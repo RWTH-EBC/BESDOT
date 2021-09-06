@@ -7,6 +7,7 @@ from warnings import warn
 import pyomo.environ as pyo
 import pandas as pd
 import numpy as np
+print('test')
 
 
 class Project(object):
