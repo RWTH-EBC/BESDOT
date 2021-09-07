@@ -3,7 +3,7 @@ from component_library.component_models.BaseComponent \
     import BaseComponent
 
 
-class HeatPump(BaseComponent):
+class HeatPump(Component):
 
     def __init__(self, comp_name, min_size, max_size, current_size, properties):
         super().__init__(comp_name=comp_name,

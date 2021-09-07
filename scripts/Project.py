@@ -7,7 +7,6 @@ from warnings import warn
 import pyomo.environ as pyo
 import pandas as pd
 import numpy as np
-print('test')
 
 
 class Project(object):
@@ -52,7 +51,7 @@ class Project(object):
         """
         pass
 
-    def build_math_model(self, strategy_name, components_list):
+    def build_model(self, strategy_name, components_list):
         """
         Build up a mathematical model (concrete model) using pyomo modeling
         language for optimization.

@@ -2,72 +2,95 @@
 Simplified Modell for internal use.
 """
 
-import pyomo.environ as pyo
-import pandas as pd
-import numpy as np
-import os
-import math
+from tools.gen_heat_profile import *
+from tools.gen_elec_profile import gen_elec_profile
 
 
 class Building(object):
-    def __init__(self, name):
+    def __init__(self, name, area, bld_typ='Verwaltungsgebäude',
+                 annual_heat_demand=None,
+                 annual_elec_demand=None):
         """
         Initialization for building.
         :param name: name of the building, should be unique
         """
         self.name = name
+        self.area = area
+        self.building_typ = bld_typ
+        # fixme: The building type is in German, which is connected with the
+        #  script "gen_heat_profil" and needs tobe changed to English
+        # todo: TEK provided only the value for non-residential building. For
+        #  residential building should get the data from the project TABULA.
 
         # Calculate the annual energy demand for heating, hot water and
         # electricity. Using TEK Tools from IWU.
-        # todo: add methods to calculate the demand from building area
         self.annual_demand = {"elec_demand": 0,
                               "heat_demand": 0,
                               "cool_demand": 0,
                               "hot_water_demand": 0,
                               "gas_demand": 0}
+        if annual_heat_demand is None:
+            self.add_annual_demand('heat')
+        if annual_elec_demand is None:
+            self.add_annual_demand('elec')
 
-        # todo: add methods to generate the energy demand profiles (electricity,
-        #  heating and cooling)
         # The gas_demand is for natural gas, the demand of hydrogen is still not
-        # considered in building.
-        self.demand_profil = {"elec_demand": [],
-                              "heat_demand": [],
-                              "cool_demand": [],
-                              "hot_water_demand": [],
-                              "gas_demand": []}
+        # considered in building. The profile of heat and cool demand depends
+        # on the air temperature, which is define in the Environment object.
+        # So the method for generate profiles should be called in project
+        # rather than in building object.
+        self.demand_profile = {"elec_demand": [],
+                               "heat_demand": [],
+                               "cool_demand": [],
+                               "hot_water_demand": [],
+                               "gas_demand": []}
 
-    def add_profile(self, profile_dict):
+    def add_annual_demand(self, energy_sector):
+        """Calculate the annual heat demand according to the TEK provided
+        data, the temperature profile should be given in Project"""
+        demand = calc_bld_demand(self.building_typ, self.area, energy_sector)
+        if energy_sector == 'heat':
+            self.annual_demand["heat_demand"] = demand
+        elif energy_sector == 'elec':
+            self.annual_demand["elec_demand"] = demand
+        else:
+            warn("Other energy sector, except 'heat' and 'elec', are not "
+                 "developed, so could not use the method. check again or fixe "
+                 "the problem with changing this method add_annual_demand")
+
+    def add_thermal_profile(self, energy_sector, temperature_profile):
+        """The heat and cool demand profile could be calculated with
+        temperature profile according to degree day method.
+        Attention!!! The temperature profile could only provided in project
+        object, so this method cannot be called in the initialization of
+        building object."""
+        # todo: the current version is only for heat, the method could be
+        #  developed for cool demand later.
+        if energy_sector == 'heat':
+            heat_demand_profile = gen_heat_profile(self.building_typ,
+                                                   self.area,
+                                                   temperature_profile)
+            self.demand_profile["heat_demand"] = heat_demand_profile
+        elif energy_sector == 'cool':
+            warn('Profile for cool is still not developed')
+        else:
+            warn_msg = 'The ' + energy_sector + ' is not allowed, check the ' \
+                                                'method add_thermal_profile '
+
+            warn(warn_msg)
+
+    def add_elec_profile(self, year):
+        """Generate the electricity profile with the 'Standardlastprofil'
+        method. This method could only be called in the Project object,
+        because the year is stored in the Environment object"""
+        elec_demand_profile = gen_elec_profile(self.annual_demand[
+                                                   "elec_demand"],
+                                               self.building_typ,
+                                               year)
+        self.demand_profile["elec_demand"] = elec_demand_profile
+
+    def add_topology(self):
         pass
 
-    def __extract_results(self, save_local_file=False):
-        # ToDo: also extract non time dependent variables (cycle variable) issubclass pyomo
-        results_lst = []
-        columns = ['TimeStep'] + [item for item in self.__input_profiles.keys() if item !='bsrn_irradiance'] + list(self.__var_dict.keys())
-        for t in self.__time_steps:
-            profile_lst = []
-            for profile in self.__input_profiles:
-                if profile != 'bsrn_irradiance':
-                    profile_lst.append(self.__input_profiles[profile][t])
-            local_lst = [t]+profile_lst  # self.__input_profiles['prices'][t]]
-            for var in self.__var_dict:
-                if issubclass(type(self.__var_dict[var]), dict) and issubclass(type(var), tuple):
-                    local_lst.append(pyo.value(self.__var_dict[var][pd.Timestamp(t)]))
-                elif issubclass(type(self.__var_dict[var]), pd.Series):
-                    local_lst.append(self.__var_dict[var][t])
-                elif issubclass(type(self.__var_dict[var]), pyo.Var):
-                    local_lst.append(pyo.value(self.__var_dict[var]))
-                else:  # issubclass(type(self.__var_dict[var]), float):
-                    local_lst.append(self.__var_dict[var])
-            results_lst.append(local_lst)
-        # self.__model.solutions.load_from(self.__solver_result)
-        if save_local_file:
-            f = open("output_files/variable_result.txt", "w")
-            for v in self.__model.component_objects(pyo.Var, active=True):
-                f.write("Variable " + str(v))
-                for index in v:
-                    f.write("   " + str(index) + str(pyo.value(v[index])))
-                    f.write("\n")
-            f.close()
-
-        return pd.DataFrame(np.array(results_lst), columns=columns)
-
+    def _energy_balance(self, model):
+        pass

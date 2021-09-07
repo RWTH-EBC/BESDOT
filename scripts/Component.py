@@ -11,7 +11,7 @@ import math
 from scripts.curvefit import *
 
 
-class BaseComponent:
+class Component(object):
     """
     The parent class for all components, like producing device, consumption.
     Except storage!
@@ -218,30 +218,11 @@ class BaseComponent:
                                                        model)
         model.cons.add(var_dict[('annual_cost', self.name)] == annual_cost)
 
-    def _constraint_bidirectional_flows(self, model, var_dict, T, max_power):
-        if self.bidirectional_flows:
-            # Add linking constraints for the binary variables of bidirectional flows
-            # to prevent simultaneous occurrence of bidirectional flows
-            for power_pair in self.bidirectional_flows:
-                for t in T:
-                    # prohibit power in bidirectional flow
-                    model.cons.add(pyo.quicksum(
-                        var_dict[('z', flow[0] + '_to_' + flow[1])][t]
-                        for flow in power_pair) <= 1)
-                for flow in power_pair:
-                    #
-                    for t in T:
-                        model.cons.add(
-                            var_dict[flow][t] <= var_dict[('z', flow[0] + '_to_' + flow[1])][t]
-                            * max_power
-                        )
-
     def add_all_constr(self, model, flows, var_dict, T):
         self._constraint_conser(model, flows, var_dict, T)
         self._constraint_maxpower(model, flows, var_dict, T)
         # todo jgn: for test purpose, the constraint vdi2067 is temporarily deactivated
         self._constraint_vdi2067(model, var_dict, T)
-        self._constraint_bidirectional_flows(model, var_dict, T, self.max_size)
 
     def add_variables(self, input_profiles, plant_parameters, var_dict, flows,
                       model, T):
@@ -264,45 +245,3 @@ class BaseComponent:
         # The linking variables should be added if the bidirectional flows occur
         # around this component
         self._add_linking_variables(var_dict, flows, model, T)
-
-    def _add_linking_variables(self, var_dict, flows, model, T):
-        # if at some point we should have redundant constraints, this is not necessarily a bad thing, these constraints
-        # further tighten the LP relaxation and can lead to a faster optimization. Even if the linking constraint that
-        # ensures a single direction of bidirectional flows proves to be redundant in practice due to optimal solutions
-        # that mind the efficiency of the component, this constraint does indeed reduce the feasible space making it not
-        # only suboptimal but also impossible to have the undesired flows, thus strengthening the LP relaxation.
-        # see Ruiz and Grossmann 2011
-        # get bidirectional flows
-        self.bidirectional_flows = self.define_bidirectional_flows(flows[self.input_energy],
-                                                                   flows[self.output_energy])
-        if self.bidirectional_flows:
-            for power_pair in self.bidirectional_flows:
-                for flow in power_pair:
-                    linking_variable = ('z', flow[0] + '_to_' + flow[1])
-                    if linking_variable not in var_dict:  # this linking variable hasn't been added yet
-                        var_dict[linking_variable] = {}
-                        for t in T:
-                            var_dict[linking_variable][t] = pyo.Var(domain=pyo.Binary)
-                            model.add_component(linking_variable[0] + '_' + linking_variable[1] + '_%s' % t,
-                                                var_dict[linking_variable][t]) # Add binary linking variable to the model
-                    else:  # this linking variable has already been added e.g. by the other component
-                        self.bidirectional_flows.remove(power_pair)
-                        break
-
-    def define_bidirectional_flows(self, *flows_in_sector):
-        # get input and output powers in the flow dict according to comp_name
-        # remove repeated sectors
-        if flows_in_sector[0] == flows_in_sector[1]:
-            flows_in_sector = [flows_in_sector[0]]
-        input_powers = []
-        output_powers = []
-        for flow in flows_in_sector:
-            input_powers.extend(flow[self.name][0])
-            output_powers.extend(flow[self.name][1])
-        # define bidirectional flows
-        bidirectional_flows = []
-        for power in input_powers:
-            if (power[1], power[0]) in output_powers:
-                # create bidirectional flow pairs in
-                bidirectional_flows.append((power, (power[1], power[0])))
-        return bidirectional_flows
