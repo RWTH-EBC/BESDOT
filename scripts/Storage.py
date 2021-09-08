@@ -2,22 +2,13 @@ import warnings
 import pyomo.environ as pyo
 import scripts
 import math
-from component_library.component_models.BaseComponent \
-    import BaseComponent
+from scripts.Component import Component
 
 
 class Storage(Component):
 
-    def __init__(self, comp_name, commodity, min_size, max_size, current_size, comp_type="BaseStorage",
-                 properties=None):
-        super().__init__(comp_name=comp_name,
-                         commodity_1=commodity,
-                         commodity_2=commodity,
-                         min_size=min_size,
-                         max_size=max_size,
-                         current_size=current_size,
-                         comp_type=comp_type,
-                         properties=properties)
+    def __init__(self, comp_name):
+        super().__init__(comp_name=comp_name)
 
     def _read_properties(self, properties):
         super()._read_properties(properties)

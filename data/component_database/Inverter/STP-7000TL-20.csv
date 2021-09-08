@@ -1,0 +1,2 @@
+p1,p2,p3,eta1,eta2,eta3,factor repair effort,factor servicing effort,servicing effort hours,service life,cost,cost_type,nominal efficiency,curve type
+0.05,0.1,0.75,0.88,0.928,0.973,0.01,0.015,20,20,200,constant,0.973,1

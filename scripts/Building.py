@@ -2,8 +2,14 @@
 Simplified Modell for internal use.
 """
 
+import pandas as pd
 from tools.gen_heat_profile import *
 from tools.gen_elec_profile import gen_elec_profile
+# from scripts.components import *
+from tools import get_all_class
+
+module_dict = get_all_class.run()
+print(module_dict)
 
 
 class Building(object):
@@ -44,6 +50,12 @@ class Building(object):
                                "cool_demand": [],
                                "hot_water_demand": [],
                                "gas_demand": []}
+
+        # The topology of the building energy system and all available
+        # components in the system, which doesn't mean the components would
+        # have to be choose by optimizer.
+        self.topology = None
+        self.components = {}
 
     def add_annual_demand(self, energy_sector):
         """Calculate the annual heat demand according to the TEK provided
@@ -89,7 +101,29 @@ class Building(object):
                                                year)
         self.demand_profile["elec_demand"] = elec_demand_profile
 
-    def add_topology(self):
+    def add_topology(self, topology):
+        topo_matrix = pd.read_csv(topology)
+        self.topology = topo_matrix
+
+    def add_components(self):
+        """Generate the components according to topology matrix and add
+        all the components to the self list"""
+        if self.topology is None:
+            warn('No topology matrix is found in building!')
+        else:
+            print(self.topology)
+            for item in self.topology.index:
+                comp_name = self.topology['comp_name'][item]
+                comp_type = self.topology['comp_type'][item]
+                comp_obj = module_dict[comp_type](comp_name)
+                self.components[comp_name] = comp_obj
+
+    def add_vars(self, model):
+        """Add Pyomo variables the ConcreteModel, which is defined in project
+        object. So the model should be given in project object build_model"""
+        pass
+
+    def add_cons(self, model):
         pass
 
     def _energy_balance(self, model):

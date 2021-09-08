@@ -51,45 +51,51 @@ class Project(object):
         """
         pass
 
-    def build_model(self, strategy_name, components_list):
+    def build_model(self):
         """
         Build up a mathematical model (concrete model) using pyomo modeling
         language for optimization.
         """
-        if self.typ == 'building':
+        if self.typ == 'building' and len(self.building_list) == 1:
+            # Initialisation of ConcreteModel
             self.model = pyo.ConcreteModel(self.name)
             self.model.cons = pyo.ConstraintList()
 
+            # Define pyomo variables
+            bld = self.building_list[0]
+            # print(bld.topology)
             # Add flow dependent decision variables
-            for var in self.__var_dict:
-                # Till here, var_dict only contains power flow variables, thus all time related
-                for t in self.__time_steps:
-                    self.__var_dict[var][t] = pyo.Var(bounds=(0, None))
-                    self.__model.add_component(var[0] + '_' + var[1] + "_%s" % t,
-                                               self.__var_dict[var][t])
-
-            # Add component dependent decision variables
-            for comp in self.__components:
-                self.__components[comp].add_variables(self.__input_profiles,
-                                                      self.__plant_parameters,
-                                                      self.__var_dict,
-                                                      self.__flows, self.__model,
-                                                      self.__time_steps)
-
-            # Add component dependent constraints
-            for comp in self.__components:
-                self.__components[comp].add_all_constr(self.__model, self.__flows,
-                                                       self.__var_dict,
-                                                       self.__time_steps)
-
-            # Instantiate EMS component and implement the strategies
-            if set(strategy_name).issubset(self.__strategy_list):
-                ems = components_list['EnergyManagementSystem'](self.__name, self.__configuration, strategy_name,
-                                                                self.__plant_parameters, self.__flows, self.__components,
-                                                                self.__component_properties)
-                ems.implement_strategy(self.__model, self.__var_dict, self.__time_steps)
-            else:
-                print('Not all strategies are defined for this prosumer. Use add_strategy to complete the strategy list.')
+            # for var in self.__var_dict:
+            #     # Till here, var_dict only contains power flow variables, thus all time related
+            #     for t in self.__time_steps:
+            #         self.__var_dict[var][t] = pyo.Var(bounds=(0, None))
+            #         self.__model.add_component(var[0] + '_' + var[1] + "_%s" % t,
+            #                                    self.__var_dict[var][t])
+            #
+            # # Add component dependent decision variables
+            # for comp in self.__components:
+            #     self.__components[comp].add_variables(self.__input_profiles,
+            #                                           self.__plant_parameters,
+            #                                           self.__var_dict,
+            #                                           self.__flows, self.__model,
+            #                                           self.__time_steps)
+            #
+            # # Add component dependent constraints
+            # for comp in self.__components:
+            #     self.__components[comp].add_all_constr(self.__model, self.__flows,
+            #                                            self.__var_dict,
+            #                                            self.__time_steps)
+            #
+            # # Instantiate EMS component and implement the strategies
+            # if set(strategy_name).issubset(self.__strategy_list):
+            #     ems = components_list['EnergyManagementSystem'](self.__name, self.__configuration, strategy_name,
+            #                                                     self.__plant_parameters, self.__flows, self.__components,
+            #                                                     self.__component_properties)
+            #     ems.implement_strategy(self.__model, self.__var_dict, self.__time_steps)
+            # else:
+            #     print('Not all strategies are defined for this prosumer. Use add_strategy to complete the strategy list.')
+        else:
+            pass
 
     def run_optimization(self, strategy_name, solver_name='gurobi', commentary=False, pareto_set_size=5):
         self.__build_math_model(strategy_name, components)

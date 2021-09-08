@@ -8,7 +8,7 @@ import warnings
 import pyomo.environ as pyo
 import scripts
 import math
-from scripts.curvefit import *
+# from scripts.curvefit import *
 
 
 class Component(object):
@@ -28,8 +28,9 @@ class Component(object):
      component will be defined with a function later
     """
 
-    def __init__(self, comp_name, commodity_1, commodity_2,  min_size, max_size, current_size,
-                 commodity_3=None, comp_type="BaseComponent", properties=None):
+    # def __init__(self, comp_name, commodity_1, commodity_2,  min_size, max_size, current_size,
+    #              commodity_3=None, comp_type="BaseComponent", properties=None):
+    def __init__(self, comp_name):
         """
         Args:
         commodity_1: str, energy input type, could be "gas","h2", "heat",
@@ -47,17 +48,18 @@ class Component(object):
          like efficiency, service life, unit investment cost
         # todo: efficiency -> dict, key=(input, output), value=efficiency
         """
-        self.input_energy = commodity_1
-        self.output_energy = commodity_2
-        self.output_energy_2 = commodity_3
-        self.name = comp_name
-        self.component_type = comp_type
-        self.max_size = max_size
-        self.min_size = min_size
-        self.current_size = current_size
-        self.properties = properties
 
-        self._read_properties(properties)
+        # self.input_energy = commodity_1
+        # self.output_energy = commodity_2
+        # self.output_energy_2 = commodity_3
+        self.name = comp_name
+        # self.component_type = comp_type
+        # self.max_size = max_size
+        # self.min_size = min_size
+        # self.current_size = current_size
+        # self.properties = properties
+
+        # self._read_properties(properties)
 
     def _read_properties(self, properties):
         if 'efficiency' in properties.columns:

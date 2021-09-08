@@ -3,10 +3,10 @@ heat_pump,HeatPump,EHP2,1,100,0,0,0,1,0,0,0,0,0,0,0,0
 therm_cns,HeatConsumption,HeatCNS1,1000,1000,0,0,0,0,0,0,0,0,0,0,0,0
 water_tes,HotWaterStorage,TES1,40,40,0,0,1,0,0,0,0,0,0,0,0,0
 pv,PV,,0,100,0,1,0,0,0,0,1,1,0,0,1,1
-solar_coll,SolarCollector,,0,100,0,0,0,1,0,0,0,0,0,0,0,0
+solar_coll,SolarThermalCollector,,0,100,0,0,0,1,0,0,0,0,0,0,0,0
 bat,Battery,,0,100,0,1,0,0,0,0,0,1,0,0,1,1
 e_grid,ElectricityGrid,,0,100,0,1,0,0,0,0,1,0,0,0,1,1
 gas_grid,GasGrid,,0,100,0,0,0,0,0,0,0,0,0,1,0,0
-boi,Boiler,,0,100,0,0,0,1,0,0,0,0,0,0,0,0
-e_boi,ElectricalBoiler,,0,100,0,0,0,1,0,0,0,0,0,0,0,0
+boi,GasBoiler,,0,100,0,0,0,1,0,0,0,0,0,0,0,0
+e_boi,ElectricBoiler,,0,100,0,0,0,1,0,0,0,0,0,0,0,0
 e_cns,ElectricalConsumption,,0,100,0,0,0,0,0,0,0,0,0,0,0,0
