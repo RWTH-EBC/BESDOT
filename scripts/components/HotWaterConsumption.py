@@ -3,12 +3,13 @@ from scripts.Component import Component
 
 class HotWaterConsumption(Component):
 
-    def __init__(self, comp_name, comp_type="HotWaterConsumption",
-                 comp_model=None):
+    def __init__(self, comp_name, consum_profile,
+                 comp_type="HotWaterConsumption", comp_model=None):
         super().__init__(comp_name=comp_name,
                          comp_type=comp_type,
                          comp_model=comp_model)
         self.inputs = ['heat']
+        self.consum_profile = consum_profile
 
     def _read_properties(self, properties):
         """

@@ -123,6 +123,24 @@ class Building(object):
                                                       irr_profile=
                                                       env.irr_profile,
                                                       comp_model=comp_model)
+                elif comp_type == 'HeatConsumption':
+                    comp_obj = module_dict[comp_type](comp_name=comp_name,
+                                                      consum_profile=
+                                                      self.demand_profile[
+                                                          'heat_demand'],
+                                                      comp_model=comp_model)
+                elif comp_type == 'ElectricalConsumption':
+                    comp_obj = module_dict[comp_type](comp_name=comp_name,
+                                                      consum_profile=
+                                                      self.demand_profile[
+                                                          'elec_demand'],
+                                                      comp_model=comp_model)
+                elif comp_type == 'HotWaterConsumption':
+                    comp_obj = module_dict[comp_type](comp_name=comp_name,
+                                                      consum_profile=
+                                                      self.demand_profile[
+                                                          'hot_water_demand'],
+                                                      comp_model=comp_model)
                 else:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       comp_model=comp_model)
@@ -164,7 +182,7 @@ class Building(object):
             self.components[comp].add_vars(model)
 
     def add_cons(self, model):
-        pass
+        self._energy_balance(model)
 
     def _energy_balance(self, model):
         pass

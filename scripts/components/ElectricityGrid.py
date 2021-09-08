@@ -1,3 +1,4 @@
+import pyomo.environ as pyo
 from scripts.Component import Component
 
 
@@ -14,3 +15,8 @@ class ElectricityGrid(Component):
         The Grid has "no" fixed input and therefore it should not be constrainted
         """
         pass
+
+    def add_vars(self, model):
+        """There isn't inputs and investigation for grid"""
+        output_energy = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('output_energy_' + self.name, output_energy)

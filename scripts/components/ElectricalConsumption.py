@@ -3,12 +3,13 @@ from scripts.Component import Component
 
 class ElectricalConsumption(Component):
 
-    def __init__(self, comp_name, comp_type="ElectricalConsumption",
-                 comp_model=None):
+    def __init__(self, comp_name, consum_profile,
+                 comp_type="ElectricalConsumption", comp_model=None):
         super().__init__(comp_name=comp_name,
                          comp_type=comp_type,
                          comp_model=comp_model)
         self.inputs = ['elec']
+        self.consum_profile = consum_profile
 
     def _constraint_vdi2067(self, model, var_dict, T):
         """

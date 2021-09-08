@@ -14,13 +14,13 @@ class Project(object):
         self.name = name
         self.typ = typ
 
-        # todo: add the weather information (temperature and irradiance) and
-        #  price information (energy price, emission)
+        # The following attributs should be replaced or added with related
+        # object before generating pyomo model.
         self.environment = None
-
         self.district_list = []
         self.building_list = []
 
+        # The pyomo model
         self.model = None
 
     def add_environment(self, environment):
@@ -62,25 +62,13 @@ class Project(object):
             self.model.time_step = pyo.RangeSet(self.environment.time_step)
             self.model.cons = pyo.ConstraintList()
 
-            # Define pyomo variables
+            # Assign pyomo variables
             bld = self.building_list[0]
             bld.add_vars(self.model)
-            # print(bld.topology)
-            # Add flow dependent decision variables
-            # for var in self.__var_dict:
-            #     # Till here, var_dict only contains power flow variables, thus all time related
-            #     for t in self.__time_steps:
-            #         self.__var_dict[var][t] = pyo.Var(bounds=(0, None))
-            #         self.__model.add_component(var[0] + '_' + var[1] + "_%s" % t,
-            #                                    self.__var_dict[var][t])
-            #
-            # # Add component dependent decision variables
-            # for comp in self.__components:
-            #     self.__components[comp].add_variables(self.__input_profiles,
-            #                                           self.__plant_parameters,
-            #                                           self.__var_dict,
-            #                                           self.__flows, self.__model,
-            #                                           self.__time_steps)
+
+            # Add pyomo constraints to model
+            bld.add_cons(self.model)
+
             #
             # # Add component dependent constraints
             # for comp in self.__components:
@@ -97,7 +85,7 @@ class Project(object):
             # else:
             #     print('Not all strategies are defined for this prosumer. Use add_strategy to complete the strategy list.')
         else:
-            pass
+            print("Other project application scenario haven't been developed")
 
     def run_optimization(self, strategy_name, solver_name='gurobi', commentary=False, pareto_set_size=5):
         self.__build_math_model(strategy_name, components)
