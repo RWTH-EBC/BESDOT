@@ -61,3 +61,7 @@ class Environment(object):
         self.temp_profile = temp_profile
         self.wind_profile = wind_profile
         self.irr_profile = irr_profile
+
+        # Set time step of optimization model, default is 8760 steps and each
+        # step is 1 hour.
+        self.time_step = 8760

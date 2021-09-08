@@ -59,6 +59,7 @@ class Project(object):
         if self.typ == 'building' and len(self.building_list) == 1:
             # Initialisation of ConcreteModel
             self.model = pyo.ConcreteModel(self.name)
+            self.model.time_step = pyo.RangeSet(self.environment.time_step)
             self.model.cons = pyo.ConstraintList()
 
             # Define pyomo variables

@@ -21,7 +21,6 @@ class Component(object):
     properties: dataframe, the properties of a component object,
     the following items should be included.
         efficiency: float, energy transfer efficiency
-         todo: preliminary define with float value, could be a pyomo variable
         capacity: float or pyomo variable, for energy producing
          components, this parameter means its maximum power in kW,
          for energy storage components, this parameter means its maximum
@@ -92,41 +91,6 @@ class Component(object):
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for servicing effort hours.")
 
-    def _get_unit_cost(self, var_dict, model):
-        # var_dict[('power', self.name)]
-        unit_cost = 0
-        if self.cost_type == 'constant':
-            unit_cost = self.cost
-        elif self.cost_type == 'piecewise':
-            print(self.cost)
-            cost_list = self.cost[0]  # unit cost of each step
-            bp_list = self.cost[1]  # breakpoint for steps
-            model.unit_cost = pyo.Var()
-            for i in range(len(cost_list)):
-                cost_deter = pyo.Var(within=pyo.Binary)
-                model.add_component('cost_deter_' + str(i), cost_deter)
-            # fixme: hard coding for quartal meeting, should not only for 2
-            #  steps.
-            model.cons.add(model.cost_deter_0 + model.cost_deter_1 == 1)
-            model.cons.add(model.unit_cost == model.cost_deter_0 * float(
-                cost_list[0]) + model.cost_deter_1 * float(cost_list[1]))
-            model.cons.add(var_dict[('power', self.name)] <= float(bp_list[0]) *
-                           model.cost_deter_0 + 10000 * model.cost_deter_1)
-            model.cons.add(var_dict[('power', self.name)] >= float(bp_list[0]) *
-                           model.cost_deter_1 + 0.0001)
-            unit_cost = model.unit_cost
-        elif self.cost_type == 'inverse_prop':
-            unit_cost = inverse_prop_func(var_dict[('power', self.name)],
-                                          float(self.cost[0]),
-                                          float(self.cost[1]),
-                                          float(self.cost[2]))
-        else:
-            print('The cost curve type', self.cost_type, 'is not found')
-            print(self.cost)
-            print(self.cost_type)
-
-        return unit_cost
-
     def _constraint_conser(self, model, flows, var_dict, T):
         """
         This constraint shows the energy transfer of the component.
@@ -187,24 +151,28 @@ class Component(object):
         # todo jgn: for test purpose, the constraint vdi2067 is temporarily deactivated
         self._constraint_vdi2067(model, var_dict, T)
 
-    def add_variables(self, input_profiles, plant_parameters, var_dict, flows,
-                      model, T):
-        # Assign the variables, which are only used in component internal,
-        # for example, power of each component.
-        lb_power = self.min_size
-        ub_power = self.max_size
-        if math.isinf(self.min_size):
-            lb_power = None
-        if math.isinf(self.max_size):
-            ub_power = None
-        var_dict[('power', self.name)] = pyo.Var(bounds=(lb_power, ub_power))
-        model.add_component('power_' + self.name, var_dict[('power', self.name)])
-        # todo jgn: for test purpose, the constraint vdi2067 and its variables are temporarily deactivated
-        var_dict[('annual_cost', self.name)] = pyo.Var(bounds=(0, None))
-        model.add_component('annual_cost_' + self.name, var_dict[('annual_cost', self.name)])
-        var_dict[('invest_cost', self.name)] = pyo.Var(bounds=(0, None))
-        model.add_component('invest_cost' + self.name,
-                            var_dict[('invest_cost', self.name)])
-        # The linking variables should be added if the bidirectional flows occur
-        # around this component
-        self._add_linking_variables(var_dict, flows, model, T)
+    def add_vars(self, model):
+        """
+        Add Pyomo variables into the ConcreteModel
+        The following variable should be assigned:
+            Component size: should be assigned in component object, for once.
+            Annual cost: for once
+            Investigation: for once
+            Total Energy input and output of each component [t]: this should be
+            assigned in each component object. For each time step.
+        """
+
+        comp_size = pyo.Var(bounds=(0, None))
+        model.add_component('size_' + self.name, comp_size)
+
+        annual_cost = pyo.Var(bounds=(0, None))
+        model.add_component('annual_cost_' + self.name, annual_cost)
+
+        invest = pyo.Var(bounds=(0, None))
+        model.add_component('invest_' + self.name, invest)
+
+        input_energy = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('input_energy_' + self.name, input_energy)
+
+        output_energy = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('output_energy_' + self.name, output_energy)

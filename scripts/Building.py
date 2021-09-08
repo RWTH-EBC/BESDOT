@@ -2,6 +2,7 @@
 Simplified Modell for internal use.
 """
 
+import pyomo.environ as pyo
 from tools.gen_heat_profile import *
 from tools.gen_elec_profile import gen_elec_profile
 from tools import get_all_class
@@ -102,7 +103,7 @@ class Building(object):
         topo_matrix = pd.read_csv(topology)
         self.topology = topo_matrix
 
-    def add_components(self):
+    def add_components(self, env):
         """Generate the components according to topology matrix and add
         all the components to the self list"""
         if self.topology is None:
@@ -112,15 +113,55 @@ class Building(object):
                 comp_name = self.topology['comp_name'][item]
                 comp_type = self.topology['comp_type'][item]
                 comp_model = self.topology['model'][item]
-
-                comp_obj = module_dict[comp_type](comp_name=comp_name,
-                                                  comp_model=comp_model)
+                if comp_type in ['HeatPump', 'GasHeatPump']:
+                    comp_obj = module_dict[comp_type](comp_name=comp_name,
+                                                      temp_profile=
+                                                      env.temp_profile,
+                                                      comp_model=comp_model)
+                elif comp_type in ['PV', 'SolarThermalCollector']:
+                    comp_obj = module_dict[comp_type](comp_name=comp_name,
+                                                      irr_profile=
+                                                      env.irr_profile,
+                                                      comp_model=comp_model)
+                else:
+                    comp_obj = module_dict[comp_type](comp_name=comp_name,
+                                                      comp_model=comp_model)
                 self.components[comp_name] = comp_obj
 
     def add_vars(self, model):
-        """Add Pyomo variables the ConcreteModel, which is defined in project
-        object. So the model should be given in project object build_model"""
-        pass
+        """Add Pyomo variables into the ConcreteModel, which is defined in
+        project object. So the model should be given in project object
+        build_model.
+        The following variable should be assigned:
+            Energy flow from a component to another [t]: this should be define
+            according to the component inputs and outputs possibility and the
+            building topology. For each time step.
+            Total Energy input and output of each component [t]: this should be
+            assigned in each component object. For each time step.
+            Component size: should be assigned in component object, for once.
+        """
+        # Assign the variables for the energy flows according to system
+        # topology. The input energy type and output energy type could be
+        # used to reduce the number of variables.
+        # Simplify the matrix at first, only the topology related information
+        # are left. Then search the items, which equal to 1, that means the
+        # energy could flow from the index component to the column component.
+        # The component pairs are stored in the dictionary energy_flow.
+        simp_matrix = self.topology.drop(['comp_type', 'model', 'min_size',
+                                          'max_size', 'current_size'], axis=1)
+        simp_matrix.set_index(['comp_name'], inplace=True)
+        energy_flow = {}
+        for index, row in simp_matrix.iteritems():
+            if len(row[row == 1].index.tolist()) > 1:
+                for input_comp in row[row == 1].index.tolist():
+                    energy_flow[(input_comp, index)] = pyo.Var(
+                        model.time_step, bounds=(0, None))
+                    model.add_component(input_comp + '_' + index,
+                                        energy_flow[(input_comp, index)])
+        # print(energy_flow)
+
+        for comp in self.components:
+            self.components[comp].add_vars(model)
 
     def add_cons(self, model):
         pass

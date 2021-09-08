@@ -123,29 +123,13 @@ class Storage(Component):
         self._constraint_maxcap(model, var_dict, T)
         self._constraint_vdi2067(model, var_dict, T)
 
-    def add_variables(self, input_profiles, plant_parameters, var_dict, flows,
-                      model, T):
-        var_dict[self.name] = {}
-        # todo jgn: replace the lower and upper boundary of capacity with
-        #  max. min capacity in the input matrix
-        lb_cap, ub_cap = [self.min_size, self.max_size]
-        if math.isinf(lb_cap):
-            lb_cap = None
-        if math.isinf(ub_cap):
-            ub_cap = None
-        var_dict[('cap', self.name)] = pyo.Var(bounds=(lb_cap, ub_cap))
-        model.add_component('cap_' + self.name, var_dict[('cap', self.name)])
-        var_dict[('annual_cost', self.name)] = pyo.Var(bounds=(0, None))
-        model.add_component('annual_cost' + self.name, var_dict[('annual_cost', self.name)])
-        # The linking variables should be added if the bidirectional flows occur
-        # around this component
-        self._add_linking_variables(var_dict, flows, model, T)
+    def add_vars(self, model):
+        """
+        Compared to the general variables in components, the following
+        variable should be assigned:
+            energy: stored energy in the storage in each time step
+        """
+        super().add_vars(model)
 
-        # todo: discuss about the initial soc and end soc of storage
-        var_dict[('init_soc', self.name)] = self.init_soc
-        # var_dict[self.name]['soc'] = {}
-        var_dict[('energy', self.name)] = {}
-        for t in T:
-            var_dict[('energy', self.name)][t] = pyo.Var(bounds=(0, None))
-            model.add_component(
-                self.name + '_energy_' + "_%s" % t, var_dict[('energy', self.name)][t])
+        energy = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('energy_' + self.name, energy)

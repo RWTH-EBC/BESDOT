@@ -15,11 +15,11 @@ class Radiator(Component):
         # of heat consumption device equal to heat demand
         super()._constraint_conser(model, flows, var_dict, T)
 
-    def add_variables(self, input_parameters, plant_parameters, var_dict, flows,
-                      *args):
-        # todo: consider "heat_demand" as a new constraint
-        output_flow = (self.name, 'therm_dmd')  # Define output flow
-        flows['heat'][self.name][1].append(output_flow)  # Add output flow
-
-        var_dict[output_flow] = input_parameters['therm_demand']  # Assign
-        # values to output flow in the var_dict
+    # def add_variables(self, input_parameters, plant_parameters, var_dict, flows,
+    #                   *args):
+    #     # todo: consider "heat_demand" as a new constraint
+    #     output_flow = (self.name, 'therm_dmd')  # Define output flow
+    #     flows['heat'][self.name][1].append(output_flow)  # Add output flow
+    #
+    #     var_dict[output_flow] = input_parameters['therm_demand']  # Assign
+    #     # values to output flow in the var_dict

@@ -35,13 +35,13 @@ test_bld_1.add_elec_profile(test_env_1.year)
 # components and add components to the building.
 topo_file = os.path.join(base_path, 'data', 'topology', 'basic.csv')
 test_bld_1.add_topology(topo_file)
-test_bld_1.add_components()
+test_bld_1.add_components(test_project.environment)
 test_project.add_building(test_bld_1)
 
 ################################################################################
 #                           Build pyomo model
 ################################################################################
-# test_project.build_model()
+test_project.build_model()
 
 #
 

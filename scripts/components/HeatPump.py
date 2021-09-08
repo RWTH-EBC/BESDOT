@@ -4,12 +4,14 @@ from scripts.Component import Component
 
 class HeatPump(Component):
 
-    def __init__(self, comp_name, comp_type="HeatPump", comp_model=None):
+    def __init__(self, comp_name, temp_profile, comp_type="HeatPump",
+                 comp_model=None):
         super().__init__(comp_name=comp_name,
                          comp_type=comp_type,
                          comp_model=comp_model)
         self.inputs = ['elec']
         self.outputs = ['heat']
+        self.temp_profile = temp_profile
 
     def calc_cop(self, amb_t, set_t=60):
         """
@@ -30,20 +32,3 @@ class HeatPump(Component):
             model.cons.add(pyo.quicksum(var_dict[i][t] for i in input_powers)
                            * var_dict[('COP', self.name)][t] ==
                            pyo.quicksum(var_dict[i][t] for i in output_powers))
-
-    def add_variables(self, input_profiles, plant_parameters, var_dict, flows,
-                      model, T):
-        """
-        Add the variables for COP in each time step
-        """
-        super().add_variables(input_profiles, plant_parameters, var_dict,
-                              flows, model, T)
-
-        var_dict[('COP', self.name)] = {}
-        for t in T:
-            var_dict[('COP', self.name)][t] = pyo.Var(bounds=(0, None))
-            model.add_component(self.name + '_COP_' + "_%s" % t,
-                                var_dict[('COP', self.name)][t])
-
-            var_dict[('COP', self.name)][t] = \
-                self.calc_cop(input_profiles['air_temperature'][t])
