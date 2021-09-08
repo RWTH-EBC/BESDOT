@@ -11,7 +11,7 @@ from scripts.Building import Building
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 ################################################################################
-# Generate python objects
+#                           Generate python objects
 ################################################################################
 
 # Generate a project object at first.
@@ -39,7 +39,7 @@ test_bld_1.add_components()
 test_project.add_building(test_bld_1)
 
 ################################################################################
-# Build pyomo model
+#                           Build pyomo model
 ################################################################################
 # test_project.build_model()
 

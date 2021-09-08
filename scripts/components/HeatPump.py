@@ -4,8 +4,12 @@ from scripts.Component import Component
 
 class HeatPump(Component):
 
-    def __init__(self, comp_name):
-        super().__init__(comp_name=comp_name)
+    def __init__(self, comp_name, comp_type="HeatPump", comp_model=None):
+        super().__init__(comp_name=comp_name,
+                         comp_type=comp_type,
+                         comp_model=comp_model)
+        self.inputs = ['elec']
+        self.outputs = ['heat']
 
     def calc_cop(self, amb_t, set_t=60):
         """

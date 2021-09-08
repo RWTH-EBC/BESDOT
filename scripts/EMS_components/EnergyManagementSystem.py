@@ -44,7 +44,7 @@ class EnergyManagementSystem:
     def __add_objective_variable_operation_costs(self, model, var_dict, time_steps):
         """
         related components:
-        1. Supply networks: "StandardACGrid", "StandardGasGrid", (not implemented yet) "DCGrid", "HeatNetwork",
+        1. Supply networks: "ElectricityGrid", "GasGrid", (not implemented yet) "DCGrid", "HeatNetwork",
         "CoolingNetwork", "HydrogenNetwork" and
         2. CO2-emission-related components: "Gasboiler" (CO2 costs not implemented yet)
         """
@@ -53,10 +53,10 @@ class EnergyManagementSystem:
         gas_grid_outputs = []
 
         for component, comp_type in self.__components:
-            if comp_type == 'StandardACGrid':
+            if comp_type == 'ElectricityGrid':
                 grid_inputs += self.__flows['electricity'][component][0]
                 grid_outputs += self.__flows['electricity'][component][1]
-            if comp_type == 'StandardGasGrid':
+            if comp_type == 'GasGrid':
                 gas_grid_outputs += self.__flows['gas'][component][1]
 
         model.f1 = pyo.Var()
@@ -72,9 +72,9 @@ class EnergyManagementSystem:
     def __add_objective_own_consumption(self, model, var_dict, time_steps):
         """
         related components:
-        1. Supply networks: "StandardACGrid", "StandardGasGrid", (not implemented yet) "DCGrid", "HeatNetwork",
+        1. Supply networks: "ElectricityGrid", "GasGrid", (not implemented yet) "DCGrid", "HeatNetwork",
         "CoolingNetwork", "HydrogenNetwork" and
-        2. Consumption components: "StandardElectricalConsumption", (not implemented yet) "HeatConsumption",
+        2. Consumption components: "ElectricalConsumption", (not implemented yet) "HeatConsumption",
         "CoolingConsumption"
         """
         # Todo jgn: rethink about the definition of own consumption, where should the loss go?
@@ -85,11 +85,11 @@ class EnergyManagementSystem:
         inv_elec_cns = []
 
         for component, comp_type in self.__components:
-            if comp_type == 'StandardACGrid':
+            if comp_type == 'ElectricityGrid':
                 grid_outputs += self.__flows['electricity'][component][1]
-            elif comp_type == 'StandardGasGrid':
+            elif comp_type == 'GasGrid':
                 gas_grid_outputs += self.__flows['gas'][component][1]
-            elif comp_type == 'StandardElectricalConsumption':
+            elif comp_type == 'ElectricalConsumption':
                 for flow in self.__flows['electricity'][component][0]:
                     if (flow[0], 'BasicInverter') in self.__components:
                         inv_elec_cns.append(flow)
@@ -119,10 +119,10 @@ class EnergyManagementSystem:
         cooling_grid_outputs = []
 
         for component, comp_type in self.__components:
-            if comp_type == 'StandardACGrid':
+            if comp_type == 'ElectricityGrid':
                 elec_grid_inputs += self.__flows['electricity'][component][0]
                 elec_grid_outputs += self.__flows['electricity'][component][1]
-            if comp_type == 'StandardGasGrid':
+            if comp_type == 'GasGrid':
                 gas_grid_inputs += self.__flows['gas'][component][0]
                 gas_grid_outputs += self.__flows['gas'][component][1]
             if comp_type == 'StandardHeatGrid':
@@ -171,10 +171,10 @@ class EnergyManagementSystem:
         gas_grid_outputs = []
 
         for component, comp_type in self.__components:
-            if comp_type == 'StandardACGrid':
+            if comp_type == 'ElectricityGrid':
                 grid_inputs += self.__flows['electricity'][component][0]
                 grid_outputs += self.__flows['electricity'][component][1]
-            if comp_type == 'StandardGasGrid':
+            if comp_type == 'GasGrid':
                 gas_grid_outputs += self.__flows['gas'][component][1]
 
         dim_components = []
@@ -210,9 +210,9 @@ class EnergyManagementSystem:
         grid_outputs = []
 
         for component, comp_type in self.__components:
-            if comp_type == 'StandardACGrid':
+            if comp_type == 'ElectricityGrid':
                 grid_outputs += self.__flows['electricity'][component][1]
-            if comp_type == 'StandardGasGrid':
+            if comp_type == 'GasGrid':
                 gas_grid_outputs += self.__flows['gas'][component][1]
 
         model.f2 = pyo.Var()
@@ -230,9 +230,9 @@ class EnergyManagementSystem:
         input_powers = []
 
         for component, comp_type in self.__components:
-            if comp_type == 'BasicPVGenerator' or comp_type == 'StandardPVGenerator':
+            if comp_type == 'BasicPVGenerator' or comp_type == 'PV':
                 pv_list.append(component)
-            elif comp_type == 'StandardACGrid':
+            elif comp_type == 'ElectricityGrid':
                 grid_list.append(component)
 
         for grid in grid_list:

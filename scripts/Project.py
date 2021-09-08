@@ -63,6 +63,7 @@ class Project(object):
 
             # Define pyomo variables
             bld = self.building_list[0]
+            bld.add_vars(self.model)
             # print(bld.topology)
             # Add flow dependent decision variables
             # for var in self.__var_dict:

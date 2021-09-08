@@ -32,13 +32,13 @@ energy_typ_list = ["sehr hoch", "hoch", "mittel", "gering", "sehr gering"]
 
 # Automatic Data Imports
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-input_profile_path = os.path.join(base_path, "data", "TEK_data",
+input_profile_path = os.path.join(base_path, "data", "tek_data",
                                   "GHD_profile.xlsx")
-input_energy_path = os.path.join(base_path, "data", "TEK_data",
+input_energy_path = os.path.join(base_path, "data", "tek_data",
                                  "TEK_Teilenergiekennwerte.xlsx")
-input_zone_path = os.path.join(base_path, "data", "TEK_data",
+input_zone_path = os.path.join(base_path, "data", "tek_data",
                                "GHD_Zonierung.xlsx")
-output_path = os.path.join(base_path, "data", "TEK_data", "output_heat_profile")
+output_path = os.path.join(base_path, "data", "tek_data", "output_heat_profile")
 
 # todo: The temperature profile should be taken from prosumer later
 input_temp_path = os.path.join(base_path, "temperature.csv")

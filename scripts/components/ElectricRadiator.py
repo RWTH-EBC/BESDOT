@@ -7,6 +7,10 @@ class ElectricRadiator(Component):
     water radiator for space heating. So this device is not designed to cover
     the hot water demand.
     """
-    def __init__(self, comp_name):
-        super().__init__(comp_name=comp_name)
-
+    def __init__(self, comp_name, comp_type="ElectricRadiator",
+                 comp_model=None):
+        super().__init__(comp_name=comp_name,
+                         comp_type=comp_type,
+                         comp_model=comp_model)
+        self.inputs = ['elec']
+        self.outputs = ['heat']

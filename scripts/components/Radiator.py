@@ -3,9 +3,12 @@ from scripts.Component import Component
 
 class Radiator(Component):
 
-    def __init__(self, comp_name):
-        # todo: commodity_2 should change to 'heat_demand'
-        super().__init__(comp_name=comp_name)
+    def __init__(self, comp_name, comp_type="Radiator", comp_model=None):
+        super().__init__(comp_name=comp_name,
+                         comp_type=comp_type,
+                         comp_model=comp_model)
+        self.inputs = ['heat']
+        self.outputs = ['heat']  # todo: maybe new outputs with demand
 
     def add_all_constr(self, model, flows, var_dict, T):
         # For heat consumption there should only one constrain, that the sum
@@ -14,7 +17,6 @@ class Radiator(Component):
 
     def add_variables(self, input_parameters, plant_parameters, var_dict, flows,
                       *args):
-        # todo: change therm to heat
         # todo: consider "heat_demand" as a new constraint
         output_flow = (self.name, 'therm_dmd')  # Define output flow
         flows['heat'][self.name][1].append(output_flow)  # Add output flow

@@ -1,74 +1,62 @@
 """
-This is a test for base component, so that other specific components could
-inherit its constraint for maximal capacity, energy transfer and cost
-calculation.
+The parent class for all energy components.
+In this class except the basic attributes will be defined, the methods for
+building pyomo model are also developed.
 """
 
+import os
 import warnings
+import pandas as pd
 import pyomo.environ as pyo
-import scripts
-import math
-# from scripts.curvefit import *
+
+
+base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class Component(object):
     """
-    The parent class for all components, like producing device, consumption.
-    Except storage!
-
     Attributes:
-    efficiency: float, energy transfer efficiency
-     todo: preliminary define with float value, could be a variable
-    capacity: float or pyomo variable, for energy producing
-     components, this parameter means its maximum power in kW,
-     for energy storage components, this parameter means its maximum
-     storage capacity in kWh
-    life: int, service life of the component
-    cost: float, investment cost in EUR/kW, fixed value for each
-     component will be defined with a function later
+    inputs: list, the energy carrier or energy sector for input
+    outputs: list, the energy carrier or energy sector for output
+    properties: dataframe, the properties of a component object,
+    the following items should be included.
+        efficiency: float, energy transfer efficiency
+         todo: preliminary define with float value, could be a pyomo variable
+        capacity: float or pyomo variable, for energy producing
+         components, this parameter means its maximum power in kW,
+         for energy storage components, this parameter means its maximum
+         storage capacity in kWh
+        life: int, service life of the component
+        cost: float, investment cost in EUR/kW, fixed value for each
+         component will be defined with a function later
     """
 
-    # def __init__(self, comp_name, commodity_1, commodity_2,  min_size, max_size, current_size,
-    #              commodity_3=None, comp_type="BaseComponent", properties=None):
-    def __init__(self, comp_name):
+    def __init__(self, comp_name, comp_type="Component", comp_model=None):
         """
-        Args:
-        commodity_1: str, energy input type, could be "gas","h2", "heat",
-         "cold", "elec_ac", "elec_dc", "irr", "biomass"
-        # todo into list,
-        commodity_2: str, energy output type, could be "gas","h2", "heat",
-         "cold", "elec_ac", "elec_dc", "demand"
-         # todo into list
-        commodity_3: str, usually not used, only when there are multiple
-         energy outputs, such as CHP and fuel cell. Could be "heat",
-         "elec_ac"
-        comp_name: str, unique name for instance
-        comp_type: str, type of component
-        properties: dataframe, contains property of the component,
-         like efficiency, service life, unit investment cost
-        # todo: efficiency -> dict, key=(input, output), value=efficiency
         """
-
-        # self.input_energy = commodity_1
-        # self.output_energy = commodity_2
-        # self.output_energy_2 = commodity_3
         self.name = comp_name
-        # self.component_type = comp_type
-        # self.max_size = max_size
-        # self.min_size = min_size
-        # self.current_size = current_size
-        # self.properties = properties
+        self.component_type = comp_type
+        self.inputs = None
+        self.outputs = None
 
-        # self._read_properties(properties)
+        properties = self.get_properties(comp_model)
+        self._read_properties(properties)
+
+    def get_properties(self, model):
+        model_property_file = os.path.join(base_path, 'data',
+                                           'component_database',
+                                           self.component_type,
+                                           model + '.csv')
+        properties = pd.read_csv(model_property_file)
+        return properties
 
     def _read_properties(self, properties):
         if 'efficiency' in properties.columns:
             self.efficiency = float(properties['efficiency'])
         else:
-            if self.component_type not in ['BaseStorage', 'Inverter', 'LiionBattery', 'HotWaterStorage',
-                                           'StandardPVGenerator', 'StandardPEMElectrolyzer', 'StandardPEMFuelCell',
-                                           'PressureStorage']:
-                warnings.warn("In the model database for " + self.component_type +
+            if self.component_type not in ['BaseStorage', 'Inverter', 'Battery',
+                                           'HotWaterStorage', 'PV']:
+                warnings.warn("In the model database for " + self.name +
                               " lack of column for efficiency.")
         if 'service life' in properties.columns:
             self.life = int(properties['service life'])
@@ -78,34 +66,7 @@ class Component(object):
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for service life.")
         if 'cost' in properties.columns:
-            self.cost_type = str(properties['cost_type'][0])
-            if str(properties['cost_type'][0]) == 'constant':
-                self.cost = float(properties['cost'])
-            elif str(properties['cost_type'][0]) == 'piecewise':
-                curve_parameter = properties['cost'][0].split(':')
-                cost_list = curve_parameter[0].split(';')
-                bp_list = curve_parameter[1].split(';')
-                curve_parameter = [cost_list, bp_list]
-                self.cost = curve_parameter
-            elif str(properties['cost_type'][0]) == 'inverse_prop':
-                curve_parameter = properties['cost'][0].split(';')
-                self.cost = curve_parameter
-            else:
-                print('the cost type is', type(properties['cost']))
-
-            # if len(properties['cost']) == 1:
-            #     if isinstance(properties['cost'][0], str):
-            #         curve_parameter = properties['cost'][0].split(';')
-            #         self.cost = curve_parameter
-            #     else:
-            #         self.cost = float(properties['cost'])
-            #     self.cost_type = str(properties['cost_type'][0])
-            # elif len(properties['cost']) > 1:
-            #     self.cost = properties['cost']
-            #     self.cost_type = str(properties['cost_type'][0])
-            # else:
-            #     print('the cost type is', type(properties['cost']))
-            #     print(properties['cost'])
+            self.cost = float(properties['cost'])
         else:
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for cost.")

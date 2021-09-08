@@ -2,14 +2,11 @@
 Simplified Modell for internal use.
 """
 
-import pandas as pd
 from tools.gen_heat_profile import *
 from tools.gen_elec_profile import gen_elec_profile
-# from scripts.components import *
 from tools import get_all_class
 
 module_dict = get_all_class.run()
-print(module_dict)
 
 
 class Building(object):
@@ -111,11 +108,13 @@ class Building(object):
         if self.topology is None:
             warn('No topology matrix is found in building!')
         else:
-            print(self.topology)
             for item in self.topology.index:
                 comp_name = self.topology['comp_name'][item]
                 comp_type = self.topology['comp_type'][item]
-                comp_obj = module_dict[comp_type](comp_name)
+                comp_model = self.topology['model'][item]
+
+                comp_obj = module_dict[comp_type](comp_name=comp_name,
+                                                  comp_model=comp_model)
                 self.components[comp_name] = comp_obj
 
     def add_vars(self, model):
