@@ -11,7 +11,7 @@ class Radiator(Component):
                          comp_type=comp_type,
                          comp_model=comp_model)
 
-    def add_all_constr(self, model):
+    def add_cons(self, model):
         # For heat consumption there should only one constrain, that the sum
         # of heat consumption device equal to heat demand
         super()._constraint_conver(model)

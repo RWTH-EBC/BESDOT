@@ -22,14 +22,14 @@ class HeatConsumption(Component):
         if not hasattr(self, 'efficiency'):
             self.efficiency = 1
 
-    def _constraint_vdi2067(self, model, var_dict, T):
+    def _constraint_vdi2067(self, model):
         """
         The heat consumption has currently no max. power or investment
         constraint.
         """
         pass
 
-    def _constraint_maxpower(self, model, flows, var_dict, T):
+    def _constraint_maxpower(self, model):
         """
         The heat consumption has currently no max. power or investment
         constraint.

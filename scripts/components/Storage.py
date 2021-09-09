@@ -83,6 +83,8 @@ class Storage(Component):
         stored_energy = model.find_component('energy_' + self.name)
 
         for t in range(len(model.time_step)-1):
+            # todo: Attention!! The efficiency is assumed with 100% in the
+            #  following constraint. Should be checked again or modified.
             model.cons.add(stored_energy[t+1] + input_energy[t+1] -
                            output_energy[t+1] == stored_energy[t+2])
 
@@ -91,40 +93,31 @@ class Storage(Component):
         # set, which is not so important.
         model.cons.add(stored_energy[1] == 0)
 
-    def _constraint_maxpower(self, model, flows, var_dict, T):
-        input_powers = flows[self.input_energy][self.name][0]
-        output_powers = flows[self.output_energy][self.name][1]
+    def _constraint_maxpower(self, model):
+        input_energy = model.find_component('input_' + self.inputs[0] +
+                                            '_' + self.name)
+        output_energy = model.find_component('output_' + self.outputs[0] +
+                                             '_' + self.name)
+        size = model.find_component('size_' + self.name)
 
-        # todo: discuss, if we need to consider efficiency for input
-        for t in T:
-            model.cons.add(
-                pyo.quicksum(var_dict[i][t] * self.input_efficiency for i in input_powers)
-                <= var_dict[('cap', self.name)] / self.e2p_in)
-            # model.cons.add(
-            #     pyo.quicksum(var_dict[i][t] * self.input_efficiency for i in
-            #                  input_powers) <= self.max_input)
-            model.cons.add(
-                pyo.quicksum(var_dict[i][t] / self.output_efficiency for i in output_powers)
-                <= var_dict[('cap', self.name)] / self.e2p_out)
+        # todo: the efficiency for input and output process?
+        for t in model.time_step:
+            model.cons.add(input_energy[t] <= size / self.e2p_in)
+            model.cons.add(output_energy[t] <= size / self.e2p_out)
 
-    def _constraint_maxcap(self, model, var_dict, T):
-        for t in T:
-            model.cons.add(var_dict[('energy', self.name)][t] <= self.max_soc *
-                           var_dict[('cap', self.name)])
-            model.cons.add(var_dict[('energy', self.name)][t] >= self.min_soc *
-                           var_dict[('cap', self.name)])
+    def _constraint_maxcap(self, model):
+        stored_energy = model.find_component('energy_' + self.name)
+        size = model.find_component('size_' + self.name)
 
-    def _constraint_vdi2067(self, model, var_dict, T):
-        annual_cost = scripts.calc_annuity_vdi2067.run(T, self.life, self.cost, var_dict[('cap', self.name)],
-                                                       self.f_inst, self.f_w,
-                                                       self.f_op, model)
-        model.cons.add(var_dict[('annual_cost', self.name)] == annual_cost)
+        for t in model.time_step:
+            model.cons.add(stored_energy[t] <= self.max_soc * size)
+            model.cons.add(stored_energy[t] >= self.min_soc * size)
 
-    def add_all_constr(self, model, flows, var_dict, T):
+    def add_cons(self, model):
         self._constraint_conver(model)
-        self._constraint_maxpower(model, flows, var_dict, T)
-        self._constraint_maxcap(model, var_dict, T)
-        self._constraint_vdi2067(model, var_dict, T)
+        self._constraint_maxpower(model)
+        self._constraint_maxcap(model)
+        self._constraint_vdi2067(model)
 
     def add_vars(self, model):
         """

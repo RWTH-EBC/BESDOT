@@ -20,7 +20,7 @@ class HotWaterConsumption(Component):
         if not hasattr(self, 'efficiency'):
             self.efficiency = 1
 
-    def _constraint_vdi2067(self, model, var_dict, T):
+    def _constraint_vdi2067(self, model):
         """
         The hot water consumption has currently no max. power or investment
         constraint. However, in the future this can used to implement costs
@@ -28,7 +28,7 @@ class HotWaterConsumption(Component):
         """
         pass
 
-    def _constraint_maxpower(self, model, flows, var_dict, T):
+    def _constraint_maxpower(self, model):
         """
         The hot water consumption has currently no max. power or investment
         constraint. However, in the future this can be used to implement the

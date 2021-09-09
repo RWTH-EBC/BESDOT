@@ -11,7 +11,8 @@ module_dict = get_all_class.run()
 
 
 class Building(object):
-    def __init__(self, name, area, bld_typ='Verwaltungsgebäude',
+    def __init__(self, name, area, solar_area=None,
+                 bld_typ='Verwaltungsgebäude',
                  annual_heat_demand=None,
                  annual_elec_demand=None):
         """
@@ -20,6 +21,13 @@ class Building(object):
         """
         self.name = name
         self.area = area
+        if solar_area is None:
+            # if the information about the available area for solar of the 
+            # building is not given, here using a factor of 10% of the total 
+            # area to assume it.  
+            self.solar_area = self.area * 0.1
+        else:
+            self.solar_area = solar_area
         self.building_typ = bld_typ
         # fixme: The building type is in German, which is connected with the
         #  script "gen_heat_profil" and needs tobe changed to English
@@ -186,11 +194,12 @@ class Building(object):
             self.components[comp].add_vars(model)
 
     def add_cons(self, model):
-        self._energy_balance(model)
+        self._constraint_energy_balance(model)
+        self._constraint_solar_area(model)
         for comp in self.components:
-            self.components[comp]._constraint_conver(model)
+            self.components[comp].add_cons(model)
 
-    def _energy_balance(self, model):
+    def _constraint_energy_balance(self, model):
         """According to the energy system topology, the sum of energy flow
         into a component should be equal to the component inputs. The sum of
         energy flow out of a component to other components should be equal to
@@ -227,3 +236,18 @@ class Building(object):
                             model.cons.add(output_energy[t] == sum(
                                 self.energy_flow[(index, output_comp)][t] for
                                 output_comp in output_components))
+
+    def _constraint_solar_area(self, model):
+        """The total available solar area should be shared by PV and solar
+        thermal collector."""
+        solar_area_var_list = []
+        for component in self.components:
+            if isinstance(self.components[component], module_dict['PV']):
+                solar_area_var_list.append(model.find_component('solar_area_' +
+                                                                component))
+            elif isinstance(self.components[component],
+                            module_dict['SolarThermalCollector']):
+                solar_area_var_list.append(model.find_component('solar_area_' +
+                                                                component))
+        model.cons.add(
+            sum(item for item in solar_area_var_list) <= self.solar_area)

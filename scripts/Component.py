@@ -8,6 +8,7 @@ import os
 import warnings
 import pandas as pd
 import pyomo.environ as pyo
+from tools.calc_annuity_vdi2067 import calc_annuity
 
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -122,28 +123,36 @@ class Component(object):
                 # developed
 
             for t in model.time_step:
-                print(self.name)
                 model.cons.add(output_energy[t] == input_energy[t] *
                                self.efficiency[output])
 
     def _constraint_maxpower(self, model):
         """
-        The power at each time step cannot be greater than the capacity.
+        The energy flow at each time step cannot be greater than its capacity.
+        Here output energy is used.
         todo(yni): capacity of some device are defined with input power,
          some are defined with output power. need to check later. In first
-         version is only input power considered.
+         version is only input power considered. Check it for heat pump and CHP!
         """
-        # find out the component in flow dictionary according to name
-        input_powers = flows[self.input_energy][self.name][0]
-        output_powers = flows[self.output_energy][self.name][1]
-        if not input_powers:  # if input_powers list is empty, use output_powers
-            for t in T:
-                model.cons.add(pyo.quicksum(var_dict[i][t] for i in output_powers)
-                               <= var_dict[('power', self.name)])
-        else:
-            for t in T:
-                model.cons.add(pyo.quicksum(var_dict[i][t] for i in input_powers)
-                               <= var_dict[('power', self.name)])
+        if self.outputs is not None:
+            size = model.find_component('size_' + self.name)
+            if len(self.outputs) == 1:
+                output_powers = model.find_component('output_' +
+                                                     self.outputs[0] + '_' +
+                                                     self.name)
+            else:
+                if 'elec' in self.outputs:
+                    # The size of CHP and fuel cell are define with electric
+                    # capacity
+                    output_powers = model.find_component('output_elec_' +
+                                                         self.name)
+                else:
+                    output_powers = model.find_component('output_' +
+                                                         self.outputs[0] + '_' +
+                                                         self.name)
+
+            for t in model.time_step:
+                model.cons.add(output_powers[t] <= size)
 
     def _constraint_vdi2067(self, model):
         """
@@ -152,21 +161,19 @@ class Component(object):
         q: interest factor
         n: number of replacements
         """
-        unit_cost = self._get_unit_cost(var_dict, model)
-        model.cons.add(var_dict[('power', self.name)] * unit_cost ==
-                       var_dict[('invest_cost', self.name)])
-        annual_cost = scripts.calc_annuity_vdi2067.run(T, self.life, unit_cost,
-                                                       var_dict[('invest_cost', self.name)],
-                                                       self.f_inst, self.f_w,
-                                                       self.f_op,
-                                                       model)
-        model.cons.add(var_dict[('annual_cost', self.name)] == annual_cost)
+        size = model.find_component('size_' + self.name)
+        annual_cost = model.find_component('annual_cost_' + self.name)
+        invest = model.find_component('invest_' + self.name)
 
-    def add_all_constr(self, model):
+        model.cons.add(size * self.cost == invest)
+        annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w,
+                               self.f_op)
+        model.cons.add(annuity == annual_cost)
+
+    def add_cons(self, model):
         self._constraint_conver(model)
-        self._constraint_maxpower(model, flows, var_dict, T)
-        # todo jgn: for test purpose, the constraint vdi2067 is temporarily deactivated
-        self._constraint_vdi2067(model, var_dict, T)
+        self._constraint_maxpower(model)
+        self._constraint_vdi2067(model)
 
     def add_vars(self, model):
         """

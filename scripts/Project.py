@@ -69,21 +69,8 @@ class Project(object):
             # Add pyomo constraints to model
             bld.add_cons(self.model)
 
-            #
-            # # Add component dependent constraints
-            # for comp in self.__components:
-            #     self.__components[comp].add_all_constr(self.__model, self.__flows,
-            #                                            self.__var_dict,
-            #                                            self.__time_steps)
-            #
-            # # Instantiate EMS component and implement the strategies
-            # if set(strategy_name).issubset(self.__strategy_list):
-            #     ems = components_list['EnergyManagementSystem'](self.__name, self.__configuration, strategy_name,
-            #                                                     self.__plant_parameters, self.__flows, self.__components,
-            #                                                     self.__component_properties)
-            #     ems.implement_strategy(self.__model, self.__var_dict, self.__time_steps)
-            # else:
-            #     print('Not all strategies are defined for this prosumer. Use add_strategy to complete the strategy list.')
+            # Add pyomo objective
+
         else:
             print("Other project application scenario haven't been developed")
 

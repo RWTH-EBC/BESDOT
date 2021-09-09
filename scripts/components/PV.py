@@ -1,8 +1,6 @@
-from scripts.Component import Component
-import pyomo.environ as pyo
-import numpy as np
-import pandas as pd
 import warnings
+import pyomo.environ as pyo
+from scripts.Component import Component
 
 
 class PV(Component):
@@ -37,18 +35,25 @@ class PV(Component):
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for NOCT")
 
-    def _constraint_maxpower(self, model):
-        """
-        The max. power check of PV is not necessary if the power factors are in the range from
-        0 to 1
-        """
-        pass
+    def _constraint_solar(self, model):
+        input_powers = model.find_component('input_' + self.inputs[0] + '_' +
+                                            self.name)
+        area = model.find_component('solar_area_' + self.name)
 
-    def calculate_pv_factors(self, input_parameters, g_t):
-        air_temp = np.array(input_parameters['air_temperature'])
-        cell_temp = air_temp + np.multiply((g_t/800), (self.noct-20))
-        pv_factors = np.multiply((g_t/1000), (1-np.multiply(self.temp_coefficient, (cell_temp-25))))
-        return pv_factors
+        for t in model.time_step:
+            model.cons.add(input_powers[t] == area / 1000 * self.irr_profile[
+                t-1])
+            # unit fo irradiance is W/m², should be changed to kW/m²
+
+    def add_cons(self, model):
+        super().add_cons(model)
+        self._constraint_solar(model)
+
+    def add_vars(self, model):
+        super().add_vars(model)
+
+        area = pyo.Var(bounds=(0, None))
+        model.add_component('solar_area_' + self.name, area)
 
 
 if __name__ == '__main__':

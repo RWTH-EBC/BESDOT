@@ -13,7 +13,7 @@ class ElectricalConsumption(Component):
 
         self.consum_profile = consum_profile
 
-    def _constraint_vdi2067(self, model, var_dict, T):
+    def _constraint_vdi2067(self, model):
         """
         The electrical consumption has currently no max. power or investment
         constraint. However, in the future this can used to implement costs
@@ -21,7 +21,7 @@ class ElectricalConsumption(Component):
         """
         pass
 
-    def _constraint_maxpower(self, model, flows, var_dict, T):
+    def _constraint_maxpower(self, model):
         """
         The electrical consumption has currently no max. power or investment
         constraint. However, in the future this can be used to implement the
