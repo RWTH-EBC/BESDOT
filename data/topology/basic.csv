@@ -2,7 +2,7 @@ comp_name,comp_type,model,min_size,max_size,current_size,heat_pump,therm_cns,wat
 heat_pump,HeatPump,EHP1,1,100,0,0,0,1,0,0,0,0,0,0,0,0
 therm_cns,HeatConsumption,HeatCNS1,1000,1000,0,0,0,0,0,0,0,0,0,0,0,0
 water_tes,HotWaterStorage,TES1,40,40,0,0,1,0,0,0,0,0,0,0,0,0
-pv,PV,PV2,0,100,0,1,0,0,0,0,1,1,0,0,1,1
+pv,PV,PV1,0,100,0,1,0,0,0,0,1,1,0,0,1,1
 solar_coll,SolarThermalCollector,ST1,0,100,0,0,0,1,0,0,0,0,0,0,0,0
 bat,Battery,BAT1,0,100,0,1,0,0,0,0,0,1,0,0,1,1
 e_grid,ElectricityGrid,GRD1,0,100,0,1,0,0,0,0,1,0,0,0,1,1

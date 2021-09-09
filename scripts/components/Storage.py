@@ -67,26 +67,29 @@ class Storage(Component):
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for e2p out.")
 
-    def _constraint_conser(self, model, flows, var_dict, T):
-        """Energy conservation equation for storage"""
-        # todo jgn: the time steps should be individually for each iteration calculated
-        #  if variable time steps are implemented
-        time_step = T[1]-T[0]
-        time_step = time_step.seconds/3600  # time step in [h]
-        input_powers = flows[self.input_energy][self.name][0]
-        output_powers = flows[self.output_energy][self.name][1]
+    def _constraint_conver(self, model):
+        """Energy conservation equation for storage, in storage could only
+        a kind of energy could be stored. so self.inputs and self.outputs
+        have only one item.
+        Attention: It is not easy to define the stored energy at each time
+        step. Other energy flows happen in the time step (1 hour), but stored
+        energy is a state, which varies before and after the time step. In
+        this tools, we consider the stored energy is before the time step.
+        """
+        input_energy = model.find_component('input_' + self.inputs[0] +
+                                            '_' + self.name)
+        output_energy = model.find_component('output_' + self.outputs[0] +
+                                             '_' + self.name)
+        stored_energy = model.find_component('energy_' + self.name)
 
-        model.cons.add(var_dict[('energy', self.name)][T[0]] ==
-                       var_dict[('init_soc', self.name)] * var_dict[('cap', self.name)]
-                       + pyo.quicksum(var_dict[i][T[0]] * self.input_efficiency * time_step for i in input_powers)
-                       - pyo.quicksum(var_dict[i][T[0]] / self.output_efficiency * time_step for i in output_powers))
+        for t in range(len(model.time_step)-1):
+            model.cons.add(stored_energy[t+1] + input_energy[t+1] -
+                           output_energy[t+1] == stored_energy[t+2])
 
-        for t in range(len(T)-1):
-            # print(t)
-            model.cons.add(
-                var_dict[('energy', self.name)][T[t+1]] == var_dict[('energy', self.name)][T[t]]
-                + pyo.quicksum(var_dict[i][T[t+1]] * self.input_efficiency * time_step for i in input_powers) -
-                pyo.quicksum(var_dict[i][T[t+1]] / self.output_efficiency * time_step for i in output_powers))
+        # Attention! The initial soc of storage is hard coded. for
+        # further development should notice this. And the end soc is not
+        # set, which is not so important.
+        model.cons.add(stored_energy[1] == 0)
 
     def _constraint_maxpower(self, model, flows, var_dict, T):
         input_powers = flows[self.input_energy][self.name][0]
@@ -118,7 +121,7 @@ class Storage(Component):
         model.cons.add(var_dict[('annual_cost', self.name)] == annual_cost)
 
     def add_all_constr(self, model, flows, var_dict, T):
-        self._constraint_conser(model, flows, var_dict, T)
+        self._constraint_conver(model)
         self._constraint_maxpower(model, flows, var_dict, T)
         self._constraint_maxcap(model, var_dict, T)
         self._constraint_vdi2067(model, var_dict, T)

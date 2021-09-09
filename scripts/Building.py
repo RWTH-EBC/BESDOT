@@ -54,6 +54,8 @@ class Building(object):
         # have to be choose by optimizer.
         self.topology = None
         self.components = {}
+        self.simp_matrix = None
+        self.energy_flow = None
 
     def add_annual_demand(self, energy_sector):
         """Calculate the annual heat demand according to the TEK provided
@@ -170,19 +172,58 @@ class Building(object):
         simp_matrix.set_index(['comp_name'], inplace=True)
         energy_flow = {}
         for index, row in simp_matrix.iteritems():
-            if len(row[row == 1].index.tolist()) > 1:
+            if len(row[row == 1].index.tolist()) > 0:
                 for input_comp in row[row == 1].index.tolist():
                     energy_flow[(input_comp, index)] = pyo.Var(
                         model.time_step, bounds=(0, None))
                     model.add_component(input_comp + '_' + index,
                                         energy_flow[(input_comp, index)])
-        # print(energy_flow)
+        # Save the simplified matrix and energy flow for energy balance
+        self.simp_matrix = simp_matrix
+        self.energy_flow = energy_flow
 
         for comp in self.components:
             self.components[comp].add_vars(model)
 
     def add_cons(self, model):
         self._energy_balance(model)
+        for comp in self.components:
+            self.components[comp]._constraint_conver(model)
 
     def _energy_balance(self, model):
-        pass
+        """According to the energy system topology, the sum of energy flow
+        into a component should be equal to the component inputs. The sum of
+        energy flow out of a component to other components should be equal to
+        component outputs.
+        Attention! If a component has more than 1 inputs or outputs, should
+        distinguish between different energy carriers"""
+        # todo: the method for more than 1 inputs or outputs should be
+        #  validiert.
+
+        # Constraints for the inputs
+        for index, row in self.simp_matrix.iteritems():
+            if self.components[index].inputs is not None:
+                for energy_type in self.components[index].inputs:
+                    if len(row[row == 1].index.tolist()) > 0:
+                        input_components = row[row == 1].index.tolist()
+                        input_energy = model.find_component('input_' +
+                                                            energy_type + '_' +
+                                                            index)
+                        for t in model.time_step:
+                            model.cons.add(input_energy[t] == sum(
+                                self.energy_flow[(input_comp, index)][t] for
+                                input_comp in input_components))
+
+        # Constraints for the outputs
+        for index, row in self.simp_matrix.iterrows():
+            if self.components[index].outputs is not None:
+                for energy_type in self.components[index].outputs:
+                    if len(row[row == 1].index.tolist()) > 0:
+                        output_components = row[row == 1].index.tolist()
+                        output_energy = model.find_component('output_' +
+                                                             energy_type + '_' +
+                                                             index)
+                        for t in model.time_step:
+                            model.cons.add(output_energy[t] == sum(
+                                self.energy_flow[(index, output_comp)][t] for
+                                output_comp in output_components))

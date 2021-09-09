@@ -4,16 +4,17 @@ from scripts.Component import Component
 class Radiator(Component):
 
     def __init__(self, comp_name, comp_type="Radiator", comp_model=None):
-        super().__init__(comp_name=comp_name,
-                         comp_type=comp_type,
-                         comp_model=comp_model)
         self.inputs = ['heat']
         self.outputs = ['heat']  # todo: maybe new outputs with demand
 
-    def add_all_constr(self, model, flows, var_dict, T):
+        super().__init__(comp_name=comp_name,
+                         comp_type=comp_type,
+                         comp_model=comp_model)
+
+    def add_all_constr(self, model):
         # For heat consumption there should only one constrain, that the sum
         # of heat consumption device equal to heat demand
-        super()._constraint_conser(model, flows, var_dict, T)
+        super()._constraint_conver(model)
 
     # def add_variables(self, input_parameters, plant_parameters, var_dict, flows,
     #                   *args):

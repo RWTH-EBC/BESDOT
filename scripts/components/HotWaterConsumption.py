@@ -5,10 +5,12 @@ class HotWaterConsumption(Component):
 
     def __init__(self, comp_name, consum_profile,
                  comp_type="HotWaterConsumption", comp_model=None):
+        self.inputs = ['heat']
+
         super().__init__(comp_name=comp_name,
                          comp_type=comp_type,
                          comp_model=comp_model)
-        self.inputs = ['heat']
+
         self.consum_profile = consum_profile
 
     def _read_properties(self, properties):
@@ -34,13 +36,13 @@ class HotWaterConsumption(Component):
         """
         pass
 
-    # def add_variables(self, input_profiles, plant_parameters, var_dict, flows,
-    #                   model, T):
-    #     # todo: change therm to heat
-    #     # todo: consider "heat_demand" as a new constraint
-    #     self._add_linking_variables(var_dict, flows, model, T)
-    #     output_flow = (self.name, 'hot_water_dmd')  # Define output flow
-    #     flows['heat'][self.name][1].append(output_flow)  # Add output flow
-    #
-    #     var_dict[output_flow] = input_profiles['hot_water_demand']  # Assign
-    #     # values to output flow in the var_dict
+    def _constraint_conver(self, model):
+        """The input energy for Consumption should equal to the demand profil"""
+        input_energy = model.find_component('input_' + self.inputs[0] + '_' +
+                                            self.name)
+        for t in model.time_step:
+            ####################################################################
+            # ATTENTION!!! The time_step in pyomo is from 1 to 8760 and
+            # python list is from 0 to 8759, so the index should be modified.
+            ####################################################################
+            model.cons.add(input_energy[t] == self.consum_profile[t-1])

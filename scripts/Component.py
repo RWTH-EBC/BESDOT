@@ -35,8 +35,13 @@ class Component(object):
         """
         self.name = comp_name
         self.component_type = comp_type
-        self.inputs = None
-        self.outputs = None
+        if not hasattr(self, 'inputs'):
+            self.inputs = None
+        if not hasattr(self, 'outputs'):
+            self.outputs = None
+        self.efficiency = {'elec': None,
+                           'heat': None,
+                           'cool': None}
 
         properties = self.get_properties(comp_model)
         self._read_properties(properties)
@@ -50,13 +55,16 @@ class Component(object):
         return properties
 
     def _read_properties(self, properties):
-        if 'efficiency' in properties.columns:
-            self.efficiency = float(properties['efficiency'])
-        else:
-            if self.component_type not in ['BaseStorage', 'Inverter', 'Battery',
-                                           'HotWaterStorage', 'PV']:
-                warnings.warn("In the model database for " + self.name +
-                              " lack of column for efficiency.")
+        if self.outputs is not None:
+            if 'efficiency' in properties.columns:
+                self.efficiency[self.outputs[0]] = float(properties[
+                                                            'efficiency'])
+            else:
+                if self.component_type not in ['Storage', 'Inverter',
+                                               'Battery', 'HotWaterStorage',
+                                               'PV']:
+                    warnings.warn("In the model database for " + self.name +
+                                  " lack of column for efficiency.")
         if 'service life' in properties.columns:
             self.life = int(properties['service life'])
         elif 'service_life' in properties.columns:
@@ -91,25 +99,34 @@ class Component(object):
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for servicing effort hours.")
 
-    def _constraint_conser(self, model, flows, var_dict, T):
+    def _constraint_conver(self, model):
         """
-        This constraint shows the energy transfer of the component.
-        For Producing components, the input energy is transfer to output
-        energy with given efficiency.
-        todo(yni): should adapt for CHP and fuel cell
+        This constraint shows the energy conversion of the component.
         """
-        # find out the component in flow dictionary according to name
-        input_powers = flows[self.input_energy][self.name][0]
-        output_powers = flows[self.output_energy][self.name][1]
-        if not self.output_energy_2:
-            output_powers_2 = flows[self.output_energy][self.name][1]
+        # todo: the component with more than 1 inputs is not developed,
+        #  because of the easily confused efficiency. If meet component in
+        #  this type, develop the method further. (By mixing of natural gas
+        #  and hydrogen, or special electrolyzer, which need heat and
+        #  electricity at the same time)
 
-        for t in T:
-            model.cons.add(pyo.quicksum(var_dict[i][t] for i in input_powers)
-                           * self.efficiency ==
-                           pyo.quicksum(var_dict[i][t] for i in output_powers))
+        for output in self.outputs:
+            output_energy = model.find_component('output_' + output + '_' +
+                                                 self.name)
+            if self.inputs is None:
+                break
+            elif len(self.inputs) == 1:
+                input_energy = model.find_component('input_' + self.inputs[0] +
+                                                    '_' + self.name)
+            else:
+                input_energy = None  # for more than 1 input, should be
+                # developed
 
-    def _constraint_maxpower(self, model, flows, var_dict, T):
+            for t in model.time_step:
+                print(self.name)
+                model.cons.add(output_energy[t] == input_energy[t] *
+                               self.efficiency[output])
+
+    def _constraint_maxpower(self, model):
         """
         The power at each time step cannot be greater than the capacity.
         todo(yni): capacity of some device are defined with input power,
@@ -128,7 +145,7 @@ class Component(object):
                 model.cons.add(pyo.quicksum(var_dict[i][t] for i in input_powers)
                                <= var_dict[('power', self.name)])
 
-    def _constraint_vdi2067(self, model, var_dict, T):
+    def _constraint_vdi2067(self, model):
         """
         t: observation period in years
         r: price change factor (not really relevant since we have n=0)
@@ -145,8 +162,8 @@ class Component(object):
                                                        model)
         model.cons.add(var_dict[('annual_cost', self.name)] == annual_cost)
 
-    def add_all_constr(self, model, flows, var_dict, T):
-        self._constraint_conser(model, flows, var_dict, T)
+    def add_all_constr(self, model):
+        self._constraint_conver(model)
         self._constraint_maxpower(model, flows, var_dict, T)
         # todo jgn: for test purpose, the constraint vdi2067 is temporarily deactivated
         self._constraint_vdi2067(model, var_dict, T)
@@ -171,8 +188,14 @@ class Component(object):
         invest = pyo.Var(bounds=(0, None))
         model.add_component('invest_' + self.name, invest)
 
-        input_energy = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('input_energy_' + self.name, input_energy)
+        if self.inputs is not None:
+            for energy_type in self.inputs:
+                input_energy = pyo.Var(model.time_step, bounds=(0, None))
+                model.add_component('input_' + energy_type + '_' + self.name,
+                                    input_energy)
 
-        output_energy = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('output_energy_' + self.name, output_energy)
+        if self.outputs is not None:
+            for energy_type in self.outputs:
+                output_energy = pyo.Var(model.time_step, bounds=(0, None))
+                model.add_component('output_' + energy_type + '_' + self.name,
+                                    output_energy)
