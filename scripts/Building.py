@@ -190,12 +190,18 @@ class Building(object):
         self.simp_matrix = simp_matrix
         self.energy_flow = energy_flow
 
+        total_annual_cost = pyo.Var(bounds=(0, None))
+        # Attention. The building name should be unique, not same as the comp
+        # or project or other buildings.
+        model.add_component('annual_cost' + self.name, total_annual_cost)
+
         for comp in self.components:
             self.components[comp].add_vars(model)
 
-    def add_cons(self, model):
+    def add_cons(self, model, env):
         self._constraint_energy_balance(model)
         self._constraint_solar_area(model)
+        self._constraint_total_cost(model, env)
         for comp in self.components:
             self.components[comp].add_cons(model)
 
@@ -249,5 +255,35 @@ class Building(object):
                             module_dict['SolarThermalCollector']):
                 solar_area_var_list.append(model.find_component('solar_area_' +
                                                                 component))
-        model.cons.add(
-            sum(item for item in solar_area_var_list) <= self.solar_area)
+        model.cons.add(sum(item for item in solar_area_var_list) <=
+                       self.solar_area)
+
+    def _constraint_total_cost(self, model, env):
+        """Calculate the total annual cost for the building energy system."""
+        bld_annual_cost = model.find_component('annual_cost' + self.name)
+        buy_elec = [0] * 8761
+        sell_elec = [0] * 8761
+        buy_gas = [0] * 8761
+        buy_heat = [0] * 8761
+
+        comp_cost_list = []
+        for comp in self.components:
+            comp_cost_list.append(model.find_component('annual_cost_' + comp))
+            if isinstance(self.components[comp],
+                          module_dict['ElectricityGrid']):
+                buy_elec = model.find_component('output_elec_' + comp)
+                sell_elec = model.find_component('input_elec_' + comp)
+            elif isinstance(self.components[comp], module_dict['GasGrid']):
+                buy_gas = model.find_component('output_gas_' + comp)
+            elif isinstance(self.components[comp], module_dict['HeatGrid']):
+                buy_heat = model.find_component('output_heat_' + comp)
+
+        # model.cons.add(bld_annual_cost == sum(buy_elec[t] * env.elec_price
+        #                                       for t in model.time_step))
+        model.cons.add(bld_annual_cost == sum(buy_elec[t] * env.elec_price +
+                                              buy_gas[t] * env.gas_price +
+                                              buy_heat[t] *
+                                              env.heat_price - sell_elec[
+                                                  t] * env.elec_feed_price
+                                              for t in model.time_step) +
+                       sum(item for item in comp_cost_list))

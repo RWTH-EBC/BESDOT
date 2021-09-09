@@ -9,6 +9,9 @@ import pandas as pd
 import numpy as np
 
 
+base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
 class Project(object):
     def __init__(self, name, typ):
         self.name = name
@@ -67,142 +70,54 @@ class Project(object):
             bld.add_vars(self.model)
 
             # Add pyomo constraints to model
-            bld.add_cons(self.model)
+            bld.add_cons(self.model, self.environment)
 
             # Add pyomo objective
-
+            bld_annual_cost = self.model.find_component('annual_cost' +
+                                                        bld.name)
+            self.model.obj = pyo.Objective(expr=bld_annual_cost,
+                                           sense=pyo.minimize)
         else:
             print("Other project application scenario haven't been developed")
 
-    def run_optimization(self, strategy_name, solver_name='gurobi', commentary=False, pareto_set_size=5):
-        self.__build_math_model(strategy_name, components)
+    def run_optimization(self, solver_name='gurobi'):
+        """
+        solver.options['Heuristics'] = 0.05
+        solver.options['MIPGap'] = 0.01
+        solver.options['ImproveStartGap'] = 0.04
+        solver.options['MIPFocus'] = 3  # 1
+        solver.options['Presolve'] = 2  # this can be helpful!
+        solver.options['NumericFocus'] = 1
+        solver.options['NonConvex'] = 2  # only for gurobi nlp
+
+        solvers:
+        glpk(bad for milp), cbc(good for milp), gurobi: linear, ipopt: nonlinear
+        """
         solver = pyo.SolverFactory(solver_name)
-        # solver.options['Heuristics'] = 0.05
-        # solver.options['MIPGap'] = 0.01
-        # solver.options['ImproveStartGap'] = 0.04
-        # solver.options['MIPFocus'] = 3  # 1
-        # solver.options['Presolve'] = 2  # this can be helpful!
-        # solver.options['NumericFocus'] = 1
-        # glpk(bad for milp), cbc(good for milp), gurobi: linear, ipopt: nonlinear
-        # in order to install a new solver paste the .exe file in env. path 'C:\Users\User\anaconda3\envs\envINEED'
-        if len(strategy_name) == 1:
-            # solver.options['NonConvex'] = 2  # only for gurobi nlp
-            self.__solver_result = solver.solve(self.__model, tee=commentary)
-            if (self.__solver_result.solver.status == SolverStatus.ok) and (
-                    self.__solver_result.solver.termination_condition == TerminationCondition.optimal):
-                self.__rsl = {0: self.__extract_results()}
-            else:
-                print('ERROR: The model is infeasible or unbounded: no optimal solution found')
-        elif len(strategy_name) > 1:
-            # using Augmented Epsilon Constraint as presented in Mavrotas 2009: Effective implmentation of the e-constraint
-            # method in Multi-Objective Mathematical Programming problems
 
-            self.__model.O_f2.deactivate()  # deactivates second objective function
+        opt_result = solver.solve(self.model, tee=True)
 
-            # solve for first iteration of max f1
-            solver.solve(self.__model, tee=commentary)
+        # Save model in lp file, this only works with linear model. That is
+        # not necessary.
+        # model_output_path = os.path.join(base_path, 'data', 'opt_output',
+        #                                  self.name + '_model.lp')
+        # self.model.write(model_output_path,
+        #                  io_options={'symbolic_solver_labels': True})
 
-            print('Non pareto optimal solution of max f1')
-            # print('( X1 , X2 ) = ( ' + str(pyo.value(model.X1)) + ' , ' + str(pyo.value(model.X2)) + ' )')
-            print('f1 = ' + str(pyo.value(self.__model.f1)))
-            print('f2 = ' + str(pyo.value(self.__model.f2)))
+        # Save results in csv file.
+        result_output_path = os.path.join(base_path, 'data', 'opt_output',
+                                         self.name + '_result.csv')
 
-            f1_max = pyo.value(self.__model.f1)
+        # Get results for all variable. This is VERY slow.
+        # todo: find an more efficient way to save results
+        result_dict = {}
+        for v in self.model.component_objects(pyo.Var, active=True):
+            # print("Variable component object",v)
+            for index in v:
+                # print("   ", v[index], v[index].value)
+                result_dict[str(v[index])] = v[index].value
+        result_df = pd.DataFrame(result_dict.items(), columns=['var', 'value'])
+        result_df.to_csv(result_output_path)
 
-            # max f2
-            self.__model.O_f2.activate()  # activate the second objective function
-            self.__model.O_f1.deactivate()  # deactivate the first objective function
-
-            ## restrict the first objective to be its maximum and solve the second
-            self.__model.C4 = pyo.Constraint(expr=self.__model.f1 == f1_max)
-
-            solver.solve(self.__model, tee=commentary)
-
-            payoff_table = {'f1': [], 'f2': []}
-
-            print('Pareto optimal (lexicographic) solution of max f1: payoff table')
-            # print('( X1 , X2 ) = ( ' + str(value(model.X1)) + ' , ' + str(value(model.X2)) + ' )')
-            print('f1 = ' + str(pyo.value(self.__model.f1)))
-            payoff_table['f1'].append(pyo.value(self.__model.f1))
-            print('f2 = ' + str(pyo.value(self.__model.f2)))
-            payoff_table['f2'].append(pyo.value(self.__model.f2))
-            f2_min = pyo.value(self.__model.f2)
-
-            ## cancel the restriction and resolve the second objective function
-            self.__model.C4.deactivate()
-
-            solver.solve(self.__model, tee=commentary)
-
-            print('Optimal solution of max f2 (not necessary pareto optimal but irrelevant since we only need the values of f2 for '
-                'pareto set: payoff table')
-            # print('( X1 , X2 ) = ( ' + str(value(model.X1)) + ' , ' + str(value(model.X2)) + ' )')
-            print('f1 = ' + str(pyo.value(self.__model.f1)))
-            payoff_table['f1'].append(pyo.value(self.__model.f1))
-            print('f2 = ' + str(pyo.value(self.__model.f2)))
-            payoff_table['f2'].append(pyo.value(self.__model.f2))
-
-            self.__payoff = pd.DataFrame(payoff_table, index=['maxf1', 'maxf2'])
-
-            f2_max = pyo.value(self.__model.f2)
-
-            if f2_min > f2_max:
-                f2_max = f2_min
-
-            # apply augmented $\epsilon$-Constraint
-
-            print('f2_min and f2_max are the bounds of epsilon2: [' + str(
-                    f2_min) + ', ' + str(f2_max) + ']' +
-                  ' Each iteration will keep f2 between f2_min and f2_max.')
-
-            steps = list(np.linspace(f2_min, f2_max, pareto_set_size))
-
-            print('Size of pareto set is:', len(steps))
-            print('Range of f2 is:', steps)
-
-            # max   f2 + delta*epsilon
-            #  s.t. f2 - s = e
-
-            self.__model.del_component(self.__model.O_f1)
-            self.__model.del_component(self.__model.O_f2)
-
-            self.__model.e = pyo.Param(initialize=0, mutable=True)
-
-            self.__model.eps = pyo.Param(initialize=0.00001)
-
-            r2 = f2_max - f2_min
-            if r2 == 0:
-                r2 = 1
-
-            self.__model.r2 = pyo.Param(initialize=r2)
-
-            # Define slack variable for f2
-            self.__model.s2 = pyo.Var(bounds=(0, None))
-
-            self.__model.O_f1 = pyo.Objective(
-                expr=self.__model.f1 + self.__model.eps * self.__model.s2 / self.__model.r2,
-                sense=pyo.maximize)
-
-            self.__model.C_e = pyo.Constraint(
-                expr=self.__model.f2 - self.__model.s2 == self.__model.e)
-
-            f1_l = []
-            f2_l = []
-            pareto_set_rsl = dict()
-            j = 0
-
-            for i in tqdm(steps):
-                self.__model.e = i
-                self.__solver_result = solver.solve(self.__model,
-                                                    tee=commentary)
-                if (self.__solver_result.solver.status == SolverStatus.ok) and (
-                        self.__solver_result.solver.termination_condition == TerminationCondition.optimal):
-                    f1_l.append(pyo.value(self.__model.f1))
-                    f2_l.append(pyo.value(self.__model.f2))
-                    pareto_set_rsl[j] = self.__extract_results()
-                    j += 1
-                else:
-                    print(
-                        'ERROR: The model is infeasible or unbounded: no optimal solution found')
-
-            self.__rsl = pareto_set_rsl
-            self.__pareto_values = pd.DataFrame({'f1': f1_l, 'f2': f2_l})
+        # Get value of single variable
+        # print(self.model.size_pv.value)

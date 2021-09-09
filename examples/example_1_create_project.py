@@ -39,9 +39,12 @@ test_bld_1.add_components(test_project.environment)
 test_project.add_building(test_bld_1)
 
 ################################################################################
-#                           Build pyomo model
+#                        Build pyomo model and run optimization
 ################################################################################
 test_project.build_model()
+test_project.run_optimization('gurobi')
 
-#
+################################################################################
+#                                  Post-processing
+################################################################################
 

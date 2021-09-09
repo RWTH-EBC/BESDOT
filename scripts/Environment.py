@@ -52,6 +52,8 @@ class Environment(object):
         # todo: price could be set into series or list, for exchanger price
         self.elec_price = 0.3  # €/kWh
         self.gas_price = 0.1  # €/kWh
+        self.heat_price = 0.08  # €/kWh
+        self.elec_feed_price = 0.1  # €/kWh
         self.elec_emission = 397  # g/kWh
         self.gas_emission = 202  # g/kWh
 
