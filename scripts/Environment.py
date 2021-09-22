@@ -67,4 +67,8 @@ class Environment(object):
 
         # Set time step of optimization model, default is 8760 steps and each
         # step is 1 hour.
-        self.time_step = end_time-start_time
+        if start_time>=1 and start_time<=8760 and end_time>=1 and end_time<=8760 and end_time>start_time:
+          self.time_step = end_time-start_time
+        else:
+            print("value not available!")
+        
