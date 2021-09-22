@@ -44,7 +44,8 @@ def _read_weather_file(weather_file=None, city='Dusseldorf', year=2021):
 
 
 class Environment(object):
-    def __init__(self, weather_file=None, city='Dusseldorf', year=2021):
+    #start_time,end_time: data can be saved from start_time until end_time.
+    def __init__(self, weather_file=None, city='Dusseldorf', year=2021,start_time=1000,end_time=1024):
         self.city = city
         self.year = year
 
@@ -59,11 +60,11 @@ class Environment(object):
 
         # Read the weather file in the directory "data"
         temp_profile, wind_profile, irr_profile = _read_weather_file(
-            weather_file, city, year)
+            weather_file, city, year)[start_time-1:end_time]
         self.temp_profile = temp_profile
         self.wind_profile = wind_profile
         self.irr_profile = irr_profile
 
         # Set time step of optimization model, default is 8760 steps and each
         # step is 1 hour.
-        self.time_step = 8760
+        self.time_step = start_time-end_time
