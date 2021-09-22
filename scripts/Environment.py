@@ -67,4 +67,4 @@ class Environment(object):
 
         # Set time step of optimization model, default is 8760 steps and each
         # step is 1 hour.
-        self.time_step = start_time-end_time
+        self.time_step = end_time-start_time
