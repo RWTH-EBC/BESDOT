@@ -61,9 +61,9 @@ class Environment(object):
         # Read the weather file in the directory "data"
         temp_profile, wind_profile, irr_profile = _read_weather_file(
             weather_file, city, year)
-        self.temp_profile = temp_profile[start_time-1:end_time]
-        self.wind_profile = wind_profile[start_time-1:end_time]
-        self.irr_profile = irr_profile[start_time-1:end_time]
+        self.temp_profile = temp_profile[start_time-1:end_time-1]
+        self.wind_profile = wind_profile[start_time-1:end_time-1]
+        self.irr_profile = irr_profile[start_time-1:end_time-1]
 
         # Set time step of optimization model, default is 8760 steps and each
         # step is 1 hour.
