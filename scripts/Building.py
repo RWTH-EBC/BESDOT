@@ -14,7 +14,7 @@ class Building(object):
     def __init__(self, name, area, solar_area=None,
                  bld_typ='Verwaltungsgebäude',
                  annual_heat_demand=None,
-                 annual_elec_demand=None):
+                 annual_elec_demand=None,start_time=1000,end_time=1024):
         """
         Initialization for building.
         :param name: name of the building, should be unique
@@ -55,7 +55,7 @@ class Building(object):
                                "heat_demand": [],
                                "cool_demand": [],
                                "hot_water_demand": [],
-                               "gas_demand": []}
+                               "gas_demand": [][start_time-1:end_time]}
 
         # The topology of the building energy system and all available
         # components in the system, which doesn't mean the components would
