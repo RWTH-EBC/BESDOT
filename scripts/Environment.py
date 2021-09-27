@@ -44,11 +44,14 @@ def _read_weather_file(weather_file=None, city='Dusseldorf', year=2021):
 
 
 class Environment(object):
-    #start_time,end_time: data can be saved from start_time until end_time.
-    def __init__(self, weather_file=None, city='Dusseldorf', year=2021,start_time=1000,end_time=1024):
+    # start_time,end_time: data can be saved from start_time until end_time.
+    # time_step should be from 1 to 8759, start_time should be from 1 to 8759,
+    # and the sum of both should be from 2 to 8760.
+    def __init__(self, weather_file=None, city='Dusseldorf', year=2021,
+                 start_time=1000, time_step=24):
         self.city = city
         self.year = year
-
+        self.time_step = time_step
         # todo: the default value should be check with the aktuell data
         # todo: price could be set into series or list, for exchanger price
         self.elec_price = 0.3  # €/kWh
@@ -61,14 +64,10 @@ class Environment(object):
         # Read the weather file in the directory "data"
         temp_profile, wind_profile, irr_profile = _read_weather_file(
             weather_file, city, year)
-        self.temp_profile = temp_profile[start_time-1:end_time]
-        self.wind_profile = wind_profile[start_time-1:end_time]
-        self.irr_profile = irr_profile[start_time-1:end_time]
-
-        # Set time step of optimization model, default is 8760 steps and each
-        # step is 1 hour.
-        if start_time>=1 and start_time<=8760 and end_time>=1 and end_time<=8760 and end_time>start_time:
-          self.time_step = end_time-start_time
-        else:
-            print("value not available!")
+        #self.temp_profile.original = temp_profile
+        #self.wind_profile.original = wind_profile
+        #self.irr_profile.original = irr_profile
+        self.temp_profile = temp_profile[start_time-1:start_time+time_step]
+        self.wind_profile = wind_profile[start_time-1:start_time+time_step]
+        self.irr_profile = irr_profile[start_time-1:start_time+time_step]
         
