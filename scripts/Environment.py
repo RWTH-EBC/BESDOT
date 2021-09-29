@@ -64,9 +64,9 @@ class Environment(object):
         # Read the weather file in the directory "data"
         temp_profile, wind_profile, irr_profile = _read_weather_file(
             weather_file, city, year)
-        #self.temp_profile.original = temp_profile
-        #self.wind_profile.original = wind_profile
-        #self.irr_profile.original = irr_profile
+        self.temp_profile_original = temp_profile
+        self.wind_profile_original = wind_profile
+        self.irr_profile_original = irr_profile
         self.temp_profile = temp_profile[start_time-1:start_time+time_step]
         self.wind_profile = wind_profile[start_time-1:start_time+time_step]
         self.irr_profile = irr_profile[start_time-1:start_time+time_step]
