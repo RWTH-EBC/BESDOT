@@ -59,6 +59,8 @@ commercial_heat = demand_df['commercial heat'].astype('float64').values
 resident_heat = demand_df['residential heat'].astype('float64').values
 total_heat = commercial_heat + resident_heat
 total_elec = demand_df['total electricity'].astype('float64').values
+print(max(total_elec))
+print(max(total_heat))
 
 energy_hub.demand_profile['elec_demand'] = total_elec
 energy_hub.demand_profile['heat_demand'] = total_heat
