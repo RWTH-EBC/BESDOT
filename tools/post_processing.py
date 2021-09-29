@@ -15,8 +15,8 @@ elec_comp_list = ['heat_pump', 'pv', 'bat', 'e_grid', 'e_boi', 'e_cns',
                   'chp']
 heat_comp_list = ['heat_pump', 'therm_cns', 'water_tes', 'solar_coll',
                   'boi', 'e_boi', 'chp']
-elec_senk_list = ['heat_pump', 'bat', 'e_grid', 'e_boi', 'e_cns']
-heat_senk_list = ['water_tes', 'therm_cns']
+elec_sink_tuple = ('heat_pump', 'bat', 'e_grid', 'e_boi')
+heat_sink_tuple = 'water_tes'
 
 
 def plot_all(csv_file):
@@ -89,155 +89,19 @@ def get_short_profiles(start_time, time_step, csv_file):
 def plot_short_time(start_time, time_step, csv_file, demand_heat, demand_elec):
     """Plot only short time like one day in a graphic"""
     elec_df, heat_df = get_short_profiles(start_time, time_step, csv_file)
-    print(elec_df)
-    print(heat_df)
+    # print(elec_df)
+    # print(heat_df)
 
     demand_heat = demand_heat[start_time: start_time + time_step]
     demand_elec = demand_elec[start_time: start_time + time_step]
 
-    ###########################################################################
     # plot for heat balance
-    ###########################################################################
     plot_step_profile(energy_type='heat', demand=demand_heat, profile=heat_df,
                       time_step=time_step)
-    # order_heat = 1.5
-    # for device in heat_df.columns:
-    #     if heat_df[device].sum() != 0:
-    #         if device != "TES":
-    #             accumulate_series_heat += heat_df[device]
-    #             ax_heat.step(time_steps, accumulate_series_heat, where="post",
-    #                          label=device, linewidth=2, zorder=order_heat)
-    #             ax_heat.fill_between(x_axis, accumulate_series_heat,
-    #                                  step="post", zorder=order_heat)
-    #             order_heat -= 0.1
-    #         else:
-    #             last_series_heat = copy.deepcopy(accumulate_series_heat)
-    #             accumulate_series_heat -= heat_df[device]
-    #             ax_heat.step(time_steps, accumulate_series_heat, where="post",
-    #                          linestyle='--', linewidth=2,
-    #                          zorder=1.5)
-    #             ax_heat.fill_between(x_axis, last_series_heat,
-    #                                  accumulate_series_heat,
-    #                                  label=device,
-    #                                  step="post", zorder=1.6,
-    #                                  hatch='///', alpha=0)
-    #             order_heat -= 0.1
-    # ax_heat.step(time_steps, demand_heat, where="post",
-    #              label='Bedarf', linestyle='--', linewidth=2,
-    #              zorder=1.5)
-    #
-    # ax_heat.set_ylabel('Leistung in kW')
-    # ax_heat.set_xlim(0, 23)
-    # ax_heat.set_ylim(0, None)
-    # ax_heat.set_xlabel('Stunde')
-    #
-    # handles, labels = ax_heat.get_legend_handles_labels()
-    # ax_heat.legend(handles[::-1], labels[::-1], loc='upper right')
-    # ax_heat.grid(axis="y", alpha=0.6)
-    # ax_heat.set_axisbelow(True)
-    #
-    # ###########################################################################
-    # # plot for electricity balance
-    # ###########################################################################
+
+    # plot for electricity balance
     plot_step_profile(energy_type='elec', demand=demand_elec, profile=elec_df,
                       time_step=time_step)
-    # order_elec = 1.5
-    # for device in elec_df.columns:
-    #     if elec_df[device].sum() != 0 or device == "BAT":
-    #         if device not in ["BAT", "HP", "EB", "to grid"]:
-    #             accumulate_series_elec += elec_df[device]
-    #             # ax_elec.step(time_steps, accumulate_series_elec, where="post",
-    #             #              label=device, linewidth=2, zorder=order_elec)
-    #             ax_elec.fill_between(x_axis, accumulate_series_elec,
-    #                                  step="post",
-    #                                  label=device, zorder=order_elec)
-    #             order_elec -= 0.1
-    #         elif device == 'BAT':
-    #             last_series_elec = copy.deepcopy(accumulate_series_elec)
-    #             accumulate_series_elec -= elec_df[device]
-    #             # ax_elec.step(time_steps, accumulate_series_elec, where="post",
-    #             #              linestyle='--', linewidth=2,
-    #             #              zorder=1.5)
-    #             ax_elec.fill_between(x_axis, last_series_elec,
-    #                                  accumulate_series_elec,
-    #                                  label=device,
-    #                                  step="post", zorder=1.6,
-    #                                  hatch='///', alpha=0)
-    #             order_heat -= 0.1
-    #         elif device == 'HP':
-    #             last_series_elec = copy.deepcopy(accumulate_series_elec)
-    #             accumulate_series_elec += elec_df[device]
-    #             # ax_elec.step(time_steps, accumulate_series_elec, where="post",
-    #             #              linewidth=2,
-    #             #              zorder=1.5)
-    #             # ax_elec.step(time_steps, accumulate_series_elec, where="post",
-    #             #              linestyle='--', linewidth=2,
-    #             #              zorder=1.5)
-    #             ax_elec.fill_between(x_axis, last_series_elec,
-    #                                  accumulate_series_elec,
-    #                                  label=device,
-    #                                  step="post", zorder=1.6,
-    #                                  hatch='||', alpha=0)
-    #             order_heat -= 0.1
-    #         elif device == 'EB':
-    #             last_series_elec = copy.deepcopy(accumulate_series_elec)
-    #             accumulate_series_elec += elec_df[device]
-    #             # ax_elec.step(time_steps, accumulate_series_elec, where="post",
-    #             #              linestyle='--', linewidth=2,
-    #             #              zorder=1.5)
-    #             # ax_elec.step(time_steps, accumulate_series_elec, where="post",
-    #             #              linewidth=2,
-    #             #              zorder=1.5)
-    #             ax_elec.fill_between(x_axis, last_series_elec,
-    #                                  accumulate_series_elec,
-    #                                  label=device,
-    #                                  step="post", zorder=1.6,
-    #                                  hatch='+++', alpha=0)
-    #             order_heat -= 0.1
-    #         elif device == 'to grid':
-    #             last_series_elec = copy.deepcopy(accumulate_series_elec)
-    #             accumulate_series_elec += elec_df[device]
-    #             # ax_elec.step(time_steps, accumulate_series_elec, where="post",
-    #             #              linestyle='--', linewidth=2,
-    #             #              zorder=1.5)
-    #             # ax_elec.step(time_steps, accumulate_series_elec, where="post",
-    #             #              linewidth=2,
-    #             #              zorder=1.5)
-    #             ax_elec.fill_between(x_axis, last_series_elec,
-    #                                  accumulate_series_elec,
-    #                                  label=device,
-    #                                  step="post", zorder=1.6,
-    #                                  hatch='\\\\', alpha=0)
-    #             order_heat -= 0.1
-    #         # else:
-    #         #     accumulate_series_elec -= time_series_elec[device]
-    #         #     ax_elec.step(time_steps, accumulate_series_elec, where="post",
-    #         #                  label=device, linestyle='--', linewidth=2,
-    #         #                  zorder=1.5)
-    #         #     order_elec -= 0.1
-    #
-    # ax_elec.step(time_steps, demand_elec, where="post",
-    #              label='Bedarf', linestyle='--', linewidth=2,
-    #              zorder=1.5)
-    #
-    # ax_elec.set_ylabel('Leistung in kW')
-    # ax_elec.set_xlim(0, 23)
-    # ax_elec.set_ylim(0, None)
-    # ax_elec.set_xlabel('Stunde')
-    #
-    # handles, labels = ax_elec.get_legend_handles_labels()
-    # ax_elec.legend(handles[::-1], labels[::-1], loc='upper right')
-    # ax_elec.grid(axis="y", alpha=0.6)
-    # ax_elec.set_axisbelow(True)
-    #
-    # fig.suptitle(t='hourly profile', fontsize=18)
-    # plt.show()
-    # plot_path = os.path.join(OUTPUTS_PATH, str(datetime.datetime.now(
-    #     ).strftime('%Y-%m-%d_%H_%M_%S_')) + day + '.png')
-
-    # plot_path = os.path.join(OUTPUTS_PATH, name + day + '.png')
-    # plt.savefig(plot_path)
-    # plt.close()
 
 
 def plot_step_profile(energy_type, demand, profile, time_step):
@@ -249,34 +113,33 @@ def plot_step_profile(energy_type, demand, profile, time_step):
     x_axis = np.linspace(0, time_step - 1, time_step)
 
     if energy_type == 'heat':
-        pass
+        sink_tuple = heat_sink_tuple
     elif energy_type == 'elec':
-        pass
+        sink_tuple = elec_sink_tuple
+    else:
+        sink_tuple = None
 
     order_heat = 1.5
     for device in profile.columns:
-        if device != "TES":
+        if not device.endswith(sink_tuple):
             accumulate_series += profile[device]
             ax.step(time_steps, accumulate_series, where="post",
-                         label=device, linewidth=2, zorder=order_heat)
+                    label=device, linewidth=2, zorder=order_heat)
             ax.fill_between(x_axis, accumulate_series,
-                                 step="post", zorder=order_heat)
+                            step="post", zorder=order_heat)
             order_heat -= 0.1
-        else:
+    for device in profile.columns:
+        if device.endswith(sink_tuple):
             last_series_heat = copy.deepcopy(accumulate_series)
             accumulate_series -= profile[device]
             ax.step(time_steps, accumulate_series, where="post",
-                         linestyle='--', linewidth=2,
-                         zorder=1.5)
-            ax.fill_between(x_axis, last_series_heat,
-                                 accumulate_series,
-                                 label=device,
-                                 step="post", zorder=1.6,
-                                 hatch='///', alpha=0)
+                    linewidth=0.1, zorder=1.5)
+            ax.fill_between(x_axis, last_series_heat, accumulate_series,
+                            label=device, step="post", zorder=1.6,
+                            hatch='///', alpha=0)
             order_heat -= 0.1
-    ax.step(time_steps, demand, where="post",
-                 label='Bedarf', linestyle='--', linewidth=2,
-                 zorder=1.5)
+    ax.step(time_steps, demand, where="post", label='Bedarf', linestyle='--',
+            linewidth=2, zorder=1.5)
 
     ax.set_ylabel('Leistung in kW')
     ax.set_xlim(0, 23)
@@ -289,6 +152,13 @@ def plot_step_profile(energy_type, demand, profile, time_step):
     ax.set_axisbelow(True)
     fig.suptitle(t='hourly profile', fontsize=18)
     plt.show()
+
+    # plot_path = os.path.join(OUTPUTS_PATH, str(datetime.datetime.now(
+    #     ).strftime('%Y-%m-%d_%H_%M_%S_')) + day + '.png')
+
+    # plot_path = os.path.join(OUTPUTS_PATH, name + day + '.png')
+    # plt.savefig(plot_path)
+    # plt.close()
 
 
 def find_element(output_df):
@@ -310,8 +180,8 @@ def find_element(output_df):
 if __name__ == '__main__':
     base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     opt_output_path = os.path.join(base_path, 'data', 'opt_output')
-    # opt_output = os.path.join(opt_output_path, 'denmark_energy_hub_result.csv')
-    opt_output = os.path.join(opt_output_path, 'project_1_result.csv')
+    opt_output = os.path.join(opt_output_path, 'denmark_energy_hub_result.csv')
+    # opt_output = os.path.join(opt_output_path, 'project_1_result.csv')
 
     demand_input = os.path.join(base_path, 'data', 'denmark_energy_hub',
                                 'energyprofile(kwh).csv')
