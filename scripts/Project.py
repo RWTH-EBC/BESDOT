@@ -106,7 +106,7 @@ class Project(object):
 
         # Save results in csv file.
         result_output_path = os.path.join(base_path, 'data', 'opt_output',
-                                         self.name + '_result.csv')
+                                          self.name + '_result.csv')
 
         # Get results for all variable. This is VERY slow.
         # todo: find an more efficient way to save results
