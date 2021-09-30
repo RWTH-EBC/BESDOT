@@ -29,9 +29,16 @@ test_bld_1 = Building(name='bld_1', area=200)
 
 # Add the energy demand profiles to the building object
 test_bld_1.add_thermal_profile('heat', test_env_1.temp_profile)
-plot_area(typ="Heat",resolution="day",profile=test_bld_1.demand_profile["heat_demand"])
+#plot_area(typ="Heat", resolution="day", profile=test_bld_1.demand_profile
+#["heat_demand"])
+plot_step_profile('heat', test_bld_1.annual_demand,
+                  test_bld_1.demand_profile["heat_demand"], 24)
 test_bld_1.add_elec_profile(test_env_1.year)
-plot_area(typ="Electricity",resolution="day",profile=test_bld_1.demand_profile["elec_demand"])
+plot_step_profile('elec', test_bld_1.annual_demand,
+                 test_bld_1.demand_profile["elec_demand"], 24)
+#plot_area(typ="Electricity", resolution="day",
+    # profile=test_bld_1.demand_profile
+#["elec_demand"])
 
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
