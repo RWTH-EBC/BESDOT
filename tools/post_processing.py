@@ -126,7 +126,27 @@ def plot_step_profile(energy_type, demand, profile, time_step):
     else:
         sink_tuple = None
 
-
+'''order_heat = 1.5
+    for device in df.columns:
+        if not str(device).endswith(sink_tuple):
+         accumulate_series += profile[device]
+         ax.step(time_steps, accumulate_series, where="post",
+                   label=device, linewidth=2, zorder=order_heat)
+         ax.fill_between(x_axis, accumulate_series,
+                            step="post", zorder=order_heat)
+         order_heat -= 0.1
+    for device in df.columns:
+        if str(device).endswith(sink_tuple):
+            last_series_heat = copy.deepcopy(accumulate_series)
+            accumulate_series -= profile[device]
+            ax.step(time_steps, accumulate_series, where="post",
+                    linewidth=0.1, zorder=1.5)
+            ax.fill_between(x_axis, last_series_heat, accumulate_series,
+                            label=device, step="post", zorder=1.6,
+                            hatch='///', alpha=0)
+            order_heat -= 0.1
+    ax.step(time_steps, demand, where="post", label='Bedarf', linestyle='--',
+            linewidth=2, zorder=1.5)'''
     plt.ylabel('Leistung in kW')
     plt.xlim(0, 23)
     plt.ylim(0, None)
