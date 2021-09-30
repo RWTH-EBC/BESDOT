@@ -62,6 +62,7 @@ class StratificationStorage(Storage):
         loss_var = model.find_component('loss_' + self.name)
         mass_flow_var = model.find_component('mass_flow_' + self.name)
 
+        # todo (yca) Size is variable, not constrain. check again
         model.cons.add(size)
 
         for t in range(len(model.time_step)-1):
@@ -71,6 +72,9 @@ class StratificationStorage(Storage):
                            mass_flow_var[l, t + 1] * water_heat_cap /
                            unit_switch - loss_var[t + 1] + input_energy[t + 1]
                            for l in pyo.layer)
+            # todo (yca): even if a new variable is generated for layer,
+            #  it should not be called in this way. That is not allowed for
+            #  pyomo model
             model.cons.add(output_energy[t + 1] ==
                            (temp_var[t + 1] - return_temp_var[t + 1]) *
                            mass_flow_var[l, t + 1] * water_heat_cap /
@@ -91,6 +95,8 @@ class StratificationStorage(Storage):
         lower_temp = model.find_component('lower_temp_' + self.name)
 
         # tank的初始温度 问题：为什么索引从1开始？以及还要添加层数
+        # The index in pyomo model start from 1, that is a difference between
+        # python and modeling language
         model.cons.add(temp_var[1] == 60)
         # tank的回水温度
         model.cons.add(return_temp_var[1] == 20)
@@ -156,6 +162,8 @@ class StratificationStorage(Storage):
     def add_vars(self, model):
         # 给mass_flow添加了一个层数角标，是否可行？
         super().add_vars(model)
+        # todo (yca): need to read the tutorial for pyomo Variabel and make a
+        #  simple model at first.
         layer = np.arange(pyo.lay_num)
         temp = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('temp_' + self.name, temp)
