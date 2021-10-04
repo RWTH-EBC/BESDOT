@@ -45,8 +45,8 @@ def _read_weather_file(weather_file=None, city='Dusseldorf', year=2021):
 
 class Environment(object):
     # start_time,end_time: data can be saved from start_time until end_time.
-    # time_step should be from 1 to 8759, start_time should be from 1 to 8759,
-    # and the sum of both should be from 2 to 8760.
+    # time_step should be from 1 to 8759, start_time should be from 0 to 8759,
+    # and the sum of both should be from 1 to 8760.
     def __init__(self, weather_file=None, city='Dusseldorf', year=2021,
                  start_time=1000, time_step=24):
         self.city = city
@@ -67,7 +67,7 @@ class Environment(object):
         self.temp_profile_original = temp_profile
         self.wind_profile_original = wind_profile
         self.irr_profile_original = irr_profile
-        self.temp_profile = temp_profile[start_time-1:start_time+time_step]
-        self.wind_profile = wind_profile[start_time-1:start_time+time_step]
-        self.irr_profile = irr_profile[start_time-1:start_time+time_step]
+        self.temp_profile = temp_profile[start_time:start_time+time_step]
+        self.wind_profile = wind_profile[start_time:start_time+time_step]
+        self.irr_profile = irr_profile[start_time:start_time+time_step]
         
