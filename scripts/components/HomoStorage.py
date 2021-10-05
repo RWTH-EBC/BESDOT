@@ -54,14 +54,22 @@ class HomoStorage(HotWaterStorage):
         loss_var = model.find_component('loss_' + self.name)
         mass_flow_var = model.find_component('mass_flow_' + self.name)
 
-        model.cons.add(size == 100)
+        # todo (yni): size defined within topology matrix
+        model.cons.add(size == 100)  # size in unit m³
 
         for t in range(len(model.time_step)-1):
             model.cons.add((temp_var[t+2] - temp_var[t+1]) * water_density *
                            size * water_heat_cap / unit_switch ==
-                           (return_temp_var[t+1] - temp_var[t+1]) *
-                           mass_flow_var[t+1] * water_heat_cap / unit_switch -
-                           loss_var[t+1] + input_energy[t+1])
+                           input_energy[t+1] - output_energy[t+1] -
+                           loss_var[t+1])
+        # Assume the end state is equal to the initial state
+        model.cons.add((temp_var[1] - temp_var[len(model.time_step)]) *
+                       water_density * size * water_heat_cap / unit_switch ==
+                       input_energy[len(model.time_step)] -
+                       output_energy[len(model.time_step)] -
+                       loss_var[len(model.time_step)])
+
+        for t in range(len(model.time_step)):
             model.cons.add(output_energy[t+1] ==
                            (temp_var[t+1] - return_temp_var[t+1]) *
                            mass_flow_var[t+1] * water_heat_cap / unit_switch)
@@ -75,11 +83,11 @@ class HomoStorage(HotWaterStorage):
         # time step 0.
         temp_var = model.find_component('temp_' + self.name)
         return_temp_var = model.find_component('return_temp_' + self.name)
-        loss_var = model.find_component('loss_' + self.name)
+        # loss_var = model.find_component('loss_' + self.name)
 
         model.cons.add(temp_var[1] == 60)
         # model.cons.add(return_temp_var[1] == 20)
-        model.cons.add(loss_var[1] == 0)
+        # model.cons.add(loss_var[1] == 0)
 
         for t in model.time_step:
             model.cons.add(temp_var[t] <= self.max_temp)
@@ -102,7 +110,7 @@ class HomoStorage(HotWaterStorage):
 
     def _constraint_mass_flow(self, model):
         # The mass flow set to be constant as circulation pumps
-        mass_flow = 100  # unit kg/h
+        mass_flow = 1000  # unit kg/h
         mass_flow_var = model.find_component('mass_flow_' + self.name)
         for t in model.time_step:
             model.cons.add(mass_flow_var[t] == mass_flow)

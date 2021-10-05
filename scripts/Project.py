@@ -73,9 +73,9 @@ class Project(object):
             bld.add_cons(self.model, self.environment)
 
             # Add pyomo objective
-            bld_annual_cost = self.model.find_component('annual_cost' +
+            bld_annual_cost = self.model.find_component('annual_cost_' +
                                                         bld.name)
-            bld_operation_cost = self.model.find_component('operation_cost' +
+            bld_operation_cost = self.model.find_component('operation_cost_' +
                                                            bld.name)
 
             # todo (yni): better framework to choose objective
@@ -91,7 +91,8 @@ class Project(object):
         else:
             print("Other project application scenario haven't been developed")
 
-    def run_optimization(self, solver_name='gurobi'):
+    def run_optimization(self, solver_name='gurobi', save_lp=False,
+                         save_result=False):
         """
         solver.options['Heuristics'] = 0.05
         solver.options['MIPGap'] = 0.01
@@ -110,25 +111,28 @@ class Project(object):
 
         # Save model in lp file, this only works with linear model. That is
         # not necessary.
-        # model_output_path = os.path.join(base_path, 'data', 'opt_output',
-        #                                  self.name + '_model.lp')
-        # self.model.write(model_output_path,
-        #                  io_options={'symbolic_solver_labels': True})
+        if save_lp:
+            model_output_path = os.path.join(base_path, 'data', 'opt_output',
+                                             self.name + '_model.lp')
+            self.model.write(model_output_path,
+                             io_options={'symbolic_solver_labels': True})
 
         # Save results in csv file.
-        result_output_path = os.path.join(base_path, 'data', 'opt_output',
-                                          self.name + '_result.csv')
+        if save_result:
+            result_output_path = os.path.join(base_path, 'data', 'opt_output',
+                                              self.name + '_result.csv')
 
-        # Get results for all variable. This is VERY slow.
-        # todo: find an more efficient way to save results
-        result_dict = {}
-        for v in self.model.component_objects(pyo.Var, active=True):
-            # print("Variable component object",v)
-            for index in v:
-                # print("   ", v[index], v[index].value)
-                result_dict[str(v[index])] = v[index].value
-        result_df = pd.DataFrame(result_dict.items(), columns=['var', 'value'])
-        result_df.to_csv(result_output_path)
+            # Get results for all variable. This is VERY slow.
+            # todo: find an more efficient way to save results
+            result_dict = {}
+            for v in self.model.component_objects(pyo.Var, active=True):
+                # print("Variable component object",v)
+                for index in v:
+                    # print("   ", v[index], v[index].value)
+                    result_dict[str(v[index])] = v[index].value
+            result_df = pd.DataFrame(result_dict.items(), columns=['var',
+                                                                   'value'])
+            result_df.to_csv(result_output_path)
 
-        # Get value of single variable
-        # print(self.model.size_pv.value)
+            # Get value of single variable
+            # print(self.model.size_pv.value)
