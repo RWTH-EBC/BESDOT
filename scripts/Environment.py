@@ -51,6 +51,7 @@ class Environment(object):
                  start_time=1000, time_step=24):
         self.city = city
         self.year = year
+        self.start_time = start_time
         self.time_step = time_step
         # todo (yni): the default value should be check with the aktuell data
         # todo (yni): price could be set into series or list, for exchanger

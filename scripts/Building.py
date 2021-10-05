@@ -78,7 +78,7 @@ class Building(object):
                  "developed, so could not use the method. check again or fixe "
                  "the problem with changing this method add_annual_demand")
 
-    def add_thermal_profile(self, energy_sector, temperature_profile):
+    def add_thermal_profile(self, energy_sector, temperature_profile, env):
         """The heat and cool demand profile could be calculated with
         temperature profile according to degree day method.
         Attention!!! The temperature profile could only provided in project
@@ -90,7 +90,9 @@ class Building(object):
             heat_demand_profile = gen_heat_profile(self.building_typ,
                                                    self.area,
                                                    temperature_profile)
-            self.demand_profile["heat_demand"] = heat_demand_profile
+            self.demand_profile["heat_demand"] = heat_demand_profile[
+                                                 env.start_time:
+                                                 env.start_time + env.time_step]
         elif energy_sector == 'cool':
             warn('Profile for cool is still not developed')
         else:
@@ -99,7 +101,7 @@ class Building(object):
 
             warn(warn_msg)
 
-    def add_elec_profile(self, year):
+    def add_elec_profile(self, year, env):
         """Generate the electricity profile with the 'Standardlastprofil'
         method. This method could only be called in the Project object,
         because the year is stored in the Environment object"""
@@ -107,7 +109,9 @@ class Building(object):
                                                    "elec_demand"],
                                                self.building_typ,
                                                year)
-        self.demand_profile["elec_demand"] = elec_demand_profile
+        self.demand_profile["elec_demand"] = elec_demand_profile[
+                                             env.start_time:
+                                             env.start_time + env.time_step]
 
     def add_topology(self, topology):
         topo_matrix = pd.read_csv(topology)
@@ -194,15 +198,17 @@ class Building(object):
         total_operation_cost = pyo.Var(bounds=(0, None))
         # Attention. The building name should be unique, not same as the comp
         # or project or other buildings.
-        model.add_component('annual_cost' + self.name, total_annual_cost)
-        model.add_component('operation_cost' + self.name, total_operation_cost)
+        model.add_component('annual_cost_' + self.name, total_annual_cost)
+        model.add_component('operation_cost_' + self.name, total_operation_cost)
 
         for comp in self.components:
             self.components[comp].add_vars(model)
 
     def add_cons(self, model, env):
         self._constraint_energy_balance(model)
-        self._constraint_solar_area(model)
+        # todo (yni): Attention in the optimization for operation cost should
+        #  comment constrain for solar area. This should be done automated.
+        # self._constraint_solar_area(model)
         self._constraint_total_cost(model, env)
         self._constraint_operation_cost(model, env)
         for comp in self.components:
@@ -263,7 +269,7 @@ class Building(object):
 
     def _constraint_total_cost(self, model, env):
         """Calculate the total annual cost for the building energy system."""
-        bld_annual_cost = model.find_component('annual_cost' + self.name)
+        bld_annual_cost = model.find_component('annual_cost_' + self.name)
         buy_elec = [0] * 8761
         sell_elec = [0] * 8761
         buy_gas = [0] * 8761
@@ -293,7 +299,7 @@ class Building(object):
 
     def _constraint_operation_cost(self, model, env):
         """Calculate the total operation cost for the building energy system."""
-        bld_operation_cost = model.find_component('operation_cost' + self.name)
+        bld_operation_cost = model.find_component('operation_cost_' + self.name)
         buy_elec = [0] * 8761
         sell_elec = [0] * 8761
         buy_gas = [0] * 8761
