@@ -191,9 +191,11 @@ class Building(object):
         self.energy_flow = energy_flow
 
         total_annual_cost = pyo.Var(bounds=(0, None))
+        total_operation_cost = pyo.Var(bounds=(0, None))
         # Attention. The building name should be unique, not same as the comp
         # or project or other buildings.
         model.add_component('annual_cost' + self.name, total_annual_cost)
+        model.add_component('operation_cost' + self.name, total_operation_cost)
 
         for comp in self.components:
             self.components[comp].add_vars(model)
@@ -287,3 +289,32 @@ class Building(object):
                                                   t] * env.elec_feed_price
                                               for t in model.time_step) +
                        sum(item for item in comp_cost_list))
+
+    def _constraint_operation_cost(self, model, env):
+        """Calculate the total operation cost for the building energy system."""
+        bld_operation_cost = model.find_component('operation_cost' + self.name)
+        buy_elec = [0] * 8761
+        sell_elec = [0] * 8761
+        buy_gas = [0] * 8761
+        buy_heat = [0] * 8761
+
+        comp_cost_list = []
+        for comp in self.components:
+            comp_cost_list.append(model.find_component('annual_cost_' + comp))
+            if isinstance(self.components[comp],
+                          module_dict['ElectricityGrid']):
+                buy_elec = model.find_component('output_elec_' + comp)
+                sell_elec = model.find_component('input_elec_' + comp)
+            elif isinstance(self.components[comp], module_dict['GasGrid']):
+                buy_gas = model.find_component('output_gas_' + comp)
+            elif isinstance(self.components[comp], module_dict['HeatGrid']):
+                buy_heat = model.find_component('output_heat_' + comp)
+
+        # model.cons.add(bld_annual_cost == sum(buy_elec[t] * env.elec_price
+        #                                       for t in model.time_step))
+        model.cons.add(bld_operation_cost == sum(buy_elec[t] * env.elec_price +
+                                                 buy_gas[t] * env.gas_price +
+                                                 buy_heat[t] *
+                                                 env.heat_price - sell_elec[
+                                                  t] * env.elec_feed_price
+                                                 for t in model.time_step))

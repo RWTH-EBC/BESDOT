@@ -5,10 +5,10 @@ homogeneous thermal capacity.
 
 import warnings
 import pyomo.environ as pyo
-from scripts.components.Storage import Storage
+from scripts.components.HotWaterStorage import HotWaterStorage
 
 
-class HomoStorage(Storage):
+class HomoStorage(HotWaterStorage):
     def __init__(self, comp_name, comp_type="HomoStorage", comp_model=None):
         super().__init__(comp_name=comp_name,
                          comp_type=comp_type,
@@ -57,7 +57,7 @@ class HomoStorage(Storage):
         model.cons.add(size == 100)
 
         for t in range(len(model.time_step)-1):
-            model.cons.add((temp_var[t+1] - temp_var[t]) * water_density *
+            model.cons.add((temp_var[t+2] - temp_var[t+1]) * water_density *
                            size * water_heat_cap / unit_switch ==
                            (return_temp_var[t+1] - temp_var[t+1]) *
                            mass_flow_var[t+1] * water_heat_cap / unit_switch -

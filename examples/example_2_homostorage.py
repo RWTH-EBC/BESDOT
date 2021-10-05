@@ -1,0 +1,47 @@
+"""
+This script is used to validate Homostorage class.
+"""
+
+import os
+from scripts.Project import Project
+from scripts.Environment import Environment
+from scripts.Building import Building
+
+base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+################################################################################
+#                           Generate python objects
+################################################################################
+
+# Generate a project object at first.
+project = Project(name='project_2', typ='building')
+
+# Generate the environment object
+env_2 = Environment()
+project.add_environment(env_2)
+
+# If the objective of the project is the optimization for building, a building
+# should be added to the project.
+bld_2 = Building(name='bld_2', area=200)
+
+# Add the energy demand profiles to the building object
+bld_2.add_thermal_profile('heat', env_2.temp_profile)
+bld_2.add_elec_profile(env_2.year)
+
+# Pre define the building energy system with the topology for different
+# components and add components to the building.
+topo_file = os.path.join(base_path, 'data', 'topology', 'homostorage.csv')
+bld_2.add_topology(topo_file)
+bld_2.add_components(project.environment)
+project.add_building(bld_2)
+
+################################################################################
+#                        Build pyomo model and run optimization
+################################################################################
+project.build_model()
+project.run_optimization('gurobi')
+
+################################################################################
+#                                  Post-processing
+################################################################################
+
