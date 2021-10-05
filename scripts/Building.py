@@ -204,6 +204,7 @@ class Building(object):
         self._constraint_energy_balance(model)
         self._constraint_solar_area(model)
         self._constraint_total_cost(model, env)
+        self._constraint_operation_cost(model, env)
         for comp in self.components:
             self.components[comp].add_cons(model)
 
@@ -310,8 +311,6 @@ class Building(object):
             elif isinstance(self.components[comp], module_dict['HeatGrid']):
                 buy_heat = model.find_component('output_heat_' + comp)
 
-        # model.cons.add(bld_annual_cost == sum(buy_elec[t] * env.elec_price
-        #                                       for t in model.time_step))
         model.cons.add(bld_operation_cost == sum(buy_elec[t] * env.elec_price +
                                                  buy_gas[t] * env.gas_price +
                                                  buy_heat[t] *

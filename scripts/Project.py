@@ -75,7 +75,18 @@ class Project(object):
             # Add pyomo objective
             bld_annual_cost = self.model.find_component('annual_cost' +
                                                         bld.name)
-            self.model.obj = pyo.Objective(expr=bld_annual_cost,
+            bld_operation_cost = self.model.find_component('operation_cost' +
+                                                           bld.name)
+
+            # todo (yni): better framework to choose objective
+            # If objective is annual cost, the components size should be
+            # given in range, so that the dimensioning could be made. If
+            # objective is operation cost, the components size should be
+            # given with the same size of maximal and minimal size.
+
+            # self.model.obj = pyo.Objective(expr=bld_annual_cost,
+            #                                sense=pyo.minimize)
+            self.model.obj = pyo.Objective(expr=bld_operation_cost,
                                            sense=pyo.minimize)
         else:
             print("Other project application scenario haven't been developed")
