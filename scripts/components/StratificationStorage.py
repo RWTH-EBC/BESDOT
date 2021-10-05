@@ -33,9 +33,9 @@ class StratificationStorage(Storage):
                           " lack of column for min temperature.")
 
     def _constraint_conver(self, model, flows, var_dict, T, size,
-                           nom_capacity, lay_num):
+                           nom_capacity, layer):
         #nom_capacity:额定容量
-        #lay_num:层数
+        #layer:层数
         """
         Compared with _constraint_conser, this function turn the pure power
         equation into an equation, which consider the temperature of output
@@ -62,19 +62,17 @@ class StratificationStorage(Storage):
         loss_var = model.find_component('loss_' + self.name)
         mass_flow_var = model.find_component('mass_flow_' + self.name)
 
-        model.cons.add(size)
-
         for t in range(len(model.time_step)-1):
             model.cons.add((temp_var[t + 1] - temp_var[t]) * water_density *
                            size * water_heat_cap / unit_switch ==
                            (return_temp_var[t + 1] - temp_var[t + 1]) *
                            mass_flow_var[l, t + 1] * water_heat_cap /
                            unit_switch - loss_var[t + 1] + input_energy[t + 1]
-                           for l in pyo.layer)
+                           for l in model.layer)
             model.cons.add(output_energy[t + 1] ==
                            (temp_var[t + 1] - return_temp_var[t + 1]) *
                            mass_flow_var[l, t + 1] * water_heat_cap /
-                           unit_switch for l in pyo.layer)
+                           unit_switch for l in model.layer)
             # FIXME: The energy loss equation shouldn't be like the following
             #  format, which is only used for validation.
             model.cons.add(loss_var[t+1] == 1.5 * ((temp_var[t+1] - 20) / 1000))
@@ -90,13 +88,13 @@ class StratificationStorage(Storage):
         upper_temp = model.find_component('upper_temp_' + self.name)
         lower_temp = model.find_component('lower_temp_' + self.name)
 
-        # tank的初始温度 问题：为什么索引从1开始？以及还要添加层数
+        # tank的初始温度
         model.cons.add(temp_var[1] == 60)
         # tank的回水温度
         model.cons.add(return_temp_var[1] == 20)
         model.cons.add(loss_var[1] == 0)
         # 质量的初始流量
-        model.cons.add(mass_flow_var[1] == 0)
+        model.cons.add(mass_flow_var[l, 1] == 0 for l in model.layer)
 
         for t in model.time_step:
             model.cons.add(temp_var[t] <= self.max_temp)
@@ -131,10 +129,10 @@ class StratificationStorage(Storage):
                                                   self.name)
         for t in model.time_step:
             model.cons.add(mass_flow_var[l, t] == mass_flow for l in
-                           pyo.layer)
+                           model.layer)
             model.cons.add(heat_water_procent[l, t] * mass_flow ==
                            mass_flow_var[l, t] for l in
-                           pyo.layer)
+                           model.layer)
 
 
     def _constraint_heat_water_procent(self, model):
@@ -142,7 +140,7 @@ class StratificationStorage(Storage):
                                                   self.name)
         # 上下层热水百分比相加等于1
         for t in model.time_step:
-            model.cons.add(sum(heat_water_procent[l, t] for l in pyo.layer)
+            model.cons.add(sum(heat_water_procent[l, t] for l in model.layer)
                            == 1)
 
     def add_cons(self, model):
@@ -154,16 +152,18 @@ class StratificationStorage(Storage):
         self._constraint_heat_water_procent(model)
 
     def add_vars(self, model):
-        # 给mass_flow添加了一个层数角标，是否可行？
         super().add_vars(model)
-        layer = np.arange(pyo.lay_num)
-        temp = pyo.Var(model.time_step, bounds=(0, None))
+        #layer = np.arange(pyo.lay_num)
+        model.m = pyo.Param(within=pyo.NonNegativeIntergers)
+        model.layer = pyo.RangeSet(1, model.m)
+
+        temp = pyo.Var(model.layer, model.time_step, bounds=(0, None))
         model.add_component('temp_' + self.name, temp)
 
         return_temp = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('return_temp_' + self.name, return_temp)
 
-        mass_flow = pyo.Var(layer, model.time_step, bounds=(0, None))
+        mass_flow = pyo.Var(model.layer, model.time_step, bounds=(0, None))
         model.add_component('mass_flow_' + self.name, mass_flow)
 
         loss = pyo.Var(model.time_step, bounds=(0, None))
@@ -178,6 +178,13 @@ class StratificationStorage(Storage):
         heat_water_procent = pyo.Var(layer, model.time_step, bounds=(0, 1))
         model.add_component('heat_water_procent_' + self.name,
                             heat_water_procent)
+
+
+        mass_flow = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('mass_flow_' + self.name, mass_flow)
+
+        loss = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('loss_' + self.name, loss)
 
 
         mass_flow = pyo.Var(model.time_step, bounds=(0, None))
