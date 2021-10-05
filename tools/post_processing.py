@@ -107,31 +107,28 @@ def plot_short_time(start_time, time_step, csv_file, demand_heat, demand_elec):
 def plot_step_profile(energy_type, demand, profile, time_step):
     fig = plt.figure(figsize=(6, 5.5))
     ax = fig.add_subplot(1, 1, 1)
-    df = pd.DataFrame(profile)
-    handles, labels = ax.get_legend_handles_labels()
+
     time_steps = range(time_step)
     accumulate_series = pd.Series([0] * time_step)
     x_axis = np.linspace(0, time_step - 1, time_step)
 
     if energy_type == 'heat':
         sink_tuple = heat_sink_tuple
-        ax.plot(time_steps, demand, color='#ffcccc', label='Heat')
     elif energy_type == 'elec':
         sink_tuple = elec_sink_tuple
-        ax.plot(time_steps, demand, color='#beffd3', label='Electricity')
     else:
         sink_tuple = None
 
-order_heat = 1.5
-    for device in profile:
+    order_heat = 1.5
+    for device in profile.columns:
         if not device.endswith(sink_tuple):
-         accumulate_series += profile[device]
-         ax.step(time_steps, accumulate_series, where="post",
-                   label=device, linewidth=2, zorder=order_heat)
-         ax.fill_between(x_axis, accumulate_series,
+            accumulate_series += profile[device]
+            ax.step(time_steps, accumulate_series, where="post",
+                    label=device, linewidth=2, zorder=order_heat)
+            ax.fill_between(x_axis, accumulate_series,
                             step="post", zorder=order_heat)
-         order_heat -= 0.1
-    for device in profile:
+            order_heat -= 0.1
+    for device in profile.columns:
         if device.endswith(sink_tuple):
             last_series_heat = copy.deepcopy(accumulate_series)
             accumulate_series -= profile[device]
@@ -143,7 +140,7 @@ order_heat = 1.5
             order_heat -= 0.1
     ax.step(time_steps, demand, where="post", label='Bedarf', linestyle='--',
             linewidth=2, zorder=1.5)
-            
+
     ax.set_ylabel('Leistung in kW')
     ax.set_xlim(0, 23)
     ax.set_ylim(0, None)
@@ -193,9 +190,6 @@ if __name__ == '__main__':
     resident_heat = demand_df['residential heat'].astype('float64').values
     total_heat = commercial_heat + resident_heat
     total_elec = demand_df['total electricity'].astype('float64').values
-    # plot_all(opt_output)
-    plot_short_time(start_time=0, time_step=24, csv_file=opt_output,
-                    demand_heat=total_heat, demand_elec=total_elec)
 
     # plot_all(opt_output)
     plot_short_time(start_time=0, time_step=24, csv_file=opt_output,

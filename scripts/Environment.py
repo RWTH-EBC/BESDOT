@@ -60,6 +60,7 @@ class Environment(object):
         self.elec_feed_price = 0.1  # €/kWh
         self.elec_emission = 397  # g/kWh
         self.gas_emission = 202  # g/kWh
+        self.co2_price = 35  # €/t
 
         # Read the weather file in the directory "data"
         temp_profile, wind_profile, irr_profile = _read_weather_file(

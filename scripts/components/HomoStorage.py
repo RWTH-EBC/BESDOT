@@ -1,18 +1,15 @@
 """
-Compared with HotWaterStorage, the storage tank is discretized vertically,
-which is more realistic. The model is derived from the following paper.
-Schütz, Thomas; Streblow, Rita; Müller, Dirk (2015): A comparison of thermal
-energy storage models for building energy system optimization. In: Energy and
-Buildings 93, S. 23–31. DOI: 10.1016/j.enbuild.2015.02.031.
+Simplest model for hot water tank, in which the thermal storage is treated as a
+homogeneous thermal capacity.
 """
+
 import warnings
 import pyomo.environ as pyo
 from scripts.components.Storage import Storage
 
 
-class StratificationStorage(Storage):
-    def __init__(self, comp_name, comp_type="StratificationStorage",
-                 comp_model=None):
+class HomoStorage(Storage):
+    def __init__(self, comp_name, comp_type="HomoStorage", comp_model=None):
         super().__init__(comp_name=comp_name,
                          comp_type=comp_type,
                          comp_model=comp_model)
@@ -30,7 +27,7 @@ class StratificationStorage(Storage):
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for min temperature.")
 
-    def _constraint_conver(self, model, flows, var_dict, T):
+    def _constraint_conver(self, model):
         """
         Compared with _constraint_conser, this function turn the pure power
         equation into an equation, which consider the temperature of output
@@ -60,14 +57,14 @@ class StratificationStorage(Storage):
         model.cons.add(size == 100)
 
         for t in range(len(model.time_step)-1):
-            model.cons.add((temp_var[t + 1] - temp_var[t]) * water_density *
+            model.cons.add((temp_var[t+1] - temp_var[t]) * water_density *
                            size * water_heat_cap / unit_switch ==
-                           (return_temp_var[t + 1] - temp_var[t + 1]) *
-                           mass_flow_var[t + 1] * water_heat_cap / unit_switch -
-                           loss_var[t + 1] + input_energy[t + 1])
-            model.cons.add(output_energy[t + 1] ==
-                           (temp_var[t + 1] - return_temp_var[t + 1]) *
-                           mass_flow_var[t + 1] * water_heat_cap / unit_switch)
+                           (return_temp_var[t+1] - temp_var[t+1]) *
+                           mass_flow_var[t+1] * water_heat_cap / unit_switch -
+                           loss_var[t+1] + input_energy[t+1])
+            model.cons.add(output_energy[t+1] ==
+                           (temp_var[t+1] - return_temp_var[t+1]) *
+                           mass_flow_var[t+1] * water_heat_cap / unit_switch)
             # FIXME: The energy loss equation shouldn't be like the following
             #  format, which is only used for validation.
             model.cons.add(loss_var[t+1] == 1.5 * ((temp_var[t+1] - 20) / 1000))
@@ -86,7 +83,7 @@ class StratificationStorage(Storage):
 
         for t in model.time_step:
             model.cons.add(temp_var[t] <= self.max_temp)
-            # model.cons.add(temp_var[t] >= self.min_temp)
+            model.cons.add(temp_var[t] >= 50)
             model.cons.add(return_temp_var[t] <= self.max_temp)
             # model.cons.add(return_temp_var[t] >= self.min_temp)
 
