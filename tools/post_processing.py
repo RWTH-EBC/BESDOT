@@ -28,7 +28,8 @@ def plot_all(csv_file):
             if 'size' in element and not np.isnan(elements_dict[element][0]):
                 size_dict[element] = elements_dict[element][0]
         else:
-            plot_single(element, elements_dict[element])
+            if sum(elements_dict[element]) > 0.001:
+                plot_single(element, elements_dict[element])
             # print(element)
             # if element == 'heat_pump_water_tes':
             #     plot_single(element, elements_dict[element])
@@ -37,11 +38,11 @@ def plot_all(csv_file):
 
 def plot_single(name, profile):
     plt.figure()
-    plt.plot(profile)
+    plt.plot(profile, linewidth=2)
     plt.title('Profile of ' + name)
     plt.ylabel('kW')
     plt.xlabel('Hours [h]')
-    plt.ylim(ymin=0)
+    plt.ylim(ymin=0, ymax=max(profile)*1.2)
     plt.xlim(xmin=0)
     plt.grid()
 
@@ -180,8 +181,8 @@ def find_element(output_df):
 if __name__ == '__main__':
     base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     opt_output_path = os.path.join(base_path, 'data', 'opt_output')
-    opt_output = os.path.join(opt_output_path, 'denmark_energy_hub_result.csv')
-    # opt_output = os.path.join(opt_output_path, 'project_1_result.csv')
+    # opt_output = os.path.join(opt_output_path, 'denmark_energy_hub_result.csv')
+    opt_output = os.path.join(opt_output_path, 'project_1_result.csv')
 
     demand_input = os.path.join(base_path, 'data', 'denmark_energy_hub',
                                 'energyprofile(kwh).csv')
