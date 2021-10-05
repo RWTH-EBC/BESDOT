@@ -52,8 +52,9 @@ class Environment(object):
         self.city = city
         self.year = year
         self.time_step = time_step
-        # todo: the default value should be check with the aktuell data
-        # todo: price could be set into series or list, for exchanger price
+        # todo (yni): the default value should be check with the aktuell data
+        # todo (yni): price could be set into series or list, for exchanger
+        #  price
         self.elec_price = 0.3  # €/kWh
         self.gas_price = 0.1  # €/kWh
         self.heat_price = 0.08  # €/kWh
@@ -63,6 +64,7 @@ class Environment(object):
         self.co2_price = 35  # €/t
 
         # Read the weather file in the directory "data"
+        # todo (yca): add comment for new variables
         temp_profile, wind_profile, irr_profile = _read_weather_file(
             weather_file, city, year)
         self.temp_profile_original = temp_profile
