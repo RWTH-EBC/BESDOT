@@ -61,6 +61,8 @@ class StratificationStorage(Storage):
         return_temp_var = model.find_component('return_temp_' + self.name)
         loss_var = model.find_component('loss_' + self.name)
         mass_flow_var = model.find_component('mass_flow_' + self.name)
+        
+        model.cons.add(nom_capacity)
 
         for t in range(len(model.time_step)-1):
             model.cons.add((temp_var[t + 1] - temp_var[t]) * water_density *
