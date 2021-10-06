@@ -181,16 +181,7 @@ class StratificationStorage(Storage):
         model.add_component('heat_water_procent_' + self.name,
                             heat_water_procent)
 
-
-        mass_flow = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('mass_flow_' + self.name, mass_flow)
-
-        loss = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('loss_' + self.name, loss)
+       
 
 
-        mass_flow = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('mass_flow_' + self.name, mass_flow)
-
-        loss = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('loss_' + self.name, loss)
+    
