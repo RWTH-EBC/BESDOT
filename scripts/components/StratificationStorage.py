@@ -57,14 +57,20 @@ class StratificationStorage(Storage):
                                              '_' + self.name)
         size = model.find_component('size_' + self.name)
 
+        # todo (yca): choose temp/return_temp or upper_temp/lower_temp
         temp_var = model.find_component('temp_' + self.name)
         return_temp_var = model.find_component('return_temp_' + self.name)
         loss_var = model.find_component('loss_' + self.name)
         mass_flow_var = model.find_component('mass_flow_' + self.name)
         
+        # Fixme (yca): nom_capacity should be a variable, not a constraint.
+        #  right? the variable size in line 58 is maybe what you want?
         model.cons.add(nom_capacity)
 
         for t in range(len(model.time_step)-1):
+            # todo (yca): think about the meaning of the constraint. This one
+            #  is used for HomoStorage, should be changed for StratStorage
+            #  with the variable heat_water_percent.
             model.cons.add((temp_var[t + 1] - temp_var[t]) * water_density *
                            size * water_heat_cap / unit_switch ==
                            (return_temp_var[t + 1] - temp_var[t + 1]) *
@@ -75,8 +81,8 @@ class StratificationStorage(Storage):
                            (temp_var[t + 1] - return_temp_var[t + 1]) *
                            mass_flow_var[l, t + 1] * water_heat_cap /
                            unit_switch for l in model.layer)
-            # FIXME: The energy loss equation shouldn't be like the following
-            #  format, which is only used for validation.
+            # FIXME (yni): The energy loss equation shouldn't be like the
+            #  following format, which is only used for validation.
             model.cons.add(loss_var[t+1] == 1.5 * ((temp_var[t+1] - 20) / 1000))
 
     def _constraint_temp(self, model):
@@ -104,6 +110,9 @@ class StratificationStorage(Storage):
             model.cons.add(return_temp_var[t] <= self.max_temp)
             # model.cons.add(return_temp_var[t] >= self.min_temp)
             # 出水温度等于上层温度
+            # Fixme (yca): what is upper_temp? is that a constant or
+            #  variable, why should it be always same as temp_var, and same
+            #  question for the lower_temp
             model.cons.add(upper_temp == temp_var[t])
             # 回水温度等于下层温度
             model.cons.add(lower_temp == return_temp_var[t])
@@ -132,6 +141,9 @@ class StratificationStorage(Storage):
         for t in model.time_step:
             model.cons.add(mass_flow_var[l, t] == mass_flow for l in
                            model.layer)
+            # todo (yca): the meaning of the following equation is hard to
+            #  understand. please explain it with comment and introduce it in
+            #  next meeting
             model.cons.add(heat_water_procent[l, t] * mass_flow ==
                            mass_flow_var[l, t] for l in
                            model.layer)
@@ -146,6 +158,8 @@ class StratificationStorage(Storage):
                            == 1)
 
     def add_cons(self, model):
+        # Fixme (yca): the needed inputs for the function __constaint_conver
+        #  is not only model, according to definition in line 35 and 36.
         self._constraint_conver(model)
         self._constraint_temp(model)
         self._constraint_return_temp(model)
@@ -156,9 +170,12 @@ class StratificationStorage(Storage):
     def add_vars(self, model):
         super().add_vars(model)
         #layer = np.arange(pyo.lay_num)
+        # Fixme (yca): RangeSet is not defined with pyomo Interger, should be
+        #  python int value
         model.m = pyo.Param(within=pyo.NonNegativeIntergers)
         model.layer = pyo.RangeSet(1, model.m)
 
+        # Fixme (yca): temp, return_temp, upper_temp and lower_temp duplicate
         temp = pyo.Var(model.layer, model.time_step, bounds=(0, None))
         model.add_component('temp_' + self.name, temp)
 
@@ -177,9 +194,14 @@ class StratificationStorage(Storage):
         lower_temp = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('lower_temp' + self.name, lower_temp)
 
-        heat_water_procent = pyo.Var(layer, model.time_step, bounds=(0, 1))
+        # todo (yca): how many layers should we take for the model? if only
+        #  2, could we take the variable layer away? if more than 2 layers,
+        #  we should set more temperature for each layer.
+        # todo (yca): layer should be called with model.layer
+        # take care of spell error. percent instead of procent
+        heat_water_percent = pyo.Var(layer, model.time_step, bounds=(0, 1))
         model.add_component('heat_water_procent_' + self.name,
-                            heat_water_procent)
+                            heat_water_percent)
 
        
 
