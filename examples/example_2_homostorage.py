@@ -28,6 +28,12 @@ bld_2 = Building(name='bld_2', area=200)
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
 bld_2.add_thermal_profile('heat', env_2.temp_profile_original, env_2)
+
+# Profile simplification for validation
+bld_2.demand_profile['heat_demand'] = [0, 20, 0, 20, 0, 20, 0, 20, 0, 20, 0,
+                                       20, 0, 20, 0, 20, 0, 20, 0, 20, 0, 20,
+                                       0, 20]
+
 bld_2.add_elec_profile(env_2.year, env_2)
 
 # Pre define the building energy system with the topology for different
