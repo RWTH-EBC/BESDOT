@@ -54,14 +54,12 @@ class StratificationStorage(Storage):
                                              '_' + self.name)
         size = model.find_component('size_' + self.name)
 
-        # todo (yca): choose temp/return_temp or upper_temp/lower_temp
         temp_var = model.find_component('temp_' + self.name)
-        #return_temp_var = model.find_component('return_temp_' + self.name)
         loss_var = model.find_component('loss_' + self.name)
         mass_flow_var = model.find_component('mass_flow_' + self.name)
         
-        # Fixme (yca): nom_capacity should be a variable, not a constraint.
-        #  right? the variable size in line 58 is maybe what you want?
+        # Backup: nom_capacity should be a variable, not a constraint.
+        #  right?
 
         for t in range(len(model.time_step)-1):
             # todo (yca): think about the meaning of the constraint. This one
@@ -111,10 +109,6 @@ class StratificationStorage(Storage):
             model.cons.add(temp_var[len(model.layer), t] <= self.max_temp)
             # model.cons.add(return_temp_var[t] >= self.min_temp)
             # 出水温度等于上层温度
-            # Fixme (yca): what is upper_temp? is that a constant or
-            #  variable, why should it be always same as temp_var, and same
-            #  question for the lower_temp
-            model.cons.add()
 
     def _constraint_return_temp(self, model):
         # The first constraint for return temperature. Assuming a constant
@@ -147,7 +141,6 @@ class StratificationStorage(Storage):
                            mass_flow_var[l, t] for l in
                            model.layer)
 
-
     def _constraint_heat_water_percent(self, model):
         heat_water_percent = model.find_component('heat_water_percent_' +
                                                   self.name)
@@ -157,8 +150,6 @@ class StratificationStorage(Storage):
                            == 1)
 
     def add_cons(self, model):
-        # Fixme (yca): the needed inputs for the function __constaint_conver
-        #  is not only model, according to definition in line 35 and 36.
         self._constraint_conver(model)
         self._constraint_temp(model)
         self._constraint_return_temp(model)
@@ -174,12 +165,8 @@ class StratificationStorage(Storage):
         model.m = pyo.Param(within=pyo.NonNegativeIntergers)
         model.layer = pyo.RangeSet(1, model.m)
 
-        # Fixme (yca): temp, return_temp, upper_temp and lower_temp duplicate
         temp = pyo.Var(model.layer, model.time_step, bounds=(0, None))
         model.add_component('temp_' + self.name, temp)
-
-        #return_temp = pyo.Var(model.time_step, bounds=(0, None))
-        #model.add_component('return_temp_' + self.name, return_temp)
 
         mass_flow = pyo.Var(model.layer, model.time_step, bounds=(0, None))
         model.add_component('mass_flow_' + self.name, mass_flow)
@@ -187,11 +174,6 @@ class StratificationStorage(Storage):
         loss = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('loss_' + self.name, loss)
 
-        # todo (yca): how many layers should we take for the model? if only
-        #  2, could we take the variable layer away? if more than 2 layers,
-        #  we should set more temperature for each layer.
-        # todo (yca): layer should be called with model.layer
-        # take care of spell error. percent instead of procent
         heat_water_percent = pyo.Var(model.layer, model.time_step, bounds=(0, 
                                                                           1))
         model.add_component('heat_water_percent_' + self.name,
