@@ -19,7 +19,14 @@ elec_sink_tuple = ('heat_pump', 'bat', 'e_grid', 'e_boi')
 heat_sink_tuple = 'water_tes'
 
 
-def plot_all(csv_file):
+def plot_all(csv_file, time_interval):
+    """
+
+    Args:
+        csv_file:
+        time_interval: list, first element is the beginning time for plot and
+        second element is the end time for plot
+    """
     output_df = pd.read_csv(csv_file)
     elements_dict = find_element(output_df)
     size_dict = {}
@@ -27,9 +34,11 @@ def plot_all(csv_file):
         if len(elements_dict[element]) == 1:
             if 'size' in element and not np.isnan(elements_dict[element][0]):
                 size_dict[element] = elements_dict[element][0]
+                print('The size of', element, 'is', size_dict[element])
         else:
             if sum(elements_dict[element]) > 0.001:
-                plot_single(element, elements_dict[element])
+                plot_single(element, elements_dict[element][time_interval[0]:
+                                                            time_interval[1]])
             # print(element)
             # if element == 'heat_pump_water_tes':
             #     plot_single(element, elements_dict[element])

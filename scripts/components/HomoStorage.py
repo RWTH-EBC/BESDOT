@@ -1,6 +1,8 @@
 """
 Simplest model for hot water tank, in which the thermal storage is treated as a
 homogeneous thermal capacity.
+The unit of size of hot water storage is m³, could be liter, should pay
+attention to the uniformity
 """
 
 import warnings
@@ -44,7 +46,7 @@ class HomoStorage(HotWaterStorage):
 
         """
         water_heat_cap = 4.18 * 10 ** 3  # Unit J/kgK
-        water_density = 1  # kg/l
+        water_density = 1000  # kg/m3
         unit_switch = 3600 * 1000  # J/kWh
 
         input_energy = model.find_component('input_' + self.inputs[0] +
@@ -58,20 +60,27 @@ class HomoStorage(HotWaterStorage):
         loss_var = model.find_component('loss_' + self.name)
         mass_flow_var = model.find_component('mass_flow_' + self.name)
 
-        # todo (yni): size defined within topology matrix
-        # model.cons.add(size == 100)  # size in unit m³
-
         for t in range(len(model.time_step)-1):
             model.cons.add((temp_var[t+2] - temp_var[t+1]) * water_density *
                            size * water_heat_cap / unit_switch ==
                            input_energy[t+1] - output_energy[t+1] -
                            loss_var[t+1])
+            # Mix of return water into tank
+            model.cons.add(temp_var[t+2] * size * water_density == temp_var[
+                t+1] * (size * water_density - mass_flow_var[t+1]) +
+                           return_temp_var[t+1] * mass_flow_var[t+1])
+
         # Assume the end state is equal to the initial state
         model.cons.add((temp_var[1] - temp_var[len(model.time_step)]) *
                        water_density * size * water_heat_cap / unit_switch ==
                        input_energy[len(model.time_step)] -
                        output_energy[len(model.time_step)] -
                        loss_var[len(model.time_step)])
+        model.cons.add(temp_var[1] * size * water_density ==
+                       temp_var[len(model.time_step)] * (size * water_density -
+                       mass_flow_var[len(model.time_step)]) +
+                       return_temp_var[len(model.time_step)] *
+                       mass_flow_var[len(model.time_step)])
 
         for t in range(len(model.time_step)):
             model.cons.add(output_energy[t+1] ==
