@@ -31,7 +31,8 @@ class Component(object):
          component will be defined with a function later
     """
 
-    def __init__(self, comp_name, comp_type="Component", comp_model=None):
+    def __init__(self, comp_name, comp_type="Component", comp_model=None,
+                 min_size=0, max_size=1000, current_size=0):
         """
         """
         self.name = comp_name
@@ -46,6 +47,9 @@ class Component(object):
 
         properties = self.get_properties(comp_model)
         self._read_properties(properties)
+        self.min_size = min_size
+        self.max_size = max_size
+        self.current_size = current_size
 
     def get_properties(self, model):
         model_property_file = os.path.join(base_path, 'data',
@@ -56,6 +60,7 @@ class Component(object):
         return properties
 
     def _read_properties(self, properties):
+        # todo (yni): modify the function formate and database formate
         if self.outputs is not None:
             if 'efficiency' in properties.columns:
                 self.efficiency[self.outputs[0]] = float(properties[
@@ -186,7 +191,7 @@ class Component(object):
             assigned in each component object. For each time step.
         """
 
-        comp_size = pyo.Var(bounds=(0, None))
+        comp_size = pyo.Var(bounds=(self.min_size, self.max_size))
         model.add_component('size_' + self.name, comp_size)
 
         annual_cost = pyo.Var(bounds=(0, None))

@@ -9,10 +9,14 @@ from scripts.components.HotWaterStorage import HotWaterStorage
 
 
 class HomoStorage(HotWaterStorage):
-    def __init__(self, comp_name, comp_type="HomoStorage", comp_model=None):
+    def __init__(self, comp_name, comp_type="HomoStorage", comp_model=None,
+                 min_size=0, max_size=1000, current_size=0):
         super().__init__(comp_name=comp_name,
                          comp_type=comp_type,
-                         comp_model=comp_model)
+                         comp_model=comp_model,
+                         min_size=min_size,
+                         max_size=max_size,
+                         current_size=current_size)
 
     def _read_properties(self, properties):
         super()._read_properties(properties)
@@ -55,7 +59,7 @@ class HomoStorage(HotWaterStorage):
         mass_flow_var = model.find_component('mass_flow_' + self.name)
 
         # todo (yni): size defined within topology matrix
-        model.cons.add(size == 100)  # size in unit m³
+        # model.cons.add(size == 100)  # size in unit m³
 
         for t in range(len(model.time_step)-1):
             model.cons.add((temp_var[t+2] - temp_var[t+1]) * water_density *
@@ -75,6 +79,8 @@ class HomoStorage(HotWaterStorage):
                            mass_flow_var[t+1] * water_heat_cap / unit_switch)
             # FIXME: The energy loss equation shouldn't be like the following
             #  format, which is only used for validation.
+            # FiXME (yni): mindesten should be loss determined by the device
+            #  size
             model.cons.add(loss_var[t+1] == 1.5 * ((temp_var[t+1] - 20) / 1000))
 
     def _constraint_temp(self, model):
@@ -110,6 +116,7 @@ class HomoStorage(HotWaterStorage):
 
     def _constraint_mass_flow(self, model):
         # The mass flow set to be constant as circulation pumps
+        # todo (yni): How to choose the reasonable mass flow?
         mass_flow = 1000  # unit kg/h
         mass_flow_var = model.find_component('mass_flow_' + self.name)
         for t in model.time_step:

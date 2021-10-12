@@ -127,37 +127,58 @@ class Building(object):
                 comp_name = self.topology['comp_name'][item]
                 comp_type = self.topology['comp_type'][item]
                 comp_model = self.topology['model'][item]
+                min_size = self.topology['min_size'][item]
+                max_size = self.topology['max_size'][item]
+                current_size = self.topology['current_size'][item]
                 if comp_type in ['HeatPump', 'GasHeatPump']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       temp_profile=
                                                       env.temp_profile,
-                                                      comp_model=comp_model)
+                                                      comp_model=comp_model,
+                                                      min_size=min_size,
+                                                      max_size=max_size,
+                                                      current_size=current_size)
                 elif comp_type in ['PV', 'SolarThermalCollector']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       irr_profile=
                                                       env.irr_profile,
-                                                      comp_model=comp_model)
+                                                      comp_model=comp_model,
+                                                      min_size=min_size,
+                                                      max_size=max_size,
+                                                      current_size=current_size)
                 elif comp_type == 'HeatConsumption':
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       consum_profile=
                                                       self.demand_profile[
                                                           'heat_demand'],
-                                                      comp_model=comp_model)
+                                                      comp_model=comp_model,
+                                                      min_size=min_size,
+                                                      max_size=max_size,
+                                                      current_size=current_size)
                 elif comp_type == 'ElectricalConsumption':
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       consum_profile=
                                                       self.demand_profile[
                                                           'elec_demand'],
-                                                      comp_model=comp_model)
+                                                      comp_model=comp_model,
+                                                      min_size=min_size,
+                                                      max_size=max_size,
+                                                      current_size=current_size)
                 elif comp_type == 'HotWaterConsumption':
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       consum_profile=
                                                       self.demand_profile[
                                                           'hot_water_demand'],
-                                                      comp_model=comp_model)
+                                                      comp_model=comp_model,
+                                                      min_size=min_size,
+                                                      max_size=max_size,
+                                                      current_size=current_size)
                 else:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
-                                                      comp_model=comp_model)
+                                                      comp_model=comp_model,
+                                                      min_size=min_size,
+                                                      max_size=max_size,
+                                                      current_size=current_size)
                 self.components[comp_name] = comp_obj
 
     def add_vars(self, model):

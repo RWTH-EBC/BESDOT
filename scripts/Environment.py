@@ -48,7 +48,7 @@ class Environment(object):
     # time_step should be from 1 to 8759, start_time should be from 0 to 8759,
     # and the sum of both should be from 1 to 8760.
     def __init__(self, weather_file=None, city='Dusseldorf', year=2021,
-                 start_time=1000, time_step=24):
+                 start_time=0, time_step=8760):
         self.city = city
         self.year = year
         self.start_time = start_time
