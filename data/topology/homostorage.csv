@@ -1,7 +1,0 @@
-comp_name,comp_type,model,min_size,max_size,current_size,therm_cns,water_tes,e_grid,gas_grid,boi,e_cns
-therm_cns,HeatConsumption,HeatCNS1,1000,1000,0,0,0,0,0,0,0
-water_tes,HomoStorage,TES_homo,40,40,0,1,0,0,0,0,0
-e_grid,ElectricityGrid,GRD1,1000,1000,0,0,0,0,0,0,1
-gas_grid,GasGrid,GAS1,1000,1000,0,0,0,0,0,1,0
-boi,GasBoiler,BOI1,1000,1000,0,0,1,0,0,0,0
-e_cns,ElectricalConsumption,CNS1,1000,1000,0,0,0,0,0,0,0
