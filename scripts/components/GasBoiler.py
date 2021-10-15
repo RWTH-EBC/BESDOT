@@ -13,3 +13,12 @@ class GasBoiler(Component):
                          min_size=min_size,
                          max_size=max_size,
                          current_size=current_size)
+
+    def _constraint_maxpower(self, model):
+        output_powers = model.find_component('output_' +
+                                             self.outputs[0] + '_' +
+                                             self.name)
+        size = model.find_component('size_' + self.name)
+
+        for t in model.time_step:
+            model.cons.add(output_powers[t] == size)
