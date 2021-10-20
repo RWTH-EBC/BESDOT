@@ -71,7 +71,7 @@ class StratificationStorage(HotWaterStorage):
                            unit_switch + (reurn_temp_var[t + 2] -
                                           return_temp_var[t + 1]) *
                            water_density *
-                           size * (1-heat_water_percent) * water_heat_cap /
+                           size * (1 - heat_water_percent) * water_heat_cap /
                            unit_switch ==
                            input_energy[t + 1] - output_energy[t + 1] -
                            loss_var[t + 1])
@@ -81,7 +81,14 @@ class StratificationStorage(HotWaterStorage):
                         input_energy[len(model.time_step)] -
                         output_energy[len(model.time_step)] -
                         loss_var[len(model.time_step)])
-
+        
+        for t in range(len(model.time_step) - 1):
+            heat_water_percent[t + 2] = size * water_density * \
+                                        heat_water_percent[t + 1] - \
+                                        mass_flow_var[t + 1] * t + \
+                                        input_energy[t + 1] * t / \
+                                        water_heat_cap / unit_switch
+            
         def _constraint_loss(self, model, loss_type='off'):
             """
             According to loss_type choose the wanted constraint about energy loss
@@ -174,20 +181,12 @@ class StratificationStorage(HotWaterStorage):
                                             '_' + self.name)
         heat_water_percent = model.find_component('heat_water_percent_' +
                                                   self.name)
-        mass_flow_var = model.find_component('mass_flow_' + self.name)
-        
+
         # Initial status should be determined by us.
         if init_status == 'on':
             model.cons.add(status_var[1] == 1)
-            for t in range(len(model.time_step) - 1):
-                heat_water_percent[t + 2] = heat_water_percent[t + 1] + \
-                                     mass_flow_var[t + 1] * t / unit_switch
         elif init_status == 'off':
             model.cons.add(status_var[1] == 0)
-            for t in range(len(model.time_step) - 1):
-                heat_water_percent[t + 2] = heat_water_percent[t + 1] - \
-                                     mass_flow_var[t + 1] * t / unit_switch
-             
 
         for t in range(len(model.time_step)-1):
             # Need a better tutorial for introducing the logical condition
