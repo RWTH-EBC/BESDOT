@@ -76,12 +76,6 @@ class StratificationStorage(HotWaterStorage):
                            input_energy[t + 1] - output_energy[t + 1] -
                            loss_var[t + 1])
 
-        model.cons.add((temp_var[1] - temp_var[len(model.time_step)]) *
-                        water_density * size * water_heat_cap / unit_switch ==
-                        input_energy[len(model.time_step)] -
-                        output_energy[len(model.time_step)] -
-                        loss_var[len(model.time_step)])
-
         def _constraint_loss(self, model, loss_type='off'):
             """
             According to loss_type choose the wanted constraint about energy loss
