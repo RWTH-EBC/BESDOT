@@ -79,8 +79,6 @@ class StratificationStorage(HotWaterStorage):
         model.cons.add((temp_var[1] - temp_var[len(model.time_step)]) *
                         water_density * size * water_heat_cap / unit_switch ==
                         input_energy[len(model.time_step)] -
-                        
-                        
                         output_energy[len(model.time_step)] -
                         loss_var[len(model.time_step)])
 
