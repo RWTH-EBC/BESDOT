@@ -83,12 +83,11 @@ class StratificationStorage(HotWaterStorage):
                         loss_var[len(model.time_step)])
         
         for t in range(len(model.time_step) - 1):
-            heat_water_percent[t + 2] = (size * water_density * \
-                                        heat_water_percent[t + 1] - \
-                                        mass_flow_var[t + 1] * t + \
-                                        input_energy[t + 1] * t / \
-                                        water_heat_cap / unit_switch) / (size \
-                                        * water_density) 
+            model.cons.add(heat_water_percent[t + 2] == (size * water_density
+                           * heat_water_percent[t + 1] - mass_flow_var[t + 1] 
+                           * t + input_energy[t + 1] * t / (water_heat_cap * (
+                           temp_var[t + 1] - return_temp_var[t + 1]) / 
+                           unit_switch) / (size * water_density))) 
             
         def _constraint_loss(self, model, loss_type='off'):
             """
