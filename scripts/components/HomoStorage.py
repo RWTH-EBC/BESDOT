@@ -164,10 +164,10 @@ class HomoStorage(HotWaterStorage):
             # Need a better tutorial for introducing the logical condition
             model.cons.add(status_var[t + 2] >= small_num *
                            (small_num + (max_temp - min_temp - small_num) *
-                            status_var[t+1] + min_temp - input_energy[t+1]))
+                            status_var[t+1] + min_temp - temp_var[t+1]))
             model.cons.add(status_var[t + 2] <= 1 + small_num *
                            (small_num + (max_temp - min_temp - 2 * small_num) *
-                            status_var[t + 1] + min_temp - input_energy[t + 1]))
+                            status_var[t + 1] + min_temp - temp_var[t + 1]))
             model.cons.add(input_energy[t + 1] == input_energy[t + 1] *
                            status_var[t + 1])
         model.cons.add(input_energy[len(model.time_step)] ==
