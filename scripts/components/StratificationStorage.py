@@ -65,17 +65,11 @@ class StratificationStorage(HotWaterStorage):
 
         # Backup: nom_capacity should be a variable, not a constraint.
         #  right?
-        for t in range(len(model.time_step) - 1):
-            model.cons.add((temp_var[t + 2] - temp_var[t + 1]) * water_density *
-                           size * heat_water_percent[t + 1] * water_heat_cap /
-                           unit_switch + (return_temp_var[t + 2] -
-                                          return_temp_var[t + 1]) *
-                           water_density *
-                           size * (1 - heat_water_percent[t + 1]) *
-                           water_heat_cap /
-                           unit_switch ==
-                           input_energy[t + 1] - output_energy[t + 1] -
-                           loss_var[t + 1])
+        for t in range(len(model.time_step)-1):
+            model.cons.add((temp_var[t+2] - temp_var[t+1]) * water_density *
+                           size * water_heat_cap / unit_switch ==
+                           input_energy[t+1] - output_energy[t+1] -
+                           loss_var[t+1])
 
         for t in range(len(model.time_step)):
             model.cons.add(output_energy[t+1] ==
