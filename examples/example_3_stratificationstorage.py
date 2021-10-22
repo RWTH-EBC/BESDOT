@@ -42,7 +42,7 @@ project.add_building(bld_3)
 ################################################################################
 #                        Build pyomo model and run optimization
 ################################################################################
-project.build_model(obj_typ='operation_cost')
+project.build_model()
 project.run_optimization('gurobi', save_lp=True, save_result=True)
 
 ################################################################################
@@ -51,4 +51,4 @@ project.run_optimization('gurobi', save_lp=True, save_result=True)
 
 result_output_path = os.path.join(base_path, 'data', 'opt_output',
                                   project.name + '_result.csv')
-post_pro.plot_all(result_output_path, time_interval=[0, env_3.time_step])
+post_pro.plot_all(result_output_path)
