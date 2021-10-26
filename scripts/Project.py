@@ -106,7 +106,7 @@ class Project(object):
         glpk(bad for milp), cbc(good for milp), gurobi: linear, ipopt: nonlinear
         """
         solver = pyo.SolverFactory(solver_name)
-        solver.options['NonConvex'] = 2
+        #solver.options['NonConvex'] = 2
         opt_result = solver.solve(self.model, tee=True)
 
         # Save model in lp file, this only works with linear model. That is
