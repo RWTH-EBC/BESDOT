@@ -174,11 +174,11 @@ class StratificationStorage(HotWaterStorage):
             # Need a better tutorial for introducing the logical condition
             model.cons.add(status_var[t + 2] >= small_num *
                            (small_num + (max_hwp - min_hwp - small_num) *
-                            status_var[t+1] + min_hwp - input_energy[t+1]))
+                            status_var[t+1] + min_hwp - heat_water_percent[t+1]))
             # todo (yca): why heat_water_percent is still not in this equation
             model.cons.add(status_var[t + 2] <= 1 + small_num *
                            (small_num + (max_hwp - min_hwp - 2 * small_num) *
-                            status_var[t + 1] + min_hwp - input_energy[t + 1]))
+                            status_var[t + 1] + min_hwp - heat_water_percent[t + 1]))
             model.cons.add(input_energy[t + 1] == input_energy[t + 1] *
                            status_var[t + 1])
         model.cons.add(input_energy[len(model.time_step)] ==
