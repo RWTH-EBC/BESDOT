@@ -150,7 +150,8 @@ class StratificationStorage(HotWaterStorage):
         # Define the status variable to determine, if input is permitted.
         # The variable won't be used, if this constraint is not added to
         # model, so prefer to define them under this method.
-        status_var = pyo.Var(model.time_step, domain=pyo.Binary)
+        status_var = pyo.Var(model.time_step, domain_type=pyo.IntegerSet,
+                             lb=0, ub=1)
         model.add_component('status_' + self.name, status_var)
         # Small number, which used to turn logical conditions to mathematical
         # condition. Attention! The built condition modell could be problematic!
