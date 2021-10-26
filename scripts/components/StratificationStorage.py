@@ -10,6 +10,7 @@ import pyomo.environ as pyo
 from scripts.components.HotWaterStorage import HotWaterStorage
 import numpy as np
 
+
 class StratificationStorage(HotWaterStorage):
     def __init__(self, comp_name, comp_type="StratificationStorage",
                  comp_model=None):
@@ -86,7 +87,6 @@ class StratificationStorage(HotWaterStorage):
                            1] - return_temp_var[t + 1])
                            + input_energy[t + 1]*unit_switch)
 
-
     def _constraint_loss(self, model, loss_type='off'):
         """
         According to loss_type choose the wanted constraint about energy loss
@@ -113,7 +113,7 @@ class StratificationStorage(HotWaterStorage):
         # value.
         temp_var = model.find_component('temp_' + self.name)
         for t in model.time_step:
-                model.cons.add(temp_var[t] == init_temp)
+            model.cons.add(temp_var[t] == init_temp)
 
     def _constraint_return_temp(self, model, init_temp=20):
         # The first constraint for return temperature. Assuming a constant
@@ -133,7 +133,6 @@ class StratificationStorage(HotWaterStorage):
         heat_water_percent = model.find_component('heat_water_percent_' +
                                                   self.name)
         model.cons.add(heat_water_percent[1] == init_hwp)
-
 
     def _constraint_input_permit(self, model, min_hwp=0.2, max_hwp=0.8,
                                  init_status='off'):
@@ -175,6 +174,7 @@ class StratificationStorage(HotWaterStorage):
             model.cons.add(status_var[t + 2] >= small_num *
                            (small_num + (max_hwp - min_hwp - small_num) *
                             status_var[t+1] + min_hwp - input_energy[t+1]))
+            # todo (yca): why heat_water_percent is still not in this equation
             model.cons.add(status_var[t + 2] <= 1 + small_num *
                            (small_num + (max_hwp - min_hwp - 2 * small_num) *
                             status_var[t + 1] + min_hwp - input_energy[t + 1]))
