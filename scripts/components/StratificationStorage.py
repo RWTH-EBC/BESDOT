@@ -16,7 +16,8 @@ class StratificationStorage(HotWaterStorage):
                  comp_model=None):
         super().__init__(comp_name=comp_name,
                          comp_type=comp_type,
-                         comp_model=comp_model)
+                         comp_model=comp_model
+                         )
 
     def _read_properties(self, properties):
         super()._read_properties(properties)
@@ -53,6 +54,8 @@ class StratificationStorage(HotWaterStorage):
                                              '_' + self.name)
         heat_water_percent = model.find_component('heat_water_percent_' +
                                                   self.name)
+        heat_water_massflow = model.find_component('heat_water_massflow_' +
+                                                   self.name)
         size = model.find_component('size_' + self.name)
 
         temp_var = model.find_component('temp_' + self.name)
@@ -86,6 +89,21 @@ class StratificationStorage(HotWaterStorage):
                            temp_var[t +
                            1] - return_temp_var[t + 1])
                            + input_energy[t + 1]*unit_switch)
+            '''model.cons.add(heat_water_massflow[
+                t+2]==size*water_density*heat_water_percent[
+                t+2])'''
+            model.cons.add(water_heat_cap * (temp_var[t +1] -
+                                             return_temp_var[t + 1]) *
+                           heat_water_massflow[t + 2] == water_heat_cap * (
+                           temp_var[t + 1] -return_temp_var[t + 1]) *
+                           heat_water_massflow[t + 1] - (
+                           mass_flow_var[t + 1]) * water_heat_cap * (
+                           temp_var[t + 1] - return_temp_var[t + 1])
+                           + (input_energy[t + 1]-loss_var[t+1]) * unit_switch)
+            model.cons.add(heat_water_massflow[
+                               t + 2] == size * water_density*
+                           heat_water_percent[
+                               t + 2])
 
     def _constraint_loss(self, model, loss_type='off'):
         """
@@ -129,7 +147,7 @@ class StratificationStorage(HotWaterStorage):
             model.cons.add(temp_var[t] - return_temp_var[t] <= delta_temp)
             model.cons.add(temp_var[t] - return_temp_var[t] >= min_delta_temp)'''
 
-    def _constraint_heat_water_percent(self, model, init_hwp=1.0):
+    def _constraint_heat_water_percent(self, model, init_hwp=0.8):
         heat_water_percent = model.find_component('heat_water_percent_' +
                                                   self.name)
         model.cons.add(heat_water_percent[1] == init_hwp)
@@ -150,8 +168,8 @@ class StratificationStorage(HotWaterStorage):
         # Define the status variable to determine, if input is permitted.
         # The variable won't be used, if this constraint is not added to
         # model, so prefer to define them under this method.
-        status_var = pyo.Var(model.time_step, within=pyo.NonNegativeIntegers,
-                             bounds=(0, 1))
+        status_var = pyo.Var(model.time_step, domain=pyo.IntegerSet,
+                             lb=0, ub=1)
         model.add_component('status_' + self.name, status_var)
         # Small number, which used to turn logical conditions to mathematical
         # condition. Attention! The built condition modell could be problematic!
@@ -212,5 +230,9 @@ class StratificationStorage(HotWaterStorage):
         heat_water_percent = pyo.Var(model.time_step, bounds=(0, 1))
         model.add_component('heat_water_percent_' + self.name,
                             heat_water_percent)
+
+        heat_water_massflow = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('heat_water_massflow_' + self.name,
+                            heat_water_massflow)
 
     
