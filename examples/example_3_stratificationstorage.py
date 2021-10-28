@@ -43,7 +43,7 @@ project.add_building(bld_3)
 #                        Build pyomo model and run optimization
 ################################################################################
 project.build_model()
-project.run_optimization('ipopt', save_lp=False, save_result=True)
+project.run_optimization('bonmin', save_lp=False, save_result=True)
 
 ################################################################################
 #                                  Post-processing
