@@ -13,12 +13,12 @@ import numpy as np
 
 class StratificationStorage(HotWaterStorage):
     def __init__(self, comp_name, comp_type="StratificationStorage",
-                 comp_model=None, min_size=0, max_size=1000, current_size=0):
+                 comp_model=None, min_size=1, max_size=1, current_size=0):
         super().__init__(comp_name=comp_name,
                          comp_type=comp_type,
                          comp_model=comp_model,
-                         min_size=0,
-                         max_size=1000,
+                         min_size=1,
+                         max_size=1,
                          current_size=0
                          )
 
@@ -64,11 +64,10 @@ class StratificationStorage(HotWaterStorage):
         loss_var = model.find_component('loss_' + self.name)
         mass_flow_var = model.find_component('mass_flow_' + self.name)
 
-        for t in range(len(model.time_step)-1):
-            '''model.cons.add((temp_var[t+2] - temp_var[t+1]) * water_density *
-                           size * water_heat_cap / unit_switch ==
-                           input_energy[t+1] - output_energy[t+1] -
-                           loss_var[t+1])'''
+        for t in range(len(model.time_step)):
+            model.cons.add(output_energy[t+1] ==
+                           (temp_var[t+1] - return_temp_var[t+1]) *
+                           mass_flow_var[t+1] * water_heat_cap / unit_switch)
 
         for t in range(len(model.time_step) - 1):
             model.cons.add(water_heat_cap * (temp_var[t + 1] -
@@ -79,13 +78,7 @@ class StratificationStorage(HotWaterStorage):
                            mass_flow_var[t + 1] * water_heat_cap * (
                            temp_var[t + 1] - return_temp_var[t + 1])
                            + (input_energy[t + 1]-loss_var[t+1]) * unit_switch)
-            
-        for t in range(len(model.time_step)):
-            model.cons.add(output_energy[t+1] ==
-                           (temp_var[t+1] - return_temp_var[t+1]) *
-                           mass_flow_var[t+1] * water_heat_cap / unit_switch)
-            model.cons.add(
-                input_energy[t + 1] == output_energy[t + 1] + loss_var[t + 1])
+
 
     def _constraint_loss(self, model, loss_type='off'):
         """
@@ -123,21 +116,22 @@ class StratificationStorage(HotWaterStorage):
         return_temp_var = model.find_component('return_temp_' + self.name)
         for t in model.time_step:
             model.cons.add(return_temp_var[t] == init_temp)
-        delta_temp = 20  # unit K
-        min_delta_temp = 0
-        '''for t in model.time_step:
-            model.cons.add(temp_var[t] - return_temp_var[t] <= delta_temp)
-            model.cons.add(temp_var[t] - return_temp_var[t] >= min_delta_temp)'''
-
-    '''def _constraint_heat_water_percent(self, model, init_hwp=0.8):
-        heat_water_percent = model.find_component('heat_water_percent_' +
-                                                  self.name)
-        model.cons.add(heat_water_percent[1] == init_hwp)'''
 
     def _constraint_heat_water_massflow(self, model, init_massflow=800):
         heat_water_massflow = model.find_component('heat_water_massflow_' +
                                                   self.name)
         model.cons.add(heat_water_massflow[1] == init_massflow)
+
+    def _constraint_input(self, model, init_massflow=300):
+        input_energy = model.find_component('input_' + self.inputs[0] + '_' +
+                                            self.name)
+        temp_var = model.find_component('temp_' + self.name)
+        return_temp_var = model.find_component('return_temp_' + self.name)
+        water_heat_cap = 4.18 * 10 ** 3  # Unit J/kgK
+        unit_switch = 3600 * 1000  # J/kWh
+        for t in model.time_step:
+            model.cons.add(input_energy[t]*unit_switch==water_heat_cap*init_massflow*(
+                temp_var[t]-return_temp_var[t]))
 
     def _constraint_input_permit(self, model, min_massflow=200,
                                  max_massflow=800,
@@ -198,8 +192,9 @@ class StratificationStorage(HotWaterStorage):
         self._constraint_return_temp(model)
         self._constraint_heat_water_massflow(model)
         self._constraint_vdi2067(model)
+        self._constraint_input(model)
         self._constraint_input_permit(model)
-        #self._constraint_heat_water_percent(model)
+
 
     def add_vars(self, model):
         super().add_vars(model)
