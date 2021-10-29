@@ -54,7 +54,7 @@ class Project(object):
         """
         pass
 
-    def build_model(self):
+    def build_model(self, obj_typ='annual_cost'):
         """
         Build up a mathematical model (concrete model) using pyomo modeling
         language for optimization.
@@ -84,10 +84,15 @@ class Project(object):
             # objective is operation cost, the components size should be
             # given with the same size of maximal and minimal size.
 
-            # self.model.obj = pyo.Objective(expr=bld_annual_cost,
-            #                                sense=pyo.minimize)
-            self.model.obj = pyo.Objective(expr=bld_operation_cost,
-                                           sense=pyo.minimize)
+            if obj_typ == 'annual_cost':
+                self.model.obj = pyo.Objective(expr=bld_annual_cost,
+                                               sense=pyo.minimize)
+            elif obj_typ == 'operation_cost':
+                self.model.obj = pyo.Objective(expr=bld_operation_cost,
+                                               sense=pyo.minimize)
+            else:
+                warn('The obj_typ is not allowed. The allowed typ is '
+                     'annual_cost or operation_cost')
         else:
             print("Other project application scenario haven't been developed")
 
@@ -106,7 +111,10 @@ class Project(object):
         glpk(bad for milp), cbc(good for milp), gurobi: linear, ipopt: nonlinear
         """
         solver = pyo.SolverFactory(solver_name)
-        #solver.options['NonConvex'] = 2
+        # Attention! The option was set for the dimension optimization for
+        # HomoStorage
+        solver.options['NonConvex'] = 2
+
         opt_result = solver.solve(self.model, tee=True)
 
         # Save model in lp file, this only works with linear model. That is

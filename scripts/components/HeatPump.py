@@ -5,7 +5,8 @@ from scripts.Component import Component
 class HeatPump(Component):
 
     def __init__(self, comp_name, temp_profile, comp_type="HeatPump",
-                 comp_model=None):
+                 comp_model=None,
+                 min_size=0, max_size=1000, current_size=0):
         # Define inputs and outputs before the initialisation of component,
         # otherwise we can't read properties properly. By getting efficiency,
         # the energy typ is needed.
@@ -14,7 +15,10 @@ class HeatPump(Component):
 
         super().__init__(comp_name=comp_name,
                          comp_type=comp_type,
-                         comp_model=comp_model)
+                         comp_model=comp_model,
+                         min_size=min_size,
+                         max_size=max_size,
+                         current_size=current_size)
 
         self.temp_profile = temp_profile
         self.cop = list(map(self.calc_cop, self.temp_profile))

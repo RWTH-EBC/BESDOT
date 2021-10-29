@@ -38,6 +38,8 @@ input_energy_path = os.path.join(base_path, "data", "tek_data",
                                  "TEK_Teilenergiekennwerte.xlsx")
 input_zone_path = os.path.join(base_path, "data", "tek_data",
                                "GHD_Zonierung.xlsx")
+input_tabula_path = os.path.join(base_path, "data", "tek_data",
+                               "TABULA_data.xlsx")
 output_path = os.path.join(base_path, "data", "tek_data", "output_heat_profile")
 
 # todo: The temperature profile should be taken from prosumer later
@@ -205,8 +207,35 @@ def plot_profile(heat_profile, save_plot=False):
     plt.show()
 
 
+def calc_residential_demand(bld_type, bld_year, bld_area,
+                            method='TABULA Berechnungsverfahren / korrigiert '
+                                   'auf Niveau von Verbrauchswerten',
+                            scenario='Ist-Zustand'):
+    """According to the IWU TABULA calculate the space heating demand and hot
+    water demand. The details of the method could be found in the project
+    report 'DE_TABULA_TypologyBrochure_IWU.pdf'
+    bld_type: building type, could be 'SFH', 'MFH', 'TH', 'AB'
+    bld_year: building construction year, used to find the building class
+    bld_area: area of the building
+    """
+    tabula_df = pd.read_excel(input_tabula_path)
+    bld = tabula_df[(tabula_df['Gebäudetyp'] == bld_type) &
+                    (tabula_df['Baualtersklasse_von'] < bld_year) &
+                    (tabula_df['Baualtersklasse_bis'] >= bld_year) &
+                    (tabula_df['Berechnungsverfahren'] == method) &
+                    (tabula_df['Szenario'] == scenario)]
+
+    heating_demand = bld['Heizung (Wärmeerzeugung)'].values[0] * bld_area
+    hot_water_demand = bld['Warmwasser (Wärmeerzeugung)'].values[0] * bld_area
+
+    print(heating_demand)
+    print(hot_water_demand)
+    return heating_demand, hot_water_demand
+
+
 if __name__ == "__main__":
     # calc_total_demand("Verwaltungsgebäude", "mittel", 10000)
     # temperature = pd.read_csv(input_temp_path)['temperature'].values
     # gen_heat_profile("Verwaltungsgebäude", 300, temperature, plot=True)
-    print(calc_bld_demand("Verwaltungsgebäude", 300, "elec"))
+    # print(calc_bld_demand("Verwaltungsgebäude", 300, "elec"))
+    calc_residential_demand('EFH', 1968, 200)
