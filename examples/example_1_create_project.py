@@ -8,6 +8,8 @@ from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
 from tools.pandas_area_plot import plot_area
+from tools.post_processing import plot_short_time
+
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 ################################################################################
@@ -30,12 +32,12 @@ test_bld_1 = Building(name='bld_1', area=200)
 # Add the energy demand profiles to the building object
 result_file = os.path.join(base_path, 'data', 'opt_output',
                            'project_1_result.csv')
-test_bld_1.add_thermal_profile('heat', test_env_1.temp_profile)
+test_bld_1.add_thermal_profile('heat', test_env_1.temp_profile, test_env_1)
 #plot_area(typ="Heat", resolution="day", profile=test_bld_1.demand_profile
 #["heat_demand"])
-test_bld_1.add_elec_profile(test_env_1.year)
-plot_short_time(1, 24, result_file, test_bld_1.demand_profile["heat_demand"],
-                test_bld_1.demand_profile["elec_demand"])
+test_bld_1.add_elec_profile(test_env_1.year, test_env_1)
+#plot_short_time(1, 24, result_file, test_bld_1.demand_profile["heat_demand"],
+#                test_bld_1.demand_profile["elec_demand"])
 #plot_area(typ="Electricity", resolution="day",
     # profile=test_bld_1.demand_profile
 #["elec_demand"])
@@ -52,6 +54,10 @@ test_project.add_building(test_bld_1)
 ################################################################################
 test_project.build_model()
 test_project.run_optimization('gurobi')
+
+################################################################################
+#                                  Post-processing
+################################################################################
 
 ################################################################################
 #                                  Post-processing
