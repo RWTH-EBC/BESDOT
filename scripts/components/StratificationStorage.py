@@ -10,6 +10,8 @@ import pyomo.environ as pyo
 from scripts.components.HotWaterStorage import HotWaterStorage
 import numpy as np
 
+# fixme (yca): name for variable heat_water_massflow and PEP8
+
 
 class StratificationStorage(HotWaterStorage):
     def __init__(self, comp_name, comp_type="StratificationStorage",
@@ -73,7 +75,7 @@ class StratificationStorage(HotWaterStorage):
             model.cons.add(water_heat_cap * (temp_var[t + 1] -
                                              return_temp_var[t + 1]) *
                            heat_water_massflow[t + 2] == water_heat_cap * (
-                           temp_var[t + 1] -return_temp_var[t + 1]) *
+                           temp_var[t + 1] - return_temp_var[t + 1]) *
                            heat_water_massflow[t + 1] -
                            mass_flow_var[t + 1] * water_heat_cap * (
                            temp_var[t + 1] - return_temp_var[t + 1])
@@ -93,10 +95,10 @@ class StratificationStorage(HotWaterStorage):
             for t in range(len(model.time_step)):
                 model.cons.add(loss_var[t + 1] == 0)
         else:
-            # FIXME: The energy loss equation shouldn't be like the following
-            #  format, which is only used for validation.
+            # The energy loss equation shouldn't be like the following
+            # format, which is only used for validation.
             # FiXME (yni): mindesten should be loss determined by the device
-            #  size
+            #  size, need a proved model from simulation or experiment
             for t in range(len(model.time_step)):
                 model.cons.add(loss_var[t + 1] == 1.5 * ((temp_var[t + 1] -
                                                           20) / 1000))
@@ -174,7 +176,6 @@ class StratificationStorage(HotWaterStorage):
                            (small_num + (max_massflow - min_massflow - small_num) *
                             status_var[t+1] + min_massflow - heat_water_massflow[
                                 t+1]))
-            # todo (yca): why heat_water_percent is still not in this equation
             model.cons.add(status_var[t + 2] <= 1 + small_num *
                            (small_num + (max_massflow- min_massflow - 2 * small_num) *
                             status_var[t + 1] + min_massflow -
@@ -199,6 +200,8 @@ class StratificationStorage(HotWaterStorage):
     def add_vars(self, model):
         super().add_vars(model)
 
+        # fixme (yca): temp and return_temp are constant, so it is not
+        #  necessary to define pyo.Var for them
         temp = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('temp_' + self.name, temp)
 
