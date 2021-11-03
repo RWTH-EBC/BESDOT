@@ -100,7 +100,7 @@ class HomoStorage(HotWaterStorage):
                 model.cons.add(loss_var[t + 1] == 1.5 * ((temp_var[t + 1] -
                                                           20) / 1000))
 
-    def _constraint_temp(self, model, init_temp=60):
+    def _constraint_temp(self, model, init_temp=58):
         # Initial temperature for water in storage is define with a constant
         # value.
         temp_var = model.find_component('temp_' + self.name)
@@ -127,7 +127,7 @@ class HomoStorage(HotWaterStorage):
         for t in model.time_step:
             model.cons.add(mass_flow_var[t] == mass_flow)
 
-    def _constraint_input_permit(self, model, min_temp=40, max_temp=95,
+    def _constraint_input_permit(self, model, min_temp=40, max_temp=60,
                                  init_status='on'):
         """
         The input to water tank is controlled by tank temperature, which is
