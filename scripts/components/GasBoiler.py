@@ -15,9 +15,9 @@ class GasBoiler(Component):
                          max_size=max_size,
                          current_size=current_size)
 
-    '''def _read_properties(self, properties):
+    def _read_properties(self, properties):
         super()._read_properties(properties)
-        if 'max temperature' in properties.columns:
+        '''if 'max temperature' in properties.columns:
             self.max_temp = float(properties['max temperature'])
         else:
             warnings.warn("In the model database for " + self.component_type +
@@ -27,6 +27,11 @@ class GasBoiler(Component):
         else:
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for min temperature.")'''
+        if 'efficiency' in properties.columns:
+            self.efficiency = float(properties['efficiency'])
+        else:
+            warnings.warn("In the model database for " + self.component_type +
+                          " lack of column for efficiency.")
 
     def _constraint_conver(self, model):
         """
@@ -60,16 +65,9 @@ class GasBoiler(Component):
             model.cons.add(output_energy[t+1] ==
                            (temp_var[t+1] - return_temp_var[t+1]) *
                            mass_flow_var[t+1] * water_heat_cap / unit_switch)
-
-        for t in range(len(model.time_step) - 1):
-            model.cons.add(water_heat_cap * (temp_var[t + 1] -
-                                             return_temp_var[t + 1]) *
-                           hot_water_mass[t + 2] == water_heat_cap * (
-                           temp_var[t + 1] - return_temp_var[t + 1]) *
-                           hot_water_mass[t + 1] -
-                           mass_flow_var[t + 1] * water_heat_cap * (
-                           temp_var[t + 1] - return_temp_var[t + 1])
-                           + (input_energy[t + 1]-loss_var[t+1]) * unit_switch)
+            #model.cons.add(output_energy[t+1] == size)
+            model.cons.add(input_energy[t+1]*self.efficiency ==
+                           output_energy[t+1]+loss_var[t+1])
 
     def _constraint_loss(self, model, loss_type='off'):
         """
@@ -77,6 +75,10 @@ class GasBoiler(Component):
         of water tank.
         'off': no energy loss occurs
         """
+        water_heat_cap = 4.18 * 10 ** 3  # Unit J/kgK
+        water_density = 1  # kg/l
+        unit_switch = 3600 * 1000  # J/kWh
+        size = model.find_component('size_' + self.name)
         loss_var = model.find_component('loss_' + self.name)
         temp_var = model.find_component('temp_' + self.name)
 
@@ -86,8 +88,9 @@ class GasBoiler(Component):
         else:
             # The energy loss equation shouldn't be like the following
             # format, which is only used for validation.
-            # FiXME (yni): mindesten should be loss determined by the device
-            #  size, need a proved model from simulation or experiment
+            # fixme(yca):
+            #  consideration of the equation of loss.
+            #
             for t in range(len(model.time_step)):
                 model.cons.add(loss_var[t + 1] == 1.5 * ((temp_var[t + 1] -
                                                           20) / 1000))
@@ -108,23 +111,7 @@ class GasBoiler(Component):
             model.cons.add(return_temp_var[t] == init_temp)
 
     def _constraint_massflow(self, model):
-        water_heat_cap = 4.18 * 10 ** 3  # Unit J/kgK
-        water_density = 1  # kg/l
-        unit_switch = 3600 * 1000  # J/kWh
-
-        input_energy = model.find_component('input_' + self.inputs[0] + '_' +
-                                            self.name)
-        output_energy = model.find_component('output_' + self.outputs[0] +
-                                             '_' + self.name)
-        size = model.find_component('size_' + self.name)
-
-        temp_var = model.find_component('temp_' + self.name)
-        return_temp_var = model.find_component('return_temp_' + self.name)
-        mass_flow_var = model.find_component('mass_flow_' + self.name)
-        for t in model.time_step:
-            model.cons.add(mass_flow_var[t] * water_heat_cap * water_density
-                           * (temp_var[t] - return_temp_var[t]) <= size
-                           * unit_switch)
+        pass
 
     '''def _constraint_hot_water_mass(self, model, init_mass=0.5):
         hot_water_mass = model.find_component('hot_water_mass_' + self.name)
@@ -192,7 +179,7 @@ class GasBoiler(Component):
         self._constraint_loss(model, loss_type='off')
         self._constraint_temp(model)
         self._constraint_return_temp(model)
-        self._constraint_massflow(model)
+        #self._constraint_massflow(model)
         #self._constraint_hot_water_mass(model)
         self._constraint_vdi2067(model)
         #self._constraint_input_permit(model)
