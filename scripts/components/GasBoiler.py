@@ -53,11 +53,11 @@ class GasBoiler(Component):
                                             self.name)
         output_energy = model.find_component('output_' + self.outputs[0] +
                                              '_' + self.name)
-        hot_water_mass = model.find_component('hot_water_mass_' + self.name)
         size = model.find_component('size_' + self.name)
 
         temp_var = model.find_component('temp_' + self.name)
         return_temp_var = model.find_component('return_temp_' + self.name)
+        tank_temp_var = model.find_component('tank_temp_' + self.name)
         loss_var = model.find_component('loss_' + self.name)
         mass_flow_var = model.find_component('mass_flow_' + self.name)
 
@@ -66,8 +66,15 @@ class GasBoiler(Component):
                            (temp_var[t+1] - return_temp_var[t+1]) *
                            mass_flow_var[t+1] * water_heat_cap / unit_switch)
             #model.cons.add(output_energy[t+1] == size)
-            model.cons.add(input_energy[t+1]*self.efficiency ==
-                           output_energy[t+1]+loss_var[t+1])
+
+        for t in range(len(model.time_step) - 1):
+            model.cons.add(tank_temp_var[t+1] * size * water_density * 1000
+                           == (size * water_density * 1000 - mass_flow_var[
+                               t+1]) * temp_var[t+1] + mass_flow_var[t+1] *
+                           return_temp_var[t+1])
+            model.cons.add(input_energy[t+1] * unit_switch == (temp_var[t+1] -
+                                                tank_temp_var[t+1]) *
+                                                water_heat_cap * size * water_density)
 
     def _constraint_loss(self, model, loss_type='off'):
         """
@@ -195,6 +202,9 @@ class GasBoiler(Component):
         return_temp = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('return_temp_' + self.name, return_temp)
 
+        tank_temp = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('tank_temp_' + self.name, tank_temp)
+
         mass_flow = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('mass_flow_' + self.name, mass_flow)
 
@@ -204,6 +214,7 @@ class GasBoiler(Component):
         hot_water_mass = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('hot_water_mass_' + self.name,
                             hot_water_mass)
+
     # def _constraint_maxpower(self, model):
     #     output_powers = model.find_component('output_' +
     #                                          self.outputs[0] + '_' +

@@ -113,7 +113,7 @@ class Project(object):
         solver = pyo.SolverFactory(solver_name)
         # Attention! The option was set for the dimension optimization for
         # HomoStorage
-        solver.options['NonConvex'] = 2
+        #solver.options['NonConvex'] = 2
 
         opt_result = solver.solve(self.model, tee=True)
 
