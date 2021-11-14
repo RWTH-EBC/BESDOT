@@ -1,0 +1,7 @@
+comp_name,comp_type,model,min_size,max_size,current_size,therm_cns,water_tes,heat_grid,heat_ex_dhw,heat_ex_heat,dhw_cns
+therm_cns,HeatConsumption,HeatCNS1,10,10,0,0,0,0,0,0,0
+dhw_cns,HotWaterConsumption,HWCNS1,10,10,0,0,0,0,0,0,0
+water_tes,HomoStorage,TES_homo,1,1,0,0,0,0,0,0,1
+heat_grid,GasGrid,GAS1,10,10,0,0,0,0,1,1,0
+heat_ex_dhw,GasBoiler,HE1,2,2,0,0,1,0,0,0,0
+heat_ex_heat,HeatExchanger,HE1,2,2,0,1,0,0,0,0,0
