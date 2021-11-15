@@ -14,6 +14,3 @@ class HeatExchanger(Component):
                          min_size=min_size,
                          max_size=max_size,
                          current_size=current_size)
-
-    def add_vars(self, model):
-        pass
