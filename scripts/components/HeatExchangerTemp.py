@@ -7,6 +7,8 @@ class HeatExchangerTemp(Component):
     HeatExchangerTemp is also a class for heat exchanger. Compared to
     HeatExchanger, this model considers the temperature variable and mass
     flow at the both side.
+    The high-temperature side is indicated by indices 'h' and the
+    low-temperature side by indices 'c'
     """
 
     def __init__(self, comp_name, comp_type="HeatExchangerTemp",
@@ -37,10 +39,13 @@ class HeatExchangerTemp(Component):
         output_energy = model.find_component('output_' + self.outputs[0] +
                                              '_' + self.name)
 
-        temp_var = model.find_component('temp_' + self.name)
-        return_temp_var = model.find_component('return_temp_' + self.name)
+        temp_h = model.find_component('temp_h_' + self.name)
+        return_temp_h = model.find_component('return_temp_h_' + self.name)
+        mass_flow_h = model.find_component('mass_flow_h_' + self.name)
+        temp_c = model.find_component('temp_c_' + self.name)
+        return_temp_c = model.find_component('return_temp_c_' + self.name)
+        mass_flow_c = model.find_component('mass_flow_c_' + self.name)
         loss_var = model.find_component('loss_' + self.name)
-        mass_flow_var = model.find_component('mass_flow_' + self.name)
 
         for t in range(len(model.time_step)-1):
             model.cons.add(input_energy[t+1] * (1 - loss_var[t+1]) ==
@@ -97,26 +102,28 @@ class HeatExchangerTemp(Component):
         super().add_vars(model)
 
         # These temperature variables and mass flow variables represent the
-        # variable of building side.
-        bld_temp = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('bld_temp_' + self.name, bld_temp)
+        # variable of high temperature side. In haus station is the network
+        # side.
+        temp_h = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('temp_h_' + self.name, temp_h)
 
-        bld_return_temp = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('bld_return_temp_' + self.name, bld_return_temp)
+        return_temp_h = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('return_temp_h_' + self.name, return_temp_h)
 
-        bld_mass_flow = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('bld_mass_flow_' + self.name, bld_mass_flow)
+        mass_flow_h = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('mass_flow_h_' + self.name, mass_flow_h)
 
         # These temperature variables and mass flow variables represent the
-        # variable of network side.
-        net_temp = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('net_temp_' + self.name, net_temp)
+        # variable of low temperature side. which represent haus side in haus
+        # station.
+        temp_c = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('temp_c_' + self.name, temp_c)
 
-        net_return_temp = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('net_return_temp_' + self.name, net_return_temp)
+        return_temp_c = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('return_temp_c_' + self.name, return_temp_c)
 
-        net_mass_flow = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('net_mass_flow_' + self.name, net_mass_flow)
+        mass_flow_c = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('mass_flow_c_' + self.name, mass_flow_c)
 
         # The energy loss is considered, because of the heat transfer to the
         # environment.
