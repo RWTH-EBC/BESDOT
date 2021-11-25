@@ -43,6 +43,8 @@ class Building(object):
                               "gas_demand": 0}
         if annual_heat_demand is None:
             self.add_annual_demand('heat')
+            # todo (yni): if annual_heat_demand is not None, should be stored
+            #  in annual_demand
         if annual_elec_demand is None:
             self.add_annual_demand('elec')
 
