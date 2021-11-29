@@ -17,6 +17,7 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Generate a project object at first.
 project = Project(name='project_4', typ='building')
 
+
 # Generate the environment object
 env_4 = Environment(time_step=3)
 project.add_environment(env_4)
@@ -42,7 +43,7 @@ project.add_building(bld_4)
 ################################################################################
 #                        Build pyomo model and run optimization
 ################################################################################
-project.build_model(obj_typ='operation_cost')
+project.build_model(obj_typ='annual_cost')
 project.run_optimization('gurobi', save_lp=True, save_result=True)
 
 ################################################################################
