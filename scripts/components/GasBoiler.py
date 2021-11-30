@@ -24,7 +24,6 @@ class GasBoiler(Component):
         properties = pd.read_csv(model_property_file)
         return properties
 
-
     def _read_properties(self, properties):
         if 'exhaustgasloss' in properties.columns:
             self.exhaustgasloss = float(properties['exhaustgasloss'])
@@ -105,5 +104,3 @@ class GasBoiler(Component):
         loss = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('loss_' + self.name, loss)
 
-        condensation_heat = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('condensation_heat_' + self.name, condensation_heat)
