@@ -16,7 +16,6 @@ def calc_exhaust_gas_loss(path, file_name):
                                'O', 'N', 'airnumber', 'v0', 'vCO2',
                                'vexhaustgas',
                                'vCO2_pre', 'exhaustgasloss'], index=[])
-    airnumber_1 = 0
     for i in range(len(data)):
         a = data.iloc[i]
         v0 = (1/0.21)*(1.866*a['C']+5.56*a['H']-0.7*a['O'])
