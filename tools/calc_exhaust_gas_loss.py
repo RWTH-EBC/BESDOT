@@ -6,9 +6,9 @@ import numpy as np
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 path = os.path.join(base_path, "data", "component_database",
-                               "GasBoiler", "BOI_exhaust_gas.csv")
+                               "GasBoiler", "BOI1_exhaust_gas.csv")
 output_path = os.path.join(base_path, "data", "component_database",
-                               "GasBoiler", "BOI_exhaust_gas_loss.csv")
+                               "GasBoiler", "BOI1_exhaust_gas_loss.csv")
 
 """exhaustgastemp[°C]: the temperature of the exhaust gas in the boiler.
    air temperature[°C]: usually assumed to be 25 degrees.
@@ -58,7 +58,7 @@ def calc_exhaust_gas_loss(path, file_name):
                         a['vCO2'], a['vexhaustgas'], a['vCO2_pre'],
                         a['exhaustgasloss']]
     df.to_csv(output_path)
-calc_exhaust_gas_loss(path, 'BOI_exhaust_gas_loss.csv')
+calc_exhaust_gas_loss(path, 'BOI1_exhaust_gas_loss.csv')
 
 
 '''def get_properties(path, file_name):

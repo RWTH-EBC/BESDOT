@@ -10,6 +10,20 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\data\component_database\GasBoiler\BOI1_exhaust_gas_loss.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\component_database\GasBoiler\BOI_exhaust_gas.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\data\component_database\GasGrid\GAS1.csv">
           <value>
             <Attribute>
