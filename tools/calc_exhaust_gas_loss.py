@@ -4,11 +4,11 @@ import os
 from warnings import warn
 import numpy as np
 
-base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-path = os.path.join(base_path, "data", "component_database",
-                               "GasBoiler", "BOI1_exhaust_gas.csv")
-output_path = os.path.join(base_path, "data", "component_database",
-                               "GasBoiler", "BOI1_exhaust_gas_loss.csv")
+#base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#path = os.path.join(base_path, "data", "component_database",
+#                               "GasBoiler", "BOI1_exhaust_gas.csv")
+#output_path = os.path.join(base_path, "data", "component_database",
+#                              "GasBoiler", "BOI1_exhaust_gas_loss.csv")
 
 """exhaustgastemp[°C]: the temperature of the exhaust gas in the boiler.
    air temperature[°C]: usually assumed to be 25 degrees.
@@ -28,7 +28,7 @@ output_path = os.path.join(base_path, "data", "component_database",
    vCO2_pre[%]: a percentage of carbon dioxide volume and total flue gas volume
    
 """
-def calc_exhaust_gas_loss(path, file_name):
+def calc_exhaust_gas_loss(path, output_path):
     data = pd.read_csv(path)
     df = pd.DataFrame(columns=['exhaustgastemp', 'airtemp', 'A1', 'B', 'C', 'H',
                                'O', 'N', 'airratio', 'v0', 'vCO2',
@@ -58,67 +58,10 @@ def calc_exhaust_gas_loss(path, file_name):
                         a['vCO2'], a['vexhaustgas'], a['vCO2_pre'],
                         a['exhaustgasloss']]
     df.to_csv(output_path)
-calc_exhaust_gas_loss(path, 'BOI1_exhaust_gas_loss.csv')
+    return exhaustgasloss
+#calc_exhaust_gas_loss(path, 'BOI1_exhaust_gas_loss.csv')
 
 
-'''def get_properties(path, file_name):
-    model_property_file = os.path.join(base_path, "data", "component_database",
-                               "GasBoiler", "BOI_exhaust_gas.csv")
-    properties = pd.read_csv(model_property_file)
-    return properties
 
-
-def _read_properties(properties):
-     if 'exhaustgastemp' in properties.columns:
-         self.exhaustgastemp = float(properties['exhaustgastemp'])
-     if 'airtemp' in properties.columns:
-         self.airtemp = float(properties['airtemp'])
-     if 'A1' in properties.columns:
-         self.A1 = float(properties['A1'])
-     if 'B' in properties.columns:
-         self.B = float(properties['B'])
-     if 'C' in properties.columns:
-         self.C = float(properties['C'])
-     if 'H' in properties.columns:
-         self.H = float(properties['H'])
-     if 'O' in properties.columns:
-         self.O = float(properties['O'])
-     if 'N' in properties.columns:
-         self.N = float(properties['N'])
-     if 'airnumber' in properties.columns:
-         self.airnumber = float(properties['airnumber'])
-     v0 = (1 / 0.21) * (1.866 * self.C + 5.56 * self.H - 0.7 * self.O)
-     vCO2 = self.C * 1.866
-     if self.airnumber == 1:
-         self.airnumber = vCO2 + (0.79 * v0 + 0.8 * self.N) + (
-                 11.1 * self.H + 0.016 * v0)
-         vexhaustgas = vCO2 + (0.79 * v0 + 0.8 * self.N) + (
-                 11.1 * self.H + 0.016 * v0)
-     if self.airnumber != 1:
-         vexhaustgas = airnumber_1 + (self.airnumber - 1) * v0 + 0.016 * \
-                       (self.airnumber - 1) * v0
-     vCO2_pre = vCO2 / vexhaustgas
-     exhaustgasloss = (self.exhaustgastemp - self.airtemp) * (self.A1 / (
-             vCO2_pre * 100) + self.B)
-     print(exhaustgasloss)
-     return exhaustgas
-
-def calc_exhaust_gas_loss(self):
-    v0 = (1 / 0.21) * (1.866 * self.C + 5.56 * self.H - 0.7 * self.O)
-    vCO2 = self.C * 1.866
-    if self.airnumber == 1:
-        self.airnumber = vCO2 + (0.79 * v0 + 0.8 * self.N) + (
-                    11.1 * self.H + 0.016 * v0)
-        vexhaustgas = vCO2 + (0.79 * v0 + 0.8 * self.N) + (
-                    11.1 * self.H + 0.016 * v0)
-    if self.airnumber != 1:
-        vexhaustgas = airnumber_1 + (self.airnumber - 1) * v0 + 0.016 * \
-                      (self.airnumber - 1) * v0
-    vCO2_pre = vCO2 / vexhaustgas
-    exhaustgasloss = (self.exhaustgastemp - self.airtemp) * (self.A1 / (
-            vCO2_pre * 100) + self.B)
-    print(exhaustgasloss)
-    return exhaustgas
-calc_exhaust_gas_loss()'''
 
 
