@@ -21,6 +21,21 @@ class CondensingBoiler(GasBoiler):
                          max_size=max_size,
                          current_size=current_size)
 
+    def get_properties(self, model):
+        model_property_file = os.path.join(base_path, 'data',
+                                           'component_database',
+                                           'CondensingBoiler',
+                                           'BOI1_exhaust_gas_loss.csv')
+        properties = pd.read_csv(model_property_file)
+        return properties
+
+    def _read_properties(self, properties):
+        if 'exhaustgastemp' in properties.columns:
+            self.exhaust_gas_temp = float(properties['exhaustgastemp'])
+        else:
+            warnings.warn("In the model database for " + self.component_type +
+                          " lack of column for exhaustgas temperature.")
+
     def _constraint_conver(self, model):
         """
         Compared with _constraint_conver, this function turn the pure power
@@ -48,7 +63,9 @@ class CondensingBoiler(GasBoiler):
         loss_var = model.find_component('loss_' + self.name)
         mass_flow_var = model.find_component('mass_flow_' + self.name)
         exhaust_gas_loss = model.find_component('exhaust_gas_loss' + self.name)
-
+        condensation_heat = model.find_component('condensation_heat' +
+                                                 self.name)
+        #todo(yca):add condensation_heat and loss
         for t in range(len(model.time_step)):
             model.cons.add(output_energy[t + 1] ==
                            (temp_var[t + 1] - return_temp_var[t + 1]) *
@@ -61,16 +78,13 @@ class CondensingBoiler(GasBoiler):
         exhaust_gas_loss = calc_exhaust_gas_loss(path, output_path)
 
     def _constraint_temp(self, model, init_temp=80):
-        # Initial temperature for water in storage is define with a constant
-        # value.
+
         temp_var = model.find_component('temp_' + self.name)
         for t in model.time_step:
             model.cons.add(temp_var[1] == init_temp)
 
     def _constraint_return_temp(self, model, init_return_temp=55):
-        # The first constraint for return temperature. Assuming a constant
-        # temperature difference between flow temperature and return
-        # temperature.
+
         return_temp_var = model.find_component('return_temp_' + self.name)
         for t in model.time_step:
             model.cons.add(return_temp_var[t] == init_return_temp)
@@ -81,11 +95,15 @@ class CondensingBoiler(GasBoiler):
         for t in model.time_step:
             model.cons.add(mass_flow_var[t] == mass_flow)
 
-    #todo(yca): check taupunkt of condensation water and constraint
+    #todo(yca): check taupunkt and mass of condensation water and constraint
     def _constraint_condensation_heat(self, model):
         water_heat_cap = 4.18 * 10 ** 3  # Unit J/kgK
         water_density = 1000  # kg/m3
         unit_switch = 3600 * 1000  # J/kWh
+        condensation_heat = model.find_component('condensation_heat' +
+                                                 self.name)
+        model.cons.add(condensation_heat[1] == 0)
+        #for t in range(len(model.time_step)):
         pass
 
     def add_cons(self, model):
@@ -110,3 +128,6 @@ class CondensingBoiler(GasBoiler):
 
         exhaust_gas_loss = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('exhaust_gas_loss' + self.name, exhaust_gas_loss)
+
+        condensation_heat = pro.Var(model.time_step, bounds=(0, None))
+        model.add_component('condensation_heat_' + self.name, condensation_heat)

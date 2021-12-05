@@ -22,20 +22,20 @@ class StandardBoiler(GasBoiler):
                          max_size=max_size,
                          current_size=current_size)
 
-    '''def get_properties(self, model):
+    def get_properties(self, model):
         model_property_file = os.path.join(base_path, 'data',
                                            'component_database',
-                                           'GasBoiler',
+                                           'StandardBoiler',
                                            'BOI1_exhaust_gas_loss.csv')
         properties = pd.read_csv(model_property_file)
         return properties
 
     def _read_properties(self, properties):
-        if 'exhaustgasloss' in properties.columns:
-            self.exhaustgasloss = float(properties['exhaustgasloss'])
+        if 'exhaustgastemp' in properties.columns:
+            self.exhaust_gas_temp = float(properties['exhaustgastemp'])
         else:
             warnings.warn("In the model database for " + self.component_type +
-                          " lack of column for exhaust gas loss.")'''
+                          " lack of column for exhaustgas temperature.")
 
     def _constraint_conver(self, model):
         """
@@ -80,23 +80,20 @@ class StandardBoiler(GasBoiler):
         exhaust_gas_loss = calc_exhaust_gas_loss(path, output_path)
 
     def _constraint_temp(self, model, init_temp=80):
-        # Initial temperature for water in storage is define with a constant
-        # value.
+
         temp_var = model.find_component('temp_' + self.name)
         for t in model.time_step:
             model.cons.add(temp_var[t] == init_temp)
 
     def _constraint_return_temp(self, model, init_return_temp=60):
-        # The first constraint for return temperature. Assuming a constant
-        # temperature difference between flow temperature and return
-        # temperature.
+
         return_temp_var = model.find_component('return_temp_' + self.name)
         model.cons.add(return_temp_var[1] == init_return_temp)
 
     def _constraint_mass_flow(self, model, mass_flow=100):
         mass_flow_var = model.find_component('mass_flow_' + self.name)
         for t in model.time_step:
-           model.cons.add(mass_flow_var[t] == mass_flow)
+            model.cons.add(mass_flow_var[t] == mass_flow)
 
     def add_cons(self, model):
         self._constraint_conver(model)
