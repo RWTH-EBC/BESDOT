@@ -2,6 +2,7 @@ import pyomo.environ as pyo
 from scripts.Component import Component
 import warnings
 from tools.calc_exhaust_gas_loss import calc_exhaust_gas_loss
+import os
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

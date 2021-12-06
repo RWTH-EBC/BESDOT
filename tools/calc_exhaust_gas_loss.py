@@ -4,11 +4,11 @@ import os
 from warnings import warn
 import numpy as np
 
-#base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-#path = os.path.join(base_path, "data", "component_database",
-#                               "GasBoiler", "BOI1_exhaust_gas.csv")
-#output_path = os.path.join(base_path, "data", "component_database",
-#                              "GasBoiler", "BOI1_exhaust_gas_loss.csv")
+base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+path = os.path.join(base_path, "data", "component_database",
+                               "GasBoiler", "BOI1_exhaust_gas.csv")
+output_path = os.path.join(base_path, "data", "component_database",
+                              "GasBoiler", "BOI1_exhaust_gas_loss.csv")
 
 """exhaustgastemp[°C]: the temperature of the exhaust gas in the boiler.
    air temperature[°C]: usually assumed to be 25 degrees.
@@ -59,7 +59,7 @@ def calc_exhaust_gas_loss(path, output_path):
                         a['exhaustgasloss']]
     df.to_csv(output_path)
     return exhaustgasloss
-#calc_exhaust_gas_loss(path, 'BOI1_exhaust_gas_loss.csv')
+#calc_exhaust_gas_loss(path, output_path)
 
 
 

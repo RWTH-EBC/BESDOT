@@ -66,7 +66,28 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\data\component_database\StandardBoiler\BOI_district.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\data\component_database\StratificationStorage\TSS_strat.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\opt_output\project_4_result.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\opt_output\project_5_result.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -95,6 +116,13 @@
           </value>
         </entry>
         <entry key="\data\topology\homostorage_sim.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\topology\standardboiler.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

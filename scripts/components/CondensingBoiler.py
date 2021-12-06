@@ -5,7 +5,7 @@ import warnings
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 path = os.path.join(base_path, "data", "component_database",
-                               "CondensingBoiler", "BOI1_exhaust_gas.csv")
+                               "CondensingBoiler", "BOI_exhaust_gas.csv")
 output_path = os.path.join(base_path, "data", "component_database",
                                "CondensingBoiler", "BOI1_exhaust_gas_loss.csv")
 
@@ -51,6 +51,7 @@ class CondensingBoiler(GasBoiler):
         water_heat_cap = 4.18 * 10 ** 3  # Unit J/kgK
         water_density = 1000  # kg/m3
         unit_switch = 3600 * 1000  # J/kWh
+        radiation_loss_coefficient = 0.01
 
         input_energy = model.find_component('input_' + self.inputs[0] +
                                             '_' + self.name)
@@ -72,19 +73,21 @@ class CondensingBoiler(GasBoiler):
                            mass_flow_var[t + 1] * water_heat_cap / unit_switch)
             model.cons.add(output_energy[t + 1] <= size)
             model.cons.add(output_energy[t + 1] >= 0.3 * size)
+        for t in range(len(model.time_step)-1):
+            model.cons.add((temp_var[t+2] - temp_var[t+1]) * mass_flow_var[
+                           t+1] * water_heat_cap / unit_switch ==
+                           input_energy[t+1] - output_energy[t+1])
 
     def _constraint_loss(self, model):
         exhaust_gas_loss = model.find_component('exhaust_gas_loss_' + self.name)
         exhaust_gas_loss = calc_exhaust_gas_loss(path, output_path)
 
     def _constraint_temp(self, model, init_temp=80):
-
         temp_var = model.find_component('temp_' + self.name)
         for t in model.time_step:
             model.cons.add(temp_var[1] == init_temp)
 
     def _constraint_return_temp(self, model, init_return_temp=55):
-
         return_temp_var = model.find_component('return_temp_' + self.name)
         for t in model.time_step:
             model.cons.add(return_temp_var[t] == init_return_temp)
@@ -98,12 +101,17 @@ class CondensingBoiler(GasBoiler):
     #todo(yca): check taupunkt and mass of condensation water and constraint
     def _constraint_condensation_heat(self, model):
         water_heat_cap = 4.18 * 10 ** 3  # Unit J/kgK
-        water_density = 1000  # kg/m3
         unit_switch = 3600 * 1000  # J/kWh
         condensation_heat = model.find_component('condensation_heat' +
                                                  self.name)
+        return_temp_var = model.find_component('return_temp_' + self.name)
+        condensation_mass = model.find_component('condensation_mass_' +
+                                                 self.name)
         model.cons.add(condensation_heat[1] == 0)
-        #for t in range(len(model.time_step)):
+        for t in range(len(model.time_step)):
+            model.cons.add(condensation_heat[t+1] == water_heat_cap *
+                           condensation_mass * (self.exhaust_gas_temp -
+                                                return_temp_var[t+1]))
         pass
 
     def add_cons(self, model):
