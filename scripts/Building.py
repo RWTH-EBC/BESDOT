@@ -2,6 +2,7 @@
 Simplified Modell for internal use.
 """
 
+import warnings
 import pyomo.environ as pyo
 from tools.gen_heat_profile import *
 from tools.gen_elec_profile import gen_elec_profile
@@ -43,10 +44,21 @@ class Building(object):
                               "gas_demand": 0}
         if annual_heat_demand is None:
             self.add_annual_demand('heat')
-            # todo (yni): if annual_heat_demand is not None, should be stored
-            #  in annual_demand
+        elif not isinstance(annual_heat_demand, float):
+                warn_msg = 'The annual_heat_demand of ' + self.name + \
+                           ' is not float, need to check.'
+                warnings.warn(warn_msg)
+        else:
+            self.annual_demand["heat_demand"] = annual_heat_demand
+
         if annual_elec_demand is None:
             self.add_annual_demand('elec')
+        elif not isinstance(annual_elec_demand, float):
+            warn_msg = 'The annual_elec_demand of ' + self.name + \
+                       ' is not float, need to check.'
+            warnings.warn(warn_msg)
+        else:
+            self.annual_demand["elec_demand"] = annual_elec_demand
 
         # The gas_demand is for natural gas, the demand of hydrogen is still not
         # considered in building. The profile of heat and cool demand depends
