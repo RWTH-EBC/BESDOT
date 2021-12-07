@@ -8,7 +8,7 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 path = os.path.join(base_path, "data", "component_database",
                                "GasBoiler", "BOI1_exhaust_gas.csv")
 output_path = os.path.join(base_path, "data", "component_database",
-                              "GasBoiler", "BOI1_exhaust_gas_loss.csv")
+                                      "GasBoiler", "BOI1_exhaust_gas_loss.csv")
 
 """exhaustgastemp[°C]: the temperature of the exhaust gas in the boiler.
    air temperature[°C]: usually assumed to be 25 degrees.
@@ -26,8 +26,8 @@ output_path = os.path.join(base_path, "data", "component_database",
        if airratio > 1, vexhaustgas=vexhaustgas(airratio=1)+(airratio-1)*v0+
        0.016*(airratio-1)*v0
    vCO2_pre[%]: a percentage of carbon dioxide volume and total flue gas volume
-   
 """
+
 def calc_exhaust_gas_loss(path, output_path):
     data = pd.read_csv(path)
     df = pd.DataFrame(columns=['exhaustgastemp', 'airtemp', 'A1', 'B', 'C', 'H',
