@@ -3,7 +3,8 @@ import warnings
 import pandas as pd
 from scripts.Component import Component
 
-base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
+    __file__))))
 
 
 class GasBoiler(Component):
@@ -27,9 +28,9 @@ class GasBoiler(Component):
         properties = pd.read_csv(model_property_file)
         return properties
 
-    def _read_properties(self, properties):
-        if 'exhaustgasloss' in properties.columns:
-            self.exhaustgasloss = float(properties['exhaustgasloss'])
-        else:
-            warnings.warn("In the model database for " + self.component_type +
-                          " lack of column for exhaust gas loss.")
+    # def _read_properties(self, properties):
+    #     if 'exhaustgasloss' in properties.columns:
+    #         self.exhaustgasloss = float(properties['exhaustgasloss'])
+    #     else:
+    #         warnings.warn("In the model database for " + self.component_type +
+    #                       " lack of column for exhaust gas loss.")

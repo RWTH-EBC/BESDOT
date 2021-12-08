@@ -23,6 +23,7 @@ class StratificationStorage(HotWaterStorage):
                          max_size=max_size,
                          current_size=current_size
                          )
+        self.flows = []
 
     def _read_properties(self, properties):
         super()._read_properties(properties)

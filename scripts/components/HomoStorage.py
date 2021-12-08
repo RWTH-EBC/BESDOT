@@ -19,6 +19,8 @@ class HomoStorage(HotWaterStorage):
                          min_size=min_size,
                          max_size=max_size,
                          current_size=current_size)
+        self.flows = []  # The element in list should be dict, which includes
+        # four elements (m_in, m_out, t_in, t_out).
 
     def _read_properties(self, properties):
         super()._read_properties(properties)

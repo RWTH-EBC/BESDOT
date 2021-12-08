@@ -225,6 +225,11 @@ class Building(object):
                         model.time_step, bounds=(0, None))
                     model.add_component(input_comp + '_' + index,
                                         energy_flow[(input_comp, index)])
+                    # todo: check self.component if has attribute flows,
+                    #  if yes, add variable.
+                    if hasattr(self.components[input_comp], 'flows'):
+                        print(input_comp)
+
         # Save the simplified matrix and energy flow for energy balance
         self.simp_matrix = simp_matrix
         self.energy_flow = energy_flow

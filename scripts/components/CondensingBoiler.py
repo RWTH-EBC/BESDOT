@@ -1,8 +1,10 @@
+import os
+import warnings
 import pyomo.environ as pyo
 from scripts.components.GasBoiler import GasBoiler
-import warnings
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 class CondensingBoiler(GasBoiler):
     def __init__(self, comp_name, comp_type="CondensingBoiler", comp_model=None,

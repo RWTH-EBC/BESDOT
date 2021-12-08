@@ -78,7 +78,6 @@ class Project(object):
             bld_operation_cost = self.model.find_component('operation_cost_' +
                                                            bld.name)
 
-            # todo (yni): better framework to choose objective
             # If objective is annual cost, the components size should be
             # given in range, so that the dimensioning could be made. If
             # objective is operation cost, the components size should be
