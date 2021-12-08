@@ -1,10 +1,11 @@
-import os
 import warnings
-import pandas as pd
+import pyomo.environ as pyo
 from scripts.Component import Component
+import warnings
+from tools.calc_exhaust_gas_loss import calc_exhaust_gas_loss
+import os
 
-base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
-    __file__))))
+base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class GasBoiler(Component):
@@ -20,17 +21,8 @@ class GasBoiler(Component):
                          max_size=max_size,
                          current_size=current_size)
 
-    def get_properties(self, model):
-        model_property_file = os.path.join(base_path, 'data',
-                                           'component_database',
-                                           'GasBoiler',
-                                           'BOI1_exhaust_gas_loss.csv')
-        properties = pd.read_csv(model_property_file)
-        return properties
 
-    # def _read_properties(self, properties):
-    #     if 'exhaustgasloss' in properties.columns:
-    #         self.exhaustgasloss = float(properties['exhaustgasloss'])
-    #     else:
-    #         warnings.warn("In the model database for " + self.component_type +
-    #                       " lack of column for exhaust gas loss.")
+
+
+
+
