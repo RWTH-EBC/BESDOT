@@ -38,7 +38,8 @@ class CondensingBoiler(GasBoiler):
         water_heat_cap = 4.18 * 10 ** 3  # Unit J/kgK
         water_density = 1000  # kg/m3
         unit_switch = 3600 * 1000  # J/kWh
-        radiation_loss_coefficient = 1 # %
+        # todo(yca):reference
+        radiation_loss = 1 # %
         gas_calorific_value_high = 10.4  # kWh/m3
         gas_calorific_value_low = 8.9  # kWh/m3
         gas_calorific_high_value_high = 11.5  # kWh/m3

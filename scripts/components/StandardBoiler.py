@@ -39,7 +39,8 @@ class StandardBoiler(GasBoiler):
         water_heat_cap = 4.18 * 10 ** 3  # Unit J/kgK
         water_density = 1000  # kg/m3
         unit_switch = 3600 * 1000  # J/kWh
-        radiation_loss_coefficient = 1  # %
+        #todo(yca):reference
+        radiation_loss = 1  # %
 
         input_energy = model.find_component('input_' + self.inputs[0] +
                                             '_' + self.name)
