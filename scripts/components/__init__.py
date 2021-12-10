@@ -17,3 +17,6 @@ from .Radiator import Radiator
 from .SolarThermalCollector import SolarThermalCollector
 from .GasGrid import GasGrid
 from .UnderfloorHeat import UnderfloorHeat
+from .StratificationStorage import StratificationStorage
+from .StandardBoiler import StandardBoiler
+from. CondensingBoiler import CondensingBoiler

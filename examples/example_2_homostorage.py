@@ -18,7 +18,7 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 project = Project(name='project_2', typ='building')
 
 # Generate the environment object
-env_2 = Environment(time_step=3)
+env_2 = Environment(time_step=10)
 project.add_environment(env_2)
 
 # If the objective of the project is the optimization for building, a building
@@ -31,7 +31,7 @@ bld_2 = Building(name='bld_2', area=200)
 
 # todo (yca): That is another possible demand profile, you could try it for
 #  validation
-bld_2.demand_profile['heat_demand'] = [1, 0, 1]
+bld_2.demand_profile['heat_demand'] = [0, 0, 1, 0, 0, 0, 0, 0, 1, 0]
 
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
@@ -44,8 +44,8 @@ project.add_building(bld_2)
 ################################################################################
 #                        Build pyomo model and run optimization
 ################################################################################
-project.build_model(obj_typ='operation_cost')
-project.run_optimization('gurobi', save_lp=False, save_result=False)
+project.build_model(obj_typ='annual_cost')
+project.run_optimization('gurobi', save_lp=True, save_result=True)
 
 ################################################################################
 #                                  Post-processing
@@ -53,4 +53,4 @@ project.run_optimization('gurobi', save_lp=False, save_result=False)
 
 result_output_path = os.path.join(base_path, 'data', 'opt_output',
                                   project.name + '_result.csv')
-post_pro.plot_all(result_output_path, time_interval=[0, env_2.time_step])
+#post_pro.plot_all(result_output_path, time_interval=[0, env_2.time_step])

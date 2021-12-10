@@ -38,9 +38,9 @@ class Component(object):
         self.name = comp_name
         self.component_type = comp_type
         if not hasattr(self, 'inputs'):
-            self.inputs = None
+            self.inputs = []
         if not hasattr(self, 'outputs'):
-            self.outputs = None
+            self.outputs = []
         self.efficiency = {'elec': None,
                            'heat': None,
                            'cool': None}
