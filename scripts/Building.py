@@ -78,6 +78,7 @@ class Building(object):
         self.components = {}
         self.simp_matrix = None
         self.energy_flow = None
+        self.heat_flows = None
 
     def add_annual_demand(self, energy_sector):
         """Calculate the annual heat demand according to the TEK provided
@@ -218,6 +219,7 @@ class Building(object):
                                           'max_size', 'current_size'], axis=1)
         simp_matrix.set_index(['comp_name'], inplace=True)
         energy_flow = {}
+        heat_flows = {}
         for index, row in simp_matrix.iteritems():
             if len(row[row == 1].index.tolist()) > 0:
                 for input_comp in row[row == 1].index.tolist():
@@ -225,14 +227,58 @@ class Building(object):
                         model.time_step, bounds=(0, None))
                     model.add_component(input_comp + '_' + index,
                                         energy_flow[(input_comp, index)])
-                    # todo: check self.component if has attribute flows,
-                    #  if yes, add variable.
-                    if hasattr(self.components[input_comp], 'flows'):
-                        print(input_comp)
+
+                    # Check, if heat is the output of the component,
+                    # input should not be considered. The reason for it is
+                    # avoiding duplicate definition, since in building
+                    # level the input of one component is the output of
+                    # another component.
+                    # todo (yni): Check, if need both outputs and inputs and
+                    #  if the following method could cause duplicate variable.
+                    if 'heat' in self.components[input_comp].outputs or \
+                            'heat' in self.components[input_comp].inputs:
+                        # Check if the component has the attribution of
+                        # 'flows', which shows if the model contains
+                        # temperature variables.
+                        # todo (yni): check, wenn the following command could
+                        #  be required.
+                        # if hasattr(self.components[input_comp],
+                        #            'heat_flows_in'):
+                        heat_flows[(input_comp, index)] = {}
+                        heat_flows[(index, input_comp)] = {}
+                        # mass flow from component 'input_comp' to
+                        # component 'index'.
+                        heat_flows[(input_comp, index)]['mass'] = \
+                            pyo.Var(model.time_step, bounds=(0, None))
+                        model.add_component(input_comp + '_' + index +
+                                            '_' + 'mass', heat_flows[(
+                            input_comp, index)]['mass'])
+                        # mass flow from component 'index' to
+                        # component 'index'.
+                        heat_flows[(index, input_comp)]['mass'] = \
+                            pyo.Var(model.time_step, bounds=(0, None))
+                        model.add_component(index + '_' + input_comp +
+                                            '_' + 'mass', heat_flows[(
+                            index, input_comp)]['mass'])
+                        # temperature of heat flow from component
+                        # 'input_comp' to component 'index'.
+                        heat_flows[(input_comp, index)]['temp'] = \
+                            pyo.Var(model.time_step, bounds=(0, None))
+                        model.add_component(input_comp + '_' + index +
+                                            '_' + 'temp', heat_flows[(
+                            input_comp, index)]['temp'])
+                        # temperature of heat flow from component
+                        # 'index' to component 'input_comp'.
+                        heat_flows[(index, input_comp)]['temp'] = \
+                            pyo.Var(model.time_step, bounds=(0, None))
+                        model.add_component(index + '_' + input_comp +
+                                            '_' + 'temp', heat_flows[(
+                            index, input_comp)]['temp'])
 
         # Save the simplified matrix and energy flow for energy balance
         self.simp_matrix = simp_matrix
         self.energy_flow = energy_flow
+        self.heat_flows = heat_flows
 
         total_annual_cost = pyo.Var(bounds=(0, None))
         total_operation_cost = pyo.Var(bounds=(0, None))
@@ -246,12 +292,15 @@ class Building(object):
 
     def add_cons(self, model, env):
         self._constraint_energy_balance(model)
+        self._constraint_mass_balance(model)
         # todo (yni): Attention in the optimization for operation cost should
         #  comment constrain for solar area. This should be done automated.
         # self._constraint_solar_area(model)
         self._constraint_total_cost(model, env)
         self._constraint_operation_cost(model, env)
         for comp in self.components:
+            if hasattr(self.components[comp], 'heat_flows_in'):
+                self.components[comp].add_heat_flows(self.energy_flow)
             self.components[comp].add_cons(model)
 
     def _constraint_energy_balance(self, model):
@@ -306,6 +355,26 @@ class Building(object):
                                                                 component))
         model.cons.add(sum(item for item in solar_area_var_list) <=
                        self.solar_area)
+
+    def _constraint_mass_balance(self, model):
+        # Constraint for the mass flow, based on the assumption, that the
+        # mass flow in each circulation should be same.
+        # todo (yni): seems not necessary, because the mass flow balance are
+        #  defined in each component? Decide it later.
+        # It seems that, adding constraint in building could reduce the total
+        # constraints number.
+        if self.heat_flows is not None:
+            for heat_flow in self.heat_flows:
+                flow_1 = model.find_component(heat_flow[0] + '_' + heat_flow[1]
+                                              + '_' + 'mass')
+                flow_2 = model.find_component(heat_flow[1] + '_' + heat_flow[0]
+                                              + '_' + 'mass')
+                for t in model.time_step:
+                    # todo (yni): it could cause the duplicate constrains,
+                    #  because the flow_1 could be flow_2 for another
+                    #  heat_flow. It would not influence the solution of
+                    #  model. But could be improved.
+                    model.cons.add(flow_1[t] == flow_2[t])
 
     def _constraint_total_cost(self, model, env):
         """Calculate the total annual cost for the building energy system."""
