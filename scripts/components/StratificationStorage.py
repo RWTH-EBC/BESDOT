@@ -24,7 +24,7 @@ class StratificationStorage(HotWaterStorage):
                          current_size=current_size
                          )
         self.heat_flows_in = []  # The element in list should be dict,
-        # which includes the tuples, in which shows the the relevant
+        # which includes the tuples, in which shows  the relevant
         # heat flow variables.
         self.heat_flows_out = []
 
@@ -76,7 +76,7 @@ class StratificationStorage(HotWaterStorage):
         temp_var = model.find_component('temp_' + self.name)
         return_temp_var = model.find_component('return_temp_' + self.name)
         loss_var = model.find_component('loss_' + self.name)
-        #mass_flow_var = model.find_component('mass_flow_' + self.name)
+        # mass_flow_var = model.find_component('mass_flow_' + self.name)
         # analyze quantities of circulation for component.
         energy_flow = {}  # to storage all the energy flows in every circulation
         for heat_input in self.heat_flows_in:
@@ -112,7 +112,6 @@ class StratificationStorage(HotWaterStorage):
                                (m_out[t + 1] * t_out[t + 1] - m_in[t + 1] *
                                 t_in[t + 1]) * water_heat_cap / unit_switch)
 
-
         # sum all energy flow for input energy and output energy
         for t in range(len(model.time_step)):
             model.cons.add(input_energy[t + 1] == sum(energy_flow[flow][t + 1]
@@ -123,7 +122,7 @@ class StratificationStorage(HotWaterStorage):
                                                        self.heat_flows_out))
 
         for t in range(len(model.time_step)):
-            #model.cons.add(output_energy[t+1] ==
+            # model.cons.add(output_energy[t+1] ==
             #               (temp_var[t+1] - return_temp_var[t+1]) *
             #               mass_flow_var[t+1] * water_heat_cap / unit_switch)
             model.cons.add(hot_water_mass[t+1] <= size*water_density*1000)
@@ -217,7 +216,6 @@ class StratificationStorage(HotWaterStorage):
             for t in range(len(model.time_step)):
                 model.cons.add(m_in[t + 1] == m_out[t + 1])
 
-
     def _constraint_hot_water_mass(self, model, init_mass=0.5):
         hot_water_mass = model.find_component('hot_water_mass_' + self.name)
         size = model.find_component('size_' + self.name)
@@ -300,8 +298,8 @@ class StratificationStorage(HotWaterStorage):
         return_temp = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('return_temp_' + self.name, return_temp)
 
-        #mass_flow = pyo.Var(model.time_step, bounds=(0, None))
-        #model.add_component('mass_flow_' + self.name, mass_flow)
+        # mass_flow = pyo.Var(model.time_step, bounds=(0, None))
+        # model.add_component('mass_flow_' + self.name, mass_flow)
 
         loss = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('loss_' + self.name, loss)
