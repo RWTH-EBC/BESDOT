@@ -22,9 +22,9 @@ class StandardBoiler(GasBoiler):
                          comp_model=comp_model,
                          min_size=min_size,
                          max_size=max_size,
-                         current_size=current_size)
+                         current_size=current_size,
+                         )
         self.exhaust_gas_loss = calc_exhaust_gas_loss(path, output_path)
-        self.loss = None
 
     def _constraint_conver(self, model):
         """
@@ -41,8 +41,11 @@ class StandardBoiler(GasBoiler):
         water_heat_cap = 4.18 * 10 ** 3  # Unit J/kgK
         water_density = 1000  # kg/m3
         unit_switch = 3600 * 1000  # J/kWh
-        #todo(yca):reference
-        radiation_loss = 1  # %
+        self.loss = 0
+        # Taschenbuch für Heizungund Klimatechnik einschließlich Trinkwasser-
+        # und Kältetechnik sowie Energiekonzepte, Herausgegeben von
+        # Prof. Dr.-Ing. Karl-Josef Albers Hochschule Esslingen
+        radiation_loss = 2  # %
 
         input_energy = model.find_component('input_' + self.inputs[0] +
                                             '_' + self.name)
@@ -53,14 +56,18 @@ class StandardBoiler(GasBoiler):
         temp_var = model.find_component('temp_' + self.name)
         return_temp_var = model.find_component('return_temp_' + self.name)
         mass_flow_var = model.find_component('mass_flow_' + self.name)
+
         self.loss = self.exhaust_gas_loss + radiation_loss
+        print(self.loss)
         for t in range(len(model.time_step)):
             model.cons.add(output_energy[t+1] ==
                            (temp_var[t+1] - return_temp_var[t+1]) *
                            mass_flow_var[t+1] * water_heat_cap / unit_switch)
             model.cons.add(output_energy[t+1] <= size)
             model.cons.add(output_energy[t+1] >= 0.3 * size)
-            model.cons.add(input_energy[t+1] == output_energy[t+1] / self.loss)
+
+            model.cons.add(input_energy[t+1] * (100 - self.loss) ==
+                           output_energy[t+1] * 100)
 
     def _get_properties_loss(self, model):
         model_property_file = os.path.join(base_path, 'data',
@@ -90,7 +97,6 @@ class StandardBoiler(GasBoiler):
     def add_cons(self, model):
         self._constraint_conver(model)
         self._constraint_temp(model)
-    #    self._constraint_return_temp(model)
         self._constraint_vdi2067(model)
         self._constraint_mass_flow(model)
 
@@ -105,5 +111,6 @@ class StandardBoiler(GasBoiler):
 
         mass_flow = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('mass_flow_' + self.name, mass_flow)
+
 
 
