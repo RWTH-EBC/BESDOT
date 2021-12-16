@@ -10,8 +10,6 @@ import pyomo.environ as pyo
 from scripts.components.HotWaterStorage import HotWaterStorage
 import numpy as np
 
-# fixme (yca): name for variable heat_water_massflow and PEP8
-
 
 class StratificationStorage(HotWaterStorage):
     def __init__(self, comp_name, comp_type="StratificationStorage",
@@ -220,6 +218,8 @@ class StratificationStorage(HotWaterStorage):
         hot_water_mass = model.find_component('hot_water_mass_' + self.name)
         size = model.find_component('size_' + self.name)
         model.cons.add(hot_water_mass[1] == init_mass*size*1000)
+        # todo (yca): add commit for density and even use formate in line 65,
+        #  make sure that the size unit is same for all constrains
 
     def _constraint_input_permit(self, model, min_mass=0.2,
                                  max_mass=0.8,

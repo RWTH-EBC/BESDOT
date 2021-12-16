@@ -130,7 +130,7 @@ class Project(object):
                                               self.name + '_result.csv')
 
             # Get results for all variable. This is VERY slow.
-            # todo: find an more efficient way to save results
+            # todo (yni): find an more efficient way to save results
             result_dict = {}
             for v in self.model.component_objects(pyo.Var, active=True):
                 # print("Variable component object",v)

@@ -30,10 +30,10 @@ class Building(object):
         else:
             self.solar_area = solar_area
         self.building_typ = bld_typ
-        # fixme: The building type is in German, which is connected with the
-        #  script "gen_heat_profil" and needs tobe changed to English
-        # todo: TEK provided only the value for non-residential building. For
-        #  residential building should get the data from the project TABULA.
+        # fixme (yni): The building type is in German, which is connected with
+        #  the script "gen_heat_profil" and needs to be changed to English
+        # todo (yni): TEK provided only the value for non-residential building.
+        #  For residential building should get the data from the project TABULA.
 
         # Calculate the annual energy demand for heating, hot water and
         # electricity. Using TEK Tools from IWU.
@@ -99,7 +99,7 @@ class Building(object):
         Attention!!! The temperature profile could only provided in project
         object, so this method cannot be called in the initialization of
         building object."""
-        # todo: the current version is only for heat, the method could be
+        # todo (yni): the current version is only for heat, the method could be
         #  developed for cool demand later.
         if energy_sector == 'heat':
             heat_demand_profile = gen_heat_profile(self.building_typ,
@@ -310,7 +310,7 @@ class Building(object):
         component outputs.
         Attention! If a component has more than 1 inputs or outputs, should
         distinguish between different energy carriers"""
-        # todo: the method for more than 1 inputs or outputs should be
+        # todo (yni): the method for more than 1 inputs or outputs should be
         #  validiert.
 
         # Constraints for the inputs
