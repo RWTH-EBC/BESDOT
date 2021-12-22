@@ -125,6 +125,7 @@ class StratificationStorage(HotWaterStorage):
             #               mass_flow_var[t+1] * water_heat_cap / unit_switch)
             model.cons.add(hot_water_mass[t+1] <= size*water_density*1000)
 
+        # todo (yni, yca): check for plausibility.
         for t in range(len(model.time_step) - 1):
             model.cons.add(water_heat_cap * (temp_var[t + 1] -
                                              return_temp_var[t + 1]) *
@@ -153,6 +154,9 @@ class StratificationStorage(HotWaterStorage):
             # FiXME (yni): mindesten should be loss determined by the device
             #  size, need a proved model from simulation or experiment
             for t in range(len(model.time_step)):
+                # Fixme (yca): why the temp_var is used in this equation? the
+                #  difference between HomoStorage and StratStorage should be
+                #  considered.
                 model.cons.add(loss_var[t + 1] == 1.5 * ((temp_var[t + 1] -
                                                           20) / 1000))
 
