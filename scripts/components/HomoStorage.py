@@ -147,8 +147,8 @@ class HomoStorage(HotWaterStorage):
             for t in range(len(model.time_step)):
                 model.cons.add(loss_var[t + 1] == 0)
         else:
-            # FIXME: The energy loss equation shouldn't be like the following
-            #  format, which is only used for validation.
+            # FIXME (yni): The energy loss equation shouldn't be like the
+            #  following format, which is only used for validation.
             # FiXME (yni): mindesten should be loss determined by the device
             #  size
             for t in range(len(model.time_step)):

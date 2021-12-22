@@ -10,8 +10,6 @@ import pyomo.environ as pyo
 from scripts.components.HotWaterStorage import HotWaterStorage
 import numpy as np
 
-# fixme (yca): name for variable heat_water_massflow and PEP8
-
 
 class StratificationStorage(HotWaterStorage):
     def __init__(self, comp_name, comp_type="StratificationStorage",
@@ -23,7 +21,10 @@ class StratificationStorage(HotWaterStorage):
                          max_size=max_size,
                          current_size=current_size
                          )
-        self.flows = []
+        self.heat_flows_in = []  # The element in list should be dict,
+        # which includes the tuples, in which shows  the relevant
+        # heat flow variables.
+        self.heat_flows_out = []
 
     def _read_properties(self, properties):
         super()._read_properties(properties)
@@ -37,6 +38,15 @@ class StratificationStorage(HotWaterStorage):
         else:
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for min temperature.")
+
+    def add_heat_flows(self, bld_heat_flows):
+        # check the building heat flows and select the tuples related to this
+        # device to add into list heat_flows.
+        for element in bld_heat_flows:
+            if self.name == element[0]:
+                self.heat_flows_out.append(element)
+            if self.name == element[1]:
+                self.heat_flows_in.append(element)
 
     def _constraint_conver(self, model):
         """
@@ -64,12 +74,55 @@ class StratificationStorage(HotWaterStorage):
         temp_var = model.find_component('temp_' + self.name)
         return_temp_var = model.find_component('return_temp_' + self.name)
         loss_var = model.find_component('loss_' + self.name)
-        mass_flow_var = model.find_component('mass_flow_' + self.name)
+        # mass_flow_var = model.find_component('mass_flow_' + self.name)
+        # analyze quantities of circulation for component.
+        energy_flow = {}  # to storage all the energy flows in every circulation
+        for heat_input in self.heat_flows_in:
+            m_in = model.find_component(heat_input[0] + '_' + heat_input[1] +
+                                        '_' + 'mass')
+            m_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
+                                         '_' + 'mass')
+            t_in = model.find_component(heat_input[0] + '_' + heat_input[1] +
+                                        '_' + 'temp')
+            t_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
+                                         '_' + 'temp')
+            energy_flow[heat_input] = model.find_component(heat_input[0] + '_' +
+                                                           heat_input[1])
+            for t in range(len(model.time_step)):
+                model.cons.add(energy_flow[heat_input][t + 1] ==
+                               (m_in[t + 1] * t_in[t + 1] - m_out[t + 1] *
+                                t_out[t + 1]) * water_heat_cap / unit_switch)
+
+        for heat_output in self.heat_flows_out:
+            m_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
+                                        '_' + 'mass')
+            m_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
+                                         '_' + 'mass')
+            t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
+                                        '_' + 'temp')
+            t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
+                                         '_' + 'temp')
+            energy_flow[heat_output] = model.find_component(heat_output[0] +
+                                                            '_' +
+                                                            heat_output[1])
+            for t in range(len(model.time_step)):
+                model.cons.add(energy_flow[heat_output][t + 1] ==
+                               (m_out[t + 1] * t_out[t + 1] - m_in[t + 1] *
+                                t_in[t + 1]) * water_heat_cap / unit_switch)
+
+        # sum all energy flow for input energy and output energy
+        for t in range(len(model.time_step)):
+            model.cons.add(input_energy[t + 1] == sum(energy_flow[flow][t + 1]
+                                                      for flow in
+                                                      self.heat_flows_in))
+            model.cons.add(output_energy[t + 1] == sum(energy_flow[flow][t + 1]
+                                                       for flow in
+                                                       self.heat_flows_out))
 
         for t in range(len(model.time_step)):
-            model.cons.add(output_energy[t+1] ==
-                           (temp_var[t+1] - return_temp_var[t+1]) *
-                           mass_flow_var[t+1] * water_heat_cap / unit_switch)
+            # model.cons.add(output_energy[t+1] ==
+            #               (temp_var[t+1] - return_temp_var[t+1]) *
+            #               mass_flow_var[t+1] * water_heat_cap / unit_switch)
             model.cons.add(hot_water_mass[t+1] <= size*water_density*1000)
 
         for t in range(len(model.time_step) - 1):
@@ -78,7 +131,7 @@ class StratificationStorage(HotWaterStorage):
                            hot_water_mass[t + 2] == water_heat_cap * (
                            temp_var[t + 1] - return_temp_var[t + 1]) *
                            hot_water_mass[t + 1] -
-                           mass_flow_var[t + 1] * water_heat_cap * (
+                           m_in[t + 1] * water_heat_cap * (
                            temp_var[t + 1] - return_temp_var[t + 1])
                            + (input_energy[t + 1]-loss_var[t+1]) * unit_switch)
 
@@ -109,20 +162,64 @@ class StratificationStorage(HotWaterStorage):
         temp_var = model.find_component('temp_' + self.name)
         for t in model.time_step:
             model.cons.add(temp_var[t] == init_temp)
+        for heat_input in self.heat_flows_in:
+            t_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
+                                         '_' + 'temp')
+            for t in range(len(model.time_step)):
+                model.cons.add(temp_var[t + 1] == t_out[t + 1])
+
+        for heat_output in self.heat_flows_out:
+            t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
+                                         '_' + 'temp')
+            for t in range(len(model.time_step)):
+                model.cons.add(temp_var[t + 1] == t_out[t + 1])
 
     def _constraint_return_temp(self, model, init_temp=20):
         # The first constraint for return temperature. Assuming a constant
         # temperature difference between flow temperature and return
         # temperature.
-        temp_var = model.find_component('temp_' + self.name)
         return_temp_var = model.find_component('return_temp_' + self.name)
         for t in model.time_step:
             model.cons.add(return_temp_var[t] == init_temp)
+        for heat_input in self.heat_flows_in:
+            t_in = model.find_component(heat_input[0] + '_' + heat_input[1] +
+                                        '_' + 'temp')
+            for t in range(len(model.time_step)):
+                model.cons.add(return_temp_var[t + 1] == t_in[t + 1])
+
+        for heat_output in self.heat_flows_out:
+            t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
+                                        '_' + 'temp')
+            for t in range(len(model.time_step)):
+                model.cons.add(return_temp_var[t + 1] == t_in[t + 1])
+
+    def _constraint_mass_flow(self, model):
+        # The mass flow set to be constant as circulation pumps
+        # mass flow unit kg/h
+
+        for heat_input in self.heat_flows_in:
+            m_in = model.find_component(heat_input[0] + '_' + heat_input[1] +
+                                        '_' + 'mass')
+            m_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
+                                         '_' + 'mass')
+            for t in range(len(model.time_step)):
+                model.cons.add(m_in[t + 1] == m_out[t + 1])
+                # todo (yni): default value is used for mass flow
+
+        for heat_output in self.heat_flows_out:
+            m_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
+                                        '_' + 'mass')
+            m_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
+                                         '_' + 'mass')
+            for t in range(len(model.time_step)):
+                model.cons.add(m_in[t + 1] == m_out[t + 1])
 
     def _constraint_hot_water_mass(self, model, init_mass=0.5):
         hot_water_mass = model.find_component('hot_water_mass_' + self.name)
         size = model.find_component('size_' + self.name)
         model.cons.add(hot_water_mass[1] == init_mass*size*1000)
+        # todo (yca): add commit for density and even use formate in line 65,
+        #  make sure that the size unit is same for all constrains
 
     def _constraint_input_permit(self, model, min_mass=0.2,
                                  max_mass=0.8,
@@ -185,6 +282,7 @@ class StratificationStorage(HotWaterStorage):
         self._constraint_loss(model, loss_type='off')
         self._constraint_temp(model)
         self._constraint_return_temp(model)
+        self._constraint_mass_flow(model)
         self._constraint_hot_water_mass(model)
         self._constraint_vdi2067(model)
         self._constraint_input_permit(model)
@@ -200,8 +298,8 @@ class StratificationStorage(HotWaterStorage):
         return_temp = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('return_temp_' + self.name, return_temp)
 
-        mass_flow = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('mass_flow_' + self.name, mass_flow)
+        # mass_flow = pyo.Var(model.time_step, bounds=(0, None))
+        # model.add_component('mass_flow_' + self.name, mass_flow)
 
         loss = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('loss_' + self.name, loss)

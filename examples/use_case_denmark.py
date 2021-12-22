@@ -23,10 +23,10 @@ project = Project(name='denmark_energy_hub', typ='building')
 # data.
 # Attention! The weather file from partner is not the formate of DWD,
 # so we should change the environment to add the weather information.
-# todo: if this case is common, should change the Enviroment class.
+
 env_denmark = Environment()
 env_denmark.elec_price = 0.26  # €/kWh
-# todo: the electricity price for heat pump is cheaper with 0.21 €/kWh
+
 env_denmark.elec_feed_price = 0.09
 env_denmark.gas_price = 0.043
 env_denmark.co2_price = 31.6
@@ -49,7 +49,6 @@ project.add_environment(env_denmark)
 
 # The building class is not rationally designed, so need to change the demand
 # profile
-# todo: add demand profile instead of area and annual demand
 energy_hub = Building(name='energy_hub', area=200, solar_area=1000000)
 
 demand_file = os.path.join(base_path, 'data', 'denmark_energy_hub',
