@@ -64,6 +64,7 @@ class FluidComponent(Component):
                 model.cons.add(energy_flow[heat_input][t + 1] ==
                                (m_in[t + 1] * t_in[t + 1] - m_out[t + 1] *
                                 t_out[t + 1]) * water_heat_cap / unit_switch)
+                model.cons.add(t_in[t + 1] >= t_out[t + 1])
 
         # sum all energy flow for input energy and output energy
         for t in range(len(model.time_step)):
@@ -95,6 +96,7 @@ class FluidComponent(Component):
                 model.cons.add(energy_flow[heat_output][t + 1] ==
                                (m_out[t + 1] * t_out[t + 1] - m_in[t + 1] *
                                 t_in[t + 1]) * water_heat_cap / unit_switch)
+                model.cons.add(t_in[t + 1] <= t_out[t + 1])
 
         for t in range(len(model.time_step)):
             model.cons.add(output_energy[t + 1] == sum(energy_flow[flow][t + 1]
