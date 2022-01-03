@@ -16,7 +16,7 @@ class HeatExchangerFluid(FluidComponent, HeatExchanger):
     The variable 'size' is set the exchanger area with unit of m2.
     """
 
-    def __init__(self, comp_name, comp_type="HeatExchangerTemp",
+    def __init__(self, comp_name, comp_type="HeatExchangerFluid",
                  comp_model=None, min_size=0, max_size=1000, current_size=0):
         super().__init__(comp_name=comp_name,
                          comp_type=comp_type,
@@ -104,9 +104,22 @@ class HeatExchangerFluid(FluidComponent, HeatExchanger):
         area = model.find_component('size_' + self.name)
 
         for t in range(len(model.time_step)):
-            model.cons.add(delta_temp == (temp_h + return_temp_h - temp_c -
-                                          return_temp_c) / 2)
+            model.cons.add(delta_temp[t+1] == (temp_h[t+1] + return_temp_h[t+1]
+                                               - temp_c[t+1] -
+                                               return_temp_c[t+1]) / 2)
             model.cons.add(input_energy[t+1] == self.k * area * delta_temp[t+1])
+
+    def add_cons(self, model):
+        self._constraint_heat_inputs(model)
+        self._constraint_heat_outputs(model)
+        self._constraint_mass_flow(model)
+        self._constraint_loss(model)
+        self._constraint_delta_temp(model)
+        self._constraint_maxpower(model)
+        self._constraint_vdi2067(model)
+        # self._constraint_conver(model)
+        # todo this one should not exist in this class, should think, if it
+        #  causes problem by FluidComponent child.
 
     def add_vars(self, model):
         super().add_vars(model)

@@ -33,7 +33,7 @@ bld_4.demand_profile['hot_water_demand'] = [0, 0, 1]
 
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
-topo_file = os.path.join(base_path, 'data', 'topology', 'heat_exchanger.csv')
+topo_file = os.path.join(base_path, 'data', 'topology', 'heat_exchanger_simp.csv')
 bld_4.add_topology(topo_file)
 bld_4.add_components(project.environment)
 project.add_building(bld_4)
