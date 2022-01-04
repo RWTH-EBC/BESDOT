@@ -24,6 +24,8 @@ class HeatExchangerFluid(FluidComponent, HeatExchanger):
                          min_size=min_size,
                          max_size=max_size,
                          current_size=current_size)
+        # Default for energy conversion in heat exchanger
+        self.efficiency['heat'] = 1
         if len(self.heat_flows_in) > 1:
             warnings.warn('more than one energy flow input is given for the '
                           'heat exchanger')
@@ -115,6 +117,7 @@ class HeatExchangerFluid(FluidComponent, HeatExchanger):
         self._constraint_mass_flow(model)
         self._constraint_loss(model)
         self._constraint_delta_temp(model)
+        self._constraint_conver(model)
         self._constraint_maxpower(model)
         self._constraint_vdi2067(model)
         # self._constraint_conver(model)
