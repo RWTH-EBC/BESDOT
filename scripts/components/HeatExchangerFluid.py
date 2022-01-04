@@ -118,7 +118,7 @@ class HeatExchangerFluid(FluidComponent, HeatExchanger):
         self._constraint_loss(model)
         self._constraint_delta_temp(model)
         self._constraint_conver(model)
-        self._constraint_maxpower(model)
+        # self._constraint_maxpower(model)
         self._constraint_vdi2067(model)
         # self._constraint_conver(model)
         # todo this one should not exist in this class, should think, if it

@@ -8,7 +8,9 @@ from .GasBoiler import GasBoiler
 from .GasHeatPump import GasHeatPump
 from .HeatConsumption import HeatConsumption
 from .HeatExchanger import HeatExchanger
+from .HeatExchangerFluid import HeatExchangerFluid
 from .HeatGrid import HeatGrid
+from .HeatGridFluid import HeatGridFluid
 from .HeatPump import HeatPump
 from .HotWaterConsumption import HotWaterConsumption
 from .HotWaterStorage import HotWaterStorage

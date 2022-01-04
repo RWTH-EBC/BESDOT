@@ -1,4 +1,4 @@
-comp_name,comp_type,model,min_size,max_size,current_size,therm_cns,heat_grid,heat_ex_heat
+comp_name,comp_type,model,min_size,max_size,current_size,therm_cns,heat_grid,heat_ex
 therm_cns,HeatConsumption,HeatCNS1,10,10,0,0,0,0
-heat_grid,HeatGrid,HG1,10,10,0,0,0,1
-heat_ex_heat,HeatExchangerFluid,HE1,2,2,0,1,0,0
+heat_grid,HeatGridFluid,HG1,10,10,0,0,0,1
+heat_ex,HeatExchangerFluid,HE1,2,2,0,1,0,0
