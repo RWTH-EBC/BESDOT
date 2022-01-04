@@ -1,3 +1,5 @@
 /data/opt_output/
 /data/denmark_energy_hub/
 **/__pycache__
+/tools/analysis_lp_new.txt
+/tools/analysis_lp_temp.txt
