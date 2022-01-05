@@ -221,8 +221,8 @@ class Building(object):
         energy_flow = {}
         heat_flows = {}
         for index, row in simp_matrix.iteritems():
-            if len(row[row == 1].index.tolist()) > 0:
-                for input_comp in row[row == 1].index.tolist():
+            if len(row[row > 0].index.tolist()) > 0:
+                for input_comp in row[row > 0].index.tolist():
                     energy_flow[(input_comp, index)] = pyo.Var(
                         model.time_step, bounds=(0, None))
                     model.add_component(input_comp + '_' + index,

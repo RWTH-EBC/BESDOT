@@ -116,7 +116,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
     #         model.cons.add(temp_var[t] - return_temp_var[t] <= delta_temp)
     #         model.cons.add(temp_var[t] - return_temp_var[t] >= min_delta_temp)
 
-    def _constraint_input_permit(self, model, min_temp=40, max_temp=60,
+    def _constraint_input_permit(self, model, min_temp=40, max_temp=90,
                                  init_status='on'):
         """
         The input to water tank is controlled by tank temperature, which is
@@ -172,7 +172,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
         # todo (yni): the constraint about return temperature should be
         #  determined by consumer, fix this later
         # self._constraint_return_temp(model)
-        self._constraint_mass_flow(model, mass_flow=300)
+        self._constraint_mass_flow(model, mass_flow=100)
         self._constraint_heat_inputs(model)
         self._constraint_heat_outputs(model)
         self._constraint_input_permit(model, min_temp=55, init_status='on')

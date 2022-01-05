@@ -37,7 +37,7 @@ def get_constrains(lines, file_new):
 def del_duplicate(lines, file_new):
     lines_seen = set()
     for line in lines:
-        print(line)
+        # print(line)
         if line not in lines_seen:
             lines_seen.add(line)
             file_new.write(line)
