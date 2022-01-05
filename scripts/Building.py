@@ -370,11 +370,12 @@ class Building(object):
                 flow_2 = model.find_component(heat_flow[1] + '_' + heat_flow[0]
                                               + '_' + 'mass')
                 for t in model.time_step:
-                    # todo (yni): it could cause the duplicate constrains,
-                    #  because the flow_1 could be flow_2 for another
-                    #  heat_flow. It would not influence the solution of
-                    #  model. But could be improved.
-                    model.cons.add(flow_1[t] == flow_2[t])
+                    if self.simp_matrix[heat_flow[0]][heat_flow[1]] > 0:
+                        # todo (yni): take care of the situation for variable
+                        #  mass flow.
+                        model.cons.add(flow_1[t] == flow_2[t])
+                        model.cons.add(flow_1[t] == self.simp_matrix[
+                            heat_flow[0]][heat_flow[1]])
 
     def _constraint_total_cost(self, model, env):
         """Calculate the total annual cost for the building energy system."""

@@ -172,7 +172,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
         # todo (yni): the constraint about return temperature should be
         #  determined by consumer, fix this later
         # self._constraint_return_temp(model)
-        self._constraint_mass_flow(model, mass_flow=100)
+        self._constraint_mass_flow(model)
         self._constraint_heat_inputs(model)
         self._constraint_heat_outputs(model)
         self._constraint_input_permit(model, min_temp=55, init_status='on')

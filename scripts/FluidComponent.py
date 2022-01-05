@@ -103,7 +103,7 @@ class FluidComponent(Component):
                                                        for flow in
                                                        self.heat_flows_out))
 
-    def _constraint_mass_flow(self, model, mass_flow=100):
+    def _constraint_mass_flow(self, model):
         # The mass flow is set to be constant as circulation pumps
         # mass flow unit kg/h
 
@@ -114,8 +114,6 @@ class FluidComponent(Component):
                                          '_' + 'mass')
             for t in range(len(model.time_step)):
                 model.cons.add(m_in[t + 1] == m_out[t + 1])
-                # todo (yni): default value is used for mass flow
-                model.cons.add(m_in[t + 1] == mass_flow)
 
         for heat_output in self.heat_flows_out:
             m_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
@@ -124,4 +122,3 @@ class FluidComponent(Component):
                                          '_' + 'mass')
             for t in range(len(model.time_step)):
                 model.cons.add(m_in[t + 1] == m_out[t + 1])
-                model.cons.add(m_in[t + 1] == mass_flow)
