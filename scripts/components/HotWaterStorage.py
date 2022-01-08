@@ -1,4 +1,5 @@
 from scripts.components.Storage import Storage
+from scripts.FluidComponent import FluidComponent
 
 
 class HotWaterStorage(Storage):
