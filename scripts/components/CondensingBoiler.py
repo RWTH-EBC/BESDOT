@@ -1,10 +1,10 @@
 import os
 import pyomo.environ as pyo
-from scripts.FluidComponent import FluidComponent
 from scripts.components.GasBoiler import GasBoiler
 import warnings
 from tools.calc_exhaust_gas_loss import calc_exhaust_gas_loss
 import pandas as pd
+from scripts.FluidComponent import FluidComponent
 
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
     __file__))))
@@ -66,7 +66,13 @@ class CondensingBoiler(FluidComponent, GasBoiler):
         condensation_mass = model.find_component('condensation_mass_' +
                                                  self.name)
         self.loss = 0
+        for heat_output in self.heat_flows_out:
+            m_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
+                                        '_' + 'mass')
         for t in range(len(model.time_step)):
+            model.cons.add(output_energy[t + 1] ==
+                           (temp_var[t + 1] - return_temp_var[t + 1]) *
+                           m_in[t + 1] * water_heat_cap / unit_switch)
             model.cons.add(output_energy[t + 1] <= size)
             model.cons.add(output_energy[t + 1] >= 0.3 * size)
             # Calculate the mass of condensate from the combustion power
@@ -86,17 +92,23 @@ class CondensingBoiler(FluidComponent, GasBoiler):
                            water_heat_cap * condensation_mass[t + 1] *
                            (160 - return_temp_var[t + 1]))
 
-    # def _constraint_temp(self, model, init_temp=80):
-    #     temp_var = model.find_component('temp_' + self.name)
-    #     model.cons.add(temp_var[1] == init_temp)
+    def _constraint_temp(self, model, init_temp=80):
+        temp_var = model.find_component('temp_' + self.name)
+        model.cons.add(temp_var[1] == init_temp)
+        for heat_output in self.heat_flows_out:
+            t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
+                                         '_' + 'temp')
+            for t in range(len(model.time_step)):
+                model.cons.add(temp_var[t + 1] == t_out[t + 1])
 
     def _constraint_return_temp(self, model, init_return_temp=55):
         return_temp_var = model.find_component('return_temp_' + self.name)
         for t in model.time_step:
             model.cons.add(return_temp_var[t] == init_return_temp)
+            model.cons.add(return_temp_var[t] <= 55)
         for heat_output in self.heat_flows_out:
             t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
-                                         '_' + 'temp')
+                                        '_' + 'temp')
             for t in range(len(model.time_step)):
                 model.cons.add(return_temp_var[t + 1] == t_in[t + 1])
 
@@ -106,9 +118,9 @@ class CondensingBoiler(FluidComponent, GasBoiler):
                                         '_' + 'mass')
             m_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'mass')
-            for t in range(len(model.time_step)):
-                model.cons.add(m_in[t + 1] == m_out[t + 1])
-                model.cons.add(m_in[t + 1] == mass_flow)
+        for t in range(len(model.time_step)):
+            model.cons.add(m_in[t + 1] == m_out[t + 1])
+            model.cons.add(m_in[t + 1] == mass_flow)
 
     def add_cons(self, model):
         self._constraint_conver(model)
