@@ -4,6 +4,7 @@ Simplified Modell for internal use.
 
 import warnings
 import pyomo.environ as pyo
+import numpy as np
 from tools.gen_heat_profile import *
 from tools.gen_elec_profile import gen_elec_profile
 from tools import get_all_class
@@ -221,8 +222,12 @@ class Building(object):
         energy_flow = {}
         heat_flows = {}
         for index, row in simp_matrix.iteritems():
-            if len(row[row > 0].index.tolist()) > 0:
-                for input_comp in row[row > 0].index.tolist():
+            # search for Nan value and the mass flow in topology matrix, the
+            # unit is kg/h.
+            # print(row[row.isnull()].index.tolist())
+            if len(row[row > 0].index.tolist() +
+                   row[row.isnull()].index.tolist()) > 0:
+                for input_comp in row[row > 0].index.tolist() + row[row.isnull()].index.tolist():
                     energy_flow[(input_comp, index)] = pyo.Var(
                         model.time_step, bounds=(0, None))
                     model.add_component(input_comp + '_' + index,
@@ -376,6 +381,10 @@ class Building(object):
                         model.cons.add(flow_1[t] == flow_2[t])
                         model.cons.add(flow_1[t] == self.simp_matrix[
                             heat_flow[0]][heat_flow[1]])
+                    elif np.isnan(self.simp_matrix[heat_flow[0]][heat_flow[1]]):
+                        model.cons.add(flow_1[t] == flow_2[t])
+                        # print(flow_1[t])
+                        # print(flow_2[t])
 
     def _constraint_total_cost(self, model, env):
         """Calculate the total annual cost for the building energy system."""
