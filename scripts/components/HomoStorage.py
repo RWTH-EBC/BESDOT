@@ -103,18 +103,22 @@ class HomoStorage(FluidComponent, HotWaterStorage):
             for t in range(len(model.time_step)):
                 model.cons.add(temp_var[t + 1] == t_out[t + 1])
 
-    # def _constraint_return_temp(self, model):
-    #     # The first constraint for return temperature. Assuming a constant
-    #     # temperature difference between flow temperature and return
-    #     # temperature.
-    #     delta_temp = 20  # unit K
-    #     min_delta_temp = 0
-    #     temp_var = model.find_component('temp_' + self.name)
-    #     return_temp_var = model.find_component('return_temp_' + self.name)
-    #
-    #     for t in model.time_step:
-    #         model.cons.add(temp_var[t] - return_temp_var[t] <= delta_temp)
-    #         model.cons.add(temp_var[t] - return_temp_var[t] >= min_delta_temp)
+    def _constraint_init_fluid_temp(self, model):
+        """In a assumed state, the temperature of fluid flowing into storage at
+        first time step should be set to an initial condition"""
+        for heat_output in self.heat_flows_out:
+            t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
+                                        '_' + 'temp')
+            t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
+                                         '_' + 'temp')
+            model.cons.add(t_in[1] == t_out[1])
+
+        for heat_input in self.heat_flows_in:
+            t_in = model.find_component(heat_input[0] + '_' + heat_input[1] +
+                                        '_' + 'temp')
+            t_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
+                                         '_' + 'temp')
+            model.cons.add(t_in[1] == t_out[1])
 
     def _constraint_input_permit(self, model, min_temp=40, max_temp=90,
                                  init_status='on'):
@@ -161,6 +165,9 @@ class HomoStorage(FluidComponent, HotWaterStorage):
             #  problematic.
             model.cons.add(input_energy[t + 1] == input_energy[t + 1] *
                            status_var[t + 1])
+            # Additional constraint for allowed temperature in storage
+            model.cons.add(temp_var[t + 2] >= min_temp)
+            model.cons.add(temp_var[t + 2] <= max_temp)
         model.cons.add(input_energy[len(model.time_step)] ==
                        input_energy[len(model.time_step)] *
                        status_var[len(model.time_step)])
@@ -169,9 +176,9 @@ class HomoStorage(FluidComponent, HotWaterStorage):
         self._constraint_conver(model)
         self._constraint_loss(model, loss_type='off')
         self._constraint_temp(model)
+        self._constraint_init_fluid_temp(model)
         # todo (yni): the constraint about return temperature should be
         #  determined by consumer, fix this later
-        # self._constraint_return_temp(model)
         self._constraint_mass_flow(model)
         self._constraint_heat_inputs(model)
         self._constraint_heat_outputs(model)
