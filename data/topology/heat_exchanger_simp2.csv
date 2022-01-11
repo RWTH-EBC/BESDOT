@@ -1,5 +1,5 @@
 comp_name,comp_type,model,min_size,max_size,current_size,water_tes,heat_grid,heat_ex_dhw,dhw_cns
-dhw_cns,HotWaterConsumption,HWCNS1,10,10,0,0,0,0,0
+dhw_cns,HeatConsumption,HeatCNS1,10,10,0,0,0,0,0
 water_tes,HomoStorage,TES_homo,10,10,0,0,0,0,50
 heat_grid,HeatGridFluid,HG1,20,20,0,0,0,100,0
 heat_ex_dhw,HeatExchangerFluid,HE1,2,2,0,50,0,0,0

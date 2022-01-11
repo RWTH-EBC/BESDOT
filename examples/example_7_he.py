@@ -48,6 +48,6 @@ project.run_optimization('gurobi', save_lp=True, save_result=True)
 #                                  Post-processing
 ################################################################################
 
-# result_output_path = os.path.join(base_path, 'data', 'opt_output',
-#                                   project.name + '_result.csv')
-# post_pro.plot_all(result_output_path, time_interval=[0, env_7.time_step])
+result_output_path = os.path.join(base_path, 'data', 'opt_output',
+                                  project.name + '_result.csv')
+post_pro.plot_all(result_output_path, time_interval=[0, env_7.time_step])

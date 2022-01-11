@@ -317,8 +317,8 @@ class Building(object):
         for index, row in self.simp_matrix.iteritems():
             if self.components[index].inputs is not None:
                 for energy_type in self.components[index].inputs:
-                    if len(row[row == 1].index.tolist()) > 0:
-                        input_components = row[row == 1].index.tolist()
+                    if len(row[row > 1].index.tolist()) > 0:
+                        input_components = row[row > 1].index.tolist()
                         input_energy = model.find_component('input_' +
                                                             energy_type + '_' +
                                                             index)
@@ -331,8 +331,8 @@ class Building(object):
         for index, row in self.simp_matrix.iterrows():
             if self.components[index].outputs is not None:
                 for energy_type in self.components[index].outputs:
-                    if len(row[row == 1].index.tolist()) > 0:
-                        output_components = row[row == 1].index.tolist()
+                    if len(row[row > 1].index.tolist()) > 0:
+                        output_components = row[row > 1].index.tolist()
                         output_energy = model.find_component('output_' +
                                                              energy_type + '_' +
                                                              index)
