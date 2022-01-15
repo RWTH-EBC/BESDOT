@@ -7,11 +7,12 @@ Buildings 93, S. 23–31. DOI: 10.1016/j.enbuild.2015.02.031.
 """
 import warnings
 import pyomo.environ as pyo
+from scripts.FluidComponent import FluidComponent
 from scripts.components.HotWaterStorage import HotWaterStorage
 import numpy as np
 
 
-class StratificationStorage(HotWaterStorage):
+class StratificationStorage(FluidComponent, HotWaterStorage):
     def __init__(self, comp_name, comp_type="StratificationStorage",
                  comp_model=None, min_size=0, max_size=1000, current_size=0):
         super().__init__(comp_name=comp_name,
@@ -21,10 +22,6 @@ class StratificationStorage(HotWaterStorage):
                          max_size=max_size,
                          current_size=current_size
                          )
-        self.heat_flows_in = []  # The element in list should be dict,
-        # which includes the tuples, in which shows  the relevant
-        # heat flow variables.
-        self.heat_flows_out = []
 
     def _read_properties(self, properties):
         super()._read_properties(properties)
@@ -38,15 +35,6 @@ class StratificationStorage(HotWaterStorage):
         else:
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for min temperature.")
-
-    def add_heat_flows(self, bld_heat_flows):
-        # check the building heat flows and select the tuples related to this
-        # device to add into list heat_flows.
-        for element in bld_heat_flows:
-            if self.name == element[0]:
-                self.heat_flows_out.append(element)
-            if self.name == element[1]:
-                self.heat_flows_in.append(element)
 
     def _constraint_conver(self, model):
         """
@@ -75,55 +63,14 @@ class StratificationStorage(HotWaterStorage):
         return_temp_var = model.find_component('return_temp_' + self.name)
         loss_var = model.find_component('loss_' + self.name)
         # mass_flow_var = model.find_component('mass_flow_' + self.name)
-        # analyze quantities of circulation for component.
-        energy_flow = {}  # to storage all the energy flows in every circulation
+        for t in range(len(model.time_step)):
+            model.cons.add(hot_water_mass[t+1] <= size*water_density*1000)
         for heat_input in self.heat_flows_in:
             m_in = model.find_component(heat_input[0] + '_' + heat_input[1] +
                                         '_' + 'mass')
-            m_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
-                                         '_' + 'mass')
-            t_in = model.find_component(heat_input[0] + '_' + heat_input[1] +
-                                        '_' + 'temp')
-            t_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
-                                         '_' + 'temp')
-            energy_flow[heat_input] = model.find_component(heat_input[0] + '_' +
-                                                           heat_input[1])
-            for t in range(len(model.time_step)):
-                model.cons.add(energy_flow[heat_input][t + 1] ==
-                               (m_in[t + 1] * t_in[t + 1] - m_out[t + 1] *
-                                t_out[t + 1]) * water_heat_cap / unit_switch)
-
         for heat_output in self.heat_flows_out:
             m_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
                                         '_' + 'mass')
-            m_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
-                                         '_' + 'mass')
-            t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
-                                        '_' + 'temp')
-            t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
-                                         '_' + 'temp')
-            energy_flow[heat_output] = model.find_component(heat_output[0] +
-                                                            '_' +
-                                                            heat_output[1])
-            for t in range(len(model.time_step)):
-                model.cons.add(energy_flow[heat_output][t + 1] ==
-                               (m_out[t + 1] * t_out[t + 1] - m_in[t + 1] *
-                                t_in[t + 1]) * water_heat_cap / unit_switch)
-
-        # sum all energy flow for input energy and output energy
-        for t in range(len(model.time_step)):
-            model.cons.add(input_energy[t + 1] == sum(energy_flow[flow][t + 1]
-                                                      for flow in
-                                                      self.heat_flows_in))
-            model.cons.add(output_energy[t + 1] == sum(energy_flow[flow][t + 1]
-                                                       for flow in
-                                                       self.heat_flows_out))
-
-        for t in range(len(model.time_step)):
-            # model.cons.add(output_energy[t+1] ==
-            #               (temp_var[t+1] - return_temp_var[t+1]) *
-            #               mass_flow_var[t+1] * water_heat_cap / unit_switch)
-            model.cons.add(hot_water_mass[t+1] <= size*water_density*1000)
 
         # todo (yni, yca): check for plausibility.
         for t in range(len(model.time_step) - 1):
@@ -288,6 +235,8 @@ class StratificationStorage(HotWaterStorage):
         self._constraint_return_temp(model)
         self._constraint_mass_flow(model)
         self._constraint_hot_water_mass(model)
+        self._constraint_heat_inputs(model)
+        self._constraint_heat_outputs(model)
         self._constraint_vdi2067(model)
         self._constraint_input_permit(model)
 
