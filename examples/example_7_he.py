@@ -28,7 +28,7 @@ bld_4 = Building(name='bld_7', area=200)
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
 # bld_4.add_thermal_profile('heat', env_4.temp_profile_original, env_4)
-bld_4.demand_profile['heat_demand'] = [5, 0, 5]  # 8 infeasible, 5 feasible
+bld_4.demand_profile['heat_demand'] = [3, 0, 3]  # 3.5 infeasible, 3 feasible
 bld_4.demand_profile['hot_water_demand'] = [0, 0, 1]
 
 # Pre define the building energy system with the topology for different
@@ -48,6 +48,6 @@ project.run_optimization('gurobi', save_lp=True, save_result=True)
 #                                  Post-processing
 ################################################################################
 
-# result_output_path = os.path.join(base_path, 'data', 'opt_output',
-#                                   project.name + '_result.csv')
-# post_pro.plot_all(result_output_path, time_interval=[0, env_7.time_step])
+result_output_path = os.path.join(base_path, 'data', 'opt_output',
+                                  project.name + '_result.csv')
+post_pro.plot_all(result_output_path, time_interval=[0, env_7.time_step])

@@ -56,16 +56,8 @@ class StandardBoiler(FluidComponent, GasBoiler):
 
         temp_var = model.find_component('temp_' + self.name)
         return_temp_var = model.find_component('return_temp_' + self.name)
-        # mass_flow_var = model.find_component('mass_flow_' + self.name)
-        for heat_output in self.heat_flows_out:
-            m_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
-                                        '_' + 'mass')
-
         self.loss = self.exhaust_gas_loss + radiation_loss
         for t in range(len(model.time_step)):
-            model.cons.add(output_energy[t+1] ==
-                           (temp_var[t+1] - return_temp_var[t+1]) *
-                           m_in[t+1] * water_heat_cap / unit_switch)
             model.cons.add(output_energy[t+1] <= size)
             model.cons.add(output_energy[t+1] >= 0.3 * size)
 
@@ -89,13 +81,12 @@ class StandardBoiler(FluidComponent, GasBoiler):
 
     def _constraint_temp(self, model, init_temp=80):
         temp_var = model.find_component('temp_' + self.name)
-        for t in model.time_step:
-            model.cons.add(temp_var[t] == init_temp)
         for heat_output in self.heat_flows_out:
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'temp')
             for t in range(len(model.time_step)):
                 model.cons.add(temp_var[t + 1] == t_out[t + 1])
+                model.cons.add(temp_var[t + 1] == init_temp)
 
     def _constraint_mass_flow(self, model, mass_flow=100):
         for heat_output in self.heat_flows_out:
@@ -110,9 +101,9 @@ class StandardBoiler(FluidComponent, GasBoiler):
     def add_cons(self, model):
         self._constraint_conver(model)
         self._constraint_temp(model)
-        self._constraint_heat_outputs(model)
         self._constraint_vdi2067(model)
-        self._constraint_mass_flow(model, mass_flow=100)
+        self._constraint_mass_flow(model)
+        self._constraint_heat_outputs(model)
 
     def add_vars(self, model):
         super().add_vars(model)
@@ -123,8 +114,6 @@ class StandardBoiler(FluidComponent, GasBoiler):
         return_temp = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('return_temp_' + self.name, return_temp)
 
-        # mass_flow = pyo.Var(model.time_step, bounds=(0, None))
-        # model.add_component('mass_flow_' + self.name, mass_flow)
 
 
 
