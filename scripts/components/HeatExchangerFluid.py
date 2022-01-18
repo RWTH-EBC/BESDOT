@@ -111,12 +111,33 @@ class HeatExchangerFluid(FluidComponent, HeatExchanger):
                                                return_temp_c[t+1]) / 2)
             model.cons.add(input_energy[t+1] == self.k * area * delta_temp[t+1])
 
+    def _constraint_unidirect(self, model):
+        """
+        In order to ensure the unidirectional flow of energy, there are
+        temperature constraints for convection heat exchangers.
+        """
+        heat_input = self.heat_flows_in[0]
+        temp_h = model.find_component(heat_input[0] + '_' + heat_input[1] +
+                                      '_' + 'temp')
+        return_temp_h = model.find_component(heat_input[1] + '_' +
+                                             heat_input[0] + '_' + 'temp')
+        heat_output = self.heat_flows_out[0]
+        temp_c = model.find_component(heat_output[1] + '_' + heat_output[0] +
+                                      '_' + 'temp')
+        return_temp_c = model.find_component(heat_output[0] + '_' +
+                                             heat_output[1] + '_' + 'temp')
+
+        for t in range(len(model.time_step)):
+            model.cons.add(temp_h[t+1] >= return_temp_c[t+1])
+            model.cons.add(return_temp_h[t+1] >= temp_c[t+1])
+
     def add_cons(self, model):
         self._constraint_heat_inputs(model)
         self._constraint_heat_outputs(model)
         self._constraint_mass_flow(model)
         self._constraint_loss(model)
         self._constraint_delta_temp(model)
+        self._constraint_unidirect(model)
         self._constraint_conver(model)
         # self._constraint_maxpower(model)
         self._constraint_vdi2067(model)
