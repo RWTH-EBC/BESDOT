@@ -35,7 +35,7 @@ class StratificationStorage(FluidComponent, HotWaterStorage):
         else:
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for min temperature.")
-
+    # c_e_cons(66)_:求解出的boi_strat_water_tes(1)为负数
     def _constraint_conver(self, model):
         """
         Compared with _constraint_conser, this function turn the pure power
@@ -143,27 +143,6 @@ class StratificationStorage(FluidComponent, HotWaterStorage):
                                         '_' + 'temp')
             for t in range(len(model.time_step)):
                 model.cons.add(return_temp_var[t + 1] == t_in[t + 1])
-
-    def _constraint_mass_flow(self, model):
-        # The mass flow set to be constant as circulation pumps
-        # mass flow unit kg/h
-
-        for heat_input in self.heat_flows_in:
-            m_in = model.find_component(heat_input[0] + '_' + heat_input[1] +
-                                        '_' + 'mass')
-            m_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
-                                         '_' + 'mass')
-            for t in range(len(model.time_step)):
-                model.cons.add(m_in[t + 1] == m_out[t + 1])
-                # todo (yni): default value is used for mass flow
-
-        for heat_output in self.heat_flows_out:
-            m_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
-                                        '_' + 'mass')
-            m_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
-                                         '_' + 'mass')
-            for t in range(len(model.time_step)):
-                model.cons.add(m_in[t + 1] == m_out[t + 1])
 
     def _constraint_hot_water_mass(self, model, init_mass=0.5):
         hot_water_mass = model.find_component('hot_water_mass_' + self.name)
