@@ -211,7 +211,7 @@ class StratificationStorage(FluidComponent, HotWaterStorage):
         self._constraint_conver(model)
         self._constraint_loss(model, loss_type='off')
         self._constraint_temp(model)
-        self._constraint_return_temp(model)
+        # self._constraint_return_temp(model)
         self._constraint_mass_flow(model)
         self._constraint_hot_water_mass(model)
         self._constraint_heat_inputs(model)

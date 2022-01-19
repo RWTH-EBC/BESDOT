@@ -118,6 +118,7 @@ class CondensingBoiler(FluidComponent, GasBoiler):
 
     def add_cons(self, model):
         self._constraint_conver(model)
+        # self._constraint_temp(model)
         self._constraint_return_temp(model)
         self._constraint_vdi2067(model)
         self._constraint_mass_flow(model)
