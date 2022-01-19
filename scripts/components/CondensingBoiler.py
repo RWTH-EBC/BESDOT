@@ -26,6 +26,7 @@ class CondensingBoiler(FluidComponent, GasBoiler):
                          current_size=current_size)
         self.exhaust_gas_loss = calc_exhaust_gas_loss(path, output_path)
 
+    # c_e_cons(54)_解出的boi_water_tes(1)为负数，与stratstorage不可解原因一样
     def _constraint_conver(self, model):
         """
         Compared with _constraint_conver, this function turn the pure power
