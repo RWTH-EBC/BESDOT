@@ -18,7 +18,7 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 project = Project(name='project_7', typ='building')
 
 # Generate the environment object
-env_7 = Environment(time_step=3)
+env_7 = Environment(time_step=24)
 project.add_environment(env_7)
 
 # If the objective of the project is the optimization for building, a building
@@ -28,7 +28,7 @@ bld_4 = Building(name='bld_7', area=200)
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
 # bld_4.add_thermal_profile('heat', env_4.temp_profile_original, env_4)
-bld_4.demand_profile['heat_demand'] = [2, 0, 2]  # 3.5 infeasible, 3 feasible
+bld_4.demand_profile['heat_demand'] = [2, 0] * 12  # 3.5 infeasible, 3 feasible
 bld_4.demand_profile['hot_water_demand'] = [0, 0, 1]
 
 # Pre define the building energy system with the topology for different

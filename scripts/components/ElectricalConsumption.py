@@ -17,6 +17,15 @@ class ElectricalConsumption(Component):
 
         self.consum_profile = consum_profile
 
+    def _read_properties(self, properties):
+        """
+        The component heat consumption is a virtual component which links the
+        inflexible electrical demand of the prosumer to the energy supply system.
+        Therefore the component has an efficiency of 1. The
+        """
+        if not hasattr(self, 'efficiency'):
+            self.efficiency = 1
+
     def _constraint_vdi2067(self, model):
         """
         The electrical consumption has currently no max. power or investment
