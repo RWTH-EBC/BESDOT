@@ -22,7 +22,6 @@ class UnderfloorHeat(FluidComponent):
         # Initial temperature for water in storage is define with a constant
         # value.
         temp_var = model.find_component('temp_' + self.name)
-        model.cons.add(temp_var[1] == init_temp)
 
         for heat_input in self.heat_flows_in:
             t_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
@@ -35,6 +34,7 @@ class UnderfloorHeat(FluidComponent):
                                          '_' + 'temp')
             for t in range(len(model.time_step)):
                 model.cons.add(temp_var[t + 1] == t_out[t + 1])
+                model.cons.add(temp_var[t + 1] == init_temp)
 
     def _constraint_floor_temp(self, model, area=200, room_temp=24):
         output_energy = model.find_component('output_' + self.outputs[0] +
@@ -42,17 +42,16 @@ class UnderfloorHeat(FluidComponent):
         floor_temp = model.find_component('floor_temp_' + self.name)
         delta_t = model.find_component('delta_t' + self.name)
         for t in range(len(model.time_step)):
-            model.cons.add(delta_t[t + 1] == (floor_temp[t + 1] - room_temp) **
+            model.cons.add(delta_t[t+1] == (floor_temp[t+1] - room_temp) **
                            1.1)
-            model.cons.add(output_energy[t + 1] == 8.92 * delta_t[t + 1] * area)
+            model.cons.add(output_energy[t+1] == 8.92 * delta_t[t+1] * area)
 
     def add_cons(self, model):
-        self._constraint_conver(model)
         self._constraint_temp(model)
         self._constraint_mass_flow(model)
         self._constraint_heat_inputs(model)
         self._constraint_heat_outputs(model)
-        self._constraint_floor_temp()
+        # self._constraint_floor_temp(model)
         self._constraint_vdi2067(model)
 
     def add_vars(self, model):

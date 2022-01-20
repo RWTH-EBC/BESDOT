@@ -6,7 +6,7 @@ from scripts.components.HeatExchangerFluid import HeatExchangerFluid
 import math
 
 
-class Radiator(FluidComponent, HeatExchangerFluid):
+class Radiator(HeatExchangerFluid):
     def __init__(self, comp_name, comp_type="Radiator", comp_model=None,
                  min_size=0, max_size=1000, current_size=0):
         super().__init__(comp_name=comp_name,
