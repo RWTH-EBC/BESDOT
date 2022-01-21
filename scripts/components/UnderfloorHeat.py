@@ -41,11 +41,12 @@ class UnderfloorHeat(FluidComponent):
             model.cons.add(output_energy[t+1] == 8.92 * delta_t[t+1] * area)
 
     def add_cons(self, model):
+        self._constraint_conver(model)
         self._constraint_temp(model)
         self._constraint_mass_flow(model)
         self._constraint_heat_inputs(model)
         self._constraint_heat_outputs(model)
-        # self._constraint_floor_temp(model)
+        self._constraint_floor_temp(model)
         self._constraint_vdi2067(model)
 
     def add_vars(self, model):
@@ -55,7 +56,7 @@ class UnderfloorHeat(FluidComponent):
         model.add_component('temp_' + self.name, temp)
 
         floor_temp = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('foor_temp_' + self.name, floor_temp)
+        model.add_component('floor_temp_' + self.name, floor_temp)
 
         delta_t = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('delta_T' + self.name, delta_t)

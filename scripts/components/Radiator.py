@@ -19,6 +19,9 @@ class Radiator(HeatExchangerFluid):
     def _constraint_conver(self, model):
         pass
 
+    def _read_properties(self, properties):
+        super()._read_properties(properties)
+
     def _constraint_return_temp(self, model, init_temp=40):
         # The first constraint for return temperature. Assuming a constant
         # temperature difference between flow temperature and return
@@ -41,6 +44,7 @@ class Radiator(HeatExchangerFluid):
 
     def add_cons(self, model):
         self._constraint_conver(model)
+        self._constraint_delta_temp(model)
         # self._constraint_temp(model)
         self._constraint_mass_flow(model)
         self._constraint_heat_inputs(model)
