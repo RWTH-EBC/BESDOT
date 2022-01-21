@@ -19,31 +19,14 @@ class Radiator(HeatExchangerFluid):
     def _constraint_conver(self, model):
         pass
 
-    def _constraint_temp(self, model):
-        # Initial temperature for water in storage is define with a constant
-        # value.
-        temp_var = model.find_component('temp_' + self.name)
-        model.cons.add(temp_var[1] == init_temp)
-
-        for heat_input in self.heat_flows_in:
-            t_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
-                                         '_' + 'temp')
-            for t in range(len(model.time_step)):
-                model.cons.add(temp_var[t + 1] == t_out[t + 1])
-
-        for heat_output in self.heat_flows_out:
-            t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
-                                         '_' + 'temp')
-            for t in range(len(model.time_step)):
-                model.cons.add(temp_var[t + 1] == t_out[t + 1])
-
-    def _constraint_return_temp(self, model, init_temp=20):
+    def _constraint_return_temp(self, model, init_temp=40):
         # The first constraint for return temperature. Assuming a constant
         # temperature difference between flow temperature and return
         # temperature.
         return_temp_var = model.find_component('return_temp_' + self.name)
         for t in model.time_step:
             model.cons.add(return_temp_var[t] == init_temp)
+
         for heat_input in self.heat_flows_in:
             t_in = model.find_component(heat_input[0] + '_' + heat_input[1] +
                                         '_' + 'temp')

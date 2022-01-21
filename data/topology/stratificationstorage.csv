@@ -2,4 +2,4 @@ comp_name,comp_type,model,min_size,max_size,current_size,therm_cns,strat_water_t
 therm_cns,HeatConsumption,HeatCNS1,10,10,0,0,0,0,0
 strat_water_tes,StratificationStorage,TSS_strat,0,10,0,,0,0,0
 gas_grid,GasGrid,GAS1,10,10,0,0,0,0,50
-boi,GasBoiler,BOI1,0,2,0,0,100,0,0
+boi,GasBoiler,BOI1,0,2,0,0,,0,0

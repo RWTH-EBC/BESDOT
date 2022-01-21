@@ -107,39 +107,27 @@ class StratificationStorage(FluidComponent, HotWaterStorage):
                 model.cons.add(loss_var[t + 1] == 1.5 * ((temp_var[t + 1] -
                                                           20) / 1000))
 
-    def _constraint_temp(self, model, init_temp=60):
+    def _constraint_temp(self, model, upper_temp=60):
         # Initial temperature for water in storage is define with a constant
         # value.
         temp_var = model.find_component('temp_' + self.name)
         for t in model.time_step:
-            model.cons.add(temp_var[t] == init_temp)
-        for heat_input in self.heat_flows_in:
-            t_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
+            model.cons.add(temp_var[t] == upper_temp)
+        for heat_input in self.heat_flows_in + self.heat_flows_out:
+            t_out = model.find_component(heat_input[0] + '_' + heat_input[1] +
                                          '_' + 'temp')
             for t in range(len(model.time_step)):
                 model.cons.add(temp_var[t + 1] == t_out[t + 1])
 
-        for heat_output in self.heat_flows_out:
-            t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
-                                         '_' + 'temp')
-            for t in range(len(model.time_step)):
-                model.cons.add(temp_var[t + 1] == t_out[t + 1])
-
-    def _constraint_return_temp(self, model, init_temp=20):
+    def _constraint_return_temp(self, model, lower_temp=20):
         # The first constraint for return temperature. Assuming a constant
         # temperature difference between flow temperature and return
         # temperature.
         return_temp_var = model.find_component('return_temp_' + self.name)
         for t in model.time_step:
-            model.cons.add(return_temp_var[t] == init_temp)
-        for heat_input in self.heat_flows_in:
-            t_in = model.find_component(heat_input[0] + '_' + heat_input[1] +
-                                        '_' + 'temp')
-            for t in range(len(model.time_step)):
-                model.cons.add(return_temp_var[t + 1] == t_in[t + 1])
-
-        for heat_output in self.heat_flows_out:
-            t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
+            model.cons.add(return_temp_var[t] == lower_temp)
+        for heat_input in self.heat_flows_in + self.heat_flows_out:
+            t_in = model.find_component(heat_input[1] + '_' + heat_input[0] +
                                         '_' + 'temp')
             for t in range(len(model.time_step)):
                 model.cons.add(return_temp_var[t + 1] == t_in[t + 1])
@@ -211,7 +199,7 @@ class StratificationStorage(FluidComponent, HotWaterStorage):
         self._constraint_conver(model)
         self._constraint_loss(model, loss_type='off')
         self._constraint_temp(model)
-        # self._constraint_return_temp(model)
+        self._constraint_return_temp(model)
         self._constraint_mass_flow(model)
         self._constraint_hot_water_mass(model)
         self._constraint_heat_inputs(model)
