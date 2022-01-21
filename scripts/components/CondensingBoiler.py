@@ -86,7 +86,7 @@ class CondensingBoiler(FluidComponent, GasBoiler):
                            water_heat_cap * condensation_mass[t + 1] *
                            (160 - return_temp_var[t + 1]))
 
-    def _constraint_temp(self, model, init_temp=80):
+    def _constraint_temp(self, model, init_temp=58):
         temp_var = model.find_component('temp_' + self.name)
         model.cons.add(temp_var[1] == init_temp)
         for heat_output in self.heat_flows_out:
