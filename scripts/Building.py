@@ -46,9 +46,9 @@ class Building(object):
         if annual_heat_demand is None:
             self.add_annual_demand('heat')
         elif not isinstance(annual_heat_demand, float):
-                warn_msg = 'The annual_heat_demand of ' + self.name + \
-                           ' is not float, need to check.'
-                warnings.warn(warn_msg)
+            warn_msg = 'The annual_heat_demand of ' + self.name + \
+                       ' is not float, need to check.'
+            warnings.warn(warn_msg)
         else:
             self.annual_demand["heat_demand"] = annual_heat_demand
 
@@ -154,8 +154,11 @@ class Building(object):
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
-                elif comp_type in ['PV', 'SolarThermalCollector']:
+                elif comp_type in ['PV', 'SolarThermalCollector',
+                                   'SolarThermalCollectorFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
+                                                      temp_profile=
+                                                      env.temp_profile,
                                                       irr_profile=
                                                       env.irr_profile,
                                                       comp_model=comp_model,
@@ -445,5 +448,5 @@ class Building(object):
                                                  buy_gas[t] * env.gas_price +
                                                  buy_heat[t] *
                                                  env.heat_price - sell_elec[
-                                                  t] * env.elec_feed_price
+                                                     t] * env.elec_feed_price
                                                  for t in model.time_step))
