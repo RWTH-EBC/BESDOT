@@ -27,13 +27,6 @@ class SolarThermalCollectorFluid(FluidComponent):
         self.solar_liquid_heat_cap = 4.18 * 10 ** 3  # Unit J/kgK
         self.unit_switch = 3600 * 1000  # J/kWh
 
-    # def add_heat_flows(self, bld_heat_flows):
-    #     for element in bld_heat_flows:
-    #         if self.name == element[0]:
-    #             self.heat_flows_out.append(element)
-    #         if self.name == element[1]:
-    #             self.heat_flows_in.append(element)
-
     def _constraint_irr_input(self, model):
         input_irr = model.find_component('input_irr_' + self.name)
         area = model.find_component('solar_area_' + self.name)
@@ -70,7 +63,7 @@ class SolarThermalCollectorFluid(FluidComponent):
             for t in model.time_step:
                 model.cons.add(average_temp[t] == (t_in[t] + t_out[t]) / 2)
                 model.cons.add(delta_temp[t] == average_temp[t] -
-                               self.temp_profile[t])
+                               self.temp_profile[t-1])
                 model.cons.add(
                     eff[t] == self.OpticalEfficiency - self.K * delta_temp[t])
 
@@ -110,7 +103,6 @@ class SolarThermalCollectorFluid(FluidComponent):
                             t]) * self.unit_switch)
                 else:
                     model.cons.add(output_energy[t] == 0)
-                model.cons.add(t_in[t] <= t_out[t])
 
     # todo: building.py anpassen
     def _constraint_temp(self, model):
@@ -125,6 +117,7 @@ class SolarThermalCollectorFluid(FluidComponent):
             for t in model.time_step:
                 model.cons.add(temp_var[t] == t_out[t])
                 model.cons.add(20 == t_in[t])
+                model.cons.add(t_in[t] <= t_out[t])
 
     def add_cons(self, model):
         # super().add_cons(model)
