@@ -36,10 +36,10 @@ class SolarThermalCollectorFluid(FluidComponent):
 
     def _constraint_irr_input(self, model):
         input_irr = model.find_component('input_irr_' + self.name)
-        area = model.find_component('area_' + self.name)
+        area = model.find_component('solar_area_' + self.name)
         for t in model.time_step:
             model.cons.add(
-                input_irr[t] == area * self.irr_profile[t] / 1000)  # kWh
+                input_irr[t] == area * self.irr_profile[t-1] / 1000)  # kWh
 
     def _constraint_efficiency(self, model):
         average_temp = model.find_component('average_temp_' + self.name)
@@ -158,7 +158,7 @@ class SolarThermalCollectorFluid(FluidComponent):
         model.add_component('output_' + self.outputs[0] + '_' + self.name,
                             output_energy)
 
-        input_irr = pyo.Var(bounds=(0, None))
+        input_irr = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('input_irr_' + self.name, input_irr)
 
         area = pyo.Var(bounds=(0, None))
