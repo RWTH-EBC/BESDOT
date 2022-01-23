@@ -14,30 +14,30 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ################################################################################
 
 # Generate a project object at first.
-project = Project(name='project_8', typ='building')
+project = Project(name='project_9', typ='building')
 
 
 # Generate the environment object
-env_8 = Environment(time_step=3)
-project.add_environment(env_8)
+env_9 = Environment(time_step=3)
+project.add_environment(env_9)
 
 # If the objective of the project is the optimization for building, a building
 # should be added to the project.
-bld_8 = Building(name='bld_8', area=200)
+bld_9 = Building(name='bld_9', area=200)
 
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
 # bld_2.add_thermal_profile('heat', env_2.temp_profile_original, env_2)
 
-bld_8.demand_profile['heat_demand'] = [1, 0, 1]
+bld_9.demand_profile['heat_demand'] = [1, 0, 1]
 
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 topo_file = os.path.join(base_path, 'data', 'topology',
-                         'underfloorheat.csv')
-bld_8.add_topology(topo_file)
-bld_8.add_components(project.environment)
-project.add_building(bld_8)
+                         'radiator.csv')
+bld_9.add_topology(topo_file)
+bld_9.add_components(project.environment)
+project.add_building(bld_9)
 
 ################################################################################
 #                        Build pyomo model and run optimization

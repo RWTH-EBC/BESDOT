@@ -2,18 +2,21 @@ from scripts.Component import Component
 import warnings
 import pyomo.environ as pyo
 from scripts.FluidComponent import FluidComponent
+from scripts.components.HeatExchangerFluid import HeatExchangerFluid
 import math
 
 
-class UnderfloorHeat(FluidComponent):
+class UnderfloorHeat(HeatExchangerFluid):
     def __init__(self, comp_name, comp_type="UnderfloorHeat", comp_model=None,
-                 min_size=0, max_size=1000, current_size=0):
+                 min_size=0, max_size=1000, current_size=0, temp=30):
         super().__init__(comp_name=comp_name,
                          comp_type=comp_type,
                          comp_model=comp_model,
                          min_size=min_size,
                          max_size=max_size,
                          current_size=current_size)
+        self.inputs = ['heat']
+        self.outputs = ['heat']
 
     def _constraint_conver(self, model):
         pass
@@ -39,7 +42,7 @@ class UnderfloorHeat(FluidComponent):
         output_energy = model.find_component('output_' + self.outputs[0] +
                                              '_' + self.name)
         floor_temp = model.find_component('floor_temp_' + self.name)
-        delta_t = model.find_component('delta_t' + self.name)
+        delta_t = model.find_component('delta_t_' + self.name)
         for t in range(len(model.time_step)):
             model.cons.add(delta_t[t+1] == (floor_temp[t+1] - room_temp) **
                            1.1)
@@ -64,4 +67,4 @@ class UnderfloorHeat(FluidComponent):
         model.add_component('floor_temp_' + self.name, floor_temp)
 
         delta_t = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('delta_T' + self.name, delta_t)
+        model.add_component('delta_t_' + self.name, delta_t)
