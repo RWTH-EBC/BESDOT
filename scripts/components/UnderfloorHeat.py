@@ -30,6 +30,11 @@ class UnderfloorHeat(FluidComponent):
             for t in range(len(model.time_step)):
                 model.cons.add(temp_var[t + 1] == t_out[t + 1])
 
+    # The total heat output of the underfloor heating can be calculated by the
+    # above equation.
+    # A: The area-specific heat output can be calculated on the room area.
+    # q=8.92*(T_floor - T_air)^1.1
+    # Q=q*A
     def _constraint_floor_temp(self, model, area=200, room_temp=24):
         output_energy = model.find_component('output_' + self.outputs[0] +
                                              '_' + self.name)
