@@ -17,20 +17,17 @@ class Radiator(HeatExchangerFluid):
                          current_size=current_size)
         self.over_temp_n = over_temp_n
 
-    def _constraint_conver(self, model):
-        pass
-
     def _read_properties(self, properties):
         super()._read_properties(properties)
 
-    def _constraint_return_temp(self, model, init_temp=40):
+    def _constraint_temp(self, model, init_temp=40):
         # The first constraint for return temperature. Assuming a constant
         # temperature difference between flow temperature and return
         # temperature.
-        return_temp_var = model.find_component('return_temp_' + self.name)
+        temp_var = model.find_component('temp_' + self.name)
         for t in model.time_step:
-            model.cons.add(return_temp_var[t] == init_temp)
-        for heat_input in self.heat_flows_in + self.heat_flows_out:
+            model.cons.add(temp_var[t] == init_temp)
+        for heat_input in self.heat_flows_in:
             t_out = model.find_component(heat_input[0] + '_' + heat_input[1] +
                                          '_' + 'temp')
             for t in range(len(model.time_step)):
@@ -52,9 +49,12 @@ class Radiator(HeatExchangerFluid):
             model.cons.add(temp_difference[t + 1] == (temp_var[t + 1] +
                                                       return_temp_var[t + 1] - 2
                                                       * room_temp) / 2)
+            #model.cons.add(conversion_factor[t + 1] == (self.over_temp_n /
+            #                                            temp_difference[t + 1])
+            #               ** 1.3)
             model.cons.add(conversion_factor[t + 1] == (self.over_temp_n /
-                                                        temp_difference[t + 1])
-                           ** 1.3)
+                                                        temp_difference[t + 1]))
+
             model.cons.add(input_energy[t + 1] == output_energy[t + 1] *
                            conversion_factor[t + 1])
             model.cons.add(output_energy[t + 1] == self.k * area *
@@ -65,7 +65,6 @@ class Radiator(HeatExchangerFluid):
         self._constraint_delta_temp(model)
         self._constraint_mass_flow(model)
         self._constraint_heat_inputs(model)
-        self._constraint_heat_outputs(model)
         self._constraint_vdi2067(model)
 
     def add_vars(self, model):
