@@ -15,6 +15,7 @@ class Radiator(HeatExchangerFluid):
                          min_size=min_size,
                          max_size=max_size,
                          current_size=current_size)
+        # todo (yca): explanation for over_temp_n
         self.over_temp_n = over_temp_n
 
     def _constraint_conver(self, model):
@@ -28,17 +29,20 @@ class Radiator(HeatExchangerFluid):
         # temperature difference between flow temperature and return
         # temperature.
         return_temp_var = model.find_component('return_temp_' + self.name)
-        for t in model.time_step:
+        for t in model.time_step:  # todo(yca): do this syntax work?
+            # todo (yca): same as underfloorheat
             model.cons.add(return_temp_var[t] == init_temp)
         for heat_input in self.heat_flows_in + self.heat_flows_out:
             t_out = model.find_component(heat_input[0] + '_' + heat_input[1] +
                                          '_' + 'temp')
             for t in range(len(model.time_step)):
+                # fixme (yca): no temp_var is found.
                 model.cons.add(temp_var[t + 1] == t_out[t + 1])
 
     def _constraint_delta_temp(self, model, room_temp=24):
         temp_var = model.find_component('temp_' + self.name)
         return_temp_var = model.find_component('return_temp_' + self.name)
+        # todo: the difference between delta_t_ and tempe_difference_?
         temp_difference = model.find_component('temp_difference_' + self.name)
         conversion_factor = model.find_component('conversion_factor_' +
                                                  self.name)
@@ -55,6 +59,7 @@ class Radiator(HeatExchangerFluid):
             model.cons.add(conversion_factor[t + 1] == (self.over_temp_n /
                                                         temp_difference[t + 1])
                            ** 1.3)
+            # todo: the meaning of following equation
             model.cons.add(input_energy[t + 1] == output_energy[t + 1] *
                            conversion_factor[t + 1])
             model.cons.add(output_energy[t + 1] == self.k * area *

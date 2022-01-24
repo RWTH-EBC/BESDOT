@@ -18,15 +18,20 @@ class UnderfloorHeat(HeatExchangerFluid):
         self.inputs = ['heat']
         self.outputs = ['heat']
 
+    # todo (yca): the reason for the overwrite.
     def _constraint_conver(self, model):
         pass
 
     def _constraint_temp(self, model, init_temp=30):
         # Initial temperature for water in storage is define with a constant
         # value.
+        # fixme (yca): the comment seems unreasonable for Underfloorheat?
         temp_var = model.find_component('temp_' + self.name)
+        # fixme (yca): why temp_var should be the same as init_temp at each
+        #  time step?
         for t in model.time_step:
             model.cons.add(temp_var[t] == init_temp)
+        # todo (yca): does underfloorheat heat_flows_out?
         for heat_input in self.heat_flows_in + self.heat_flows_out:
             t_out = model.find_component(heat_input[0] + '_' + heat_input[1] +
                                          '_' + 'temp')
@@ -39,6 +44,8 @@ class UnderfloorHeat(HeatExchangerFluid):
     # q=8.92*(T_floor - T_air)^1.1
     # Q=q*A
     def _constraint_floor_temp(self, model, area=200, room_temp=24):
+        # todo (yca): this function is a highlight. Is it possible that the
+        #  area is taken from Building object? if not, what is the challenge.
         output_energy = model.find_component('output_' + self.outputs[0] +
                                              '_' + self.name)
         floor_temp = model.find_component('floor_temp_' + self.name)
