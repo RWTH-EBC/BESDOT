@@ -4,6 +4,9 @@ import pyomo.environ as pyo
 from scripts.FluidComponent import FluidComponent
 from scripts.components.HeatExchangerFluid import HeatExchangerFluid
 import math
+water_heat_cap = 4.18 * 10 ** 3  # Unit J/kgK
+water_density = 1000  # kg/m3
+unit_switch = 3600 * 1000  # J/kWh
 
 
 class Radiator(HeatExchangerFluid):
@@ -18,28 +21,7 @@ class Radiator(HeatExchangerFluid):
         # todo (yca): explanation for over_temp_n
         self.over_temp_n = over_temp_n
 
-    def _constraint_conver(self, model):
-        pass
-
-    def _read_properties(self, properties):
-        super()._read_properties(properties)
-
-    def _constraint_return_temp(self, model, init_temp=40):
-        # The first constraint for return temperature. Assuming a constant
-        # temperature difference between flow temperature and return
-        # temperature.
-        return_temp_var = model.find_component('return_temp_' + self.name)
-        for t in model.time_step:  # todo(yca): do this syntax work?
-            # todo (yca): same as underfloorheat
-            model.cons.add(return_temp_var[t] == init_temp)
-        for heat_input in self.heat_flows_in + self.heat_flows_out:
-            t_out = model.find_component(heat_input[0] + '_' + heat_input[1] +
-                                         '_' + 'temp')
-            for t in range(len(model.time_step)):
-                # fixme (yca): no temp_var is found.
-                model.cons.add(temp_var[t + 1] == t_out[t + 1])
-
-    def _constraint_delta_temp(self, model, room_temp=24):
+    def _constraint_conver(self, model, room_temp=24):
         temp_var = model.find_component('temp_' + self.name)
         return_temp_var = model.find_component('return_temp_' + self.name)
         # todo: the difference between delta_t_ and tempe_difference_?
@@ -56,21 +38,35 @@ class Radiator(HeatExchangerFluid):
             model.cons.add(temp_difference[t + 1] == (temp_var[t + 1] +
                                                       return_temp_var[t + 1] - 2
                                                       * room_temp) / 2)
-            model.cons.add(conversion_factor[t + 1] == (self.over_temp_n /
-                                                        temp_difference[t + 1])
-                           ** 1.3)
+            # model.cons.add(conversion_factor[t + 1] == (self.over_temp_n /
+            #                                            temp_difference[t + 1])
+            #               ** 1.3)
             # todo: the meaning of following equation
-            model.cons.add(input_energy[t + 1] == output_energy[t + 1] *
-                           conversion_factor[t + 1])
-            model.cons.add(output_energy[t + 1] == self.k * area *
+             #model.cons.add(input_energy[t + 1] >= output_energy[t + 1] *
+             #              conversion_factor[t + 1])
+            model.cons.add(input_energy[t + 1] >= output_energy[t + 1] * 1.1)
+            model.cons.add(output_energy[t + 1] * 1000 == self.k * area *
                            temp_difference[t + 1])
+
+    def _read_properties(self, properties):
+        super()._read_properties(properties)
+
+    def _constraint_temp(self, model, init_temp=40):
+        temp_var = model.find_component('temp_' + self.name)
+        for t in model.time_step:  # todo(yca): do this syntax work?
+            # todo (yca): same as underfloorheat
+            model.cons.add(temp_var[t] == init_temp)
+        for heat_input in self.heat_flows_in:
+            t_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
+                                         '_' + 'temp')
+            for t in range(len(model.time_step)):
+                model.cons.add(temp_var[t + 1] == t_out[t + 1])
 
     def add_cons(self, model):
         self._constraint_conver(model)
-        self._constraint_delta_temp(model)
+        self._constraint_temp(model)
         self._constraint_mass_flow(model)
         self._constraint_heat_inputs(model)
-        self._constraint_heat_outputs(model)
         self._constraint_vdi2067(model)
 
     def add_vars(self, model):
