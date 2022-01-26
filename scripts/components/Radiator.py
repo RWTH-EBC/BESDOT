@@ -26,6 +26,7 @@ class Radiator(HeatExchangerFluid):
         self.over_temp_n = over_temp_n
 
     # todo(yca):same as underfloorheat.
+    # todo(yca): size(area) always be the min_size
     def _constraint_conver(self, model, room_temp=24):
         temp_var = model.find_component('temp_' + self.name)
         return_temp_var = model.find_component('return_temp_' + self.name)
