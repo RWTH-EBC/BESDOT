@@ -15,7 +15,7 @@ import numpy as np
 class StratificationStorage(FluidComponent, HotWaterStorage):
     def __init__(self, comp_name, comp_type="StratificationStorage",
                  comp_model=None, min_size=0, max_size=1000, current_size=0,
-                 upper_temp=60, lower_temp=20):
+                 upper_temp=60, lower_temp=30):
         super().__init__(comp_name=comp_name,
                          comp_type=comp_type,
                          comp_model=comp_model,
@@ -57,15 +57,10 @@ class StratificationStorage(FluidComponent, HotWaterStorage):
 
         input_energy = model.find_component('input_' + self.inputs[0] + '_' +
                                             self.name)
-        output_energy = model.find_component('output_' + self.outputs[0] +
-                                             '_' + self.name)
         hot_water_mass = model.find_component('hot_water_mass_' + self.name)
         size = model.find_component('size_' + self.name)
 
-        temp_var = model.find_component('temp_' + self.name)
-        return_temp_var = model.find_component('return_temp_' + self.name)
         loss_var = model.find_component('loss_' + self.name)
-        # mass_flow_var = model.find_component('mass_flow_' + self.name)
         for t in range(len(model.time_step)):
             model.cons.add(hot_water_mass[t+1] <= size*water_density*1000)
         for heat_input in self.heat_flows_in:

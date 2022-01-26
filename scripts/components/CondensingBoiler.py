@@ -26,7 +26,6 @@ class CondensingBoiler(FluidComponent, GasBoiler):
                          current_size=current_size)
         self.exhaust_gas_loss = calc_exhaust_gas_loss(path, output_path)
 
-    # c_e_cons(54)_解出的boi_water_tes(1)为负数，与stratstorage不可解原因一样
     def _constraint_conver(self, model):
         """
         Compared with _constraint_conver, this function turn the pure power
@@ -86,7 +85,8 @@ class CondensingBoiler(FluidComponent, GasBoiler):
                            water_heat_cap * condensation_mass[t + 1] *
                            (160 - return_temp_var[t + 1]))
 
-    def _constraint_temp(self, model, init_temp=80):
+    # todo(yca): init_temp is too high, think about it.
+    def _constraint_temp(self, model, init_temp=70):
         temp_var = model.find_component('temp_' + self.name)
         model.cons.add(temp_var[1] == init_temp)
         for heat_output in self.heat_flows_out:
