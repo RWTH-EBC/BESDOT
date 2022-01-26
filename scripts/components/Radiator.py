@@ -18,9 +18,14 @@ class Radiator(HeatExchangerFluid):
                          min_size=min_size,
                          max_size=max_size,
                          current_size=current_size)
-        # todo (yca): explanation for over_temp_n
+        # According to EN 442, the standard output of radiators is specified at
+        # 75/65/20 °C, i.e. at tV = 75 °C (flow), tR = 65 °C (return) and tL =
+        # 20 °C (room air) and at the usual atmospheric pressure (1013 mbar).
+        # The standard overtemperature was calculated from the log-average
+        # formula.(49.8)
         self.over_temp_n = over_temp_n
 
+    # todo(yca):same as underfloorheat.
     def _constraint_conver(self, model, room_temp=24):
         temp_var = model.find_component('temp_' + self.name)
         return_temp_var = model.find_component('return_temp_' + self.name)

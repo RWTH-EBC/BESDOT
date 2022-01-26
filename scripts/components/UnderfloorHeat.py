@@ -18,7 +18,8 @@ class UnderfloorHeat(HeatExchangerFluid):
                          max_size=max_size,
                          current_size=current_size)
 
-    # todo (yca): the reason for the overwrite.
+    # todo (yca): water_tes_under_heat is always constant,if massflow, temp and
+    #  return temp were set.
     def _constraint_conver(self, model):
         input_energy = model.find_component('input_' + self.inputs[0] +
                                             '_' + self.name)
@@ -29,10 +30,7 @@ class UnderfloorHeat(HeatExchangerFluid):
         #    model.cons.add(input_energy[t + 1] >= output_energy[t + 1])
 
     def _constraint_temp(self, model, init_temp=30):
-        # fixme (yca): the comment seems unreasonable for Underfloorheat?
         temp_var = model.find_component('temp_' + self.name)
-        # fixme (yca): why temp_var should be the same as init_temp at each
-        #  time step?
         for t in model.time_step:
             model.cons.add(temp_var[t] == init_temp)
         for heat_input in self.heat_flows_in:
