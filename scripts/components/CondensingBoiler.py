@@ -95,7 +95,7 @@ class CondensingBoiler(FluidComponent, GasBoiler):
             for t in range(len(model.time_step)):
                 model.cons.add(temp_var[t + 1] == t_out[t + 1])
 
-    def _constraint_return_temp(self, model, init_return_temp=55):
+    def _constraint_return_temp(self, model, init_return_temp=30):
         return_temp_var = model.find_component('return_temp_' + self.name)
         for t in model.time_step:
             model.cons.add(return_temp_var[t] == init_return_temp)
@@ -106,7 +106,7 @@ class CondensingBoiler(FluidComponent, GasBoiler):
             for t in range(len(model.time_step)):
                 model.cons.add(return_temp_var[t + 1] == t_in[t + 1])
 
-    def _constraint_mass_flow(self, model, mass_flow=100):
+    def _constraint_mass_flow(self, model):
         for heat_output in self.heat_flows_out:
             m_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
                                         '_' + 'mass')
@@ -114,12 +114,12 @@ class CondensingBoiler(FluidComponent, GasBoiler):
                                          '_' + 'mass')
             for t in range(len(model.time_step)):
                 model.cons.add(m_in[t + 1] == m_out[t + 1])
-                model.cons.add(m_in[t + 1] == mass_flow)
+                #model.cons.add(m_in[t + 1] == mass_flow)
 
     def add_cons(self, model):
         self._constraint_conver(model)
         self._constraint_temp(model)
-        #self._constraint_return_temp(model)
+        self._constraint_return_temp(model)
         self._constraint_vdi2067(model)
         self._constraint_mass_flow(model)
         self._constraint_heat_outputs(model)

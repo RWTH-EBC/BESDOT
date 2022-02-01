@@ -9,7 +9,7 @@ water_density = 1000  # kg/m3
 unit_switch = 3600 * 1000  # J/kWh
 
 
-class Radiator(HeatExchangerFluid):
+class Radiator(HeatExchangerFluid, FluidComponent):
     def __init__(self, comp_name, comp_type="Radiator", comp_model=None,
                  min_size=0, max_size=1000, current_size=0, over_temp_n=49.8):
         super().__init__(comp_name=comp_name,

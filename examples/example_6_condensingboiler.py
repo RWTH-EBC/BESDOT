@@ -34,7 +34,7 @@ bld_6.demand_profile['heat_demand'] = [1, 0, 1]
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 topo_file = os.path.join(base_path, 'data', 'topology',
-                         'condensingboiler.csv')
+                         'condensingboiler2.csv')
 bld_6.add_topology(topo_file)
 bld_6.add_components(project.environment)
 project.add_building(bld_6)

@@ -8,7 +8,7 @@ import math
 area = 200
 
 
-class UnderfloorHeat(HeatExchangerFluid):
+class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
     def __init__(self, comp_name, comp_type="UnderfloorHeat", comp_model=None,
                  min_size=0, max_size=1000, current_size=0):
         super().__init__(comp_name=comp_name,
@@ -44,7 +44,6 @@ class UnderfloorHeat(HeatExchangerFluid):
     # A: The area-specific heat output can be calculated on the room area.
     # q=8.92*(T_floor - T_air)^1.1
     # Q=q*A
-    # todo(yca): area as variable combine with Building.
     def _constraint_floor_temp(self, model, room_temp=24):
         # todo (yca): this function is a highlight. Is it possible that the
         #  area is taken from Building object? if not, what is the challenge.
