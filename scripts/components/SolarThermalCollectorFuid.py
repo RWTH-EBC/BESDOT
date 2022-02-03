@@ -26,6 +26,7 @@ class SolarThermalCollectorFluid(FluidComponent):
         self.irr_profile = irr_profile
         self.solar_liquid_heat_cap = 4.18 * 10 ** 3  # Unit J/kgK
         self.unit_switch = 3600 * 1000  # J/kWh
+        self.max_temp = 135
 
     def _constraint_irr_input(self, model):
         input_irr = model.find_component('input_irr_' + self.name)
@@ -95,7 +96,7 @@ class SolarThermalCollectorFluid(FluidComponent):
                 # todo: bld_8.water_tes_solar_coll_temp[t]
                 model.cons.add(ctr_temp_diff[t] == t_out[t] - 20)
                 # todo: Regelung
-                if ctr_temp_diff[t] >= 5:
+                if ctr_temp_diff[t] >= 5 :
                     model.cons.add(output_energy[t] == input_energy[t])
                     model.cons.add(
                         output_energy[t] == self.solar_liquid_heat_cap * (
@@ -118,6 +119,7 @@ class SolarThermalCollectorFluid(FluidComponent):
                 model.cons.add(temp_var[t] == t_out[t])
                 model.cons.add(20 == t_in[t])
                 model.cons.add(t_in[t] <= t_out[t])
+                model.cons.add(t_in[t] <= self.max_temp)
 
     def add_cons(self, model):
         # super().add_cons(model)
@@ -127,29 +129,26 @@ class SolarThermalCollectorFluid(FluidComponent):
         self._constraint_heat_outputs(model)
         self._constraint_conver(model)
         self._constraint_temp(model)
-        self._constraint_mass_flow(model)
-        self._constraint_temp(model)
-        self._constraint_vdi2067(model)
 
     def add_vars(self, model):
-        # super().add_vars(model)
+        super().add_vars(model)
 
-        comp_size = pyo.Var(bounds=(self.min_size, self.max_size))
-        model.add_component('size_' + self.name, comp_size)
-
-        annual_cost = pyo.Var(bounds=(0, None))
-        model.add_component('annual_cost_' + self.name, annual_cost)
-
-        invest = pyo.Var(bounds=(0, None))
-        model.add_component('invest_' + self.name, invest)
-
-        input_energy = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('input_' + self.inputs[0] + '_' + self.name,
-                            input_energy)
-
-        output_energy = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('output_' + self.outputs[0] + '_' + self.name,
-                            output_energy)
+        # comp_size = pyo.Var(bounds=(self.min_size, self.max_size))
+        # model.add_component('size_' + self.name, comp_size)
+        #
+        # annual_cost = pyo.Var(bounds=(0, None))
+        # model.add_component('annual_cost_' + self.name, annual_cost)
+        #
+        # invest = pyo.Var(bounds=(0, None))
+        # model.add_component('invest_' + self.name, invest)
+        #
+        # input_energy = pyo.Var(model.time_step, bounds=(0, None))
+        # model.add_component('input_' + self.inputs[0] + '_' + self.name,
+        #                     input_energy)
+        #
+        # output_energy = pyo.Var(model.time_step, bounds=(0, None))
+        # model.add_component('output_' + self.outputs[0] + '_' + self.name,
+        #                     output_energy)
 
         input_irr = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('input_irr_' + self.name, input_irr)
