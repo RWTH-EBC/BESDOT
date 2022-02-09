@@ -26,11 +26,10 @@ class Radiator(HeatExchangerFluid, FluidComponent):
         self.over_temp_n = over_temp_n
 
     # todo(yca):same as underfloorheat.
-    # todo(yca): size(area) always be the min_size
-    def _constraint_conver(self, model, room_temp=24):
+    # todo(yca): NO FUNCTION of Q = C * M * DELTA T
+    def _constraint_conver(self, model, room_temp=24, area=200):
         temp_var = model.find_component('temp_' + self.name)
         return_temp_var = model.find_component('return_temp_' + self.name)
-        # todo: the difference between delta_t_ and tempe_difference_?
         temp_difference = model.find_component('temp_difference_' + self.name)
         conversion_factor = model.find_component('conversion_factor_' +
                                                  self.name)
@@ -38,7 +37,6 @@ class Radiator(HeatExchangerFluid, FluidComponent):
                                             '_' + self.name)
         output_energy = model.find_component('output_' + self.outputs[0] +
                                              '_' + self.name)
-        area = model.find_component('size_' + self.name)
 
         for t in range(len(model.time_step)):
             model.cons.add(temp_difference[t + 1] == (temp_var[t + 1] +
@@ -68,9 +66,19 @@ class Radiator(HeatExchangerFluid, FluidComponent):
             for t in range(len(model.time_step)):
                 model.cons.add(temp_var[t + 1] == t_out[t + 1])
 
+    def _constraint_return_temp(self, model):
+        return_temp_var = model.find_component('return_temp_' + self.name)
+
+        for heat_output in self.heat_flows_in:
+            t_in = model.find_component(heat_output[0] + '_' + heat_output[1] +
+                                        '_' + 'temp')
+            for t in range(len(model.time_step)):
+                model.cons.add(return_temp_var[t + 1] == t_in[t + 1])
+
     def add_cons(self, model):
         self._constraint_conver(model)
         self._constraint_temp(model)
+        #self._constraint_return_temp(model)
         self._constraint_mass_flow(model)
         self._constraint_heat_inputs(model)
         self._constraint_vdi2067(model)

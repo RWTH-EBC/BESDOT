@@ -18,7 +18,7 @@ project = Project(name='project_6', typ='building')
 
 
 # Generate the environment object
-env_6 = Environment(time_step=3)
+env_6 = Environment(time_step=24)
 project.add_environment(env_6)
 
 # If the objective of the project is the optimization for building, a building
@@ -29,12 +29,12 @@ bld_6 = Building(name='bld_6', area=200)
 # Attention! generate thermal with profile whole year temperature profile
 # bld_2.add_thermal_profile('heat', env_2.temp_profile_original, env_2)
 
-bld_6.demand_profile['heat_demand'] = [1, 0, 1]
-
+#bld_6.demand_profile['heat_demand'] = [1, 0] * 12
+bld_6.add_thermal_profile('heat', env_6.temp_profile_original, env_6)
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 topo_file = os.path.join(base_path, 'data', 'topology',
-                         'condensingboiler2.csv')
+                         'condensingboiler.csv')
 bld_6.add_topology(topo_file)
 bld_6.add_components(project.environment)
 project.add_building(bld_6)

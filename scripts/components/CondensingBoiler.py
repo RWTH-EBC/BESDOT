@@ -88,7 +88,8 @@ class CondensingBoiler(FluidComponent, GasBoiler):
     # todo(yca): init_temp is too high, think about it.
     def _constraint_temp(self, model, init_temp=60):
         temp_var = model.find_component('temp_' + self.name)
-        model.cons.add(temp_var[1] == init_temp)
+        for t in model.time_step:
+            model.cons.add(temp_var[t] == init_temp)
         for heat_output in self.heat_flows_out:
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'temp')
@@ -98,7 +99,7 @@ class CondensingBoiler(FluidComponent, GasBoiler):
     def _constraint_return_temp(self, model, init_return_temp=30):
         return_temp_var = model.find_component('return_temp_' + self.name)
         for t in model.time_step:
-            model.cons.add(return_temp_var[t] == init_return_temp)
+            #model.cons.add(return_temp_var[t] == init_return_temp)
             model.cons.add(return_temp_var[t] <= 55)
         for heat_output in self.heat_flows_out:
             t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
