@@ -56,8 +56,10 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
             #model.cons.add(delta_t[t+1] == (floor_temp[t+1] - room_temp) **
             #               1.1)
             model.cons.add(delta_t[t + 1] == (floor_temp[t + 1] - room_temp))
-            model.cons.add(output_energy[t+1] * 1000 == 8.92 * delta_t[t+1] *
-                           area)
+            model.cons.add(output_energy[t+1] * 1000 == 8.92 * ((24-21)**1.1+1.1
+                                                                * (24-21)**0.1 *
+                                                                (floor_temp[t +
+                                                                 1]-24)) * area)
 
     def add_cons(self, model):
         self._constraint_conver(model)
