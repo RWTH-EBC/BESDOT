@@ -21,12 +21,9 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
     # todo (yca): water_tes_under_heat is always constant,if massflow, temp and
     #  return temp were set.
     def _constraint_conver(self, model):
-        input_energy = model.find_component('input_' + self.inputs[0] +
-                                            '_' + self.name)
-        output_energy = model.find_component('output_' + self.outputs[0] +
-                                             '_' + self.name)
-
-        #for t in range(len(model.time_step) - 1):
+        input_energy = model.find_component('input_' + self.inputs[0] + '_' +
+                                            self.name)
+        # for t in range(len(model.time_step) - 1):
         #    model.cons.add(input_energy[t + 1] >= output_energy[t + 1])
 
     def _constraint_temp(self, model, init_temp=30):
@@ -38,13 +35,28 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
                                          '_' + 'temp')
             for t in range(len(model.time_step)):
                 model.cons.add(temp_var[t + 1] == t_out[t + 1])
+        for heat_output in self.heat_flows_out:
+            t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
+                                         '_' + 'temp')
+            for t in range(len(model.time_step)):
+                model.cons.add(temp_var[t + 1] == t_out[t + 1])
+
+    def _constraint_return_temp(self, model, init_return_temp=20):
+        return_temp_var = model.find_component('return_temp_' + self.name)
+        model.cons.add(return_temp_var[1] == init_return_temp)
+        for heat_output in self.heat_flows_out:
+            t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
+                                        '_' + 'temp')
+            for t in range(len(model.time_step)):
+                model.cons.add(return_temp_var[t + 1] == t_in[t + 1])
 
     # The total heat output of the underfloor heating can be calculated by the
     # above equation.
     # A: The area-specific heat output can be calculated on the room area.
     # q=8.92*(T_floor - T_air)^1.1
     # Q=q*A
-    def _constraint_floor_temp(self, model, room_temp=24):
+    def _constraint_floor_temp(self, model, room_temp=21,
+                               floor_temp_approximate=24):
         # todo (yca): this function is a highlight. Is it possible that the
         #  area is taken from Building object? if not, what is the challenge.
         output_energy = model.find_component('output_' + self.outputs[0] +
@@ -56,16 +68,18 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
             #model.cons.add(delta_t[t+1] == (floor_temp[t+1] - room_temp) **
             #               1.1)
             model.cons.add(delta_t[t + 1] == (floor_temp[t + 1] - room_temp))
-            model.cons.add(output_energy[t+1] * 1000 == 8.92 * ((24-21)**1.1+1.1
-                                                                * (24-21)**0.1 *
-                                                                (floor_temp[t +
-                                                                 1]-24)) * area)
+            model.cons.add(output_energy[t+1] * 1000 == 8.92 * (
+                    (floor_temp_approximate-room_temp)**1.1+1.1 *
+                    (floor_temp_approximate-room_temp)**0.1 * (floor_temp[t + 1]
+                                                               - 24)) * area)
 
     def add_cons(self, model):
         self._constraint_conver(model)
         self._constraint_temp(model)
+        # self._constraint_return_temp(model)
         self._constraint_mass_flow(model)
         self._constraint_heat_inputs(model)
+        self._constraint_heat_outputs(model)
         self._constraint_floor_temp(model)
         self._constraint_vdi2067(model)
 
@@ -74,6 +88,9 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
 
         temp = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('temp_' + self.name, temp)
+
+        return_temp = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('return_temp_' + self.name, return_temp)
 
         floor_temp = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('floor_temp_' + self.name, floor_temp)
