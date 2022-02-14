@@ -88,7 +88,7 @@ class StandardBoiler(FluidComponent, GasBoiler):
                 model.cons.add(temp_var[t + 1] == t_out[t + 1])
                 model.cons.add(temp_var[t + 1] == init_temp)
 
-    def _constraint_mass_flow(self, model, mass_flow=100):
+    def _constraint_mass_flow(self, model):
         for heat_output in self.heat_flows_out:
             m_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
                                         '_' + 'mass')
@@ -96,7 +96,7 @@ class StandardBoiler(FluidComponent, GasBoiler):
                                          '_' + 'mass')
             for t in range(len(model.time_step)):
                 model.cons.add(m_in[t + 1] == m_out[t + 1])
-                model.cons.add(m_in[t + 1] == mass_flow)
+                #model.cons.add(m_in[t + 1] == mass_flow)
 
     def add_cons(self, model):
         self._constraint_conver(model)
