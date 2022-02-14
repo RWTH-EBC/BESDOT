@@ -306,7 +306,11 @@ class Building(object):
         self._constraint_operation_cost(model, env)
         for comp in self.components:
             if hasattr(self.components[comp], 'heat_flows_in'):
-                self.components[comp].add_heat_flows(self.energy_flow)
+                if isinstance(self.components[comp].heat_flows_in, list):
+                    self.components[comp].add_heat_flows_in(self.energy_flow)
+            if hasattr(self.components[comp], 'heat_flows_out'):
+                if isinstance(self.components[comp].heat_flows_out, list):
+                    self.components[comp].add_heat_flows_out(self.energy_flow)
             self.components[comp].add_cons(model)
 
     def _constraint_energy_balance(self, model):

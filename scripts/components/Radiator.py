@@ -18,6 +18,7 @@ class Radiator(HeatExchangerFluid, FluidComponent):
                          min_size=min_size,
                          max_size=max_size,
                          current_size=current_size)
+        self.heat_flows_out = None
         # According to EN 442, the standard output of radiators is specified at
         # 75/65/20 °C, i.e. at tV = 75 °C (flow), tR = 65 °C (return) and tL =
         # 20 °C (room air) and at the usual atmospheric pressure (1013 mbar).

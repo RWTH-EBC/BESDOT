@@ -25,6 +25,7 @@ class StandardBoiler(FluidComponent, GasBoiler):
                          max_size=max_size,
                          current_size=current_size,
                          )
+        self.heat_flows_in = None
         self.exhaust_gas_loss = calc_exhaust_gas_loss(path, output_path)
 
     def _constraint_conver(self, model):

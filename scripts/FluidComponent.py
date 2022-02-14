@@ -31,14 +31,19 @@ class FluidComponent(Component):
         # heat flow variables.
         self.heat_flows_out = []
 
-    def add_heat_flows(self, bld_heat_flows):
+    def add_heat_flows_in(self, bld_heat_flows):
+        # check the building heat flows and select the tuples related to this
+        # device to add into list heat_flows.
+        for element in bld_heat_flows:
+            if self.name == element[1]:
+                self.heat_flows_in.append(element)
+
+    def add_heat_flows_out(self, bld_heat_flows):
         # check the building heat flows and select the tuples related to this
         # device to add into list heat_flows.
         for element in bld_heat_flows:
             if self.name == element[0]:
                 self.heat_flows_out.append(element)
-            if self.name == element[1]:
-                self.heat_flows_in.append(element)
 
     def _constraint_heat_inputs(self, model):
         """
