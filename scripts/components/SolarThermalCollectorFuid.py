@@ -24,7 +24,7 @@ class SolarThermalCollectorFluid(FluidComponent):
         self.outputs = ['heat']
         self.temp_profile = temp_profile
         self.irr_profile = irr_profile
-        self.solar_liquid_heat_cap = 4.18 * 10 ** 3  # Unit J/kgK
+        self.solar_liquid_heat_cap = 4180  # J/kgK
         self.unit_switch = 3600 * 1000  # J/kWh
         self.max_temp = 135
 
