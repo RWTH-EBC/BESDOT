@@ -101,7 +101,7 @@ class SolarThermalCollectorFluid(FluidComponent):
                     model.cons.add(
                         output_energy[t] == self.solar_liquid_heat_cap * (
                                 m_out[t] * t_out[t] - m_in[t] * t_in[
-                            t]) * self.unit_switch)
+                            t]) / self.unit_switch)
                 else:
                     model.cons.add(output_energy[t] == 0)
 
