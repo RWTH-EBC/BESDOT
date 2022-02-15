@@ -58,8 +58,7 @@ class Radiator(HeatExchangerFluid, FluidComponent):
 
     def _constraint_temp(self, model, init_temp=40):
         temp_var = model.find_component('temp_' + self.name)
-        for t in model.time_step:  # todo(yca): do this syntax work?
-            # todo (yca): same as underfloorheat
+        for t in model.time_step:
             model.cons.add(temp_var[t] == init_temp)
         for heat_input in self.heat_flows_in:
             t_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
