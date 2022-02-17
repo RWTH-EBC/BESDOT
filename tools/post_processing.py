@@ -7,6 +7,7 @@ import copy
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Attention! The elec_list and heat_list use the name from topology
 # matrix, for different scenario the name for each component may change.
@@ -46,13 +47,27 @@ def plot_all(csv_file, time_interval):
 
 
 def plot_single(name, profile):
-    plt.figure()
-    plt.plot(profile, linewidth=2)
-    plt.title('Profile of ' + name)
-    plt.ylabel('kW')
-    plt.xlabel('Hours [h]')
-    plt.ylim(ymin=0, ymax=max(profile)*1.2)
-    plt.xlim(xmin=0)
+    fig, ax = plt.subplots(figsize=(14, 7))
+    # ax = fig.add_subplot(1, 1)
+    ax.plot(profile, linewidth=2, color='r', marker='o', linestyle='dashed')
+    ax.set_title('Profile of ' + name, fontsize=18, backgroundcolor='#3c7f99',
+                 fontweight='bold', color='white', verticalalignment="baseline")
+    ax.set_xlabel('Hours [h]')
+    if 'mass' in name:
+        ax.set_ylabel('KG/H', fontsize=16)
+    elif 'temp' in name:
+        ax.set_ylabel('°', fontsize=16)
+    else:
+        ax.set_ylabel('KW', fontsize=16)
+    ax.set_xlim(xmin=0)
+    ax.set_ylim(ymin=0, ymax=max(profile)*1.2)
+    # plt.figure()
+    #plt.plot(profile, linewidth=2)
+    #plt.title('Profile of ' + name)
+    #plt.ylabel('kW')
+    #plt.xlabel('Hours [h]')
+    #plt.ylim(ymin=0, ymax=max(profile)*1.2)
+    #plt.xlim(xmin=0)
     plt.grid()
 
     plt.show()
