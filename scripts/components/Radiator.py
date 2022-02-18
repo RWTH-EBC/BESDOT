@@ -26,8 +26,6 @@ class Radiator(HeatExchangerFluid, FluidComponent):
         # formula.(49.8)
         self.over_temp_n = over_temp_n
 
-    # todo(yca):same as underfloorheat.
-    # todo(yca): NO FUNCTION of Q = C * M * DELTA T
     def _constraint_conver(self, model, room_temp=24, area=200):
         temp_var = model.find_component('temp_' + self.name)
         return_temp_var = model.find_component('return_temp_' + self.name)
@@ -90,7 +88,7 @@ class Radiator(HeatExchangerFluid, FluidComponent):
         self._constraint_return_temp(model)
         self._constraint_mass_flow(model)
         self._constraint_heat_inputs(model)
-        self._constraint_heat_outputs(model)
+        #self._constraint_heat_outputs(model)
         self._constraint_vdi2067(model)
 
     def add_vars(self, model):

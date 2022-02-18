@@ -47,7 +47,7 @@ def plot_all(csv_file, time_interval):
 
 
 def plot_single(name, profile):
-    fig, ax = plt.subplots(figsize=(14, 7))
+    fig, ax = plt.subplots(figsize=(14, 14))
     # ax = fig.add_subplot(1, 1)
     ax.plot(profile, linewidth=2, color='r', marker='o', linestyle='dashed')
     ax.set_title('Profile of ' + name, fontsize=12, backgroundcolor='#3c7f99',
