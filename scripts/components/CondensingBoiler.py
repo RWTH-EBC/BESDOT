@@ -24,6 +24,7 @@ class CondensingBoiler(FluidComponent, GasBoiler):
                          min_size=min_size,
                          max_size=max_size,
                          current_size=current_size)
+        self.heat_flows_in = None
         self.exhaust_gas_loss = calc_exhaust_gas_loss(path, output_path)
 
     def _constraint_conver(self, model):
@@ -77,6 +78,8 @@ class CondensingBoiler(FluidComponent, GasBoiler):
         for t in range(len(model.time_step) - 1):
             model.cons.add((input_energy[t + 2] + condensation_heat[t + 1]) *
                            (100 - self.loss) == output_energy[t + 2] * 100)
+            model.cons.add((input_energy[1]) *
+                           (100 - self.loss) == output_energy[1] * 100)
         # The temperature of the uncondensed gas, which is assumed to be 160
         # degrees according to the lesson, then it is condensed to below the
         # return temperature, thus obtaining the heat of condensation.
@@ -96,7 +99,7 @@ class CondensingBoiler(FluidComponent, GasBoiler):
             for t in range(len(model.time_step)):
                 model.cons.add(temp_var[t + 1] == t_out[t + 1])
 
-    def _constraint_return_temp(self, model, init_return_temp=30):
+    def _constraint_return_temp(self, model):
         return_temp_var = model.find_component('return_temp_' + self.name)
         for t in model.time_step:
             #model.cons.add(return_temp_var[t] == init_return_temp)
@@ -115,7 +118,6 @@ class CondensingBoiler(FluidComponent, GasBoiler):
                                          '_' + 'mass')
             for t in range(len(model.time_step)):
                 model.cons.add(m_in[t + 1] == m_out[t + 1])
-                #model.cons.add(m_in[t + 1] == mass_flow)
 
     def add_cons(self, model):
         self._constraint_conver(model)
