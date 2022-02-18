@@ -50,15 +50,15 @@ def plot_single(name, profile):
     fig, ax = plt.subplots(figsize=(14, 7))
     # ax = fig.add_subplot(1, 1)
     ax.plot(profile, linewidth=2, color='r', marker='o', linestyle='dashed')
-    ax.set_title('Profile of ' + name, fontsize=18, backgroundcolor='#3c7f99',
+    ax.set_title('Profile of ' + name, fontsize=12, backgroundcolor='#3c7f99',
                  fontweight='bold', color='white', verticalalignment="baseline")
     ax.set_xlabel('Hours [h]')
     if 'mass' in name:
-        ax.set_ylabel('KG/H', fontsize=16)
+        ax.set_ylabel('mass [KG/H]', fontsize=12)
     elif 'temp' in name:
-        ax.set_ylabel('°', fontsize=16)
+        ax.set_ylabel('temperature [°]', fontsize=12)
     else:
-        ax.set_ylabel('KW', fontsize=16)
+        ax.set_ylabel('power [KW]', fontsize=12)
     ax.set_xlim(xmin=0)
     ax.set_ylim(ymin=0, ymax=max(profile)*1.2)
     # plt.figure()
