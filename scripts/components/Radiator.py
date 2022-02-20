@@ -26,7 +26,7 @@ class Radiator(HeatExchangerFluid, FluidComponent):
         # formula.(49.8)
         self.over_temp_n = over_temp_n
 
-    def _constraint_conver(self, model, room_temp=20, area=200):
+    def _constraint_conver(self, model, room_temp=20):
         temp_var = model.find_component('temp_' + self.name)
         return_temp_var = model.find_component('return_temp_' + self.name)
         temp_difference = model.find_component('temp_difference_' + self.name)
@@ -36,6 +36,7 @@ class Radiator(HeatExchangerFluid, FluidComponent):
                                             '_' + self.name)
         output_energy = model.find_component('output_' + self.outputs[0] +
                                              '_' + self.name)
+        area = model.find_component('size_' + self.name)
 
         for t in range(len(model.time_step)):
             model.cons.add(temp_difference[t + 1] == (temp_var[t + 1] +
@@ -48,7 +49,7 @@ class Radiator(HeatExchangerFluid, FluidComponent):
              #model.cons.add(input_energy[t + 1] >= output_energy[t + 1] *
              #              conversion_factor[t + 1])
            # model.cons.add(input_energy[t + 1] >= output_energy[t + 1] * 1.1)
-            model.cons.add(output_energy[t + 1] * 1000 == self.k * area *
+            model.cons.add(input_energy[t + 1] * 1000 == self.k * area *
                            temp_difference[t + 1])
 
     def _read_properties(self, properties):
@@ -69,13 +70,18 @@ class Radiator(HeatExchangerFluid, FluidComponent):
         #    for t in range(len(model.time_step)):
         #        model.cons.add(temp_var[t + 1] == t_out[t + 1])
 
-    def _constraint_return_temp(self, model):
-        return_temp_var = model.find_component('return_temp_' + self.name)
-        for heat_input in self.heat_flows_in:
-            t_in = model.find_component(heat_input[0] + '_' + heat_input[1] +
-                                        '_' + 'temp')
-            for t in range(len(model.time_step)):
-                model.cons.add(return_temp_var[t + 1] == t_in[t + 1])
+    #def _constraint_return_temp(self, model):
+    #    return_temp_var = model.find_component('return_temp_' + self.name)
+    #    temp_var = model.find_component('temp_' + self.name)
+    #    delta_t = 10
+    #    for t in model.time_step:
+    #        model.cons.add(temp_var[t]-return_temp_var[t] == delta_t)
+
+        #for heat_input in self.heat_flows_in:
+        #    t_in = model.find_component(heat_input[0] + '_' + heat_input[1] +
+        #                                '_' + 'temp')
+        #    for t in range(len(model.time_step)):
+        #        model.cons.add(return_temp_var[t + 1] == t_in[t + 1])
         #for heat_output in self.heat_flows_out:
         #    t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
         #                                '_' + 'temp')
@@ -94,7 +100,7 @@ class Radiator(HeatExchangerFluid, FluidComponent):
     def add_cons(self, model):
         self._constraint_conver(model)
         self._constraint_temp(model)
-        #self._constraint_return_temp(model)
+       # self._constraint_return_temp(model)
         self._constraint_mass_flow(model)
         self._constraint_heat_inputs(model)
         #self._constraint_heat_outputs(model)
@@ -112,13 +118,6 @@ class Radiator(HeatExchangerFluid, FluidComponent):
         temp_difference = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('temp_difference_' + self.name, temp_difference)
 
-        conversion_factor = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('conversion_factor_' + self.name, conversion_factor)
-    # def add_variables(self, input_parameters, plant_parameters, var_dict, flows,
-    #                   *args):
-    #     # todo: consider "heat_demand" as a new constraint
-    #     output_flow = (self.name, 'therm_dmd')  # Define output flow
-    #     flows['heat'][self.name][1].append(output_flow)  # Add output flow
-    #
-    #     var_dict[output_flow] = input_parameters['therm_demand']  # Assign
-    #     # values to output flow in the var_dict
+        #conversion_factor = pyo.Var(model.time_step, bounds=(0, None))
+        #model.add_component('conversion_factor_' + self.name, conversion_factor)
+

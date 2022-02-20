@@ -5,7 +5,6 @@ from scripts.FluidComponent import FluidComponent
 from scripts.components.HeatExchangerFluid import HeatExchangerFluid
 import math
 
-area = 200
 
 
 class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
@@ -57,10 +56,13 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
     # Q=q*A
     def _constraint_floor_temp(self, model, room_temp=21,
                                floor_temp_approximate=24):
+        input_energy = model.find_component('input_' + self.inputs[0] +
+                                            '_' + self.name)
         output_energy = model.find_component('output_' + self.outputs[0] +
                                              '_' + self.name)
         floor_temp = model.find_component('floor_temp_' + self.name)
         delta_t = model.find_component('delta_t_' + self.name)
+        area = model.find_component('size_' + self.name)
 
         temp_var = model.find_component('temp_' + self.name)
         return_temp_var = model.find_component('return_temp_' + self.name)
@@ -78,7 +80,8 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
                     (floor_temp_approximate-room_temp)**0.1 * (floor_temp[t + 1]
                     - floor_temp_approximate)))
             model.cons.add(delta_t[t + 1] == (floor_temp[t + 1] - room_temp))
-            model.cons.add(output_energy[t+1] * 1000 == heat_flux[t + 1] * area)
+            model.cons.add(input_energy[t+1] * 1000 == heat_flux[t + 1] * area)
+            #model.cons.add(input_energy[t + 1] == output_energy[t + 1])
 
     def _constraint_mass_flow(self, model):
         for heat_input in self.heat_flows_in:

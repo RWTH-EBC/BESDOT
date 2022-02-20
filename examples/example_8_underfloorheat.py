@@ -6,7 +6,7 @@ from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
 import tools.post_processing as post_pro
-from scripts.components.UnderfloorHeat import area
+
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -24,7 +24,7 @@ project.add_environment(env_8)
 
 # If the objective of the project is the optimization for building, a building
 # should be added to the project.
-bld_8 = Building(name='bld_8', area=area)
+bld_8 = Building(name='bld_8', area=200)
 
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
