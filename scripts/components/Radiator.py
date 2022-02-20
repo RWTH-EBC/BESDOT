@@ -26,7 +26,7 @@ class Radiator(HeatExchangerFluid, FluidComponent):
         # formula.(49.8)
         self.over_temp_n = over_temp_n
 
-    def _constraint_conver(self, model, room_temp=24, area=200):
+    def _constraint_conver(self, model, room_temp=20, area=200):
         temp_var = model.find_component('temp_' + self.name)
         return_temp_var = model.find_component('return_temp_' + self.name)
         temp_difference = model.find_component('temp_difference_' + self.name)
