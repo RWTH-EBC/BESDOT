@@ -52,7 +52,8 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
     # The total heat output of the underfloor heating can be calculated by the
     # above equation.
     # A: The area-specific heat output can be calculated on the room area.
-    # q=8.92*(T_floor - T_air)^1.1 W/m2
+    # q=8.92*(T_floor - T_air)^1.1 W/m2 can be approximated as a linearization
+    # according to the Taylor expansion formula
     # Q=q*A
     def _constraint_floor_temp(self, model, room_temp=21,
                                floor_temp_approximate=24):
@@ -75,7 +76,7 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
             model.cons.add(heat_flux[t + 1] == 8.92 * (
                     (floor_temp_approximate-room_temp)**1.1+1.1 *
                     (floor_temp_approximate-room_temp)**0.1 * (floor_temp[t + 1]
-                                                               - 24)))
+                    - floor_temp_approximate)))
             model.cons.add(delta_t[t + 1] == (floor_temp[t + 1] - room_temp))
             model.cons.add(output_energy[t+1] * 1000 == heat_flux[t + 1] * area)
 
