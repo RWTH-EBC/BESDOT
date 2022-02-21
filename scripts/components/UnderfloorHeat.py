@@ -73,7 +73,7 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
             #               1.1)
             model.cons.add(average_t[t + 1] == (temp_var[t + 1] +
                                                 return_temp_var[t + 1])/2)
-            #model.cons.add(heat_flux[t + 1] == 4.797 * average_t[t + 1] - 94.25)
+
             model.cons.add(heat_flux[t + 1] == 8.92 * (
                     (floor_temp_approximate-room_temp)**1.1+1.1 *
                     (floor_temp_approximate-room_temp)**0.1 * (floor_temp[t + 1]
