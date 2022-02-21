@@ -19,19 +19,11 @@ class Radiator(HeatExchangerFluid, FluidComponent):
                          max_size=max_size,
                          current_size=current_size)
         self.heat_flows_out = None
-        # According to EN 442, the standard output of radiators is specified at
-        # 75/65/20 °C, i.e. at tV = 75 °C (flow), tR = 65 °C (return) and tL =
-        # 20 °C (room air) and at the usual atmospheric pressure (1013 mbar).
-        # The standard overtemperature was calculated from the log-average
-        # formula.(49.8)
-        self.over_temp_n = over_temp_n
 
     def _constraint_conver(self, model, room_temp=20):
         temp_var = model.find_component('temp_' + self.name)
         return_temp_var = model.find_component('return_temp_' + self.name)
         temp_difference = model.find_component('temp_difference_' + self.name)
-        conversion_factor = model.find_component('conversion_factor_' +
-                                                 self.name)
         input_energy = model.find_component('input_' + self.inputs[0] +
                                             '_' + self.name)
         output_energy = model.find_component('output_' + self.outputs[0] +
@@ -42,51 +34,30 @@ class Radiator(HeatExchangerFluid, FluidComponent):
             model.cons.add(temp_difference[t + 1] == (temp_var[t + 1] +
                                                       return_temp_var[t + 1] - 2
                                                       * room_temp) / 2)
-            # model.cons.add(conversion_factor[t + 1] == (self.over_temp_n /
-            #                                            temp_difference[t + 1])
-            #               ** 1.3)
-            # todo: the meaning of following equation
-             #model.cons.add(input_energy[t + 1] >= output_energy[t + 1] *
-             #              conversion_factor[t + 1])
-           # model.cons.add(input_energy[t + 1] >= output_energy[t + 1] * 1.1)
             model.cons.add(input_energy[t + 1] * 1000 == self.k * area *
                            temp_difference[t + 1])
+            model.cons.add(input_energy[t + 1] == output_energy[t + 1])
 
     def _read_properties(self, properties):
         super()._read_properties(properties)
 
-    def _constraint_temp(self, model, init_temp=40):
+    def _constraint_temp(self, model, init_temp=45):
         temp_var = model.find_component('temp_' + self.name)
-        for t in model.time_step:
-            model.cons.add(temp_var[t] == init_temp)
+        #for t in model.time_step:
+        #    model.cons.add(temp_var[t] == init_temp)
         for heat_input in self.heat_flows_in:
-            t_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
+            t_out = model.find_component(heat_input[0] + '_' + heat_input[1] +
                                          '_' + 'temp')
             for t in range(len(model.time_step)):
                 model.cons.add(temp_var[t + 1] == t_out[t + 1])
-        #for heat_output in self.heat_flows_out:
-        #    t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
-        #                                 '_' + 'temp')
-        #    for t in range(len(model.time_step)):
-        #        model.cons.add(temp_var[t + 1] == t_out[t + 1])
 
-    #def _constraint_return_temp(self, model):
-    #    return_temp_var = model.find_component('return_temp_' + self.name)
-    #    temp_var = model.find_component('temp_' + self.name)
-    #    delta_t = 10
-    #    for t in model.time_step:
-    #        model.cons.add(temp_var[t]-return_temp_var[t] == delta_t)
-
-        #for heat_input in self.heat_flows_in:
-        #    t_in = model.find_component(heat_input[0] + '_' + heat_input[1] +
-        #                                '_' + 'temp')
-        #    for t in range(len(model.time_step)):
-        #        model.cons.add(return_temp_var[t + 1] == t_in[t + 1])
-        #for heat_output in self.heat_flows_out:
-        #    t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
-        #                                '_' + 'temp')
-        #    for t in range(len(model.time_step)):
-        #        model.cons.add(return_temp_var[t + 1] == t_in[t + 1])
+    def _constraint_return_temp(self, model):
+        return_temp_var = model.find_component('return_temp_' + self.name)
+        for heat_input in self.heat_flows_in:
+            t_in = model.find_component(heat_input[1] + '_' + heat_input[0] +
+                                        '_' + 'temp')
+            for t in range(len(model.time_step)):
+                model.cons.add(return_temp_var[t + 1] == t_in[t + 1])
 
     def _constraint_mass_flow(self, model):
         for heat_input in self.heat_flows_in:
@@ -100,10 +71,9 @@ class Radiator(HeatExchangerFluid, FluidComponent):
     def add_cons(self, model):
         self._constraint_conver(model)
         self._constraint_temp(model)
-       # self._constraint_return_temp(model)
+        self._constraint_return_temp(model)
         self._constraint_mass_flow(model)
         self._constraint_heat_inputs(model)
-        #self._constraint_heat_outputs(model)
         self._constraint_vdi2067(model)
 
     def add_vars(self, model):

@@ -102,7 +102,6 @@ class CondensingBoiler(FluidComponent, GasBoiler):
     def _constraint_return_temp(self, model):
         return_temp_var = model.find_component('return_temp_' + self.name)
         for t in model.time_step:
-            #model.cons.add(return_temp_var[t] == init_return_temp)
             model.cons.add(return_temp_var[t] <= 55)
         for heat_output in self.heat_flows_out:
             t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
