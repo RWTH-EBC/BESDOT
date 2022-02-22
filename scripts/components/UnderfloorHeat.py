@@ -52,7 +52,12 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
     # A: The area-specific heat output can be calculated on the room area.
     # q=8.92*(T_floor - T_air)^1.1 W/m2 can be approximated as a linearization
     # according to the Taylor expansion formula
-    # Q=q*A
+    # Q=q*A, q:heat flux
+    # Relation between surface temperature and average water temperature :
+    # Tboden = 0.625(Taverage water temp) + 6.875 reference:A new simplified
+    # model to calculate surface temperature and heat transfer of radiant floor
+    # heating and cooling systems, Xiaozhou Wu, Jianing Zhao, Bjarne W. Olesen,
+    # Lei Fang, Fenghao Wang
     def _constraint_floor_temp(self, model, room_temp=21,
                                floor_temp_approximate=24):
         input_energy = model.find_component('input_' + self.inputs[0] +
@@ -69,11 +74,10 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
         heat_flux = model.find_component('heat_flux_' + self.name)
 
         for t in range(len(model.time_step)):
-            #model.cons.add(delta_t[t+1] == (floor_temp[t+1] - room_temp) **
-            #               1.1)
             model.cons.add(average_t[t + 1] == (temp_var[t + 1] +
                                                 return_temp_var[t + 1])/2)
-
+            #model.cons.add(floor_temp[t + 1] == 0.625 * average_t[t + 1] + 6.875
+            #               )
             model.cons.add(heat_flux[t + 1] == 8.92 * (
                     (floor_temp_approximate-room_temp)**1.1+1.1 *
                     (floor_temp_approximate-room_temp)**0.1 * (floor_temp[t + 1]
