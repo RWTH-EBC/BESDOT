@@ -8,7 +8,6 @@ import pyomo.environ as pyo
 import pandas as pd
 import numpy as np
 
-
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -20,6 +19,7 @@ class Project(object):
         # The following attributs should be replaced or added with related
         # object before generating pyomo model.
         self.environment = None
+        self.init_storage_temp = None
         self.district_list = []
         self.building_list = []
 
@@ -53,6 +53,9 @@ class Project(object):
             district:
         """
         pass
+
+    def add_init_storage_temp(self, init_storage_temp):
+        self.init_storage_temp = init_storage_temp
 
     def build_model(self, obj_typ='annual_cost'):
         """
