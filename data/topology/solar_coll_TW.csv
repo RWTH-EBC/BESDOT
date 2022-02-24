@@ -1,0 +1,6 @@
+comp_name,comp_type,model,min_size,max_size,current_size,solar_coll,water_tes,boi,dhw_cns,gas_grid
+solar_coll,SolarThermalCollectorFluid,FPC,0,10,0,0,50,0,0,0
+water_tes,HomoStorage,TES_homo,0,10,0,0,0,0,80,0
+boi,GasBoiler,BOI1,0,2,0,0,100,0,0,0
+dhw_cns,HotWaterConsumption,HWCNS1,0,100,0,0,0,0,0,0
+gas_grid,GasGrid,GAS1,10,10,0,0,0,50,0,0
