@@ -19,6 +19,9 @@ heat_comp_list = ['heat_pump', 'therm_cns', 'water_tes', 'solar_coll',
 elec_sink_tuple = ('heat_pump', 'bat', 'e_grid', 'e_boi')
 heat_sink_tuple = 'water_tes'
 
+base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+opt_output_path = os.path.join(base_path, 'data', 'opt_output')
+plot_output = os.path.join(opt_output_path, 'plot', 'plot')
 
 def plot_all(csv_file, time_interval):
     """
@@ -50,8 +53,7 @@ def plot_single(name, profile):
     fig, ax = plt.subplots(figsize=(14, 14))
     # ax = fig.add_subplot(1, 1)
     ax.plot(profile, linewidth=2, color='r', marker='o', linestyle='dashed')
-    ax.set_title('Profile of ' + name, fontsize=12, backgroundcolor='#3c7f99',
-                 fontweight='bold', color='white', verticalalignment="baseline")
+    ax.set_title('Profile of ' + name)
     ax.set_xlabel('Hours [h]')
     if 'mass' in name:
         ax.set_ylabel('mass [KG/H]', fontsize=12)
@@ -70,7 +72,8 @@ def plot_single(name, profile):
     #plt.xlim(xmin=0)
     plt.grid()
 
-    plt.show()
+    #plt.show()
+    plt.savefig(plot_output)
     plt.close()
 
 
@@ -207,6 +210,7 @@ if __name__ == '__main__':
     opt_output_path = os.path.join(base_path, 'data', 'opt_output')
     # opt_output = os.path.join(opt_output_path, 'denmark_energy_hub_result.csv')
     opt_output = os.path.join(opt_output_path, 'project_1_result.csv')
+    plot_output = os.path.join(opt_output_path, 'plot')
 
     demand_input = os.path.join(base_path, 'data', 'denmark_energy_hub',
                                 'energyprofile(kwh).csv')
