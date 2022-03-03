@@ -21,7 +21,6 @@ heat_sink_tuple = 'water_tes'
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 opt_output_path = os.path.join(base_path, 'data', 'opt_output')
-# plot_output = os.path.join(opt_output_path, 'plot')
 
 def plot_all(csv_file, time_interval):
     """
@@ -43,7 +42,7 @@ def plot_all(csv_file, time_interval):
             if sum(elements_dict[element]) > 0.001:
                 plot_single(element, elements_dict[element][time_interval[0]:
                                                             time_interval[1]])
-        #if 'temp' in element_dict and 'mass' not in element_dict:
+
         #    fig, ax = plt.figure()
         #    ax = fig.add_subplot(111)
         #    ax1 = plot_single(element, elements_dict[element][time_interval[0]:
@@ -65,8 +64,6 @@ def plot_single(name, profile):
     ax.plot(profile, linewidth=2, color='r', marker='o', linestyle='dashed')
     ax.set_title('Profile of ' + name)
     ax.set_xlabel('Hours [h]')
-    #ax.plot(profile[], linewidth=2, color='r', marker='o', linestyle='dashed')
-    #ax2 = ax1.twinx()
     if 'mass' in name:
         ax.set_ylabel('mass [KG/H]', fontsize=12)
     elif 'temp' in name:
@@ -81,6 +78,39 @@ def plot_single(name, profile):
     #plt.show()
     plt.savefig(plot_output)
     plt.close()
+
+
+def plot_double(csv_file):
+    plot_output = os.path.join(opt_output_path, 'plot', 'profile of boi')
+    df = pd.read_csv(csv_file)
+    #profile_temp = df.loc['boi_water_tes_temp[1]':'boi_water_tes_temp[24]', "value"]
+    profile_temp = df.loc[192:215, "value"]
+    df_profile_temp = pd.DataFrame(profile_temp)
+    #profile_return_temp = df.loc['water_tes_boi_temp[1]':'water_tes_boi_temp[24]']
+    profile_return_temp = df.loc[216:239, "value"]
+    df_profile_return_temp = pd.DataFrame(profile_return_temp)
+    # profile_inputpower = df.loc['input_gas_boi[1]':'input_gas_boi[24]']
+    profile_inputpower = df.loc[446:469, "value"]
+    df_profile_inputpower = pd.DataFrame(profile_inputpower)
+    #profile_outputpower = df.loc['output_heat_boi[1]':'output_heat_boi[24]']
+    profile_outputpower = df.loc[470:493, "value"]
+    df_profile_outputpower = pd.DataFrame(profile_outputpower)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(df_profile_inputpower, '-', label='input')
+    ax.plot(df_profile_outputpower, '-', label='output')
+    ax2 = ax.twinx()
+    ax2.plot(df_profile_temp, '-r', label='temp')
+    ax2.plot(profile_temp, '-r', label='temp')
+    ax2.plot(df_profile_return_temp, '-g', label='return_temp')
+    ax.legend(loc=0)
+    ax.grid()
+    ax.set_xlabel("Time (h)")
+    ax.set_ylabel(r"power[KW]")
+    ax2.set_ylabel(r"Temperature ($^\circ$C)")
+    ax.set_xlim(xmin=192)
+    ax2.legend(loc=0)
+    plt.savefig(plot_output)
 
 
 def get_short_profiles(start_time, time_step, csv_file):
