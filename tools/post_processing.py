@@ -43,10 +43,19 @@ def plot_all(csv_file, time_interval):
             if sum(elements_dict[element]) > 0.001:
                 plot_single(element, elements_dict[element][time_interval[0]:
                                                             time_interval[1]])
+        if 'temp' in element_dict and 'mass' not in element_dict:
+            fig, ax = plt.figure()
+            ax = fig.add_subplot(111)
+            ax1 = plot_single(element, elements_dict[element][time_interval[0]:
+                                                              time_interval[1]])
+            ax2 = ax1.twinx()
+            ax2 = plot_single(element, elements_dict[element][time_interval[0]:
+                                                              time_interval[1]])
+
+
             # print(element)
             # if element == 'heat_pump_water_tes':
-            #     plot_single(element, elements_dict[element])
-            pass
+            # plot_single(element, elements_dict[element])
 
 
 def plot_single(name, profile):
@@ -61,21 +70,15 @@ def plot_single(name, profile):
         ax.set_ylabel('temperature [°]', fontsize=12)
     else:
         ax.set_ylabel('power [KW]', fontsize=12)
+
+    #ax2 = ax1.twinx()
     ax.set_xlim(xmin=0)
     ax.set_ylim(ymin=0, ymax=max(profile)*1.2)
-    # plt.figure()
-    #plt.plot(profile, linewidth=2)
-    #plt.title('Profile of ' + name)
-    #plt.ylabel('kW')
-    #plt.xlabel('Hours [h]')
-    #plt.ylim(ymin=0, ymax=max(profile)*1.2)
-    #plt.xlim(xmin=0)
     plt.grid()
 
     #plt.show()
     plt.savefig(plot_output)
     plt.close()
-
 
 def get_short_profiles(start_time, time_step, csv_file):
     def combine_items(ori_list):

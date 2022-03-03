@@ -114,8 +114,8 @@ class StandardBoiler(FluidComponent, GasBoiler):
         return_temp = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('return_temp_' + self.name, return_temp)
 
-        modulation = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('modulation_' + self.name, modulation)
+        #modulation = pyo.Var(model.time_step, bounds=(0, None))
+        #model.add_component('modulation_' + self.name, modulation)
 
 
 
