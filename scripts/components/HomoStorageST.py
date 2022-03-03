@@ -9,9 +9,10 @@ import warnings
 import pyomo.environ as pyo
 from scripts.FluidComponent import FluidComponent
 from scripts.components.HotWaterStorage import HotWaterStorage
+from scripts.components.HomoStorage import HomoStorage
 
 
-class HomoStorageST(FluidComponent, HotWaterStorage):
+class HomoStorageST(HomoStorage):
     def __init__(self, comp_name, comp_type="HomoStorageST", comp_model=None,
                  min_size=0, max_size=1000, current_size=0):
         super().__init__(comp_name=comp_name,
@@ -21,6 +22,7 @@ class HomoStorageST(FluidComponent, HotWaterStorage):
                          max_size=max_size,
                          current_size=current_size)
 
+    '''
     def _read_properties(self, properties):
         super()._read_properties(properties)
         if 'max temperature' in properties.columns:
@@ -84,44 +86,37 @@ class HomoStorageST(FluidComponent, HotWaterStorage):
             for t in range(len(model.time_step)):
                 model.cons.add(loss_var[t + 1] == 1.5 * ((temp_var[t + 1] -
                                                           20) / 1000))
+'''
 
-    def _constraint_temp(self, model, init_temp=50, min_temp=30, max_temp=70):
-        # Initial temperature for water in storage is define with a constant
-        # value.
+    def _constraint_temp(self, model, init_temp=50, max_temp=95,
+                          hot_water_temp=60, cold_water_temp=12):
+        super()._constraint_temp(model=model, init_temp=init_temp)
+
         temp_var = model.find_component('temp_' + self.name)
-        model.cons.add(temp_var[1] == init_temp)
+        #model.cons.add(temp_var[1] == init_temp)
         for t in model.time_step:
-            model.cons.add(temp_var[t] >= min_temp)
+            model.cons.add(temp_var[t] >= cold_water_temp)
             model.cons.add(temp_var[t] <= max_temp)
 
         for heat_input in self.heat_flows_in:
             t_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
                                          '_' + 'temp')
-            for t in range(len(model.time_step)):
-                model.cons.add(temp_var[t + 1] == t_out[t + 1])
-
-        for heat_output in self.heat_flows_out:
-            t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
-                                         '_' + 'temp')
-            for t in range(len(model.time_step)):
-                model.cons.add(temp_var[t + 1] == t_out[t + 1])
-
-    def _constraint_init_fluid_temp(self, model):
-        """In a assumed state, the temperature of fluid flowing into storage at
-        first time step should be set to an initial condition"""
-        for heat_output in self.heat_flows_out:
-            t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
-                                        '_' + 'temp')
-            t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
-                                         '_' + 'temp')
-            model.cons.add(t_in[1] == t_out[1])
-
-        for heat_input in self.heat_flows_in:
             t_in = model.find_component(heat_input[0] + '_' + heat_input[1] +
                                         '_' + 'temp')
-            t_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
+            for t in range(len(model.time_step)):
+                model.cons.add(t_in[t + 1] >= t_out[t + 1])
+                #model.cons.add(temp_var[t + 1] == t_out[t + 1])
+
+        for heat_output in self.heat_flows_out:
+            t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'temp')
-            model.cons.add(t_in[1] == t_out[1])
+            t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
+                                        '_' + 'temp')
+            for t in range(len(model.time_step)):
+                #model.cons.add(hot_water_temp <= t_out[t + 1])
+                model.cons.add(t_in[t + 1] <= t_out[t + 1])
+                model.cons.add(cold_water_temp == t_in[t + 1])
+                #model.cons.add(temp_var[t + 1] == t_out[t + 1])
 
     def add_cons(self, model):
         self._constraint_conver(model)
@@ -137,16 +132,13 @@ class HomoStorageST(FluidComponent, HotWaterStorage):
 
     def add_vars(self, model):
         super().add_vars(model)
-
-        # Method 1: Using the defined variable in building. heat_flows[(
-        # input_comp, index)]['mass'] and heat_flows[(input_comp, index)][
-        # 'temp'].
-        # Method 2: Defining new variables and using new constraints to
-        # connect the variable in component and building, just as energy flow.
-        # first Method is chosen in 22.12.2021
-
+        '''
         temp = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('temp_' + self.name, temp)
-
         loss = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('loss_' + self.name, loss)
+        '''
+
+
+
+
