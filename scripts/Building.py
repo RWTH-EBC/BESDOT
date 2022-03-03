@@ -183,7 +183,8 @@ class Building(object):
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
-                elif comp_type == 'HotWaterConsumption':
+                elif comp_type in ['HotWaterConsumption',
+                                   'HotWaterConsumptionFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       consum_profile=
                                                       self.demand_profile[
@@ -304,7 +305,7 @@ class Building(object):
         self._constraint_mass_balance(model)
         # todo (yni): Attention in the optimization for operation cost should
         #  comment constrain for solar area. This should be done automated.
-        self._constraint_solar_area(model)
+        #self._constraint_solar_area(model)
         self._constraint_total_cost(model, env)
         self._constraint_operation_cost(model, env)
         for comp in self.components:
@@ -364,7 +365,7 @@ class Building(object):
                                                                 component))
             elif isinstance(self.components[component],
                             module_dict['SolarThermalCollectorFluid']):
-                solar_area_var_list.append(model.find_component('solar_area_' +
+                solar_area_var_list.append(model.find_component('size_' +
                                                                 component))
         model.cons.add(sum(item for item in solar_area_var_list) <=
                        self.solar_area)
