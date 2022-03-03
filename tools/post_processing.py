@@ -21,7 +21,7 @@ heat_sink_tuple = 'water_tes'
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 opt_output_path = os.path.join(base_path, 'data', 'opt_output')
-plot_output = os.path.join(opt_output_path, 'plot', 'plot')
+plot_output = os.path.join(opt_output_path, 'plot')
 
 def plot_all(csv_file, time_interval):
     """
@@ -43,14 +43,14 @@ def plot_all(csv_file, time_interval):
             if sum(elements_dict[element]) > 0.001:
                 plot_single(element, elements_dict[element][time_interval[0]:
                                                             time_interval[1]])
-        if 'temp' in element_dict and 'mass' not in element_dict:
-            fig, ax = plt.figure()
-            ax = fig.add_subplot(111)
-            ax1 = plot_single(element, elements_dict[element][time_interval[0]:
-                                                              time_interval[1]])
-            ax2 = ax1.twinx()
-            ax2 = plot_single(element, elements_dict[element][time_interval[0]:
-                                                              time_interval[1]])
+        #if 'temp' in element_dict and 'mass' not in element_dict:
+        #    fig, ax = plt.figure()
+        #    ax = fig.add_subplot(111)
+        #    ax1 = plot_single(element, elements_dict[element][time_interval[0]:
+        #                                                      time_interval[1]])
+        #    ax2 = ax1.twinx()
+        #    ax2 = plot_single(element, elements_dict[element][time_interval[0]:
+        #                                                      time_interval[1]])
 
 
             # print(element)
@@ -60,10 +60,12 @@ def plot_all(csv_file, time_interval):
 
 def plot_single(name, profile):
     fig, ax = plt.subplots(figsize=(14, 14))
-    # ax = fig.add_subplot(1, 1)
+    #ax = fig.add_subplot(111)
     ax.plot(profile, linewidth=2, color='r', marker='o', linestyle='dashed')
     ax.set_title('Profile of ' + name)
     ax.set_xlabel('Hours [h]')
+    #ax.plot(profile[], linewidth=2, color='r', marker='o', linestyle='dashed')
+    #ax2 = ax1.twinx()
     if 'mass' in name:
         ax.set_ylabel('mass [KG/H]', fontsize=12)
     elif 'temp' in name:
@@ -71,14 +73,14 @@ def plot_single(name, profile):
     else:
         ax.set_ylabel('power [KW]', fontsize=12)
 
-    #ax2 = ax1.twinx()
     ax.set_xlim(xmin=0)
     ax.set_ylim(ymin=0, ymax=max(profile)*1.2)
     plt.grid()
 
     #plt.show()
-    plt.savefig(plot_output)
+    plt.savefig(fname=name)
     plt.close()
+
 
 def get_short_profiles(start_time, time_step, csv_file):
     def combine_items(ori_list):
