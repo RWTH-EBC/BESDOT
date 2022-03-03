@@ -182,7 +182,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
         # self._constraint_mass_flow(model)
         self._constraint_heat_inputs(model)
         self._constraint_heat_outputs(model)
-        self._constraint_input_permit(model, min_temp=30, init_status='on')
+        #self._constraint_input_permit(model, min_temp=30, init_status='on')
         self._constraint_vdi2067(model)
 
     def add_vars(self, model):
