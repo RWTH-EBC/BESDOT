@@ -17,7 +17,7 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 project = Project(name='project_11', typ='building')
 
 # Generate the environment object
-env_11 = Environment(time_step=15)
+env_11 = Environment(start_time=11, time_step=3)
 project.add_environment(env_11)
 
 # If the objective of the project is the optimization for building, a building
@@ -30,8 +30,8 @@ bld_11 = Building(name='bld_11', area=200, solar_area=50)
 
 # todo: That is another possible demand profile, you could try it for
 #  validation
-bld_11.demand_profile['heat_demand'] = [0, 0, 1, 0, 0, 0]
-bld_11.demand_profile['hot_water_demand'] = [1, 0, 1, 1, 0] * 3
+bld_11.demand_profile['heat_demand'] = [1, 0, 1, 1, 0]
+bld_11.demand_profile['hot_water_demand'] = [1, 0, 1, 1, 0]
 
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
@@ -44,7 +44,7 @@ project.add_building(bld_11)
 ################################################################################
 #                        Build pyomo model and run optimization
 ################################################################################
-project.build_model()
+project.build_model(obj_typ='annual_cost')
 project.run_optimization(save_lp=True, save_result=True)
 
 ################################################################################
@@ -53,4 +53,4 @@ project.run_optimization(save_lp=True, save_result=True)
 
 result_output_path = os.path.join(base_path, 'data', 'opt_output',
                                   project.name + '_result.csv')
-# post_pro.plot_all(result_output_path, time_interval=[0, env_7.time_step])
+#post_pro.plot_all(result_output_path, time_interval=[0, env_11.time_step])
