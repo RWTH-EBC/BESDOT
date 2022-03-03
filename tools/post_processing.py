@@ -21,7 +21,7 @@ heat_sink_tuple = 'water_tes'
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 opt_output_path = os.path.join(base_path, 'data', 'opt_output')
-plot_output = os.path.join(opt_output_path, 'plot')
+# plot_output = os.path.join(opt_output_path, 'plot')
 
 def plot_all(csv_file, time_interval):
     """
@@ -59,6 +59,7 @@ def plot_all(csv_file, time_interval):
 
 
 def plot_single(name, profile):
+    plot_output = os.path.join(opt_output_path, 'plot', 'Profile of ' + name)
     fig, ax = plt.subplots(figsize=(14, 14))
     #ax = fig.add_subplot(111)
     ax.plot(profile, linewidth=2, color='r', marker='o', linestyle='dashed')
@@ -78,7 +79,7 @@ def plot_single(name, profile):
     plt.grid()
 
     #plt.show()
-    plt.savefig(fname=name)
+    plt.savefig(plot_output)
     plt.close()
 
 
