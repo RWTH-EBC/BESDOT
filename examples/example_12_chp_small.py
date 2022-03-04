@@ -26,13 +26,14 @@ bld_12 = Building(name='bld_12', area=200)
 # Attention! generate thermal with profile whole year temperature profile
 # bld_2.add_thermal_profile('heat', env_2.temp_profile_original, env_2)
 
-bld_12.demand_profile['heat_demand'] = [1, 0, 1]
+bld_12.demand_profile['heat_demand'] = [5, 0, 5]
 bld_12.demand_profile["elec_demand"] = [1, 0, 1]
 
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
+#todo: 1 kann man löschen. (keine Auslauftemperaturanforderung)
 topo_file = os.path.join(base_path, 'data', 'topology',
-                         'chp_fluid_small.csv')
+                         'chp_fluid_small1.csv')
 bld_12.add_topology(topo_file)
 bld_12.add_components(project.environment)
 project.add_building(bld_12)
@@ -49,4 +50,4 @@ project.run_optimization('gurobi', save_lp=True, save_result=True)
 
 result_output_path = os.path.join(base_path, 'data', 'opt_output',
                                   project.name + '_result.csv')
-#post_pro.plot_all(result_output_path)
+#post_pro.plot_all(result_output_path, time_interval=[0, env_12.time_step])
