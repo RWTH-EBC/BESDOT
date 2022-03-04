@@ -82,17 +82,21 @@ def plot_single(name, profile):
 
 def plot_double(csv_file, comp_name1, comp_name2):
     plot_output = os.path.join(opt_output_path, 'plot', 'profile of ' +
-                               comp_name2)
+                               comp_name1)
     df = pd.read_csv(csv_file)
     data1 = df[df['var'].str.contains(comp_name1 + '_' + comp_name2 + '_temp')]
+    data1 = data1.reset_index(drop=True)
     profile_temp = data1['value']
     data2 = df[df['var'].str.contains(comp_name2 + '_' + comp_name1 + '_temp')]
+    data2 = data2.reset_index(drop=True)
     profile_return_temp = data2['value']
     data3 = df[(df['var'].str.contains('input_')) & (df['var'].str.contains(
         comp_name1))]
+    data3 = data3.reset_index(drop=True)
     profile_inputpower = data3['value']
     data4 = df[(df['var'].str.contains('output_')) & (df['var'].str.contains(
         comp_name2))]
+    data4 = data4.reset_index(drop=True)
     profile_outputpower = data4['value']
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -101,13 +105,13 @@ def plot_double(csv_file, comp_name1, comp_name2):
     ax2 = ax.twinx()
     ax2.plot(profile_temp, '-r', label='temp')
     ax2.plot(profile_return_temp, '-g', label='return_temp')
-    ax.legend(loc=0)
+    ax.legend(loc='center left', bbox_to_anchor=(0, 1.1), ncol=1)
     ax.grid()
     ax.set_xlabel("Time (h)")
     ax.set_ylabel(r"power[KW]")
     ax2.set_ylabel(r"Temperature ($^\circ$C)")
-    ax.set_xlim(xmin=192)
-    ax2.legend(loc=0)
+    ax.set_xlim(xmax=len(profile_temp)*1.2)
+    ax2.legend(loc='upper right', bbox_to_anchor=(1.05, 1.18), ncol=1)
     plt.savefig(plot_output)
 
 
