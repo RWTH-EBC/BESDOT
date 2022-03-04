@@ -46,9 +46,9 @@ class Building(object):
         if annual_heat_demand is None:
             self.add_annual_demand('heat')
         elif not isinstance(annual_heat_demand, float):
-                warn_msg = 'The annual_heat_demand of ' + self.name + \
-                           ' is not float, need to check.'
-                warnings.warn(warn_msg)
+            warn_msg = 'The annual_heat_demand of ' + self.name + \
+                       ' is not float, need to check.'
+            warnings.warn(warn_msg)
         else:
             self.annual_demand["heat_demand"] = annual_heat_demand
 
@@ -162,7 +162,7 @@ class Building(object):
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
-                elif comp_type == 'HeatConsumption':
+                elif comp_type in ['HeatConsumption', 'HeatConsumptionFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       consum_profile=
                                                       self.demand_profile[
@@ -413,13 +413,10 @@ class Building(object):
 
         # model.cons.add(bld_annual_cost == sum(buy_elec[t] * env.elec_price
         #                                       for t in model.time_step))
-        model.cons.add(bld_annual_cost == sum(buy_elec[t] * env.elec_price +
-                                              buy_gas[t] * env.gas_price +
-                                              buy_heat[t] *
-                                              env.heat_price - sell_elec[
-                                                  t] * env.elec_feed_price
-                                              for t in model.time_step) +
-                       sum(item for item in comp_cost_list))
+        model.cons.add(bld_annual_cost == sum(
+            buy_elec[t] * env.elec_price + buy_gas[t] * env.gas_price +
+            buy_heat[t] * env.heat_price - sell_elec[t] * env.elec_feed_price
+            for t in model.time_step) + sum(item for item in comp_cost_list))
 
     def _constraint_operation_cost(self, model, env):
         """Calculate the total operation cost for the building energy system."""
@@ -445,5 +442,5 @@ class Building(object):
                                                  buy_gas[t] * env.gas_price +
                                                  buy_heat[t] *
                                                  env.heat_price - sell_elec[
-                                                  t] * env.elec_feed_price
+                                                     t] * env.elec_feed_price
                                                  for t in model.time_step))
