@@ -120,7 +120,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
                                          '_' + 'temp')
             model.cons.add(t_in[1] == t_out[1])
 
-    def _constraint_input_permit(self, model, min_temp=30, max_temp=70,
+    def _constraint_input_permit(self, model, min_temp=30, max_temp=68,
                                  init_status='on'):
         """
         The input to water tank is controlled by tank temperature, which is
@@ -157,17 +157,17 @@ class HomoStorage(FluidComponent, HotWaterStorage):
             # Need a better tutorial for introducing the logical condition
             model.cons.add(status_var[t + 2] >= small_num *
                            (small_num + (max_temp - min_temp - small_num) *
-                            status_var[t+1] + min_temp - temp_var[t+1]))
+                            status_var[t+1] + min_temp - temp_var[t+2]))
             model.cons.add(status_var[t + 2] <= 1 + small_num *
                            (small_num + (max_temp - min_temp - 2 * small_num) *
-                            status_var[t + 1] + min_temp - temp_var[t + 1]))
+                            status_var[t + 1] + min_temp - temp_var[t + 2]))
             # fixme (yni): the following equation is wrong!!!, that could be
             #  problematic.
             model.cons.add(input_energy[t + 1] == input_energy[t + 1] *
                            status_var[t + 1])
             # Additional constraint for allowed temperature in storage
-            model.cons.add(temp_var[t + 2] >= min_temp)
-            model.cons.add(temp_var[t + 2] <= max_temp)
+            #model.cons.add(temp_var[t + 2] >= min_temp)
+            #model.cons.add(temp_var[t + 2] <= max_temp)
         model.cons.add(input_energy[len(model.time_step)] ==
                        input_energy[len(model.time_step)] *
                        status_var[len(model.time_step)])
@@ -182,7 +182,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
         # self._constraint_mass_flow(model)
         self._constraint_heat_inputs(model)
         self._constraint_heat_outputs(model)
-        self._constraint_input_permit(model, min_temp=30, init_status='on')
+        # self._constraint_input_permit(model, min_temp=30, init_status='on')
         self._constraint_vdi2067(model)
 
     def add_vars(self, model):

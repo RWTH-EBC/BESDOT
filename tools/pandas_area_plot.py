@@ -37,13 +37,16 @@ def plot_area(typ, resolution):
     # df.plot.area(stacked=False)
 
     if typ == "Electricity":
-        df.plot.area(ax=ax, color=['#beffd3', '#58b368', '#3e7d52'])
+        df.plot.area(ax=ax, format_string="y-.d",
+                     color=['#beffd3', '#58b368', '#3e7d52'])
         plt.subplots_adjust(left=0.125)
     elif typ == "Heat":
-        df.plot.area(ax=ax, color=['#ffcccc', '#ff9999', '#b36b6b'])
+        df.plot.area(ax=ax, format_string="r-.d",
+                     color=['#ffcccc', '#ff9999', '#b36b6b'])
         plt.subplots_adjust(left=0.139)
     elif typ == "Cool":
-        df.plot.area(ax=ax, color=['#cce5ff', '#6b8fb3', '#4b647d'])
+        df.plot.area(ax=ax, format_string="b-.d",
+                     color=['#cce5ff', '#6b8fb3', '#4b647d'])
     else:
         warn('This energy typ {} is not allowed'.format(energy))
         # warn('This energy typ %s is not allowed' % energy)
