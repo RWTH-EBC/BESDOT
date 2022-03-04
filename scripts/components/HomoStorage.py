@@ -85,14 +85,14 @@ class HomoStorage(FluidComponent, HotWaterStorage):
                 model.cons.add(loss_var[t + 1] == 1.5 * ((temp_var[t + 1] -
                                                           20) / 1000))
 
-    def _constraint_temp(self, model, init_temp=58):
+    def _constraint_temp(self, model, init_temp=31):
         # Initial temperature for water in storage is define with a constant
         # value.
         temp_var = model.find_component('temp_' + self.name)
         model.cons.add(temp_var[1] == init_temp)
         for t in model.time_step:
             model.cons.add(self.max_temp >= temp_var[t])
-            model.cons.add(self.min_temp >= temp_var[t])
+            model.cons.add(self.min_temp <= temp_var[t])
 
         for heat_input in self.heat_flows_in:
             t_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
@@ -203,6 +203,26 @@ class HomoStorage(FluidComponent, HotWaterStorage):
 
         loss = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('loss_' + self.name, loss)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
