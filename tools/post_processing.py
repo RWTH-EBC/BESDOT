@@ -80,29 +80,27 @@ def plot_single(name, profile):
     plt.close()
 
 
-def plot_double(csv_file):
-    plot_output = os.path.join(opt_output_path, 'plot', 'profile of boi')
+def plot_double(csv_file, comp_name1, comp_name2):
+    plot_output = os.path.join(opt_output_path, 'plot', 'profile of ' +
+                               comp_name2)
     df = pd.read_csv(csv_file)
-    #profile_temp = df.loc['boi_water_tes_temp[1]':'boi_water_tes_temp[24]', "value"]
-    profile_temp = df.loc[192:215, "value"]
-    df_profile_temp = pd.DataFrame(profile_temp)
-    #profile_return_temp = df.loc['water_tes_boi_temp[1]':'water_tes_boi_temp[24]']
-    profile_return_temp = df.loc[216:239, "value"]
-    df_profile_return_temp = pd.DataFrame(profile_return_temp)
-    # profile_inputpower = df.loc['input_gas_boi[1]':'input_gas_boi[24]']
-    profile_inputpower = df.loc[446:469, "value"]
-    df_profile_inputpower = pd.DataFrame(profile_inputpower)
-    #profile_outputpower = df.loc['output_heat_boi[1]':'output_heat_boi[24]']
-    profile_outputpower = df.loc[470:493, "value"]
-    df_profile_outputpower = pd.DataFrame(profile_outputpower)
+    data1 = df[df['var'].str.contains(comp_name1 + '_' + comp_name2 + '_temp')]
+    profile_temp = data1['value']
+    data2 = df[df['var'].str.contains(comp_name2 + '_' + comp_name1 + '_temp')]
+    profile_return_temp = data2['value']
+    data3 = df[(df['var'].str.contains('input_')) & (df['var'].str.contains(
+        comp_name1))]
+    profile_inputpower = data3['value']
+    data4 = df[(df['var'].str.contains('output_')) & (df['var'].str.contains(
+        comp_name2))]
+    profile_outputpower = data4['value']
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.plot(df_profile_inputpower, '-', label='input')
-    ax.plot(df_profile_outputpower, '-', label='output')
+    ax.plot(profile_inputpower, '-', label='input')
+    ax.plot(profile_outputpower, '-', label='output')
     ax2 = ax.twinx()
-    ax2.plot(df_profile_temp, '-r', label='temp')
     ax2.plot(profile_temp, '-r', label='temp')
-    ax2.plot(df_profile_return_temp, '-g', label='return_temp')
+    ax2.plot(profile_return_temp, '-g', label='return_temp')
     ax.legend(loc=0)
     ax.grid()
     ax.set_xlabel("Time (h)")
