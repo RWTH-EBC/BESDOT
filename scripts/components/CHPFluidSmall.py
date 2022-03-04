@@ -21,6 +21,8 @@ class CHPFluidSmall(CHP, FluidComponent):
                          max_size=max_size,
                          current_size=current_size)
         self.outlet_temp = None
+        self.comp_type = comp_type
+        self.comp_model = comp_model
 
     # Pel = elektrische Nennleistung = comp_size
     # Qth = thermische Nennleistung
@@ -43,11 +45,16 @@ class CHPFluidSmall(CHP, FluidComponent):
         model.cons.add(elec_eff == (0.1016 * Pel + 29.609) / 100)
 
     def _constraint_temp(self, model):
-
+        '''
         chp_properties_path = os.path.join(base_path, "data",
-                                                  "component_database",
-                                                  "CHPFluidSmall",
-                                                  "CHPFluidSmall1.csv")
+                                           "component_database",
+                                           "CHPFluidSmall",
+                                           "CHPFluidSmall1.csv")
+        '''
+        chp_properties_path = os.path.join(base_path, "data",
+                                           "component_database", self.comp_type,
+                                           self.comp_model + ".csv")
+
         chp_properties = pd.read_csv(chp_properties_path)
         if 'outlet_temp' in chp_properties.columns:
             self.outlet_temp = float(chp_properties['outlet_temp'])
@@ -68,12 +75,11 @@ class CHPFluidSmall(CHP, FluidComponent):
             model.cons.add(inlet_temp[t] == t_in[t])
             model.cons.add(outlet_temp[t] == self.outlet_temp)
 
-
     def _constraint_conver(self, model):
         Pel = model.find_component('size_' + self.name)
         Qth = model.find_component('therm_size_' + self.name)
         therm_eff = model.find_component('therm_eff_' + self.name)
-        #elec_eff = model.find_component('elec_eff_' + self.name)
+        # elec_eff = model.find_component('elec_eff_' + self.name)
         input_energy = model.find_component('input_' + self.inputs[0] +
                                             '_' + self.name)
         output_heat = model.find_component(
@@ -84,14 +90,14 @@ class CHPFluidSmall(CHP, FluidComponent):
 
         for t in model.time_step:
             model.cons.add(input_energy[t] * therm_eff[t] == output_heat[t])
-            #model.cons.add(input_energy[t] * elec_eff == output_elec[t])
+            # model.cons.add(input_energy[t] * elec_eff == output_elec[t])
             model.cons.add(Qth * status[t] == output_heat[t])
             model.cons.add(Pel * status[t] == output_elec[t])
 
     def add_cons(self, model):
         self._constraint_Pel(model)
         self._constraint_therm_eff(model)
-        #self._constraint_elec_eff(model)
+        # self._constraint_elec_eff(model)
         self._constraint_temp(model)
         self._constraint_conver(model)
         self._constraint_heat_outputs(model)
@@ -106,8 +112,8 @@ class CHPFluidSmall(CHP, FluidComponent):
         therm_eff = pyo.Var(model.time_step, bounds=(0, 1))
         model.add_component('therm_eff_' + self.name, therm_eff)
 
-        #elec_eff = pyo.Var(bounds=(0, 1))
-        #model.add_component('elec_eff_' + self.name, elec_eff)
+        # elec_eff = pyo.Var(bounds=(0, 1))
+        # model.add_component('elec_eff_' + self.name, elec_eff)
 
         outlet_temp = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('outlet_temp_' + self.name, outlet_temp)
