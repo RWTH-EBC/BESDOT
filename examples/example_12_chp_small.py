@@ -26,7 +26,7 @@ bld_12 = Building(name='bld_12', area=200)
 # Attention! generate thermal with profile whole year temperature profile
 # bld_2.add_thermal_profile('heat', env_2.temp_profile_original, env_2)
 
-bld_12.demand_profile['heat_demand'] = [1, 0, 2]
+bld_12.demand_profile['heat_demand'] = [1, 0, 1]
 bld_12.demand_profile["elec_demand"] = [1, 0, 1]
 
 # Pre define the building energy system with the topology for different
@@ -40,7 +40,7 @@ project.add_building(bld_12)
 ################################################################################
 #                        Build pyomo model and run optimization
 ################################################################################
-project.build_model(obj_typ='annual_cost')
+project.build_model(obj_typ='operation_cost')
 project.run_optimization('gurobi', save_lp=True, save_result=True)
 
 ################################################################################
