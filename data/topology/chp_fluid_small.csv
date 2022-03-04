@@ -2,4 +2,4 @@ comp_name,comp_type,model,min_size,max_size,current_size,therm_cns,water_tes,gas
 therm_cns,HeatConsumption,HeatCNS1,10,10,0,0,0,0,0
 water_tes,HomoStorage,TES_homo,0,100,0,100,0,0,0
 gas_grid,GasGrid,GAS1,0,10,0,0,0,0,100
-chp_small,CHPFluidSmall,CHPFluidSmall1,2,50,0,0,100,0,0
+chp_small,CHPFluidSmall,CHPFluidSmall1,2,50,0,0,,0,0
