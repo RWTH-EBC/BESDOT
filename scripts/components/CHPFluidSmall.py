@@ -9,18 +9,21 @@ from scripts.components.CHP import CHP
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
     __file__))))
 
-
+# kleine BHKW (Pel <= 50kW) mit Brennwertnutzung
+# Die Rücklauftemperatur der BHKW muss kleiner als 50 Grad sein,
+# damit der Brennwert ausgenutzt werden kann.
+# water_tes_temp (1) <= 50
 class CHPFluidSmall(CHP, FluidComponent):
 
     def __init__(self, comp_name, comp_type="CHPFluidSmall", comp_model=None,
-                 min_size=2, max_size=50, current_size=0):
+                 min_size=0, max_size=50, current_size=0):
         super().__init__(comp_name=comp_name,
                          comp_type=comp_type,
                          comp_model=comp_model,
                          min_size=min_size,
                          max_size=max_size,
                          current_size=current_size)
-        self.outlet_temp = None
+        #self.outlet_temp = None
         self.comp_type = comp_type
         self.comp_model = comp_model
 
@@ -45,24 +48,26 @@ class CHPFluidSmall(CHP, FluidComponent):
         model.cons.add(elec_eff == (0.1016 * Pel + 29.609) / 100)
 
     def _constraint_temp(self, model):
+        # todo: ob Vorlauftemperatur der BHKW bestimmt wird
         '''
         chp_properties_path = os.path.join(base_path, "data",
                                            "component_database",
                                            "CHPFluidSmall",
                                            "CHPFluidSmall1.csv")
-        '''
+
         chp_properties_path = os.path.join(base_path, "data",
                                            "component_database", self.comp_type,
                                            self.comp_model + ".csv")
 
         chp_properties = pd.read_csv(chp_properties_path)
         if 'outlet_temp' in chp_properties.columns:
-            self.outlet_temp = float(chp_properties['outlet_temp'])
+            if chp_properties['outlet_temp'] is not None:
+                self.outlet_temp = float(chp_properties['outlet_temp'])
         else:
             warnings.warn(
                 "In the model database for " + self.component_type +
                 " lack of column for outlet temperature.")
-
+        '''
         outlet_temp = model.find_component('outlet_temp_' + self.name)
         inlet_temp = model.find_component('inlet_temp_' + self.name)
         for heat_output in self.heat_flows_out:
@@ -70,10 +75,12 @@ class CHPFluidSmall(CHP, FluidComponent):
                                         '_' + 'temp')
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'temp')
-        for t in model.time_step:
-            model.cons.add(outlet_temp[t] == t_out[t])
-            model.cons.add(inlet_temp[t] == t_in[t])
-            model.cons.add(outlet_temp[t] == self.outlet_temp)
+            for t in model.time_step:
+                model.cons.add(outlet_temp[t] == t_out[t])
+                model.cons.add(inlet_temp[t] == t_in[t])
+                model.cons.add(inlet_temp[t] <= 50)
+                # Zu hohe Temperaturspreizng führt zur Beschädigung der Anlagen.
+                model.cons.add(outlet_temp[t] - inlet_temp[t] <= 25)
 
     def _constraint_conver(self, model):
         Pel = model.find_component('size_' + self.name)
@@ -87,6 +94,7 @@ class CHPFluidSmall(CHP, FluidComponent):
         output_elec = model.find_component(
             'output_' + self.outputs[1] + '_' + self.name)
         status = model.find_component('status_' + self.name)
+        #model.cons.add(status[1] == 1)
 
         for t in model.time_step:
             model.cons.add(input_energy[t] * therm_eff[t] == output_heat[t])
