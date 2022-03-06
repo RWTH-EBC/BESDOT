@@ -4,7 +4,7 @@ import warnings
 import pandas as pd
 import pyomo.environ as pyo
 from scripts.FluidComponent import FluidComponent
-from scripts.Components.CHP import CHP
+from scripts.components.CHP import CHP
 
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
     __file__))))
