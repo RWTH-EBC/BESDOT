@@ -3,6 +3,7 @@ import pyomo.environ as pyo
 from scripts.FluidComponent import FluidComponent
 from scripts.components.CHP import CHP
 
+
 # große BHKW (Pel >= 50kW) ohne Brennwertnutzung
 class CHPFluidBig(CHP, FluidComponent):
 
@@ -16,7 +17,6 @@ class CHPFluidBig(CHP, FluidComponent):
                          min_size=min_size,
                          max_size=max_size,
                          current_size=current_size)
-        # self.outlet_temp = None
         self.comp_type = comp_type
         self.comp_model = comp_model
 
@@ -31,10 +31,13 @@ class CHPFluidBig(CHP, FluidComponent):
     def _constraint_therm_eff(self, model):
         Qth = model.find_component('therm_size_' + self.name)
         therm_eff = model.find_component('therm_eff_' + self.name)
-        outlet_temp = model.find_component('inlet_temp_' + self.name)
-        inlet_temp = model.find_component('outlet_temp_' + self.name)
+        inlet_temp = model.find_component('inlet_temp_' + self.name)
+        outlet_temp = model.find_component('outlet_temp_' + self.name)
         for t in model.time_step:
-            model.cons.add(therm_eff[t] == 0.496 - 0.0001 * (Qth - 267) - 0.002 * (inlet_temp[t] - 47) - 0.0017 * (outlet_temp[t] - 67))
+            model.cons.add(
+                therm_eff[t] == 0.496 - 0.0001 * (Qth - 267) - 0.002 * (
+                            inlet_temp[t] - 47) - 0.0017 * (
+                            outlet_temp[t] - 67))
 
     def _constraint_temp(self, model):
         outlet_temp = model.find_component('outlet_temp_' + self.name)
@@ -44,10 +47,10 @@ class CHPFluidBig(CHP, FluidComponent):
                                         '_' + 'temp')
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'temp')
-        for t in model.time_step:
-            model.cons.add(outlet_temp[t] == t_out[t])
-            model.cons.add(inlet_temp[t] == t_in[t])
-            model.cons.add(outlet_temp[t] - inlet_temp[t] <= 25)
+            for t in model.time_step:
+                model.cons.add(outlet_temp[t] == t_out[t])
+                model.cons.add(inlet_temp[t] == t_in[t])
+                model.cons.add(outlet_temp[t] - inlet_temp[t] <= 25)
 
     def _constraint_conver(self, model):
         Pel = model.find_component('size_' + self.name)
@@ -80,7 +83,7 @@ class CHPFluidBig(CHP, FluidComponent):
         Qth = pyo.Var(bounds=(0, None))
         model.add_component('therm_size_' + self.name, Qth)
 
-        therm_eff = pyo.Var(bounds=(0, 1))
+        therm_eff = pyo.Var(model.time_step,bounds=(0, 1))
         model.add_component('therm_eff_' + self.name, therm_eff)
 
         outlet_temp = pyo.Var(model.time_step, bounds=(0, None))

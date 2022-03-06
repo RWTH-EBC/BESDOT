@@ -80,6 +80,10 @@ class CHPFluidSmall(CHP, FluidComponent):
         '''
         outlet_temp = model.find_component('outlet_temp_' + self.name)
         inlet_temp = model.find_component('inlet_temp_' + self.name)
+        # Zu hohe Temperaturspreizng führt zur Beschädigung der Anlagen.
+        for t in model.time_step:
+            model.cons.add(outlet_temp[t] - inlet_temp[t] <= 25)
+            model.cons.add(inlet_temp[t] <= 50)
         for heat_output in self.heat_flows_out:
             t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
                                         '_' + 'temp')
@@ -88,9 +92,6 @@ class CHPFluidSmall(CHP, FluidComponent):
             for t in model.time_step:
                 model.cons.add(outlet_temp[t] == t_out[t])
                 model.cons.add(inlet_temp[t] == t_in[t])
-                model.cons.add(inlet_temp[t] <= 50)
-                # Zu hohe Temperaturspreizng führt zur Beschädigung der Anlagen.
-                model.cons.add(outlet_temp[t] - inlet_temp[t] <= 25)
 
     # status_chp ----- zur Beschreibung der taktenden Betrieb
     # input * η = output

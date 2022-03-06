@@ -7,7 +7,7 @@ from scripts.components.CHP import CHP
 class CHPFluidSmallHi(CHP, FluidComponent):
 
     def __init__(self, comp_name, comp_type="CHPFluidSmallHi", comp_model=None,
-                 min_size=0, max_size=50, current_size=0):
+                 min_size=0.00001, max_size=50, current_size=0):
         #self.inputs = ['gas']
         #self.outputs = ['heat', 'elec']
         super().__init__(comp_name=comp_name,
@@ -16,7 +16,7 @@ class CHPFluidSmallHi(CHP, FluidComponent):
                          min_size=min_size,
                          max_size=max_size,
                          current_size=current_size)
-        self.outlet_temp = None
+        #self.outlet_temp = None
         self.comp_type = comp_type
         self.comp_model = comp_model
 
@@ -36,21 +36,22 @@ class CHPFluidSmallHi(CHP, FluidComponent):
     def _constraint_temp(self, model):
         outlet_temp = model.find_component('outlet_temp_' + self.name)
         inlet_temp = model.find_component('inlet_temp_' + self.name)
+        for t in model.time_step:
+            model.cons.add(outlet_temp[t] - inlet_temp[t] <= 25)
         for heat_output in self.heat_flows_out:
             t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
                                         '_' + 'temp')
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'temp')
-        for t in model.time_step:
-            model.cons.add(outlet_temp[t] == t_out[t])
-            model.cons.add(inlet_temp[t] == t_in[t])
-            model.cons.add(outlet_temp[t] - inlet_temp[t] <= 25)
+            for t in model.time_step:
+                model.cons.add(outlet_temp[t] == t_out[t])
+                model.cons.add(inlet_temp[t] == t_in[t])
+
 
     def _constraint_conver(self, model):
         Pel = model.find_component('size_' + self.name)
         Qth = model.find_component('therm_size_' + self.name)
         therm_eff = model.find_component('therm_eff_' + self.name)
-        elec_eff = model.find_component('elec_eff_' + self.name)
         input_energy = model.find_component('input_' + self.inputs[0] +
                                             '_' + self.name)
         output_heat = model.find_component(
