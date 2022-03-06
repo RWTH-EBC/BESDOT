@@ -14,7 +14,8 @@ base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 # damit der Brennwert ausgenutzt werden kann.
 # water_tes_temp (1) <= 50
 class CHPFluidSmall(CHP, FluidComponent):
-
+    # Die elektrische Nennleistung der BHKW mit Brennwertnutzung
+    # sollte kleiner gleich 50 kW.
     def __init__(self, comp_name, comp_type="CHPFluidSmall", comp_model=None,
                  min_size=0, max_size=50, current_size=0):
         super().__init__(comp_name=comp_name,
@@ -29,11 +30,14 @@ class CHPFluidSmall(CHP, FluidComponent):
 
     # Pel = elektrische Nennleistung = comp_size
     # Qth = thermische Nennleistung
+    # Qth = f(Pel)
     def _constraint_Pel(self, model):
         Pel = model.find_component('size_' + self.name)
         Qth = model.find_component('therm_size_' + self.name)
         model.cons.add(Qth == 2.1178 * Pel + 2.5991)
 
+    # ηth = f(Qth, Tein)
+    # Die Beziehung zwischen ηth und Taus wird vernachlässigt.
     def _constraint_therm_eff(self, model):
         Qth = model.find_component('therm_size_' + self.name)
         inlet_temp = model.find_component('inlet_temp_' + self.name)
@@ -42,11 +46,17 @@ class CHPFluidSmall(CHP, FluidComponent):
             model.cons.add(therm_eff[t] == 0.705 - 0.0008 * (Qth - 44) -
                            0.006 * (inlet_temp[t] - 30))
 
+    # ηel = f(Qel, Tein) ----löschbar
     def _constraint_elec_eff(self, model):
         Pel = model.find_component('size_' + self.name)
         elec_eff = model.find_component('elec_eff_' + self.name)
         model.cons.add(elec_eff == (0.1016 * Pel + 29.609) / 100)
 
+    # verbinden die Parameter der einzelnen Anlage mit den Parameter zwischen
+    # zwei Anlagen (simp_matrix).
+    # Die Rücklauftemperatur der BHKW muss kleiner als 50 Grad sein,
+    # damit der Brennwert ausgenutzt werden kann.
+    # Zu hohe Temperaturspreizng (>25 Grad) führt zur Beschädigung der Anlagen.
     def _constraint_temp(self, model):
         # todo: ob Vorlauftemperatur der BHKW bestimmt wird
         '''
@@ -82,6 +92,8 @@ class CHPFluidSmall(CHP, FluidComponent):
                 # Zu hohe Temperaturspreizng führt zur Beschädigung der Anlagen.
                 model.cons.add(outlet_temp[t] - inlet_temp[t] <= 25)
 
+    # status_chp ----- zur Beschreibung der taktenden Betrieb
+    # input * η = output
     def _constraint_conver(self, model):
         Pel = model.find_component('size_' + self.name)
         Qth = model.find_component('therm_size_' + self.name)
