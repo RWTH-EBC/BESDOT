@@ -26,6 +26,7 @@ class SolarThermalCollectorFluid(FluidComponent):
         self.outputs = ['heat']
         self.temp_profile = temp_profile
         self.irr_profile = irr_profile
+        # todo: (qli) solar_liquid_heat_cap korrigieren
         self.solar_liquid_heat_cap = 4180  # J/kgK
         self.unit_switch = 3600 * 1000  # J/kWh
         self.max_temp = 135
@@ -41,13 +42,19 @@ class SolarThermalCollectorFluid(FluidComponent):
             for t in model.time_step:
                 model.cons.add(outlet_temp[t] == t_out[t])
                 model.cons.add(t_in[t] == inlet_temp[t])
-                # todo: Regelung
-                # model.cons.add(t_in[t] + 5 <= outlet_temp[t])
+                # todo: Regelung (GDP)
+                '''
+                if outlet_temp[t] - inlet_temp[t] >= 5:
+                    model.cons.add(status[t] == 1)
+                else:
+                    model.cons.add(status[t] == 0)
+                model.cons.add(output_energy[t] == output_energy[t] * status[t])
+                '''
+                # Über die max. Temperatur verdampft die Solarflüssigkeit.
                 model.cons.add(outlet_temp[t] <= self.max_temp)
 
     """
     def _constraint_efficiency(self, model):
-        delta_temp = model.find_component('delta_temp_' + self.name)
         eff = model.find_component('eff_' + self.name)
         solar_coll_properties_path = os.path.join(base_path, "data",
                                                   "component_database",
@@ -69,57 +76,22 @@ class SolarThermalCollectorFluid(FluidComponent):
         outlet_temp = model.find_component('outlet_temp_' + self.name)
         inlet_temp = model.find_component('inlet_temp_' + self.name)
 
-        # eff[1] = konst
-        model.cons.add(delta_temp[1] == inlet_temp[1] - self.temp_profile[0])
-        model.cons.add(
-            eff[1] == self.OpticalEfficiency - self.K * delta_temp[1] /
-            self.irr_profile[0])
-        for t in range(len(model.time_step)-1):
-            model.cons.add(
-                delta_temp[t + 2] == (inlet_temp[t + 2] + outlet_temp[t + 1]) /
-                2 - self.temp_profile[t + 1])
-            model.cons.add(
-                eff[t + 2] == self.OpticalEfficiency - self.K * delta_temp[
-                    t + 2] / self.irr_profile[t + 1])
-
-    """
-    # 非线性， size和solar出水温度
-    def _constraint_efficiency(self, model):
-        delta_temp = model.find_component('delta_temp_' + self.name)
-        eff = model.find_component('eff_' + self.name)
-        solar_coll_properties_path = os.path.join(base_path, "data",
-                                                  "component_database",
-                                                  "SolarThermalCollectorFluid",
-                                                  "FPC.csv")
-        solar_coll_properties = pd.read_csv(solar_coll_properties_path)
-        if 'optical_eff' in solar_coll_properties.columns:
-            self.OpticalEfficiency = float(solar_coll_properties['optical_eff'])
-        else:
-            warnings.warn(
-                "In the model database for " + self.component_type +
-                " lack of column for optical efficiency.")
-        if 'K' in solar_coll_properties.columns:
-            self.K = float(solar_coll_properties['K'])
-        else:
-            warnings.warn(
-                "In the model database for " + self.component_type +
-                " lack of column for K.")
-        outlet_temp = model.find_component('outlet_temp_' + self.name)
-        inlet_temp = model.find_component('inlet_temp_' + self.name)
-
-        '''
-    
         for t in model.time_step:
             model.cons.add(
-                delta_temp[t] == (inlet_temp[t] + outlet_temp[t]) / 2 -
-                self.temp_profile[t - 1])
-            model.cons.add(
-                eff[t] == self.OpticalEfficiency - self.K * delta_temp[t] /
-                self.irr_profile[t - 1])    
-        '''
+                eff[t] == self.OpticalEfficiency - self.K * ((inlet_temp[t] + 
+                outlet_temp[t]) / 2 - self.temp_profile[t - 1]) / 
+                self.irr_profile[t - 1])
+
+    """
+
+    # Test
+    def _constraint_efficiency(self, model):
+        eff = model.find_component('eff_' + self.name)
         for t in model.time_step:
             model.cons.add(eff[t] == 0.8)
 
+
+    # 'size' bezieht sich auf die Fläche der Solarthermie.
     def _constraint_conver(self, model):
         eff = model.find_component('eff_' + self.name)
         input_energy = model.find_component('input_' + self.inputs[0] +
@@ -140,20 +112,14 @@ class SolarThermalCollectorFluid(FluidComponent):
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'temp')
             for t in model.time_step:
-                model.cons.add(output_energy[t] == input_energy[t])
-                #model.cons.add(0 <= input_energy[t])
-                #model.cons.add(0 <= output_energy[t])
-                '''
+                # Beim Stagnationszustand gilt output_energy< input_energy
+                model.cons.add(output_energy[t] <= input_energy[t])
+                # model.cons.add(0 <= input_energy[t])
+                # model.cons.add(0 <= output_energy[t])
                 model.cons.add(
                     output_energy[t] == self.solar_liquid_heat_cap * (
                             m_out[t] * t_out[t] - m_in[t] * t_in[t]) /
                     self.unit_switch)
-                '''
-            # for t in range(len(model.time_step) - 1):
-            #     model.cons.add(output_energy[t + 2] == input_energy[t + 2])
-            #     model.cons.add(
-            #         output_energy[t + 2] == self.solar_liquid_heat_cap * (
-            #                 t_out[t + 2] - t_in[t + 1]) / self.unit_switch)
 
     def add_cons(self, model):
         self._constraint_vdi2067(model)
@@ -169,9 +135,6 @@ class SolarThermalCollectorFluid(FluidComponent):
 
         outlet_temp = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('outlet_temp_' + self.name, outlet_temp)
-
-        delta_temp = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('delta_temp_' + self.name, delta_temp)
 
         eff = pyo.Var(model.time_step, bounds=(0, 1))
         model.add_component('eff_' + self.name, eff)

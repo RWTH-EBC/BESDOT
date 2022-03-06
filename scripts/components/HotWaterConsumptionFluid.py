@@ -77,7 +77,6 @@ class HotWaterConsumptionFluid(FluidComponent):
         #self._constraint_cold_water(model)
         #self._constraint_hot_water(model)
         self._constraint_heat_inputs(model)
-        # self._constraint_floor_temp(model)
         self._constraint_vdi2067(model)
 
     def add_vars(self, model):
