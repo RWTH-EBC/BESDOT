@@ -58,11 +58,11 @@ class HomoStorage(FluidComponent, HotWaterStorage):
         temp_var = model.find_component('temp_' + self.name)
         loss_var = model.find_component('loss_' + self.name)
 
-        for t in range(len(model.time_step)-1):
-            model.cons.add((temp_var[t+2] - temp_var[t+1]) * water_density *
+        for t in range(len(model.time_step) - 1):
+            model.cons.add((temp_var[t + 2] - temp_var[t + 1]) * water_density *
                            size * water_heat_cap / unit_switch ==
-                           input_energy[t+1] - output_energy[t+1] -
-                           loss_var[t+1])
+                           input_energy[t + 1] - output_energy[t + 1] -
+                           loss_var[t + 1])
 
     def _constraint_loss(self, model, loss_type='off'):
         """
@@ -85,7 +85,8 @@ class HomoStorage(FluidComponent, HotWaterStorage):
                 model.cons.add(loss_var[t + 1] == 1.5 * ((temp_var[t + 1] -
                                                           20) / 1000))
 
-    def _constraint_temp(self, model, init_temp=58):
+    # todo (qli): init_temp= heat_water_return_temp = 30
+    def _constraint_temp(self, model, init_temp=31):
         # Initial temperature for water in storage is define with a constant
         # value.
         temp_var = model.find_component('temp_' + self.name)
@@ -105,6 +106,20 @@ class HomoStorage(FluidComponent, HotWaterStorage):
                                          '_' + 'temp')
             for t in range(len(model.time_step)):
                 model.cons.add(temp_var[t + 1] == t_out[t + 1])
+
+    def _constraint_heat_water_return_temp(self, model, init_temp=30):
+        for heat_output in self.heat_flows_out:
+            t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
+                                        '_' + 'temp')
+            for t in range(len(model.time_step)):
+                model.cons.add(init_temp == t_in[t + 1])
+
+    def _constraint_heat_water_temp(self, model, init_temp=45):
+        for heat_output in self.heat_flows_out:
+            t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
+                                         '_' + 'temp')
+            for t in range(len(model.time_step)):
+                model.cons.add(init_temp <= t_out[t + 1])
 
     def _constraint_init_fluid_temp(self, model):
         """In a assumed state, the temperature of fluid flowing into storage at
@@ -156,11 +171,11 @@ class HomoStorage(FluidComponent, HotWaterStorage):
         elif init_status == 'off':
             model.cons.add(status_var[1] == 0)
 
-        for t in range(len(model.time_step)-1):
+        for t in range(len(model.time_step) - 1):
             # Need a better tutorial for introducing the logical condition
             model.cons.add(status_var[t + 2] >= small_num *
                            (small_num + (max_temp - min_temp - small_num) *
-                            status_var[t+1] + min_temp - temp_var[t+1]))
+                            status_var[t + 1] + min_temp - temp_var[t + 1]))
             model.cons.add(status_var[t + 2] <= 1 + small_num *
                            (small_num + (max_temp - min_temp - 2 * small_num) *
                             status_var[t + 1] + min_temp - temp_var[t + 1]))
@@ -185,8 +200,11 @@ class HomoStorage(FluidComponent, HotWaterStorage):
         # self._constraint_mass_flow(model)
         self._constraint_heat_inputs(model)
         self._constraint_heat_outputs(model)
-        #self._constraint_input_permit(model, min_temp=55, init_status='on')
+        # self._constraint_input_permit(model, min_temp=55, init_status='on')
         self._constraint_vdi2067(model)
+        # todo (qli): löschen?
+        self._constraint_heat_water_return_temp(model)
+        #self._constraint_heat_water_temp(model)
 
     def add_vars(self, model):
         super().add_vars(model)
@@ -203,33 +221,3 @@ class HomoStorage(FluidComponent, HotWaterStorage):
 
         loss = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('loss_' + self.name, loss)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
