@@ -46,7 +46,6 @@ class SolarThermalCollectorFluid(FluidComponent):
                 # Über die max. Temperatur verdampft die Solarflüssigkeit.
                 model.cons.add(outlet_temp[t] <= self.max_temp)
 
-    """
     def _constraint_efficiency(self, model):
         eff = model.find_component('eff_' + self.name)
         solar_coll_properties_path = os.path.join(base_path, "data",
@@ -69,11 +68,11 @@ class SolarThermalCollectorFluid(FluidComponent):
         outlet_temp = model.find_component('outlet_temp_' + self.name)
         inlet_temp = model.find_component('inlet_temp_' + self.name)
 
+        # G = 1000 w/m2 (Solar Keymark Certificate)
         for t in model.time_step:
-            model.cons.add(
-                eff[t] == self.OpticalEfficiency - self.K * ((inlet_temp[t] + 
-                outlet_temp[t]) / 2 - self.temp_profile[t - 1]) / 
-                self.irr_profile[t - 1])
+            model.cons.add(eff[t] == self.OpticalEfficiency - self.K * (
+                        (inlet_temp[t] + outlet_temp[t]) / 2 -
+                        self.temp_profile[t - 1]) / 1000)
 
     """
 
@@ -81,7 +80,8 @@ class SolarThermalCollectorFluid(FluidComponent):
     def _constraint_efficiency(self, model):
         eff = model.find_component('eff_' + self.name)
         for t in model.time_step:
-            model.cons.add(eff[t] == 0.8)
+            model.cons.add(eff[t] == 0.5)
+    """
 
     # 'size' bezieht sich auf die Fläche der Solarthermie.
     def _constraint_conver(self, model):
@@ -104,8 +104,9 @@ class SolarThermalCollectorFluid(FluidComponent):
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'temp')
             for t in model.time_step:
-                # Beim Stagnationszustand gilt output_energy< input_energy
-                model.cons.add(output_energy[t] <= input_energy[t])
+                # todo:Beim Stagnationszustand gilt output_energy< input_energy
+                # aber das Ergebnis ist komisch
+                model.cons.add(output_energy[t] == input_energy[t])
                 # model.cons.add(0 <= input_energy[t])
                 # model.cons.add(0 <= output_energy[t])
                 model.cons.add(
@@ -134,8 +135,9 @@ class SolarThermalCollectorFluid(FluidComponent):
             '''
 
         small_num = 0.00001
-        status_var = pyo.Var(model.time_step, domain=pyo.Binary)
-        model.add_component('status_' + self.name, status_var)
+        # status_var = pyo.Var(model.time_step, domain=pyo.Binary)
+        # model.add_component('status_' + self.name, status_var)
+        status_var = model.find_component('status_' + self.name)
         output_energy = model.find_component('output_' + self.outputs[0] +
                                              '_' + self.name)
         outlet_temp = model.find_component('outlet_temp_' + self.name)
@@ -221,3 +223,6 @@ class SolarThermalCollectorFluid(FluidComponent):
 
         eff = pyo.Var(model.time_step, bounds=(0, 1))
         model.add_component('eff_' + self.name, eff)
+
+        status_var = pyo.Var(model.time_step, domain=pyo.Binary)
+        model.add_component('status_' + self.name, status_var)

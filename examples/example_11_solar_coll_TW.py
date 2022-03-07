@@ -17,7 +17,8 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 project = Project(name='project_11', typ='building')
 
 # Generate the environment object
-env_11 = Environment(start_time=11, time_step=3)
+#env_11 = Environment(start_time=4329, time_step=3)
+env_11 = Environment(start_time=10, time_step=3)
 project.add_environment(env_11)
 
 # If the objective of the project is the optimization for building, a building
@@ -30,7 +31,6 @@ bld_11 = Building(name='bld_11', area=200, solar_area=50)
 
 # todo: That is another possible demand profile, you could try it for
 #  validation
-bld_11.demand_profile['heat_demand'] = [1, 0, 1, 1, 0]
 bld_11.demand_profile['hot_water_demand'] = [1, 0, 1, 1, 0]
 
 # Pre define the building energy system with the topology for different
