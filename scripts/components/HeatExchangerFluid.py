@@ -134,7 +134,7 @@ class HeatExchangerFluid(FluidComponent, HeatExchanger):
     def add_cons(self, model):
         self._constraint_heat_inputs(model)
         self._constraint_heat_outputs(model)
-        self._constraint_mass_flow(model)
+        # self._constraint_mass_flow(model)
         self._constraint_loss(model)
         self._constraint_delta_temp(model)
         self._constraint_unidirect(model)
