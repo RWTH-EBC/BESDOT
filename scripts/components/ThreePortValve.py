@@ -1,3 +1,5 @@
+import warnings
+import pyomo.environ as pyo
 from scripts.components.HeatExchangerFluid import HeatExchangerFluid
 
 
@@ -6,8 +8,22 @@ class ThreePortValve(HeatExchangerFluid):
     todo add description
     """
     def __init__(self, comp_name, comp_type="ThreePortValve"):
-        super().__init__(comp_name=comp_name,
-                         comp_type=comp_type)
+        self.name = comp_name
+        self.component_type = comp_type
+        self.efficiency = {'heat': 1}
+
+        self.inputs = ['heat']
+        self.outputs = ['heat']
+
+        self.heat_flows_in = []
+        self.heat_flows_out = []
+
+        if len(self.heat_flows_in) > 1:
+            warnings.warn('more than one energy flow input is given for the '
+                          'heat exchanger')
+        if len(self.heat_flows_out) > 1:
+            warnings.warn('more than one energy flow output is given for the '
+                          'heat exchanger')
 
     def _constraint_mix(self, model):
         """After flow mixing in three port valve, flow in output side should be
@@ -34,3 +50,10 @@ class ThreePortValve(HeatExchangerFluid):
         self._constraint_heat_outputs(model)
         self._constraint_conver(model)
         self._constraint_mix(model)
+
+    def add_vars(self, model):
+        input_energy = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('input_heat_' + self.name, input_energy)
+
+        output_energy = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('output_heat_' + self.name, output_energy)
