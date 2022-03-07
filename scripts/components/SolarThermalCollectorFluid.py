@@ -4,6 +4,7 @@ import pandas as pd
 import pyomo.environ as pyo
 from scripts.FluidComponent import FluidComponent
 from scripts.Component import Component
+from pyomo.gdp import Disjunct, Disjunction
 
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
     __file__))))
@@ -42,14 +43,6 @@ class SolarThermalCollectorFluid(FluidComponent):
             for t in model.time_step:
                 model.cons.add(outlet_temp[t] == t_out[t])
                 model.cons.add(t_in[t] == inlet_temp[t])
-                # todo: Regelung (GDP)
-                '''
-                if outlet_temp[t] - inlet_temp[t] >= 5:
-                    model.cons.add(status[t] == 1)
-                else:
-                    model.cons.add(status[t] == 0)
-                model.cons.add(output_energy[t] == output_energy[t] * status[t])
-                '''
                 # Über die max. Temperatur verdampft die Solarflüssigkeit.
                 model.cons.add(outlet_temp[t] <= self.max_temp)
 
@@ -84,12 +77,11 @@ class SolarThermalCollectorFluid(FluidComponent):
 
     """
 
-    # Test
+    # todo: Test
     def _constraint_efficiency(self, model):
         eff = model.find_component('eff_' + self.name)
         for t in model.time_step:
             model.cons.add(eff[t] == 0.8)
-
 
     # 'size' bezieht sich auf die Fläche der Solarthermie.
     def _constraint_conver(self, model):
@@ -121,11 +113,102 @@ class SolarThermalCollectorFluid(FluidComponent):
                             m_out[t] * t_out[t] - m_in[t] * t_in[t]) /
                     self.unit_switch)
 
+    def _constraint_output_permit(self, model, off_delta_temp=4,
+                                  on_delta_temp=8, init_status='on'):
+
+        # todo: Regelung (GDP)
+        '''
+        for t in model.time_step:
+            if status_var[1] = 1
+                if outlet_temp[t] - inlet_temp[t] <= 4:
+                    status[t+1] = 0
+                    energy[t+1] = 0
+                else:
+                    status[t+1] = 1
+            else:
+                if outlet_temp[t] - inlet_temp[t] >= 8:
+                    status[t+1] = 1
+                else:
+                    status[t+1] = 0
+                    energy[t+1] = 0
+            '''
+
+        small_num = 0.00001
+        status_var = pyo.Var(model.time_step, domain=pyo.Binary)
+        model.add_component('status_' + self.name, status_var)
+        output_energy = model.find_component('output_' + self.outputs[0] +
+                                             '_' + self.name)
+        outlet_temp = model.find_component('outlet_temp_' + self.name)
+        inlet_temp = model.find_component('inlet_temp_' + self.name)
+        model.init = pyo.BooleanVar()
+
+        if init_status == 'on':
+            model.init_log = pyo.LogicalConstraint(
+                expr=model.init.equivalent_to(True))
+        elif init_status == 'off':
+            model.init_log = pyo.LogicalConstraint(
+                expr=model.init.equivalent_to(False))
+
+        for t in model.time_step:
+            a = Disjunct()
+            c_1 = pyo.Constraint(
+                expr=outlet_temp[t] - inlet_temp[t] <= off_delta_temp)
+            c_2 = pyo.Constraint(expr=output_energy[t] == 0)
+            model.add_component('a_dis_' + str(t), a)
+            a.add_component('a_1_' + str(t), c_1)
+            a.add_component('a_2_' + str(t), c_2)
+
+            b = Disjunct()
+            c_7 = pyo.Constraint(
+                expr=outlet_temp[t] - inlet_temp[
+                    t] >= off_delta_temp - small_num)
+            model.add_component('b_dis_' + str(t), b)
+            b.add_component('b_1_' + str(t), c_7)
+
+            c = Disjunct()
+            c_3 = pyo.Constraint(
+                expr=outlet_temp[t] - inlet_temp[t] >= on_delta_temp)
+            model.add_component('c_dis_' + str(t), c)
+            c.add_component('c_' + str(t), c_3)
+
+            d = Disjunct()
+            c_4 = pyo.Constraint(expr=output_energy[t] == 0)
+            c_6 = pyo.Constraint(expr=outlet_temp[t] - inlet_temp[
+                t] <= on_delta_temp + small_num)
+            model.add_component('d_dis_' + str(t), d)
+            d.add_component('d_' + str(t), c_4)
+            d.add_component('d_2_' + str(t), c_6)
+
+            dj = Disjunction(expr=[a, b, c, d])
+            model.add_component('dj_dis_' + str(t), dj)
+
+            if t == 1:
+                p_4 = pyo.LogicalConstraint(
+                    expr=model.init.equivalent_to(
+                        pyo.lor(a.indicator_var, b.indicator_var)))
+                p_5 = pyo.LogicalConstraint(
+                    expr=~model.init.equivalent_to(
+                        pyo.lor(c.indicator_var, d.indicator_var)))
+            else:
+                last_status = model.find_component('b_dis_' + str(t - 1))
+                p_4 = pyo.LogicalConstraint(
+                    expr=pyo.lor(a.indicator_var,
+                                 b.indicator_var).equivalent_to(
+                        last_status.indicator_var))
+                p_5 = pyo.LogicalConstraint(
+                    expr=~last_status.indicator_var.equivalent_to(
+                        pyo.lor(c.indicator_var, d.indicator_var)))
+            model.add_component('p_4_' + str(t), p_4)
+            model.add_component('p_5_' + str(t), p_5)
+            model.cons.add(output_energy[t] == output_energy[t] * status_var[t])
+
     def add_cons(self, model):
         self._constraint_vdi2067(model)
         self._constraint_temp(model)
         self._constraint_efficiency(model)
         self._constraint_conver(model)
+        # todo: Regelung (GDP)
+        self._constraint_output_permit(model)
 
     def add_vars(self, model):
         super().add_vars(model)
