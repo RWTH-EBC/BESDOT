@@ -38,8 +38,8 @@ class ThreePortValve(HeatExchangerFluid):
         # Temperature of fluid before and after division
         temp_flow_in = model.find_component(heat_input[1] + '_' +
                                             heat_input[0] + '_temp')
-        temp_flow_out = model.find_component(heat_output[0] + '_' +
-                                             heat_output[1] + '_temp')
+        temp_flow_out = model.find_component(heat_output[1] + '_' +
+                                             heat_output[0] + '_temp')
 
         for t in model.time_step:
             model.cons.add(mass_flow_in[t] <= mass_flow_out[t])

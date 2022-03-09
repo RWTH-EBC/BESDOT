@@ -95,7 +95,7 @@ def plot_double(csv_file, comp_name1, comp_name2):
     data3 = data3.reset_index(drop=True)
     profile_inputpower = data3['value']
     data4 = df[(df['var'].str.contains('output_')) & (df['var'].str.contains(
-        comp_name2))]
+        comp_name1))]
     data4 = data4.reset_index(drop=True)
     profile_outputpower = data4['value']
     fig = plt.figure()
