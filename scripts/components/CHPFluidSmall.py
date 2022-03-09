@@ -104,14 +104,6 @@ class CHPFluidSmall(CHP, FluidComponent):
             model.cons.add(Qth * status[t] == output_heat[t])
             model.cons.add(Pel * status[t] == output_elec[t])
 
-    # todo (qli): building.py Zeile 342 anpassen
-    def _constraint_elec_balance(self, model):
-        output_elec = model.find_component(
-            'output_' + self.outputs[1] + '_' + self.name)
-        energy_flow_elec = model.find_component(self.name + '_e_grid_elec')
-        for t in model.time_step:
-            model.cons.add(output_elec[t] == energy_flow_elec[t])
-
     def add_cons(self, model):
         self._constraint_Pel(model)
         self._constraint_therm_eff(model)
