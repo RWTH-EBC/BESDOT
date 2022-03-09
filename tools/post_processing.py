@@ -98,20 +98,22 @@ def plot_double(csv_file, comp_name1, comp_name2):
         comp_name1))]
     data4 = data4.reset_index(drop=True)
     profile_outputpower = data4['value']
-    fig = plt.figure()
+    fig = plt.figure(figsize=(14, 14))
     ax = fig.add_subplot(111)
     ax.plot(profile_inputpower, '-', label='input')
     ax.plot(profile_outputpower, '-', label='output')
     ax2 = ax.twinx()
-    ax2.plot(profile_temp, '-r', label='temp')
-    ax2.plot(profile_return_temp, '-g', label='return_temp')
-    ax.legend(loc='center left', bbox_to_anchor=(0, 1.1), ncol=1)
+    ax2.plot(profile_temp, '-r', label=comp_name1 + '_' + comp_name2 + '_temp')
+    ax2.plot(profile_return_temp, '-g', label=comp_name2 + '_' + comp_name1 +
+                                              '_temp')
+    ax.legend(loc='center left', bbox_to_anchor=(0, 1.07), ncol=1)
     ax.grid()
     ax.set_xlabel("Time (h)")
-    ax.set_ylabel(r"power[KW]")
+    ax.set_title('Profile of ' + comp_name1)
+    ax.set_ylabel(r"Power (KW)")
     ax2.set_ylabel(r"Temperature ($^\circ$C)")
-    ax.set_xlim(xmax=len(profile_temp)*1.2)
-    ax2.legend(loc='upper right', bbox_to_anchor=(1.05, 1.18), ncol=1)
+    ax.set_xlim(xmax=len(profile_temp))
+    ax2.legend(loc='upper right', bbox_to_anchor=(1.1, 1.1), ncol=1)
     plt.savefig(plot_output)
 
 
