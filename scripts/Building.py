@@ -339,7 +339,7 @@ class Building(object):
         for index, row in self.simp_matrix.iterrows():
             if self.components[index].outputs is not None:
                 for energy_type in self.components[index].outputs:
-                    if energy_type == 'heat' and index != ('chp_small' or 'chp_small' or 'chp_big'):
+                    if energy_type == 'heat' and index != 'chp_small' and index != 'chp_big':
                         if len(row[row > 0].index.tolist() +
                                row[row.isnull()].index.tolist()) > 0:
                             output_components = row[row > 0].index.tolist() + \
