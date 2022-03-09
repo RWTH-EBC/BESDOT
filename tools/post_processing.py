@@ -135,7 +135,7 @@ def plot_double(csv_file, comp_name1, comp_name2, time_step, inputenergy,
             profile_return_temp = profile_return_temp_original[i-1]
             profile_inputpower = profile_inputpower_original[i-1]
             profile_outputpower = profile_outputpower_original[i-1]
-            fig = plt.figure(figsize=(14, 14))
+            fig = plt.figure(figsize=(8, 8))
             ax = fig.add_subplot(111)
             ax.plot(profile_inputpower, '-', label='input')
             ax.plot(profile_outputpower, '--', label='output')
@@ -152,7 +152,7 @@ def plot_double(csv_file, comp_name1, comp_name2, time_step, inputenergy,
             ax.set_ylabel(r"Power (KW)")
             ax2.set_ylabel(r"Temperature ($^\circ$C)")
             ax.set_xlim(xmax=24)
-            ax2.legend(loc='upper right', bbox_to_anchor=(1.1, 1.1), ncol=1)
+            ax2.legend(loc='upper right', bbox_to_anchor=(1.1, 1.12), ncol=1)
             plt.savefig(plot_output)
             i = i + 1
 
