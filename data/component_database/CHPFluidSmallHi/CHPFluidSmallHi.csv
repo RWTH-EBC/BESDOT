@@ -1,2 +1,2 @@
-min_elec_size,max_elec_size,cost_type,cost,factor repair effort,factor servicing effort,servicing effort hours,fix_cost_factor,service life,outlet_temp
-0,50,constant,1100,0.05,0.015,20,0.025,15,65
+min_elec_size,max_elec_size,cost_type,cost,factor repair effort,factor servicing effort,servicing effort hours,fix_cost_factor,service life,max temperature,min temperature
+0,50,constant,1100,0.05,0.015,20,0.025,15,95,30
