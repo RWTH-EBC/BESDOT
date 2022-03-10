@@ -327,17 +327,18 @@ class Building(object):
         for index, row in self.simp_matrix.iteritems():
             if self.components[index].inputs is not None:
                 for energy_type in self.components[index].inputs:
-                    if len(row[row > 0].index.tolist() +
-                           row[row.isnull()].index.tolist()) > 0:
-                        input_components = row[row > 0].index.tolist() + \
-                                           row[row.isnull()].index.tolist()
-                        input_energy = model.find_component('input_' +
+                    if energy_type != 'elec':
+                        if len(row[row > 0].index.tolist() +
+                               row[row.isnull()].index.tolist()) > 0:
+                            input_components = row[row > 0].index.tolist() + \
+                                               row[row.isnull()].index.tolist()
+                            input_energy = model.find_component('input_' +
                                                             energy_type + '_' +
                                                             index)
-                        for t in model.time_step:
-                            model.cons.add(input_energy[t] == sum(
-                                self.energy_flow[(input_comp, index)][t] for
-                                input_comp in input_components))
+                            for t in model.time_step:
+                                model.cons.add(input_energy[t] == sum(
+                                    self.energy_flow[(input_comp, index)][t] for
+                                    input_comp in input_components))
 
         # Constraints for the outputs
         for index, row in self.simp_matrix.iterrows():
