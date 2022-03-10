@@ -12,6 +12,7 @@ class HomoStorageST(HomoStorage):
                          max_size=max_size,
                          current_size=current_size)
 
+    # todo (qli): HotWaterConsumption.py anpassen
     def _constraint_cold_water_temp(self, model, cold_water_temp=12):
         for heat_output in self.heat_flows_out:
             t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
@@ -19,6 +20,7 @@ class HomoStorageST(HomoStorage):
             for t in model.time_step:
                 model.cons.add(cold_water_temp == t_in[t])
 
+    # todo (qli): HotWaterConsumption.py anpassen
     def _constraint_hot_water_temp(self, model, hot_water_temp=60):
         for heat_output in self.heat_flows_out:
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
