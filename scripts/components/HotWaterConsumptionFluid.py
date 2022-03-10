@@ -52,30 +52,28 @@ class HotWaterConsumptionFluid(FluidComponent):
             ####################################################################
             model.cons.add(input_energy[t] == self.consum_profile[t-1])
 
-    def _constraint_cold_water(self, model):
-        cold_water_temp = model.find_component('cold_water_temp_' + self.name)
-        for t in model.time_step:
-            model.cons.add(cold_water_temp[t] == self.cold_water_temp)
-        for heat_input in self.heat_flows_in + self.heat_flows_out:
+    # todo (qli): HotWaterConsumption.py anpassen
+    def _constraint_cold_water_temp(self, model, cold_water_temp=12):
+        for heat_input in self.heat_flows_in:
             t_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
                                          '_' + 'temp')
             for t in model.time_step:
-                model.cons.add(cold_water_temp[t] == t_out[t])
+                model.cons.add(cold_water_temp == t_out[t])
 
-    def _constraint_hot_water(self, model, hot_water_min_temp=60):
-        hot_water_temp = model.find_component('hot_water_temp_' + self.name)
-        for t in model.time_step:
-            model.cons.add(hot_water_temp[t] >= hot_water_min_temp)
-        for heat_input in self.heat_flows_in + self.heat_flows_out:
+    # todo (qli): HotWaterConsumption.py anpassen
+    def _constraint_hot_water_temp(self, model, hot_water_temp=60):
+        for heat_input in self.heat_flows_in:
             t_in = model.find_component(heat_input[0] + '_' + heat_input[1] +
                                         '_' + 'temp')
             for t in model.time_step:
-                model.cons.add(hot_water_temp[t] == t_in[t])
+                model.cons.add(hot_water_temp == t_in[t])
 
     def add_cons(self, model):
         self._constraint_conver(model)
-        #self._constraint_cold_water(model)
-        #self._constraint_hot_water(model)
+        # todo: (qli) anpassen
+        self._constraint_cold_water_temp(model)
+        # todo: (qli) anpassen
+        self._constraint_hot_water_temp(model)
         self._constraint_heat_inputs(model)
         self._constraint_vdi2067(model)
 
@@ -85,11 +83,5 @@ class HotWaterConsumptionFluid(FluidComponent):
         input_energy = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('input_' + self.inputs[0] + '_' + self.name,
                             input_energy)
-
-        cold_water_temp = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('cold_water_temp_' + self.name, cold_water_temp)
-
-        hot_water_temp = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('hot_water_temp_' + self.name, hot_water_temp)
 
 
