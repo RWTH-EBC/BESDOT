@@ -48,8 +48,8 @@ class HomoStorageST(HomoStorage):
     def add_cons(self, model):
         self._constraint_conver(model)
         self._constraint_loss(model, loss_type='off')
-        self._constraint_hot_water_temp(model)
-        self._constraint_cold_water_temp(model)
+        #self._constraint_hot_water_temp(model)
+        #self._constraint_cold_water_temp(model)
         self._constraint_temp(model)
         self._constraint_heat_outputs(model)
         self._constraint_vdi2067(model)
