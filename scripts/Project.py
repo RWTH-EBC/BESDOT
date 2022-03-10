@@ -8,7 +8,6 @@ import pyomo.environ as pyo
 import pandas as pd
 import numpy as np
 
-
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -20,6 +19,7 @@ class Project(object):
         # The following attributs should be replaced or added with related
         # object before generating pyomo model.
         self.environment = None
+        self.init_storage_temp = None
         self.district_list = []
         self.building_list = []
 
@@ -54,6 +54,9 @@ class Project(object):
         """
         pass
 
+    def add_init_storage_temp(self, init_storage_temp):
+        self.init_storage_temp = init_storage_temp
+
     def build_model(self, obj_typ='annual_cost'):
         """
         Build up a mathematical model (concrete model) using pyomo modeling
@@ -64,6 +67,7 @@ class Project(object):
             self.model = pyo.ConcreteModel(self.name)
             self.model.time_step = pyo.RangeSet(self.environment.time_step)
             self.model.cons = pyo.ConstraintList()
+            self.obj_typ = obj_typ
 
             # Assign pyomo variables
             bld = self.building_list[0]
@@ -83,10 +87,10 @@ class Project(object):
             # objective is operation cost, the components size should be
             # given with the same size of maximal and minimal size.
 
-            if obj_typ == 'annual_cost':
+            if self.obj_typ == 'annual_cost':
                 self.model.obj = pyo.Objective(expr=bld_annual_cost,
                                                sense=pyo.minimize)
-            elif obj_typ == 'operation_cost':
+            elif self.obj_typ == 'operation_cost':
                 self.model.obj = pyo.Objective(expr=bld_operation_cost,
                                                sense=pyo.minimize)
             else:
@@ -113,6 +117,7 @@ class Project(object):
         # Attention! The option was set for the dimension optimization for
         # HomoStorage
         solver.options['NonConvex'] = 2
+        #solver.options['MIPFocus'] = 3
 
         opt_result = solver.solve(self.model, tee=True)
 
