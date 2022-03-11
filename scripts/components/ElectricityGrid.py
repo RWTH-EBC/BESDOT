@@ -32,7 +32,7 @@ class ElectricityGrid(Component):
         # todo (qli): Name anpassen ('chp_big_' + self.name + '_elec')
         # energy_flow_elec_input = model.find_component(
         #     'chp_small_' + self.name + '_elec')
-        energy_flow_elec_output = model.find_component(self.name + 'e_boi_elec')
+        energy_flow_elec_output = model.find_component(self.name + '_e_boi')
         for t in model.time_step:
             # model.cons.add(sell_elec[t] == energy_flow_elec_input[t])
             model.cons.add(buy_elec[t] == energy_flow_elec_output[t])
@@ -50,5 +50,3 @@ class ElectricityGrid(Component):
         # buy_elec = pyo.Var(model.time_step, bounds=(0, None))
         # model.add_component('output_elec_' + self.name, buy_elec)
 
-        energy_flow_elec_output = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component(self.name + 'e_boi_elec', energy_flow_elec_output)
