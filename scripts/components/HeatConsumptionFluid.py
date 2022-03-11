@@ -78,10 +78,17 @@ class HeatConsumptionFluid(FluidComponent):
                 model.cons.add(outlet_temp[t] == t_out[t])
                 model.cons.add(inlet_temp[t] >= self.inlet_temp)
 
+    # todo (qli):
+    def _constraint_heat_water_temp(self, model, init_temp=45):
+        for heat_input in self.heat_flows_in:
+            t_in = model.find_component(
+                heat_input[0] + '_' + heat_input[1] + '_' + 'temp')
+            for t in range(len(model.time_step)):
+                model.cons.add(init_temp == t_in[t + 1])
+
     def add_cons(self, model):
         self._constraint_conver(model)
-        # self._constraint_cold_water(model)
-        # self._constraint_hot_water(model)
+        self._constraint_heat_water_temp(model)
         self._constraint_heat_inputs(model)
         self._constraint_temp(model)
         self._constraint_vdi2067(model)

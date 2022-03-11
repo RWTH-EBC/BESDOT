@@ -85,7 +85,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
                 model.cons.add(loss_var[t + 1] == 1.5 * ((temp_var[t + 1] -
                                                           20) / 1000))
 
-    def _constraint_temp(self, model, init_temp=50):
+    def _constraint_temp(self, model, init_temp=45):
         # Initial temperature for water in storage is define with a constant
         # value.
         temp_var = model.find_component('temp_' + self.name)
@@ -102,6 +102,15 @@ class HomoStorage(FluidComponent, HotWaterStorage):
                                          '_' + 'temp')
             for t in range(len(model.time_step)):
                 model.cons.add(temp_var[t + 1] == t_out[t + 1])
+
+    # todo (qli):
+    def _constraint_heat_water_temp(self, model, init_temp=45):
+        for heat_output in self.heat_flows_out:
+            t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
+                                         '_' + 'temp')
+            for t in range(len(model.time_step)):
+                model.cons.add(init_temp <= t_out[t + 1])
+
 
     def _constraint_init_fluid_temp(self, model):
         """In a assumed state, the temperature of fluid flowing into storage at
@@ -184,6 +193,8 @@ class HomoStorage(FluidComponent, HotWaterStorage):
         self._constraint_heat_outputs(model)
         # self._constraint_input_permit(model, min_temp=30, init_status='on')
         self._constraint_vdi2067(model)
+        # todo (qli): löschen?
+        #self._constraint_heat_water_temp(model)
 
     def add_vars(self, model):
         super().add_vars(model)
