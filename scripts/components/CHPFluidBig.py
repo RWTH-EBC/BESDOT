@@ -24,13 +24,20 @@ class CHPFluidBig(CHP, FluidComponent):
         self.heat_flows_out = []
 
     # todo (qli): building.py Zeile 342 anpassen
-    def add_heat_flows(self, bld_heat_flows):
+    def add_heat_flows_in(self, bld_heat_flows):
+        # check the building heat flows and select the tuples related to this
+        # device to add into list heat_flows.
         for element in bld_heat_flows:
-            if element[0] != 'e_grid' and element[1] != 'e_grid':
-                if self.name == element[0]:
-                    self.heat_flows_out.append(element)
-                if self.name == element[1]:
-                    self.heat_flows_in.append(element)
+            if element[1] != 'e_grid' and self.name == element[1]:
+                self.heat_flows_in.append(element)
+
+    # todo (qli): building.py Zeile 342 anpassen
+    def add_heat_flows_out(self, bld_heat_flows):
+        # check the building heat flows and select the tuples related to this
+        # device to add into list heat_flows.
+        for element in bld_heat_flows:
+            if element[1] != 'e_grid'  and self.name == element[0]:
+                self.heat_flows_out.append(element)
 
     # Pel = elektrische Nennleistung = comp_size
     # Qth = thermische Nennleistung
