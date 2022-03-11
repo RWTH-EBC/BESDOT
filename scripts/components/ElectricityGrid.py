@@ -20,3 +20,15 @@ class ElectricityGrid(Component):
         The Grid has "no" fixed input and therefore it should not be constrainted
         """
         pass
+
+    # todo (qli): building.py Zeile 342 anpassen
+    def _constraint_elec_balance(self, model):
+        sell_elec = model.find_component('input_elec_' + self.name)
+        # todo (qli): Name anpassen ('chp_big_' + self.name + '_elec')
+        energy_flow_elec = model.find_component('chp_small_' + self.name + '_elec')
+        for t in model.time_step:
+            model.cons.add(sell_elec[t] == energy_flow_elec[t])
+
+    # todo (qli): building.py Zeile 342 anpassen
+    def add_cons(self, model):
+        self._constraint_elec_balance(model)
