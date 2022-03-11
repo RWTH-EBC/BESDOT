@@ -331,7 +331,7 @@ class Building(object):
         for index, row in self.simp_matrix.iteritems():
             if self.components[index].inputs is not None:
                 for energy_type in self.components[index].inputs:
-                    if energy_type != 'elec':
+                    if index != 'e_boi':
                         if len(row[row > 0].index.tolist() +
                                row[row.isnull()].index.tolist()) > 0:
                             input_components = row[row > 0].index.tolist() + \
