@@ -31,8 +31,8 @@ bld_16 = Building(name='bld_16', area=200, solar_area=50)
 
 # todo: That is another possible demand profile, you could try it for
 #  validation
-bld_16.demand_profile['hot_water_demand'] = [1.1, 0, 1, 1, 0]
-
+#bld_16.demand_profile['hot_water_demand'] = [1.1, 0, 1, 1, 0]
+bld_16.demand_profile['hot_water_demand'] = [6, 0, 6, 1, 0]
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 topo_file = os.path.join(base_path, 'data', 'topology',
