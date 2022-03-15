@@ -28,7 +28,6 @@ class ElectricBoiler_ST(Component):
         self.heat_flows_in = []
         self.heat_flows_out = []
 
-
     def add_heat_flows_in(self, bld_heat_flows):
         # check the building heat flows and select the tuples related to this
         # device to add into list heat_flows.
@@ -45,14 +44,18 @@ class ElectricBoiler_ST(Component):
 
     def _constraint_mass_temp(self, model):
         for heat_input in self.heat_flows_in:
-            m_out_cold = model.find_component(heat_input[1] + '_' + heat_input[0] +
-                                         '_' + 'mass')
-            m_in_cold = model.find_component(heat_input[0] + '_' + heat_input[1] +
-                                        '_' + 'mass')
-            t_out_cold = model.find_component(heat_input[1] + '_' + heat_input[0] +
-                                         '_' + 'temp')
-            t_in_cold = model.find_component(heat_input[0] + '_' + heat_input[1] +
-                                        '_' + 'temp')
+            m_out_cold = model.find_component(
+                heat_input[1] + '_' + heat_input[0] +
+                '_' + 'mass')
+            m_in_cold = model.find_component(
+                heat_input[0] + '_' + heat_input[1] +
+                '_' + 'mass')
+            t_out_cold = model.find_component(
+                heat_input[1] + '_' + heat_input[0] +
+                '_' + 'temp')
+            t_in_cold = model.find_component(
+                heat_input[0] + '_' + heat_input[1] +
+                '_' + 'temp')
             for heat_output in self.heat_flows_out:
                 m_in_hot = model.find_component(
                     heat_output[1] + '_' + heat_output[0] + '_' + 'mass')
@@ -69,7 +72,6 @@ class ElectricBoiler_ST(Component):
                     model.cons.add(t_out_cold[t] == t_in_hot[t])
                     model.cons.add(t_in_cold[t] <= t_out_hot[t])
                     model.cons.add(t_in_hot[t] <= t_out_hot[t])
-
 
     def _constraint_conver(self, model):
         e_boi_properties_path = os.path.join(base_path, "data",
@@ -90,30 +92,35 @@ class ElectricBoiler_ST(Component):
         elec_transport = model.find_component('e_grid_' + self.name)
         input_heat = model.find_component('input_heat_' + self.name)
         output_heat = model.find_component('output_heat_' + self.name)
-        #heat_transport = model.find_component('tp_val_' + self.name)
+        # heat_transport = model.find_component('tp_val_' + self.name)
         for heat_input in self.heat_flows_in:
-            heat_transport = model.find_component(heat_input[0] + '_' + heat_input[1])
+            heat_transport = model.find_component(
+                heat_input[0] + '_' + heat_input[1])
             for t in model.time_step:
                 model.cons.add(heat_transport[t] == input_heat[t])
         for t in model.time_step:
             model.cons.add(elec_transport[t] == input_elec[t])
-            #model.cons.add(heat_transport[t] == input_heat[t])
+            # model.cons.add(heat_transport[t] == input_heat[t])
             model.cons.add(
                 input_elec[t] * self.Efficiency + input_heat[t] == output_heat[
                     t])
         for heat_input in self.heat_flows_in:
-            m_out_cold = model.find_component(heat_input[1] + '_' + heat_input[0] +
-                                         '_' + 'mass')
-            m_in_cold = model.find_component(heat_input[0] + '_' + heat_input[1] +
-                                        '_' + 'mass')
-            t_out_cold = model.find_component(heat_input[1] + '_' + heat_input[0] +
-                                         '_' + 'temp')
-            t_in_cold = model.find_component(heat_input[0] + '_' + heat_input[1] +
-                                        '_' + 'temp')
+            m_out_cold = model.find_component(
+                heat_input[1] + '_' + heat_input[0] +
+                '_' + 'mass')
+            m_in_cold = model.find_component(
+                heat_input[0] + '_' + heat_input[1] +
+                '_' + 'mass')
+            t_out_cold = model.find_component(
+                heat_input[1] + '_' + heat_input[0] +
+                '_' + 'temp')
+            t_in_cold = model.find_component(
+                heat_input[0] + '_' + heat_input[1] +
+                '_' + 'temp')
             for t in model.time_step:
                 model.cons.add(input_heat[t] == water_heat_cap * (
-                            m_in_cold[t] * t_in_cold[t] - m_out_cold[t] *
-                            t_out_cold[t]) / unit_switch)
+                        m_in_cold[t] * t_in_cold[t] - m_out_cold[t] *
+                        t_out_cold[t]) / unit_switch)
 
         for heat_output in self.heat_flows_out:
             m_in_hot = model.find_component(
@@ -125,7 +132,9 @@ class ElectricBoiler_ST(Component):
             t_out_hot = model.find_component(
                 heat_output[0] + '_' + heat_output[1] + '_' + 'temp')
             for t in model.time_step:
-                model.cons.add(output_heat[t] == water_heat_cap * (m_out_hot[t] * t_out_hot[t] - m_in_hot[t] * t_in_hot[t]) / unit_switch)
+                model.cons.add(output_heat[t] == water_heat_cap * (
+                            m_out_hot[t] * t_out_hot[t] - m_in_hot[t] *
+                            t_in_hot[t]) / unit_switch)
 
     def _constraint_maxpower(self, model):
         size = model.find_component('size_' + self.name)

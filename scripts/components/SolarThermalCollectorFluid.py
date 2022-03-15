@@ -46,6 +46,7 @@ class SolarThermalCollectorFluid(FluidComponent):
                 # Über die max. Temperatur verdampft die Solarflüssigkeit.
                 model.cons.add(outlet_temp[t] <= self.max_temp)
 
+
     def _constraint_efficiency(self, model):
         eff = model.find_component('eff_' + self.name)
         solar_coll_properties_path = os.path.join(base_path, "data",
@@ -76,7 +77,7 @@ class SolarThermalCollectorFluid(FluidComponent):
 
     """
 
-    # todo: Test
+    # Test
     def _constraint_efficiency(self, model):
         eff = model.find_component('eff_' + self.name)
         for t in model.time_step:
@@ -120,14 +121,14 @@ class SolarThermalCollectorFluid(FluidComponent):
         # todo: Regelung (GDP)
         '''
         for t in model.time_step:
-            if status_var[1] = 1
-                if outlet_temp[t] - inlet_temp[t] <= 4:
+            if status_var[t] = 1
+                if outlet_temp[t+1] - inlet_temp[t+1] <= 4:
                     status[t+1] = 0
                     energy[t+1] = 0
                 else:
                     status[t+1] = 1
             else:
-                if outlet_temp[t] - inlet_temp[t] >= 8:
+                if outlet_temp[t+1] - inlet_temp[t+1] >= 8:
                     status[t+1] = 1
                 else:
                     status[t+1] = 0
@@ -176,7 +177,7 @@ class SolarThermalCollectorFluid(FluidComponent):
             d = Disjunct()
             c_4 = pyo.Constraint(expr=output_energy[t] == 0)
             c_6 = pyo.Constraint(expr=outlet_temp[t] - inlet_temp[
-                t] <= on_delta_temp + small_num)
+                t] <= on_delta_temp - small_num)
             model.add_component('d_dis_' + str(t), d)
             d.add_component('d_' + str(t), c_4)
             d.add_component('d_2_' + str(t), c_6)
