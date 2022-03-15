@@ -180,7 +180,8 @@ class Building(object):
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
-                elif comp_type == 'HotWaterConsumption':
+                elif comp_type in ['HotWaterConsumption',
+                                   'HotWaterConsumptionFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       consum_profile=
                                                       self.demand_profile[
