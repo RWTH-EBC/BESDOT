@@ -27,9 +27,10 @@ class GasGrid(Component):
     def _constraint_gas_balance(self, model):
         output_gas = model.find_component('output_gas_' + self.name)
         # todo (qli): Name anpassen (self.name + '_chp_big')
-        #energy_flow_gas = model.find_component(self.name + '_chp_big')
+        # energy_flow_gas = model.find_component(self.name + '_chp_big')
         for gas_output in self.gas_flows_out:
-            energy_flow_gas = model.find_component(gas_output[0] + '_' + gas_output[1])
+            energy_flow_gas = model.find_component(
+                gas_output[0] + '_' + gas_output[1])
             for t in model.time_step:
                 model.cons.add(output_gas[t] == energy_flow_gas[t])
 

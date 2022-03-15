@@ -45,7 +45,7 @@ class CHPFluidBig(CHP, FluidComponent):
         Pel = model.find_component('size_' + self.name)
         Qth = model.find_component('therm_size_' + self.name)
         # todo: Korrektur
-        model.cons.add(Pel == 0.8146 * Qth - 16.821)
+        model.cons.add(Pel == 0.8148 * Qth - 16.89)
 
     def _constraint_therm_eff(self, model):
         Qth = model.find_component('therm_size_' + self.name)
