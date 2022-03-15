@@ -78,7 +78,7 @@ class CHPFluidSmall(CHP, FluidComponent):
         inlet_temp = model.find_component('inlet_temp_' + self.name)
         # Zu hohe Temperaturspreizng führt zur Beschädigung der Anlagen.
         for t in model.time_step:
-            model.cons.add(outlet_temp[t] - inlet_temp[t] <= 25)
+            #model.cons.add(outlet_temp[t] - inlet_temp[t] <= 25)
             model.cons.add(inlet_temp[t] <= 50)
         for heat_output in self.heat_flows_out:
             t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
