@@ -86,7 +86,7 @@ class HeatConsumptionFluid(FluidComponent):
             for t in range(len(model.time_step)):
                 model.cons.add(init_temp == t_in[t + 1])
 
-        # todo (qli):
+    # todo (qli):
     def _constraint_heat_water_return_temp(self, model, init_temp=18):
         for heat_input in self.heat_flows_in:
             t_out = model.find_component(
