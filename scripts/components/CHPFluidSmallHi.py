@@ -20,7 +20,7 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         # todo (qli): start_price
         self.start_price = 5  # €/start
         # todo (qli): building.py Zeile 342 anpassen
-        self.heat_flows_in = []
+        self.heat_flows_in = None
         self.heat_flows_out = []
 
     # todo (qli): building.py Zeile 342 anpassen
