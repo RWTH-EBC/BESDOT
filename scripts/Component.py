@@ -202,12 +202,12 @@ class Component(object):
 
         if self.inputs is not None:
             for energy_type in self.inputs:
-                input_energy = pyo.Var(model.time_step, bounds=(0, None))
+                input_energy = pyo.Var(model.time_step, bounds=(0, 10**8))
                 model.add_component('input_' + energy_type + '_' + self.name,
                                     input_energy)
 
         if self.outputs is not None:
             for energy_type in self.outputs:
-                output_energy = pyo.Var(model.time_step, bounds=(0, None))
+                output_energy = pyo.Var(model.time_step, bounds=(0, 10**8))
                 model.add_component('output_' + energy_type + '_' + self.name,
                                     output_energy)

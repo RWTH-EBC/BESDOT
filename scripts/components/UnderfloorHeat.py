@@ -29,10 +29,10 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
         # for t in range(len(model.time_step) - 1):
         #    model.cons.add(input_energy[t + 1] >= output_energy[t + 1])
 
-    def _constraint_temp(self, model, init_temp=35):
+    def _constraint_temp(self, model, init_temp=30):
         temp_var = model.find_component('temp_' + self.name)
-        #for t in model.time_step:
-            #model.cons.add(temp_var[t] == init_temp)
+        for t in model.time_step:
+            model.cons.add(temp_var[t] == init_temp)
         for heat_input in self.heat_flows_in:
             t_out = model.find_component(heat_input[0] + '_' + heat_input[1] +
                                          '_' + 'temp')
@@ -76,8 +76,8 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
         for t in range(len(model.time_step)):
             model.cons.add(average_t[t + 1] == (temp_var[t + 1] +
                                                 return_temp_var[t + 1])/2)
-            #model.cons.add(floor_temp[t + 1] == 0.625 * average_t[t + 1] + 6.875
-            #               )
+            model.cons.add(floor_temp[t + 1] == 0.625 * average_t[t + 1] + 6.875
+                           )
             model.cons.add(heat_flux[t + 1] == 8.92 * (
                     (floor_temp_approximate-room_temp)**1.1+1.1 *
                     (floor_temp_approximate-room_temp)**0.1 * (floor_temp[t + 1]
@@ -107,7 +107,7 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
         self._constraint_conver(model)
         self._constraint_temp(model)
         self._constraint_return_temp(model)
-        self._constraint_mass_flow(model)
+        #self._constraint_mass_flow(model)
         self._constraint_heat_inputs(model)
         self._constraint_floor_temp(model)
         self._constraint_vdi2067(model)

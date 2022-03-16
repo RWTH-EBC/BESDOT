@@ -106,9 +106,11 @@ class Building(object):
             heat_demand_profile = gen_heat_profile(self.building_typ,
                                                    self.area,
                                                    temperature_profile)
-            self.demand_profile["heat_demand"] = heat_demand_profile[
-                                                 env.start_time:
-                                                 env.start_time + env.time_step]
+            # Fixme: the heat demand profile is already selected with time step
+            # self.demand_profile["heat_demand"] = heat_demand_profile[
+            #                                      env.start_time:
+            #                                      env.start_time + env.time_step]
+            self.demand_profile["heat_demand"] = heat_demand_profile
         elif energy_sector == 'cool':
             warn('Profile for cool is still not developed')
         else:
@@ -190,6 +192,8 @@ class Building(object):
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
+                elif comp_type == 'ThreePortValve':
+                    comp_obj = module_dict[comp_type](comp_name=comp_name)
                 else:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       comp_model=comp_model,

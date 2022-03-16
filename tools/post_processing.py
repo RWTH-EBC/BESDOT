@@ -79,8 +79,7 @@ def plot_single(name, profile):
     plt.savefig(plot_output)
     plt.close()
 
-
-def plot_double(csv_file, comp_name1, comp_name2):
+def plot_double_24h(csv_file, comp_name1, comp_name2):
     plot_output = os.path.join(opt_output_path, 'plot', 'profile of ' +
                                comp_name1)
     df = pd.read_csv(csv_file)
@@ -95,24 +94,134 @@ def plot_double(csv_file, comp_name1, comp_name2):
     data3 = data3.reset_index(drop=True)
     profile_inputpower = data3['value']
     data4 = df[(df['var'].str.contains('output_')) & (df['var'].str.contains(
-        comp_name2))]
+        comp_name1))]
     data4 = data4.reset_index(drop=True)
     profile_outputpower = data4['value']
-    fig = plt.figure()
+    fig = plt.figure(figsize=(8, 8))
     ax = fig.add_subplot(111)
     ax.plot(profile_inputpower, '-', label='input')
     ax.plot(profile_outputpower, '-', label='output')
     ax2 = ax.twinx()
-    ax2.plot(profile_temp, '-r', label='temp')
-    ax2.plot(profile_return_temp, '-g', label='return_temp')
-    ax.legend(loc='center left', bbox_to_anchor=(0, 1.1), ncol=1)
+    ax2.plot(profile_temp, '-r', label=comp_name1 + '_' + comp_name2 + '_temp')
+    ax2.plot(profile_return_temp, '-g', label=comp_name2 + '_' + comp_name1 +
+                                              '_temp')
+    ax.legend(loc='center left', bbox_to_anchor=(0, 1.07), ncol=1)
     ax.grid()
     ax.set_xlabel("Time (h)")
-    ax.set_ylabel(r"power[KW]")
+    ax.set_title('Profile of ' + comp_name1)
+    ax.set_ylabel(r"Power (KW)")
     ax2.set_ylabel(r"Temperature ($^\circ$C)")
-    ax.set_xlim(xmax=len(profile_temp)*1.2)
-    ax2.legend(loc='upper right', bbox_to_anchor=(1.05, 1.18), ncol=1)
+    ax.set_xlim(xmax=len(profile_temp))
+    ax2.legend(loc='upper right', bbox_to_anchor=(1.1, 1.12), ncol=1)
     plt.savefig(plot_output)
+
+def plot_double(csv_file, comp_name1, comp_name2, time_step, inputenergy,
+                outputenergy):
+    #plot_output = os.path.join(opt_output_path, 'plot', 'profile of ' +
+    #                           comp_name1)
+    df = pd.read_csv(csv_file)
+    #data1 = df[df['var'].str.contains(comp_name1 + '_' + comp_name2 + '_temp')]
+    #data1 = data1.reset_index(drop=True)
+    #profile_temp = data1['value']
+    profile_temp_original, profile_return_temp_original, \
+    profile_inputpower_original, profile_outputpower_original = \
+        get_info_for_figu(csv_file, comp_name1, comp_name2, time_step,
+                          inputenergy, outputenergy)
+    for i in range(1, len(profile_temp_original)+1):
+        if i < len(profile_temp_original)+1:
+            plot_output = os.path.join(opt_output_path, 'plot', 'profile of ' +
+                                       comp_name1 + ' day ' + str(i))
+            profile_temp = profile_temp_original[i-1]
+            profile_return_temp = profile_return_temp_original[i-1]
+            profile_inputpower = profile_inputpower_original[i-1]
+            profile_outputpower = profile_outputpower_original[i-1]
+            fig = plt.figure(figsize=(8, 8))
+            ax = fig.add_subplot(111)
+            ax.plot(profile_inputpower, '-', label='input')
+            ax.plot(profile_outputpower, '--', label='output')
+            ax2 = ax.twinx()
+            ax2.plot(profile_temp, '-r',
+                     label=comp_name1 + '_' + comp_name2 + '_temp')
+            ax2.plot(profile_return_temp, '-g',
+                     label=comp_name2 + '_' + comp_name1 +
+                           '_temp')
+            ax.legend(loc='center left', bbox_to_anchor=(0, 1.07), ncol=1)
+            ax.grid()
+            ax.set_xlabel("Time (h)")
+            ax.set_title('Profile of ' + comp_name1 + ' day ' + str(i))
+            ax.set_ylabel(r"Power (KW)")
+            ax2.set_ylabel(r"Temperature ($^\circ$C)")
+            ax.set_xlim(xmax=24)
+            ax2.legend(loc='upper right', bbox_to_anchor=(1.1, 1.12), ncol=1)
+            plt.savefig(plot_output)
+            i = i + 1
+
+
+def get_info_for_figu(csv_file, comp_name1, comp_name2, time_step,
+                             inputenergy, outputenergy):
+    df = pd.read_csv(csv_file)
+    name1 = comp_name1 + '_' + comp_name2 + '_temp[1]'
+    name2 = comp_name2 + '_' + comp_name1 + '_temp[1]'
+    name3 = 'input_' + inputenergy + '_' + comp_name1 + '[1]'
+    name4 = 'output_' + outputenergy + '_' + comp_name1 + '[1]'
+    part = int(8760/time_step)
+    temp = []
+    return_temp = []
+    input_power = []
+    output_power = []
+    pa = []
+    pa_co = 1
+    for i in range(1, 8761):
+        if pa_co != part:
+            pa.append(df["value"][df[df["var"] == str(name1[:-2] + str(i)+"]")].
+                      index].to_list()[0])
+            pa_co += 1
+        else:
+            pa_co = 1
+            pa.append(df["value"][df[df["var"] == str(name1[:-2] + str(i)+"]")].
+                      index].to_list()[0])
+            temp.append(pa)
+            pa = []
+    for i in range(1, 8761):
+        if pa_co != part:
+            pa.append(
+                df["value"][df[df["var"] == str(name2[:-2] + str(i) + "]")].
+                index].to_list()[0])
+            pa_co += 1
+        else:
+            pa_co = 1
+            pa.append(
+                df["value"][df[df["var"] == str(name2[:-2] + str(i) + "]")].
+                index].to_list()[0])
+            return_temp.append(pa)
+            pa = []
+    for i in range(1, 8761):
+        if pa_co != part:
+            pa.append(
+                df["value"][df[df["var"] == str(name3[:-2] + str(i) + "]")].
+                index].to_list()[0])
+            pa_co += 1
+        else:
+            pa_co = 1
+            pa.append(
+                df["value"][df[df["var"] == str(name3[:-2] + str(i) + "]")].
+                index].to_list()[0])
+            input_power.append(pa)
+            pa = []
+    for i in range(1, 8761):
+        if pa_co != part:
+            pa.append(
+                df["value"][df[df["var"] == str(name4[:-2] + str(i) + "]")].
+                index].to_list()[0])
+            pa_co += 1
+        else:
+            pa_co = 1
+            pa.append(
+                df["value"][df[df["var"] == str(name4[:-2] + str(i) + "]")].
+                index].to_list()[0])
+            output_power.append(pa)
+            pa = []
+    return temp, return_temp, input_power, output_power
 
 
 def get_short_profiles(start_time, time_step, csv_file):
