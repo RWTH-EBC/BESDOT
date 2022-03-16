@@ -1,2 +1,2 @@
-input efficiency,output efficiency,self discharge efficiency,max soc,min soc,max temperature,min temperature,max e2p input,max e2p output,service life,cost,factor repair effort,factor servicing effort,servicing effort hours
-0.9,0.9,0.99,1,0,95,60,1,1,20,10,0.01,0.015,20
+input efficiency,output efficiency,self discharge efficiency,max soc,min soc,max temperature,min temperature,max e2p input,max e2p output,service life,cost,factor repair effort,factor servicing effort,servicing effort hours,upper temp,lower temp
+0.9,0.9,0.99,1,0,95,60,1,1,20,10,0.01,0.015,20,60,30

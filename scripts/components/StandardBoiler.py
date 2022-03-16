@@ -54,13 +54,13 @@ class StandardBoiler(FluidComponent, GasBoiler):
         output_energy = model.find_component('output_' + self.outputs[0] +
                                              '_' + self.name)
         size = model.find_component('size_' + self.name)
-
-        temp_var = model.find_component('temp_' + self.name)
-        return_temp_var = model.find_component('return_temp_' + self.name)
+        #modulation = model.find_component('modulation_' + self.name)
         self.loss = self.exhaust_gas_loss + radiation_loss
+
         for t in range(len(model.time_step)):
             model.cons.add(output_energy[t+1] <= size)
             model.cons.add(output_energy[t+1] >= 0.3 * size)
+            #model.cons.add(modulation[t+1] == output_energy[t+1]/size)
 
             model.cons.add(input_energy[t+1] * (100 - self.loss) ==
                            output_energy[t+1] * 100)
@@ -89,6 +89,14 @@ class StandardBoiler(FluidComponent, GasBoiler):
                 model.cons.add(temp_var[t + 1] == t_out[t + 1])
                 model.cons.add(temp_var[t + 1] == init_temp)
 
+    def _constraint_return_temp(self, model):
+        return_temp_var = model.find_component('return_temp_' + self.name)
+        for heat_output in self.heat_flows_out:
+            t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
+                                        '_' + 'temp')
+            for t in range(len(model.time_step)):
+                model.cons.add(return_temp_var[t + 1] == t_in[t + 1])
+
     def _constraint_mass_flow(self, model):
         for heat_output in self.heat_flows_out:
             m_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
@@ -97,11 +105,11 @@ class StandardBoiler(FluidComponent, GasBoiler):
                                          '_' + 'mass')
             for t in range(len(model.time_step)):
                 model.cons.add(m_in[t + 1] == m_out[t + 1])
-                #model.cons.add(m_in[t + 1] == mass_flow)
 
     def add_cons(self, model):
         self._constraint_conver(model)
         self._constraint_temp(model)
+        self._constraint_return_temp(model)
         self._constraint_vdi2067(model)
         self._constraint_mass_flow(model)
         self._constraint_heat_outputs(model)
@@ -114,6 +122,9 @@ class StandardBoiler(FluidComponent, GasBoiler):
 
         return_temp = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('return_temp_' + self.name, return_temp)
+
+        #modulation = pyo.Var(model.time_step, bounds=(0, None))
+        #model.add_component('modulation_' + self.name, modulation)
 
 
 

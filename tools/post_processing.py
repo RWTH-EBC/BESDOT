@@ -7,6 +7,7 @@ import copy
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Attention! The elec_list and heat_list use the name from topology
 # matrix, for different scenario the name for each component may change.
@@ -18,6 +19,8 @@ heat_comp_list = ['heat_pump', 'therm_cns', 'water_tes', 'solar_coll',
 elec_sink_tuple = ('heat_pump', 'bat', 'e_grid', 'e_boi')
 heat_sink_tuple = 'water_tes'
 
+base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+opt_output_path = os.path.join(base_path, 'data', 'opt_output')
 
 def plot_all(csv_file, time_interval):
     """
@@ -39,24 +42,77 @@ def plot_all(csv_file, time_interval):
             if sum(elements_dict[element]) > 0.001:
                 plot_single(element, elements_dict[element][time_interval[0]:
                                                             time_interval[1]])
+
+        #    fig, ax = plt.figure()
+        #    ax = fig.add_subplot(111)
+        #    ax1 = plot_single(element, elements_dict[element][time_interval[0]:
+        #                                                      time_interval[1]])
+        #    ax2 = ax1.twinx()
+        #    ax2 = plot_single(element, elements_dict[element][time_interval[0]:
+        #                                                      time_interval[1]])
+
+
             # print(element)
             # if element == 'heat_pump_water_tes':
-            #     plot_single(element, elements_dict[element])
-            pass
+            # plot_single(element, elements_dict[element])
 
 
 def plot_single(name, profile):
-    plt.figure()
-    plt.plot(profile, linewidth=2)
-    plt.title('Profile of ' + name)
-    plt.ylabel('kW')
-    plt.xlabel('Hours [h]')
-    plt.ylim(ymin=0, ymax=max(profile)*1.2)
-    plt.xlim(xmin=0)
+    plot_output = os.path.join(opt_output_path, 'plot', 'Profile of ' + name)
+    fig, ax = plt.subplots(figsize=(14, 14))
+    #ax = fig.add_subplot(111)
+    ax.plot(profile, linewidth=2, color='r', marker='o', linestyle='dashed')
+    ax.set_title('Profile of ' + name)
+    ax.set_xlabel('Hours [h]')
+    if 'mass' in name:
+        ax.set_ylabel('mass [KG/H]', fontsize=12)
+    elif 'temp' in name:
+        ax.set_ylabel('temperature [°]', fontsize=12)
+    else:
+        ax.set_ylabel('power [KW]', fontsize=12)
+
+    ax.set_xlim(xmin=0)
+    ax.set_ylim(ymin=0, ymax=max(profile)*1.2)
     plt.grid()
 
-    plt.show()
+    #plt.show()
+    plt.savefig(plot_output)
     plt.close()
+
+
+def plot_double(csv_file, comp_name1, comp_name2):
+    plot_output = os.path.join(opt_output_path, 'plot', 'profile of ' +
+                               comp_name1)
+    df = pd.read_csv(csv_file)
+    data1 = df[df['var'].str.contains(comp_name1 + '_' + comp_name2 + '_temp')]
+    data1 = data1.reset_index(drop=True)
+    profile_temp = data1['value']
+    data2 = df[df['var'].str.contains(comp_name2 + '_' + comp_name1 + '_temp')]
+    data2 = data2.reset_index(drop=True)
+    profile_return_temp = data2['value']
+    data3 = df[(df['var'].str.contains('input_')) & (df['var'].str.contains(
+        comp_name1))]
+    data3 = data3.reset_index(drop=True)
+    profile_inputpower = data3['value']
+    data4 = df[(df['var'].str.contains('output_')) & (df['var'].str.contains(
+        comp_name2))]
+    data4 = data4.reset_index(drop=True)
+    profile_outputpower = data4['value']
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(profile_inputpower, '-', label='input')
+    ax.plot(profile_outputpower, '-', label='output')
+    ax2 = ax.twinx()
+    ax2.plot(profile_temp, '-r', label='temp')
+    ax2.plot(profile_return_temp, '-g', label='return_temp')
+    ax.legend(loc='center left', bbox_to_anchor=(0, 1.1), ncol=1)
+    ax.grid()
+    ax.set_xlabel("Time (h)")
+    ax.set_ylabel(r"power[KW]")
+    ax2.set_ylabel(r"Temperature ($^\circ$C)")
+    ax.set_xlim(xmax=len(profile_temp)*1.2)
+    ax2.legend(loc='upper right', bbox_to_anchor=(1.05, 1.18), ncol=1)
+    plt.savefig(plot_output)
 
 
 def get_short_profiles(start_time, time_step, csv_file):
@@ -192,6 +248,7 @@ if __name__ == '__main__':
     opt_output_path = os.path.join(base_path, 'data', 'opt_output')
     # opt_output = os.path.join(opt_output_path, 'denmark_energy_hub_result.csv')
     opt_output = os.path.join(opt_output_path, 'project_1_result.csv')
+    plot_output = os.path.join(opt_output_path, 'plot')
 
     demand_input = os.path.join(base_path, 'data', 'denmark_energy_hub',
                                 'energyprofile(kwh).csv')

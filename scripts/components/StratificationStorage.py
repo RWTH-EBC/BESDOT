@@ -14,8 +14,7 @@ import numpy as np
 
 class StratificationStorage(FluidComponent, HotWaterStorage):
     def __init__(self, comp_name, comp_type="StratificationStorage",
-                 comp_model=None, min_size=0, max_size=1000, current_size=0,
-                 upper_temp=60, lower_temp=30):
+                 comp_model=None, min_size=0, max_size=1000, current_size=0):
         super().__init__(comp_name=comp_name,
                          comp_type=comp_type,
                          comp_model=comp_model,
@@ -23,8 +22,6 @@ class StratificationStorage(FluidComponent, HotWaterStorage):
                          max_size=max_size,
                          current_size=current_size
                          )
-        self.upper_temp = upper_temp
-        self.lower_temp = lower_temp
 
     def _read_properties(self, properties):
         super()._read_properties(properties)
@@ -38,6 +35,10 @@ class StratificationStorage(FluidComponent, HotWaterStorage):
         else:
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for min temperature.")
+        if 'upper temp' in properties.columns:
+            self.upper_temp = float(properties['upper temp'])
+        if 'lower temp' in properties.columns:
+            self.lower_temp = float(properties['lower temp'])
 
     def _constraint_conver(self, model):
         """
@@ -192,7 +193,7 @@ class StratificationStorage(FluidComponent, HotWaterStorage):
         self._constraint_loss(model, loss_type='off')
         self._constraint_temp(model)
         self._constraint_return_temp(model)
-        self._constraint_mass_flow(model)
+        # self._constraint_mass_flow(model)
         self._constraint_hot_water_mass(model)
         self._constraint_heat_inputs(model)
         self._constraint_heat_outputs(model)
