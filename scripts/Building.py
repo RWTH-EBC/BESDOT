@@ -46,9 +46,9 @@ class Building(object):
         if annual_heat_demand is None:
             self.add_annual_demand('heat')
         elif not isinstance(annual_heat_demand, float):
-                warn_msg = 'The annual_heat_demand of ' + self.name + \
-                           ' is not float, need to check.'
-                warnings.warn(warn_msg)
+            warn_msg = 'The annual_heat_demand of ' + self.name + \
+                       ' is not float, need to check.'
+            warnings.warn(warn_msg)
         else:
             self.annual_demand["heat_demand"] = annual_heat_demand
 
@@ -245,8 +245,10 @@ class Building(object):
                     # another component.
                     # todo (yni): Check, if need both outputs and inputs and
                     #  if the following method could cause duplicate variable.
-                    if 'heat' in self.components[input_comp].outputs or \
-                            'heat' in self.components[input_comp].inputs:
+                    if 'heat' in self.components[input_comp].outputs and \
+                            'heat' in self.components[index].inputs or \
+                            'heat' in self.components[input_comp].inputs and \
+                            'heat' in self.components[index].outputs:
                         # Check if the component has the attribution of
                         # 'flows', which shows if the model contains
                         # temperature variables.
