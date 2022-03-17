@@ -75,7 +75,6 @@ class HotWaterConsumptionFluid(FluidComponent):
         # todo: (qli) anpassen
         self._constraint_hot_water_temp(model)
         self._constraint_heat_inputs(model)
-        self._constraint_vdi2067(model)
 
     def add_vars(self, model):
         #super().add_vars(model)
