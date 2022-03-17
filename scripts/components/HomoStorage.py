@@ -7,9 +7,12 @@ attention to the uniformity
 
 import warnings
 import pyomo.environ as pyo
+from pyomo.gdp import Disjunct, Disjunction
 from scripts.FluidComponent import FluidComponent
 from scripts.components.HotWaterStorage import HotWaterStorage
 
+
+small_num = 0.0001
 
 class HomoStorage(FluidComponent, HotWaterStorage):
     def __init__(self, comp_name, comp_type="HomoStorage", comp_model=None,
@@ -85,7 +88,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
                 model.cons.add(loss_var[t + 1] == 1.5 * ((temp_var[t + 1] -
                                                           20) / 1000))
 
-    def _constraint_temp(self, model, init_temp=50):
+    def _constraint_temp(self, model, init_temp=58):
         # Initial temperature for water in storage is define with a constant
         # value.
         temp_var = model.find_component('temp_' + self.name)
@@ -172,6 +175,78 @@ class HomoStorage(FluidComponent, HotWaterStorage):
                        input_energy[len(model.time_step)] *
                        status_var[len(model.time_step)])
 
+    def _constraint_input_permit_gdp(self, model, min_temp=30, max_temp=70,
+                                     init_status='on'):
+        """
+        This function use the pyomo GDP model to replace the original constraint
+        for input permit. It would be easier to generate the control model.
+        Args:
+            model: pyomo model for the project
+            min_temp: the set minimal temperature
+            max_temp: the set maximal temperature
+            init_status: determine the initial status of energy supplier.
+        Returns:
+            None
+        """
+        temp_var = model.find_component('temp_' + self.name)
+        input_energy = model.find_component('input_' + self.inputs[0] +
+                                            '_' + self.name)
+        model.init = pyo.BooleanVar()
+
+        if init_status == 'on':
+            model.init_log = pyo.LogicalConstraint(
+                expr=model.init.equivalent_to(True))
+        elif init_status == 'off':
+            model.init_log = pyo.LogicalConstraint(
+                expr=model.init.equivalent_to(False))
+
+        for t in model.time_step:
+            a = Disjunct()
+            c_1 = pyo.Constraint(expr=temp_var[t] >= 60)
+            c_2 = pyo.Constraint(expr=input_energy[t] == 0)
+            model.add_component('a_dis_' + str(t), a)
+            a.add_component('a_1_' + str(t), c_1)
+            a.add_component('a_2_' + str(t), c_2)
+
+            b = Disjunct()
+            c_7 = pyo.Constraint(expr=temp_var[t] <= 60 - small_num)
+            model.add_component('b_dis_' + str(t), b)
+            b.add_component('b_1_' + str(t), c_7)
+
+            c = Disjunct()
+            c_3 = pyo.Constraint(expr=temp_var[t] <= 30)
+            model.add_component('c_dis_' + str(t), c)
+            c.add_component('c_' + str(t), c_3)
+
+            d = Disjunct()
+            c_4 = pyo.Constraint(expr=input_energy[t] == 0)
+            c_6 = pyo.Constraint(expr=temp_var[t] >= 30 + small_num)
+            model.add_component('d_dis_' + str(t), d)
+            d.add_component('d_' + str(t), c_4)
+            d.add_component('d_2_' + str(t), c_6)
+
+            dj = Disjunction(expr=[a, b, c, d])
+            model.add_component('dj_dis_' + str(t), dj)
+
+            if t == 1:
+                p_4 = pyo.LogicalConstraint(
+                    expr=model.init.equivalent_to(
+                        pyo.lor(a.indicator_var, b.indicator_var)))
+                p_5 = pyo.LogicalConstraint(
+                    expr=~model.init.equivalent_to(
+                        pyo.lor(c.indicator_var, d.indicator_var)))
+            else:
+                last_status = model.find_component('b_dis_' + str(t - 1))
+                p_4 = pyo.LogicalConstraint(
+                    expr=pyo.lor(a.indicator_var,
+                                 b.indicator_var).equivalent_to(
+                        last_status.indicator_var))
+                p_5 = pyo.LogicalConstraint(
+                    expr=~last_status.indicator_var.equivalent_to(
+                        pyo.lor(c.indicator_var, d.indicator_var)))
+            model.add_component('p_4_' + str(t), p_4)
+            model.add_component('p_5_' + str(t), p_5)
+
     def add_cons(self, model):
         self._constraint_conver(model)
         self._constraint_loss(model, loss_type='off')
@@ -195,7 +270,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
         # connect the variable in component and building, just as energy flow.
         # first Method is chosen in 22.12.2021
 
-        temp = pyo.Var(model.time_step, bounds=(0, None))
+        temp = pyo.Var(model.time_step, bounds=(0, 100))
         model.add_component('temp_' + self.name, temp)
 
         loss = pyo.Var(model.time_step, bounds=(0, None))
