@@ -162,7 +162,7 @@ class SolarThermalCollectorFluid(FluidComponent):
             b = Disjunct()
             c_7 = pyo.Constraint(
                 expr=outlet_temp[t] - inlet_temp[
-                    t] >= off_delta_temp - small_num)
+                    t] >= off_delta_temp + small_num)
             model.add_component('b_dis_' + str(t), b)
             b.add_component('b_1_' + str(t), c_7)
 

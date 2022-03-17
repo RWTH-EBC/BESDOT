@@ -1,9 +1,4 @@
 from scripts.Component import Component
-import os
-import warnings
-
-import pandas as pd
-import pyomo.environ as pyo
 
 
 class ElectricityGrid(Component):
@@ -43,10 +38,3 @@ class ElectricityGrid(Component):
 
     def add_vars(self, model):
         super().add_vars(model)
-
-        # sell_elec = pyo.Var(model.time_step, bounds=(0, None))
-        # model.add_component('input_elec_' + self.name, sell_elec)
-        #
-        # buy_elec = pyo.Var(model.time_step, bounds=(0, None))
-        # model.add_component('output_elec_' + self.name, buy_elec)
-
