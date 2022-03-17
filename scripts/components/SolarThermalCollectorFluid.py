@@ -28,9 +28,10 @@ class SolarThermalCollectorFluid(FluidComponent):
         self.temp_profile = temp_profile
         self.irr_profile = irr_profile
         # todo: (qli) solar_liquid_heat_cap korrigieren
-        self.solar_liquid_heat_cap = 4180  # J/kgK
+        self.solar_liquid_heat_cap = 3690  # J/kgK
         self.unit_switch = 3600 * 1000  # J/kWh
         self.max_temp = 135
+        self.mass_flow = 200  # kg/h
 
     def _constraint_temp(self, model):
         outlet_temp = model.find_component('outlet_temp_' + self.name)
@@ -72,11 +73,10 @@ class SolarThermalCollectorFluid(FluidComponent):
         # G = 1000 w/m2 (Solar Keymark Certificate)
         for t in model.time_step:
             model.cons.add(eff[t] == self.OpticalEfficiency - self.K * (
-                        (inlet_temp[t] + outlet_temp[t]) / 2 -
-                        self.temp_profile[t - 1]) / 1000)
+                    (inlet_temp[t] + outlet_temp[t]) / 2 -
+                    self.temp_profile[t - 1]) / 1000)
 
     """
-
     # Test
     def _constraint_efficiency(self, model):
         eff = model.find_component('eff_' + self.name)
@@ -108,8 +108,6 @@ class SolarThermalCollectorFluid(FluidComponent):
                 # todo:Beim Stagnationszustand gilt output_energy< input_energy
                 # aber das Ergebnis ist komisch
                 model.cons.add(output_energy[t] == input_energy[t])
-                # model.cons.add(0 <= input_energy[t])
-                # model.cons.add(0 <= output_energy[t])
                 model.cons.add(
                     output_energy[t] == self.solar_liquid_heat_cap * (
                             m_out[t] * t_out[t] - m_in[t] * t_in[t]) /
@@ -209,9 +207,13 @@ class SolarThermalCollectorFluid(FluidComponent):
         self._constraint_vdi2067(model)
         self._constraint_temp(model)
         self._constraint_efficiency(model)
-        self._constraint_conver(model)
-        # todo: Regelung (GDP)
+        # todo(qli):
+        #self._constraint_conver(model)
         self._constraint_output_permit(model)
+        # todo(qli):
+        self._constraint_heat_cap_var(model)
+        self._constraint_mass_con(model)
+        self._constraint_conver_mass_con(model)
 
     def add_vars(self, model):
         super().add_vars(model)
@@ -227,3 +229,56 @@ class SolarThermalCollectorFluid(FluidComponent):
 
         status_var = pyo.Var(model.time_step, domain=pyo.Binary)
         model.add_component('status_' + self.name, status_var)
+
+        # todo(qli):
+        heat_cap = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('solar_fluid_heat_cap', heat_cap)
+
+
+    def _constraint_heat_cap_var(self, model):
+        outlet_temp = model.find_component('outlet_temp_' + self.name)
+        inlet_temp = model.find_component('inlet_temp_' + self.name)
+        heat_cap = model.find_component('solar_fluid_heat_cap')
+        for t in model.time_step:
+            model.cons.add(heat_cap[t] == 3400 + 4 * (inlet_temp[t] +
+                                                      outlet_temp[
+                                                          t]) / 2)  # J/(kg*K)
+
+    def _constraint_mass_con(self, model):
+        for heat_output in self.heat_flows_out:
+            m_in = model.find_component(
+                heat_output[1] + '_' + heat_output[0] +
+                '_' + 'mass')
+            m_out = model.find_component(
+                heat_output[0] + '_' + heat_output[1] +
+                '_' + 'mass')
+            for t in model.time_step:
+                model.cons.add(m_in[t] == self.mass_flow)
+                model.cons.add(m_out[t] == self.mass_flow)
+
+    # 'size' bezieht sich auf die Fläche der Solarthermie.
+    def _constraint_conver_mass_con(self, model):
+        heat_cap = model.find_component('solar_fluid_heat_cap')
+        eff = model.find_component('eff_' + self.name)
+        input_energy = model.find_component('input_' + self.inputs[0] +
+                                            '_' + self.name)
+        comp_size = model.find_component('size_' + self.name)
+        for t in model.time_step:
+            model.cons.add(input_energy[t] == self.irr_profile[t - 1] * eff[
+                t] * comp_size / unit_switch)
+        output_energy = model.find_component('output_' + self.outputs[0] +
+                                             '_' + self.name)
+        for heat_output in self.heat_flows_out:
+            t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
+                                        '_' + 'temp')
+            t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
+                                         '_' + 'temp')
+            for t in model.time_step:
+                # todo:Beim Stagnationszustand gilt output_energy< input_energy
+                # aber das Ergebnis ist komisch
+                model.cons.add(output_energy[t] == input_energy[t])
+                # model.cons.add(0 <= input_energy[t])
+                # model.cons.add(0 <= output_energy[t])
+                model.cons.add(
+                    output_energy[t] == heat_cap[t] * self.mass_flow * (
+                                t_out[t] - t_in[t]) / self.unit_switch)
