@@ -93,6 +93,9 @@ class HomoStorage(FluidComponent, HotWaterStorage):
         # value.
         temp_var = model.find_component('temp_' + self.name)
         model.cons.add(temp_var[1] == init_temp)
+        for t in model.time_step:
+            model.cons.add(self.max_temp >= temp_var[t])
+            model.cons.add(self.min_temp <= temp_var[t])
 
         for heat_input in self.heat_flows_in:
             t_out = model.find_component(heat_input[1] + '_' + heat_input[0] +

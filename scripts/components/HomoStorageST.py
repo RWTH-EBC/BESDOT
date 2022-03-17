@@ -12,23 +12,6 @@ class HomoStorageST(HomoStorage):
                          max_size=max_size,
                          current_size=current_size)
 
-    # todo (qli): HotWaterConsumption.py anpassen
-    def _constraint_cold_water_temp(self, model, cold_water_temp=12):
-        for heat_output in self.heat_flows_out:
-            t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
-                                        '_' + 'temp')
-            for t in model.time_step:
-                model.cons.add(cold_water_temp == t_in[t])
-
-    # todo (qli): HotWaterConsumption.py anpassen
-    def _constraint_hot_water_temp(self, model, hot_water_temp=60):
-        for heat_output in self.heat_flows_out:
-            t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
-                                         '_' + 'temp')
-            # todo: mit Dreiwegeventil verbinden
-            for t in model.time_step:
-                model.cons.add(hot_water_temp <= t_out[t])
-
     def _constraint_temp(self, model, init_temp=60):
         super()._constraint_temp(model=model, init_temp=init_temp)
 
@@ -48,8 +31,6 @@ class HomoStorageST(HomoStorage):
     def add_cons(self, model):
         self._constraint_conver(model)
         self._constraint_loss(model, loss_type='off')
-        #self._constraint_hot_water_temp(model)
-        #self._constraint_cold_water_temp(model)
         self._constraint_temp(model)
         self._constraint_heat_outputs(model)
         self._constraint_vdi2067(model)
