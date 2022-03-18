@@ -74,12 +74,12 @@ class StandardBoiler(FluidComponent, GasBoiler):
         size = model.find_component('size_' + self.name)
         for t in range(len(model.time_step)):
             logic_1 = Disjunct()
-            con_1 = pyo.Constraint(expr=output_energy[t] == 0)
+            con_1 = pyo.Constraint(expr=output_energy[t+1] == 0)
             model.add_component(self.name + '_logic_1_' + str(t), logic_1)
             logic_1.add_component(self.name + 'con_1_' + str(t), con_1)
 
             logic_2 = Disjunct()
-            con_2 = pyo.Constraint(expr=output_energy[t] >= 0.3 * size)
+            con_2 = pyo.Constraint(expr=output_energy[t+1] >= 0.3 * size)
             model.add_component(self.name + '_logic_2_' + str(t), logic_2)
             logic_2.add_component(self.name + 'con_2_' + str(t), con_2)
 
@@ -124,8 +124,9 @@ class StandardBoiler(FluidComponent, GasBoiler):
                                         '_' + 'mass')
             m_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'mass')
-            for t in range(len(model.time_step)):
+            for t in range(len(model.time_step)-1):
                 model.cons.add(m_in[t + 1] == m_out[t + 1])
+                model.cons.add(m_in[t + 2] == m_in[t + 1])
 
     def add_cons(self, model):
         self._constraint_conver(model)
