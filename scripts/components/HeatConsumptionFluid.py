@@ -53,31 +53,6 @@ class HeatConsumptionFluid(FluidComponent):
     #
     #     var_dict[output_flow] = input_profiles['therm_demand']
 
-    def _constraint_temp(self, model):
-        heatCNS_properties_path = os.path.join(base_path, "data",
-                                               "component_database",
-                                               "HeatConsumptionFluid",
-                                               "HeatCNS.csv")
-        heatCNS_properties = pd.read_csv(heatCNS_properties_path)
-        if 'inlet_temp' in heatCNS_properties.columns:
-            self.inlet_temp = float(heatCNS_properties['inlet_temp'])
-        else:
-            warnings.warn(
-                "In the model database for " + self.component_type +
-                " lack of column for inlet temperature.")
-
-        inlet_temp = model.find_component('inlet_temp_' + self.name)
-        outlet_temp = model.find_component('outlet_temp_' + self.name)
-        for heat_input in self.heat_flows_in + self.heat_flows_out:
-            t_in = model.find_component(heat_input[0] + '_' + heat_input[1] +
-                                        '_' + 'temp')
-            t_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
-                                         '_' + 'temp')
-            for t in model.time_step:
-                model.cons.add(inlet_temp[t] == t_in[t])
-                model.cons.add(outlet_temp[t] == t_out[t])
-                model.cons.add(inlet_temp[t] >= self.inlet_temp)
-
     # todo (qli):
     def _constraint_heat_water_temp(self, model, init_temp=45):
         for heat_input in self.heat_flows_in:
@@ -98,18 +73,11 @@ class HeatConsumptionFluid(FluidComponent):
         self._constraint_conver(model)
         self._constraint_heat_water_temp(model)
         self._constraint_heat_water_return_temp(model)
-        self._constraint_heat_inputs(model)
-        self._constraint_temp(model)
         self._constraint_vdi2067(model)
 
     def add_vars(self, model):
         super().add_vars(model)
 
-        inlet_temp = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('inlet_temp_' + self.name, inlet_temp)
-
-        outlet_temp = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('outlet_temp_' + self.name, outlet_temp)
 
 
 

@@ -355,19 +355,17 @@ class Building(object):
         for index, row in self.simp_matrix.iterrows():
             if self.components[index].outputs is not None:
                 for energy_type in self.components[index].outputs:
-                    if energy_type == 'heat' and index != 'chp_small' and index != 'chp_big':
-                        if len(row[row > 0].index.tolist() +
-                               row[row.isnull()].index.tolist()) > 0:
-                            output_components = row[row > 0].index.tolist() + \
-                                                row[row.isnull()].index.tolist()
-                            output_energy = model.find_component('output_' +
-                                                                 energy_type + '_' +
-                                                                 index)
-                            for t in model.time_step:
-                                model.cons.add(output_energy[t] == sum(
-                                    self.energy_flow[(index, output_comp)][t]
-                                    for
-                                    output_comp in output_components))
+                    if len(row[row > 0].index.tolist() +
+                           row[row.isnull()].index.tolist()) > 0:
+                        output_components = row[row > 0].index.tolist() + \
+                                            row[row.isnull()].index.tolist()
+                        output_energy = model.find_component('output_' +
+                                                             energy_type + '_' +
+                                                             index)
+                        for t in model.time_step:
+                            model.cons.add(output_energy[t] == sum(
+                                self.energy_flow[(index, output_comp)][t] for
+                                output_comp in output_components))
 
     def _constraint_solar_area(self, model):
         """The total available solar area should be shared by PV and solar
@@ -393,23 +391,21 @@ class Building(object):
         # constraints number.
         if self.heat_flows is not None:
             for heat_flow in self.heat_flows:
-                # todo (qli): building.py Zeile 342 anpassen
-                if heat_flow[0] != 'e_grid' and heat_flow[1] != 'e_grid':
-                    flow_1 = model.find_component(heat_flow[0] + '_' + heat_flow[1]
-                                                  + '_' + 'mass')
-                    flow_2 = model.find_component(heat_flow[1] + '_' + heat_flow[0]
-                                                  + '_' + 'mass')
-                    for t in model.time_step:
-                        if self.simp_matrix[heat_flow[0]][heat_flow[1]] > 0:
-                            # todo (yni): take care of the situation for variable
-                            #  mass flow.
-                            model.cons.add(flow_1[t] == flow_2[t])
-                            model.cons.add(flow_1[t] == self.simp_matrix[
-                                heat_flow[0]][heat_flow[1]])
-                        elif np.isnan(self.simp_matrix[heat_flow[0]][heat_flow[1]]):
-                            model.cons.add(flow_1[t] == flow_2[t])
-                            # print(flow_1[t])
-                            # print(flow_2[t])
+                flow_1 = model.find_component(heat_flow[0] + '_' + heat_flow[1]
+                                              + '_' + 'mass')
+                flow_2 = model.find_component(heat_flow[1] + '_' + heat_flow[0]
+                                              + '_' + 'mass')
+                for t in model.time_step:
+                    if self.simp_matrix[heat_flow[0]][heat_flow[1]] > 0:
+                        # todo (yni): take care of the situation for variable
+                        #  mass flow.
+                        model.cons.add(flow_1[t] == flow_2[t])
+                        model.cons.add(flow_1[t] == self.simp_matrix[
+                            heat_flow[0]][heat_flow[1]])
+                    elif np.isnan(self.simp_matrix[heat_flow[0]][heat_flow[1]]):
+                        model.cons.add(flow_1[t] == flow_2[t])
+                        # print(flow_1[t])
+                        # print(flow_2[t])
 
     def _constraint_total_cost(self, model, env):
         """Calculate the total annual cost for the building energy system."""
@@ -433,10 +429,13 @@ class Building(object):
 
         # model.cons.add(bld_annual_cost == sum(buy_elec[t] * env.elec_price
         #                                       for t in model.time_step))
-        model.cons.add(bld_annual_cost == sum(
-            buy_elec[t] * env.elec_price + buy_gas[t] * env.gas_price +
-            buy_heat[t] * env.heat_price - sell_elec[t] * env.elec_feed_price
-            for t in model.time_step) + sum(item for item in comp_cost_list))
+        model.cons.add(bld_annual_cost == sum(buy_elec[t] * env.elec_price +
+                                              buy_gas[t] * env.gas_price +
+                                              buy_heat[t] *
+                                              env.heat_price - sell_elec[
+                                                  t] * env.elec_feed_price
+                                              for t in model.time_step) +
+                       sum(item for item in comp_cost_list))
 
     def _constraint_operation_cost(self, model, env):
         """Calculate the total operation cost for the building energy system."""

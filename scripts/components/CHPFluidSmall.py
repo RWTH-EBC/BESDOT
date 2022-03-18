@@ -33,22 +33,6 @@ class CHPFluidSmall(CHP, FluidComponent):
         self.heat_flows_in = None
         self.heat_flows_out = []
 
-    # todo (qli): building.py Zeile 342 anpassen
-    def add_heat_flows_in(self, bld_heat_flows):
-        # check the building heat flows and select the tuples related to this
-        # device to add into list heat_flows.
-        for element in bld_heat_flows:
-            if element[1] != 'e_grid' and self.name == element[1]:
-                self.heat_flows_in.append(element)
-
-    # todo (qli): building.py Zeile 342 anpassen
-    def add_heat_flows_out(self, bld_heat_flows):
-        # check the building heat flows and select the tuples related to this
-        # device to add into list heat_flows.
-        for element in bld_heat_flows:
-            if element[1] != 'e_grid'  and self.name == element[0]:
-                self.heat_flows_out.append(element)
-
     # Pel = elektrische Nennleistung = comp_size
     # Qth = thermische Nennleistung
     # Qth = f(Pel)
@@ -115,16 +99,11 @@ class CHPFluidSmall(CHP, FluidComponent):
         self._constraint_therm_eff(model)
         self._constraint_temp(model)
         self._constraint_conver(model)
-        self._constraint_heat_outputs(model)
 
-        # todo (qli): building.py Zeile 342 anpassen
-        self._constraint_elec_balance(model)
-        # todo (qli): building.py Zeile 342 anpassen
-        self._constraint_heat_balance(model)
         self._constraint_vdi2067_chp(model)
-        self._constraint_start_stop_ratio(model)
+        #self._constraint_start_stop_ratio(model)
         # todo (qli): building.py anpassen
-        self._constraint_start_cost(model)
+        #self._constraint_start_cost(model)
         # todo (qli): building.py anpassen
         self._constraint_chp_elec_sell_price(model)
 
@@ -168,22 +147,6 @@ class CHPFluidSmall(CHP, FluidComponent):
         # todo (qli): building.py anpassen
         elec_sell_price = pyo.Var(bounds=(0, None))
         model.add_component('elec_sell_price_' + self.name, elec_sell_price)
-
-    # todo (qli): building.py anpassen
-    def _constraint_elec_balance(self, model):
-        sell_elec = model.find_component(
-            'output_' + self.outputs[1] + '_' + self.name)
-        energy_flow_elec = model.find_component(self.name + '_e_grid_elec')
-        for t in model.time_step:
-            model.cons.add(sell_elec[t] == energy_flow_elec[t])
-
-    # todo (qli): building.py anpassen
-    def _constraint_heat_balance(self, model):
-        output_heat = model.find_component(
-            'output_' + self.outputs[0] + '_' + self.name)
-        energy_flow_heat = model.find_component(self.name + '_water_tes')
-        for t in model.time_step:
-            model.cons.add(output_heat[t] == energy_flow_heat[t])
 
     def _constraint_vdi2067_chp(self, model):
         """
