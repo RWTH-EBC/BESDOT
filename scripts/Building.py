@@ -226,6 +226,13 @@ class Building(object):
         simp_matrix.set_index(['comp_name'], inplace=True)
         energy_flow = {}
         heat_flows = {}
+        # The elec_flows is created for the component CHP. CHP has both heat
+        # and electricity output. If the energy type from energy_flow is not
+        # clearly, errors of optimization might occur.
+        # Except for CHP, some innovative technology such as electrolyse could
+        # meet the same problem. It could be fixed in the same way later, when
+        # it occurs.
+        # elec_flows = []
         for index, row in simp_matrix.iteritems():
             # search for Nan value and the mass flow in topology matrix, the
             # unit is kg/h.
@@ -244,17 +251,10 @@ class Building(object):
                     # avoiding duplicate definition, since in building
                     # level the input of one component is the output of
                     # another component.
-                    # todo (yni): Check, if need both outputs and inputs and
-                    #  if the following method could cause duplicate variable.
-                    if 'heat' in self.components[input_comp].outputs or \
-                            'heat' in self.components[input_comp].inputs:
-                        # Check if the component has the attribution of
-                        # 'flows', which shows if the model contains
-                        # temperature variables.
-                        # todo (yni): check, wenn the following command could
-                        #  be required.
-                        # if hasattr(self.components[input_comp],
-                        #            'heat_flows_in'):
+                    if 'heat' in self.components[input_comp].outputs and \
+                            'heat' in self.components[index].inputs or \
+                            'heat' in self.components[input_comp].inputs and \
+                            'heat' in self.components[index].outputs:
                         heat_flows[(input_comp, index)] = {}
                         heat_flows[(index, input_comp)] = {}
                         # mass flow from component 'input_comp' to
@@ -285,6 +285,11 @@ class Building(object):
                         model.add_component(index + '_' + input_comp +
                                             '_' + 'temp', heat_flows[(
                             index, input_comp)]['temp'])
+                    # elif 'elec' in self.components[input_comp].outputs and \
+                    #         'elec' in self.components[index].inputs or \
+                    #         'elec' in self.components[input_comp].inputs and \
+                    #         'elec' in self.components[index].outputs:
+                    #     elec_flows.append((index, input_comp))
 
         # Save the simplified matrix and energy flow for energy balance
         self.simp_matrix = simp_matrix
@@ -312,10 +317,12 @@ class Building(object):
         for comp in self.components:
             if hasattr(self.components[comp], 'heat_flows_in'):
                 if isinstance(self.components[comp].heat_flows_in, list):
-                    self.components[comp].add_heat_flows_in(self.energy_flow)
+                    self.components[comp].add_heat_flows_in(
+                        self.heat_flows.keys())
             if hasattr(self.components[comp], 'heat_flows_out'):
                 if isinstance(self.components[comp].heat_flows_out, list):
-                    self.components[comp].add_heat_flows_out(self.energy_flow)
+                    self.components[comp].add_heat_flows_out(
+                        self.heat_flows.keys())
             self.components[comp].add_cons(model)
 
     def _constraint_energy_balance(self, model):

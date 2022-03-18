@@ -11,8 +11,8 @@ from pyomo.gdp import Disjunct, Disjunction
 from scripts.FluidComponent import FluidComponent
 from scripts.components.HotWaterStorage import HotWaterStorage
 
-
 small_num = 0.0001
+
 
 class HomoStorage(FluidComponent, HotWaterStorage):
     def __init__(self, comp_name, comp_type="HomoStorage", comp_model=None,
@@ -75,18 +75,18 @@ class HomoStorage(FluidComponent, HotWaterStorage):
         """
         loss_var = model.find_component('loss_' + self.name)
         temp_var = model.find_component('temp_' + self.name)
+        size = model.find_component('size_' + self.name)
 
         if loss_type == 'off':
             for t in range(len(model.time_step)):
                 model.cons.add(loss_var[t + 1] == 0)
         else:
-            # FIXME (yni): The energy loss equation shouldn't be like the
-            #  following format, which is only used for validation.
-            # FiXME (yni): mindesten should be loss determined by the device
-            #  size
+            # FIXME (yni): The energy loss equation supposed to be unchanged,
+            #  but the hard coding values are not be validated. It should be
+            #  got from a plausible resource
             for t in range(len(model.time_step)):
                 model.cons.add(loss_var[t + 1] == 1.5 * ((temp_var[t + 1] -
-                                                          20) / 1000))
+                                                          20) / 1000) * size)
 
     def _constraint_temp(self, model, init_temp=45):
         # Initial temperature for water in storage is define with a constant
