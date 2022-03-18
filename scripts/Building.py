@@ -340,15 +340,20 @@ class Building(object):
                 for energy_type in self.components[index].inputs:
                     if len(row[row > 0].index.tolist() +
                            row[row.isnull()].index.tolist()) > 0:
-                        input_components = row[row > 0].index.tolist() + \
-                                           row[row.isnull()].index.tolist()
-                        input_energy = model.find_component('input_' +
-                                                            energy_type + '_' +
-                                                            index)
-                        for t in model.time_step:
-                            model.cons.add(input_energy[t] == sum(
-                                self.energy_flow[(input_comp, index)][t] for
-                                input_comp in input_components))
+                        self.components[index].constraint_sum_inputs(
+                            model=model, other_comp=row,
+                            energy_type=energy_type,
+                            energy_flow=self.energy_flow,
+                            comp_obj=self.components)
+                        # input_components = row[row > 0].index.tolist() + \
+                        #                    row[row.isnull()].index.tolist()
+                        # input_energy = model.find_component('input_' +
+                        #                                     energy_type + '_' +
+                        #                                     index)
+                        # for t in model.time_step:
+                        #     model.cons.add(input_energy[t] == sum(
+                        #         self.energy_flow[(input_comp, index)][t] for
+                        #         input_comp in input_components))
 
         # Constraints for the outputs
         for index, row in self.simp_matrix.iterrows():
@@ -356,15 +361,19 @@ class Building(object):
                 for energy_type in self.components[index].outputs:
                     if len(row[row > 0].index.tolist() +
                            row[row.isnull()].index.tolist()) > 0:
-                        output_components = row[row > 0].index.tolist() + \
-                                            row[row.isnull()].index.tolist()
-                        output_energy = model.find_component('output_' +
-                                                             energy_type + '_' +
-                                                             index)
-                        for t in model.time_step:
-                            model.cons.add(output_energy[t] == sum(
-                                self.energy_flow[(index, output_comp)][t] for
-                                output_comp in output_components))
+                        self.components[index].constraint_sum_outputs(
+                            model=model, other_comp=row,
+                            energy_type=energy_type,
+                            energy_flow=self.energy_flow)
+                        # output_components = row[row > 0].index.tolist() + \
+                        #                     row[row.isnull()].index.tolist()
+                        # output_energy = model.find_component('output_' +
+                        #                                      energy_type + '_' +
+                        #                                      index)
+                        # for t in model.time_step:
+                        #     model.cons.add(output_energy[t] == sum(
+                        #         self.energy_flow[(index, output_comp)][t] for
+                        #         output_comp in output_components))
 
     def _constraint_solar_area(self, model):
         """The total available solar area should be shared by PV and solar
@@ -460,5 +469,5 @@ class Building(object):
                                                  buy_gas[t] * env.gas_price +
                                                  buy_heat[t] *
                                                  env.heat_price - sell_elec[
-                                                  t] * env.elec_feed_price
+                                                     t] * env.elec_feed_price
                                                  for t in model.time_step))

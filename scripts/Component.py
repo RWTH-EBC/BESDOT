@@ -10,7 +10,6 @@ import pandas as pd
 import pyomo.environ as pyo
 from tools.calc_annuity_vdi2067 import calc_annuity
 
-
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -64,7 +63,7 @@ class Component(object):
         if self.outputs is not None:
             if 'efficiency' in properties.columns:
                 self.efficiency[self.outputs[0]] = float(properties[
-                                                            'efficiency'])
+                                                             'efficiency'])
             else:
                 if self.component_type not in ['Storage', 'Inverter',
                                                'Battery', 'HotWaterStorage',
@@ -175,6 +174,52 @@ class Component(object):
                                self.f_op)
         model.cons.add(annuity == annual_cost)
 
+    def constraint_sum_inputs(self, model, other_comp, energy_type,
+                              energy_flow, comp_obj):
+        """
+        This function used to be in class Building. Some spacial components have
+        more than 1 input type, which could not be seen as input. The function
+        should be rewritten in those spacial components.
+        Args:
+            model: pyomo model object
+            other_comp: pandas Series, taken from building topology
+            energy_type: modeled energy type in case of more than 1 input type
+            energy_flow: the energy flows from building object, dict
+            comp_obj: the component objects in building, might be used by the
+                spacial components, dict
+        Returns: None
+        """
+        # Search connected component from other_comp
+        input_components = other_comp[other_comp > 0].index.tolist() + \
+                           other_comp[other_comp.isnull()].index.tolist()
+        input_energy = model.find_component('input_' + energy_type + '_' +
+                                            self.name)
+        # Sum up all the inputs
+        for t in model.time_step:
+            model.cons.add(input_energy[t] == sum(
+                energy_flow[(input_comp, self.name)][t] for input_comp in
+                input_components))
+
+    def constraint_sum_outputs(self, model, other_comp, energy_type,
+                               energy_flow):
+        """
+        Almost same as constraint_energy_inputs.
+        Args:
+            model: pyomo model object
+            other_comp: pandas Series, taken from building topology
+            energy_type: modeled energy type in case of more than 1 input type
+            energy_flow: the energy flows from building object, dict
+        Returns: None
+        """
+        output_components = other_comp[other_comp > 0].index.tolist() + \
+                            other_comp[other_comp.isnull()].index.tolist()
+        output_energy = model.find_component('output_' + energy_type + '_' +
+                                             self.name)
+        for t in model.time_step:
+            model.cons.add(output_energy[t] == sum(
+                energy_flow[(self.name, output_comp)][t] for
+                output_comp in output_components))
+
     def add_cons(self, model):
         self._constraint_conver(model)
         self._constraint_maxpower(model)
@@ -202,12 +247,12 @@ class Component(object):
 
         if self.inputs is not None:
             for energy_type in self.inputs:
-                input_energy = pyo.Var(model.time_step, bounds=(0, 10**8))
+                input_energy = pyo.Var(model.time_step, bounds=(0, 10 ** 8))
                 model.add_component('input_' + energy_type + '_' + self.name,
                                     input_energy)
 
         if self.outputs is not None:
             for energy_type in self.outputs:
-                output_energy = pyo.Var(model.time_step, bounds=(0, 10**8))
+                output_energy = pyo.Var(model.time_step, bounds=(0, 10 ** 8))
                 model.add_component('output_' + energy_type + '_' + self.name,
                                     output_energy)
