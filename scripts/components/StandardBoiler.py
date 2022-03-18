@@ -71,6 +71,7 @@ class StandardBoiler(FluidComponent, GasBoiler):
         boiler is turned on then the minimum power has to be the set value"""
         output_energy = model.find_component('output_' + self.outputs[0] +
                                              '_' + self.name)
+        size = model.find_component('size_' + self.name)
         for t in range(len(model.time_step)):
             logic_1 = Disjunct()
             con_1 = pyo.Constraint(expr=output_energy[t] == 0)
@@ -78,7 +79,7 @@ class StandardBoiler(FluidComponent, GasBoiler):
             logic_1.add_component(self.name + 'con_1_' + str(t), con_1)
 
             logic_2 = Disjunct()
-            con_2 = pyo.Constraint(expr=output_energy[t] == 0)
+            con_2 = pyo.Constraint(expr=output_energy[t] >= 0.3 * size)
             model.add_component(self.name + '_logic_2_' + str(t), logic_2)
             logic_2.add_component(self.name + 'con_2_' + str(t), con_2)
 
