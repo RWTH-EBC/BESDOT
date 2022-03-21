@@ -249,7 +249,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
 
     def add_cons(self, model):
         self._constraint_conver(model)
-        self._constraint_loss(model, loss_type='off')
+        self._constraint_loss(model, loss_type='on')
         self._constraint_temp(model)
         # self._constraint_init_fluid_temp(model)
         # todo (yni): the constraint about return temperature should be

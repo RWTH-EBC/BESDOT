@@ -1,5 +1,6 @@
 import os
 import pyomo.environ as pyo
+from pyomo.gdp import Disjunct, Disjunction
 from scripts.components.GasBoiler import GasBoiler
 import warnings
 import pandas as pd
@@ -59,11 +60,31 @@ class StandardBoiler(FluidComponent, GasBoiler):
 
         for t in range(len(model.time_step)):
             model.cons.add(output_energy[t+1] <= size)
-            model.cons.add(output_energy[t+1] >= 0.3 * size)
+            # model.cons.add(output_energy[t+1] >= 0.3 * size)
             #model.cons.add(modulation[t+1] == output_energy[t+1]/size)
 
             model.cons.add(input_energy[t+1] * (100 - self.loss) ==
                            output_energy[t+1] * 100)
+
+    def _constraint_mod(self, model):
+        """This function is used to simulate the modulation of boiler. If the
+        boiler is turned on then the minimum power has to be the set value"""
+        output_energy = model.find_component('output_' + self.outputs[0] +
+                                             '_' + self.name)
+        size = model.find_component('size_' + self.name)
+        for t in range(len(model.time_step)):
+            logic_1 = Disjunct()
+            con_1 = pyo.Constraint(expr=output_energy[t+1] == 0)
+            model.add_component(self.name + '_logic_1_' + str(t), logic_1)
+            logic_1.add_component(self.name + 'con_1_' + str(t), con_1)
+
+            logic_2 = Disjunct()
+            con_2 = pyo.Constraint(expr=output_energy[t+1] >= 0.3 * size)
+            model.add_component(self.name + '_logic_2_' + str(t), logic_2)
+            logic_2.add_component(self.name + 'con_2_' + str(t), con_2)
+
+            dj = Disjunction(expr=[logic_1, logic_2])
+            model.add_component(self.name + 'dis_' + str(t), dj)
 
     def _get_properties_loss(self, model):
         model_property_file = os.path.join(base_path, 'data',
@@ -103,8 +124,9 @@ class StandardBoiler(FluidComponent, GasBoiler):
                                         '_' + 'mass')
             m_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'mass')
-            for t in range(len(model.time_step)):
+            for t in range(len(model.time_step)-1):
                 model.cons.add(m_in[t + 1] == m_out[t + 1])
+                model.cons.add(m_in[t + 2] == m_in[t + 1])
 
     def add_cons(self, model):
         self._constraint_conver(model)
@@ -113,6 +135,7 @@ class StandardBoiler(FluidComponent, GasBoiler):
         self._constraint_vdi2067(model)
         self._constraint_mass_flow(model)
         self._constraint_heat_outputs(model)
+        self._constraint_mod(model)
 
     def add_vars(self, model):
         super().add_vars(model)
