@@ -89,14 +89,16 @@ class ThroughHeaterElec(FluidComponent):
                                              heat_output[0] + '_mass')
 
         # Already covered by _constraint_conver?
-        # temp_flow_in = model.find_component(heat_input[1] + '_' +
-        #                                     heat_input[0] + '_temp')
-        # temp_flow_out = model.find_component(heat_output[1] + '_' +
-        #                                      heat_output[0] + '_temp')
+        # Temperature from consumption to ThroughHeater should be equal to the
+        # temperature from ThroughHeater to other components.
+        temp_flow_in = model.find_component(heat_input[1] + '_' +
+                                            heat_input[0] + '_temp')
+        temp_flow_out = model.find_component(heat_output[1] + '_' +
+                                             heat_output[0] + '_temp')
 
         for t in model.time_step:
             model.cons.add(mass_flow_in[t] == mass_flow_out[t])
-            # model.cons.add(temp_flow_in[t] <= temp_flow_out[t])
+            model.cons.add(temp_flow_in[t] == temp_flow_out[t])
 
     def add_cons(self, model):
         self._constraint_heat_inputs(model)
@@ -106,16 +108,16 @@ class ThroughHeaterElec(FluidComponent):
         self._constraint_vdi2067(model)
         self._constraint_virtual(model)
 
-    def add_vars(self, model):
-        super().add_vars(model)
-
-        input_heat = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('input_heat_' + self.name, input_heat)
-
-        input_elec = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('input_elec_' + self.name, input_elec)
-
-        output_energy = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('output_heat_' + self.name, output_energy)
+    # def add_vars(self, model):
+    #     super().add_vars(model)
+    #
+    #     input_heat = pyo.Var(model.time_step, bounds=(0, None))
+    #     model.add_component('input_heat_' + self.name, input_heat)
+    #
+    #     input_elec = pyo.Var(model.time_step, bounds=(0, None))
+    #     model.add_component('input_elec_' + self.name, input_elec)
+    #
+    #     output_energy = pyo.Var(model.time_step, bounds=(0, None))
+    #     model.add_component('output_heat_' + self.name, output_energy)
 
 
