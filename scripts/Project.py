@@ -114,6 +114,7 @@ class Project(object):
         # Attention! The option was set for the dimension optimization for
         # HomoStorage
         solver.options['NonConvex'] = 2
+        solver.options['MIPGap'] = 0.01
 
         opt_result = solver.solve(self.model, tee=True)
 
