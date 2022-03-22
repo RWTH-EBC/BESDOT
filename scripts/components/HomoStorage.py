@@ -75,6 +75,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
         """
         loss_var = model.find_component('loss_' + self.name)
         temp_var = model.find_component('temp_' + self.name)
+        size = model.find_component('size_' + self.name)
 
         if loss_type == 'off':
             for t in range(len(model.time_step)):
@@ -85,8 +86,8 @@ class HomoStorage(FluidComponent, HotWaterStorage):
             # FiXME (yni): mindesten should be loss determined by the device
             #  size
             for t in range(len(model.time_step)):
-                model.cons.add(loss_var[t + 1] == 1.5 * ((temp_var[t + 1] -
-                                                          20) / 1000))
+                model.cons.add(loss_var[t + 1] == 0.6 * ((temp_var[t + 1] -
+                                                          20) / 1000 * size))
 
     def _constraint_temp(self, model, init_temp=58):
         # Initial temperature for water in storage is define with a constant
