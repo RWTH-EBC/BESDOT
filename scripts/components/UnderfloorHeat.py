@@ -95,6 +95,14 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
             for t in range(len(model.time_step)):
                 model.cons.add(m_in[t + 1] == m_out[t + 1])
 
+    # todo (qli):
+    def _constraint_heat_water_return_temp(self, model, room_temp=21):
+        for heat_input in self.heat_flows_in:
+            t_out = model.find_component(
+                heat_input[1] + '_' + heat_input[0] + '_' + 'temp')
+            for t in range(len(model.time_step)):
+                model.cons.add(room_temp <= t_out[t + 1])
+
     def add_cons(self, model):
         self._constraint_conver(model)
         self._constraint_temp(model)
@@ -103,6 +111,8 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
         self._constraint_heat_inputs(model)
         self._constraint_floor_temp(model)
         self._constraint_vdi2067(model)
+        # todo (qli):
+        self._constraint_heat_water_return_temp(model)
 
     def add_vars(self, model):
         super().add_vars(model)

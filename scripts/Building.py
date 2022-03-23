@@ -164,7 +164,7 @@ class Building(object):
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
-                elif comp_type == 'HeatConsumption':
+                elif comp_type in ['HeatConsumption', 'HeatConsumptionFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       consum_profile=
                                                       self.demand_profile[
@@ -182,7 +182,8 @@ class Building(object):
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
-                elif comp_type == 'HotWaterConsumption':
+                elif comp_type in ['HotWaterConsumption',
+                                   'HotWaterConsumptionFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       consum_profile=
                                                       self.demand_profile[
@@ -418,8 +419,8 @@ class Building(object):
     def _constraint_total_cost(self, model, env):
         """Calculate the total annual cost for the building energy system."""
         bld_annual_cost = model.find_component('annual_cost_' + self.name)
-        buy_elec = [0] * 8761
-        sell_elec = [0] * 8761
+        buy_elec = [0.3] * 8761  # ct/kWh
+        sell_elec = [0.08] * 8761  # ct/kWh
         buy_gas = [0] * 8761
         buy_heat = [0] * 8761
 
@@ -448,8 +449,8 @@ class Building(object):
     def _constraint_operation_cost(self, model, env):
         """Calculate the total operation cost for the building energy system."""
         bld_operation_cost = model.find_component('operation_cost_' + self.name)
-        buy_elec = [0] * 8761
-        sell_elec = [0] * 8761
+        buy_elec = [0.3] * 8761
+        sell_elec = [0.08] * 8761
         buy_gas = [0] * 8761
         buy_heat = [0] * 8761
 
