@@ -10,7 +10,7 @@ base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
     __file__))))
 
 unit_switch = 1000  # W/kWh
-
+small_num = 0.00001
 
 class SolarThermalCollectorFluid(FluidComponent):
 
