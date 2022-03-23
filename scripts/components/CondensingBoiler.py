@@ -68,7 +68,7 @@ class CondensingBoiler(FluidComponent, GasBoiler):
         self.loss = 0
         for t in range(len(model.time_step)):
             model.cons.add(output_energy[t + 1] <= size)
-            model.cons.add(output_energy[t + 1] >= 0.3 * size)
+            #model.cons.add(output_energy[t + 1] >= 0.3 * size)
             # Calculate the mass of condensate from the combustion power
             self.loss = self.exhaust_gas_loss + radiation_loss
             model.cons.add(input_energy[t + 1] ==
@@ -115,8 +115,9 @@ class CondensingBoiler(FluidComponent, GasBoiler):
                                         '_' + 'mass')
             m_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'mass')
-            for t in range(len(model.time_step)):
+            for t in range(len(model.time_step) - 1):
                 model.cons.add(m_in[t + 1] == m_out[t + 1])
+                model.cons.add(m_in[t + 2] == m_in[t + 1])
 
     def add_cons(self, model):
         self._constraint_conver(model)

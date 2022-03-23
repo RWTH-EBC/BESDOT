@@ -36,7 +36,7 @@ bld_10.add_thermal_profile('heat', env_10.temp_profile_original, env_10)
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 topo_file = os.path.join(base_path, 'data', 'topology',
-                         'threeportvalve.csv')
+                         'final.csv')
 bld_10.add_topology(topo_file)
 bld_10.add_components(project.environment)
 project.add_building(bld_10)
@@ -54,13 +54,15 @@ project.run_optimization('gurobi', save_lp=True, save_result=True)
 result_output_path = os.path.join(base_path, 'data', 'opt_output',
                                   project.name + '_result.csv')
 post_pro.plot_all(result_output_path, time_interval=[0, env_10.time_step])
-#post_pro.plot_double(result_output_path, "boi", "water_tes", 365, "gas", "heat")
-#post_pro.plot_double(result_output_path, "water_tes", "tp_val", 365, "heat",
-#                     "heat")
-#post_pro.plot_double(result_output_path, "tp_val", "under_heat", 365, "heat",
-#                     "heat")
-#post_pro.plot_double(result_output_path, "under_heat", "therm_cns", 365, "heat",
-#                     "heat")
-post_pro.plot_double_24h(result_output_path, "water_tes", "tp_val")
-post_pro.plot_double_24h(result_output_path, "tp_val", "under_heat")
-post_pro.plot_double_24h(result_output_path, "under_heat", "therm_cns")
+post_pro.plot_double(result_output_path, "boi", "water_tes", 365, "gas", "heat")
+post_pro.plot_double(result_output_path, "conden_boi", "water_tes", 365, "gas",
+                     "heat")
+post_pro.plot_double(result_output_path, "water_tes", "tp_val", 365, "heat",
+                     "heat")
+post_pro.plot_double(result_output_path, "tp_val", "under_heat", 365, "heat",
+                     "heat")
+post_pro.plot_double(result_output_path, "under_heat", "therm_cns", 365, "heat",
+                     "heat")
+#post_pro.plot_double_24h(result_output_path, "water_tes", "tp_val")
+#post_pro.plot_double_24h(result_output_path, "tp_val", "under_heat")
+#post_pro.plot_double_24h(result_output_path, "under_heat", "therm_cns")
