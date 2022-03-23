@@ -43,9 +43,9 @@ class Component(object):
         self.efficiency = {'elec': None,
                            'heat': None,
                            'cool': None}
-
-        properties = self.get_properties(comp_model)
-        self._read_properties(properties)
+        if comp_model is not None:
+            properties = self.get_properties(comp_model)
+            self._read_properties(properties)
         self.min_size = min_size
         self.max_size = max_size
         self.current_size = current_size

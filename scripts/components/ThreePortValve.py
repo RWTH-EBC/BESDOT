@@ -8,15 +8,18 @@ class ThreePortValve(HeatExchangerFluid):
     todo add description
     """
     def __init__(self, comp_name, comp_type="ThreePortValve"):
-        self.name = comp_name
-        self.component_type = comp_type
-        self.efficiency = {'heat': 1}
-
+        # self.name = comp_name
+        # self.component_type = comp_type
+        # self.efficiency = {'heat': 1}
+        #
         self.inputs = ['heat']
         self.outputs = ['heat']
+        #
+        # self.heat_flows_in = []
+        # self.heat_flows_out = []
 
-        self.heat_flows_in = []
-        self.heat_flows_out = []
+        super().__init__(comp_name=comp_name,
+                         comp_type=comp_type)
 
         if len(self.heat_flows_in) > 1:
             warnings.warn('more than one energy flow input is given for the '

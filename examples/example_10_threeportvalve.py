@@ -19,7 +19,7 @@ project = Project(name='project_10', typ='building')
 
 
 # Generate the environment object
-env_10 = Environment(time_step=8760)
+env_10 = Environment(time_step=24)
 project.add_environment(env_10)
 
 # If the objective of the project is the optimization for building, a building
@@ -51,16 +51,16 @@ project.run_optimization('gurobi', save_lp=True, save_result=True)
 #                                  Post-processing
 ################################################################################
 
-result_output_path = os.path.join(base_path, 'data', 'opt_output',
-                                  project.name + '_result.csv')
-# post_pro.plot_all(result_output_path, time_interval=[0, env_10.time_step])
-post_pro.plot_double(result_output_path, "boi", "water_tes", 365, "gas", "heat")
-post_pro.plot_double(result_output_path, "water_tes", "tp_val", 365, "heat",
-                     "heat")
-post_pro.plot_double(result_output_path, "tp_val", "under_heat", 365, "heat",
-                     "heat")
-post_pro.plot_double(result_output_path, "under_heat", "therm_cns", 365, "heat",
-                     "heat")
+# result_output_path = os.path.join(base_path, 'data', 'opt_output',
+#                                   project.name + '_result.csv')
+# # post_pro.plot_all(result_output_path, time_interval=[0, env_10.time_step])
+# post_pro.plot_double(result_output_path, "boi", "water_tes", 365, "gas", "heat")
+# post_pro.plot_double(result_output_path, "water_tes", "tp_val", 365, "heat",
+#                      "heat")
+# post_pro.plot_double(result_output_path, "tp_val", "under_heat", 365, "heat",
+#                      "heat")
+# post_pro.plot_double(result_output_path, "under_heat", "therm_cns", 365, "heat",
+#                      "heat")
 #post_pro.plot_double_24h(result_output_path, "water_tes", "tp_val")
 #post_pro.plot_double_24h(result_output_path, "tp_val", "under_heat")
 #post_pro.plot_double_24h(result_output_path, "under_heat", "therm_cns")
