@@ -91,18 +91,20 @@ class ThroughHeaterElec(FluidComponent):
         mass_flow_out = False
         temp_flow_out = False
 
-        for energy_flow_in in self.energy_flows['input']:
-            if energy_flow_in in self.heat_flows_out:
+        for energy_flow_in in self.energy_flows['input']['heat']:
+            if energy_flow_in in self.heat_flows_in:
                 mass_flow_in = model.find_component(energy_flow_in[0] + '_' +
                                                     energy_flow_in[1] + '_mass')
                 temp_flow_in = model.find_component(energy_flow_in[1] + '_' +
                                                     energy_flow_in[0] + '_temp')
-        for energy_flow_out in self.energy_flows['output']:
-            if energy_flow_out in self.heat_flows_in:
-                mass_flow_out = model.find_component(energy_flow_out[1] + '_' +
-                                                     energy_flow_out[0] + '_mass')
+        for energy_flow_out in self.energy_flows['output']['heat']:
+            if energy_flow_out in self.heat_flows_out:
+                mass_flow_out = model.find_component(energy_flow_out[0] + '_' +
+                                                     energy_flow_out[
+                                                         1] + '_mass')
                 temp_flow_out = model.find_component(energy_flow_out[1] + '_' +
-                                                     energy_flow_out[0] + '_temp')
+                                                     energy_flow_out[
+                                                         0] + '_temp')
 
         # Temperature from consumption to ThroughHeaterElec should be equal to the
         # temperature from ThroughHeaterElec to other components.
