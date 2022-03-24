@@ -129,15 +129,6 @@ class CHPFluidSmall(CHP, FluidComponent):
         # model.add_component('output_elec_' + self.name, output_elec)
 
         # todo (qli): building.py anpassen
-        energy_flow_elec = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component(self.name + '_e_grid_elec', energy_flow_elec)
-
-        # todo (qli): building.py anpassen
-        energy_flow_elec = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('chp_small_' + self.name + '_elec',
-                            energy_flow_elec)
-
-        # todo (qli): building.py anpassen
         start_cost = pyo.Var(bounds=(0, None))
         model.add_component('start_cost_' + self.name, start_cost)
 

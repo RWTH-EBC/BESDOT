@@ -72,7 +72,6 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         self._constraint_therm_eff(model)
         self._constraint_temp(model)
         self._constraint_conver(model)
-        self._constraint_vdi2067_chp(model)
 
         self._constraint_vdi2067_chp(model)
         #self._constraint_start_stop_ratio(model)
@@ -102,15 +101,6 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         # todo (qli): building.py Zeile 342 anpassen
         # output_elec = pyo.Var(model.time_step, bounds=(0, None))
         # model.add_component('output_elec_' + self.name, output_elec)
-
-        # todo (qli): building.py Zeile 342 anpassen
-        energy_flow_elec = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component(self.name + '_e_grid_elec', energy_flow_elec)
-
-        # todo (qli): building.py Zeile 342 anpassen
-        energy_flow_elec = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('chp_small_' + self.name + '_elec',
-                            energy_flow_elec)
 
         # todo (qli): building.py anpassen
         start_cost = pyo.Var(bounds=(0, None))

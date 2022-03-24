@@ -23,7 +23,6 @@ class HotWaterConsumptionFluid(FluidComponent):
                          current_size=current_size)
 
         self.consum_profile = consum_profile
-        self.cold_water_temp = 12
 
     def _constraint_vdi2067(self, model):
         """
@@ -61,7 +60,7 @@ class HotWaterConsumptionFluid(FluidComponent):
                 model.cons.add(cold_water_temp == t_out[t])
 
     # todo (qli): HotWaterConsumption.py anpassen
-    def _constraint_hot_water_temp(self, model, hot_water_temp=60):
+    def _constraint_hot_water_temp(self, model, hot_water_temp=30):
         for heat_input in self.heat_flows_in:
             t_in = model.find_component(heat_input[0] + '_' + heat_input[1] +
                                         '_' + 'temp')

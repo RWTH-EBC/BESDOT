@@ -54,7 +54,7 @@ class HeatConsumptionFluid(FluidComponent):
     #     var_dict[output_flow] = input_profiles['therm_demand']
 
     # todo (qli):
-    def _constraint_heat_water_temp(self, model, init_temp=45):
+    def _constraint_heat_water_temp(self, model, init_temp=30):
         for heat_input in self.heat_flows_in:
             t_in = model.find_component(
                 heat_input[0] + '_' + heat_input[1] + '_' + 'temp')
@@ -62,7 +62,7 @@ class HeatConsumptionFluid(FluidComponent):
                 model.cons.add(init_temp == t_in[t + 1])
 
     # todo (qli):
-    def _constraint_heat_water_return_temp(self, model, init_temp=18):
+    def _constraint_heat_water_return_temp(self, model, init_temp=21):
         for heat_input in self.heat_flows_in:
             t_out = model.find_component(
                 heat_input[1] + '_' + heat_input[0] + '_' + 'temp')
