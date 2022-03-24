@@ -97,11 +97,9 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
 
     # todo (qli):
     def _constraint_heat_water_return_temp(self, model, room_temp=21):
-        for heat_input in self.heat_flows_in:
-            t_out = model.find_component(
-                heat_input[1] + '_' + heat_input[0] + '_' + 'temp')
-            for t in range(len(model.time_step)):
-                model.cons.add(room_temp <= t_out[t + 1])
+        return_temp_var = model.find_component('return_temp_' + self.name)
+        for t in model.time_step:
+            model.cons.add(room_temp <= return_temp_var[t])
 
     def add_cons(self, model):
         self._constraint_conver(model)
