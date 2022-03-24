@@ -230,36 +230,36 @@ class Building(object):
                             'heat' in self.components[index].outputs:
                         self.energy_flows['heat'][(input_comp, index)] = None
                         self.components[input_comp].add_energy_flows(
-                            'input', 'heat', (input_comp, index))
-                        self.components[index].add_energy_flows(
                             'output', 'heat', (input_comp, index))
+                        self.components[index].add_energy_flows(
+                            'input', 'heat', (input_comp, index))
                     if 'elec' in self.components[input_comp].outputs and \
                             'elec' in self.components[index].inputs or \
                             'elec' in self.components[input_comp].inputs and \
                             'elec' in self.components[index].outputs:
                         self.energy_flows['elec'][(input_comp, index)] = None
                         self.components[input_comp].add_energy_flows(
-                            'input', 'elec', (input_comp, index))
-                        self.components[index].add_energy_flows(
                             'output', 'elec', (input_comp, index))
+                        self.components[index].add_energy_flows(
+                            'input', 'elec', (input_comp, index))
                     if 'cool' in self.components[input_comp].outputs and \
                             'cool' in self.components[index].inputs or \
                             'cool' in self.components[input_comp].inputs and \
                             'cool' in self.components[index].outputs:
                         self.energy_flows['cool'][(input_comp, index)] = None
                         self.components[input_comp].add_energy_flows(
-                            'input', 'cool', (input_comp, index))
-                        self.components[index].add_energy_flows(
                             'output', 'cool', (input_comp, index))
+                        self.components[index].add_energy_flows(
+                            'input', 'cool', (input_comp, index))
                     if 'gas' in self.components[input_comp].outputs and \
                             'gas' in self.components[index].inputs or \
                             'gas' in self.components[input_comp].inputs and \
                             'gas' in self.components[index].outputs:
                         self.energy_flows['gas'][(input_comp, index)] = None
                         self.components[input_comp].add_energy_flows(
-                            'input', 'gas', (input_comp, index))
-                        self.components[index].add_energy_flows(
                             'output', 'gas', (input_comp, index))
+                        self.components[index].add_energy_flows(
+                            'input', 'gas', (input_comp, index))
 
     def add_vars(self, model):
         """Add Pyomo variables into the ConcreteModel, which is defined in
