@@ -230,7 +230,7 @@ class SolarThermalCollectorFluid(FluidComponent):
         self._constraint_vdi2067(model)
         self._constraint_temp(model)
         self._constraint_efficiency(model)
-        self._constraint_output_permit(model)
+        #self._constraint_output_permit(model)
         if heat_cap_type =='con':
             # todo(qli): Wirkungsgrad = Konst
             self._constraint_conver(model)
