@@ -159,11 +159,8 @@ class Building(object):
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
-                elif comp_type in ['PV', 'SolarThermalCollector',
-                                   'SolarThermalCollectorFluid']:
+                elif comp_type in ['PV', 'SolarThermalCollector']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
-                                                      temp_profile=
-                                                      env.temp_profile,
                                                       irr_profile=
                                                       env.irr_profile,
                                                       comp_model=comp_model,
@@ -188,8 +185,7 @@ class Building(object):
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
-                elif comp_type in ['HotWaterConsumption',
-                                   'HotWaterConsumptionFluid']:
+                elif comp_type == 'HotWaterConsumption':
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       consum_profile=
                                                       self.demand_profile[
@@ -398,7 +394,7 @@ class Building(object):
         self._constraint_mass_balance(model)
         # todo (yni): Attention in the optimization for operation cost should
         #  comment constrain for solar area. This should be done automated.
-        self._constraint_solar_area(model)
+        # self._constraint_solar_area(model)
         self._constraint_total_cost(model, env)
         self._constraint_operation_cost(model, env)
         for comp in self.components:
@@ -470,8 +466,8 @@ class Building(object):
                 solar_area_var_list.append(model.find_component('solar_area_' +
                                                                 component))
             elif isinstance(self.components[component],
-                            module_dict['SolarThermalCollectorFluid']):
-                solar_area_var_list.append(model.find_component('size_' +
+                            module_dict['SolarThermalCollector']):
+                solar_area_var_list.append(model.find_component('solar_area_' +
                                                                 component))
         model.cons.add(sum(item for item in solar_area_var_list) <=
                        self.solar_area)
@@ -504,18 +500,25 @@ class Building(object):
     def _constraint_total_cost(self, model, env):
         """Calculate the total annual cost for the building energy system."""
         bld_annual_cost = model.find_component('annual_cost_' + self.name)
-        buy_elec = [0] * 8760
-        sell_elec = [0] * 8760
-        buy_gas = [0] * 8760
-        buy_heat = [0] * 8760
+        # The following elements (buy_elec, ...) are the energy purchase and
+        # sale volume in time series and used to avoid that the constraint
+        # added is not executed properly if there is a None. The reason for
+        # 8761 steps is the different index of python list and pyomo.
+        buy_elec = [0] * 8761
+        sell_elec = [0] * 8761
+        buy_gas = [0] * 8761
+        buy_heat = [0] * 8761
 
         comp_cost_list = []
         for comp in self.components:
             comp_cost_list.append(model.find_component('annual_cost_' + comp))
             if isinstance(self.components[comp],
                           module_dict['ElectricityGrid']):
-                buy_elec = model.find_component('output_elec_' + comp)
-                sell_elec = model.find_component('input_elec_' + comp)
+                if 'elec' in self.components[comp].energy_flows['input'].keys():
+                    sell_elec = model.find_component('input_elec_' + comp)
+                if 'elec' in self.components[comp].energy_flows[
+                    'output'].keys():
+                    buy_elec = model.find_component('output_elec_' + comp)
             elif isinstance(self.components[comp], module_dict['GasGrid']):
                 buy_gas = model.find_component('output_gas_' + comp)
             elif isinstance(self.components[comp], module_dict['HeatGrid']):
@@ -534,18 +537,25 @@ class Building(object):
     def _constraint_operation_cost(self, model, env):
         """Calculate the total operation cost for the building energy system."""
         bld_operation_cost = model.find_component('operation_cost_' + self.name)
-        buy_elec = [0] * 8760
-        sell_elec = [0] * 8760
-        buy_gas = [0] * 8760
-        buy_heat = [0] * 8760
+        # The following elements (buy_elec, ...) are the energy purchase and
+        # sale volume in time series and used to avoid that the constraint
+        # added is not executed properly if there is a None. The reason for
+        # 8761 steps is the different index of python list and pyomo.
+        buy_elec = [0] * 8761
+        sell_elec = [0] * 8761
+        buy_gas = [0] * 8761
+        buy_heat = [0] * 8761
 
-        comp_cost_list = []
+        # comp_cost_list = []
         for comp in self.components:
-            comp_cost_list.append(model.find_component('annual_cost_' + comp))
+            # comp_cost_list.append(model.find_component('annual_cost_' + comp))
             if isinstance(self.components[comp],
                           module_dict['ElectricityGrid']):
-                buy_elec = model.find_component('output_elec_' + comp)
-                sell_elec = model.find_component('input_elec_' + comp)
+                if 'elec' in self.components[comp].energy_flows['input'].keys():
+                    sell_elec = model.find_component('input_elec_' + comp)
+                if 'elec' in self.components[comp].energy_flows[
+                    'output'].keys():
+                    buy_elec = model.find_component('output_elec_' + comp)
             elif isinstance(self.components[comp], module_dict['GasGrid']):
                 buy_gas = model.find_component('output_gas_' + comp)
             elif isinstance(self.components[comp], module_dict['HeatGrid']):
@@ -555,5 +565,5 @@ class Building(object):
                                                  buy_gas[t] * env.gas_price +
                                                  buy_heat[t] *
                                                  env.heat_price - sell_elec[
-                                                  t] * env.elec_feed_price
+                                                     t] * env.elec_feed_price
                                                  for t in model.time_step))

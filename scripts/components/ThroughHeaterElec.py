@@ -29,6 +29,18 @@ class ThroughHeaterElec(FluidComponent):
             model.cons.add(output_energy[t] == input_elec[t] *
                            self.efficiency['heat'] + input_heat[t])
 
+    def _constraint_maxpower(self, model):
+        """
+        The energy flow at each time step cannot be greater than its capacity.
+        Here output energy is used. The size is defined for electricity.
+        """
+        size = model.find_component('size_' + self.name)
+
+        input_elec = model.find_component('input_elec_' + self.name)
+
+        for t in model.time_step:
+            model.cons.add(input_elec[t] <= size)
+
     def constraint_sum_inputs(self, model, energy_type, energy_flows):
         """
         For ThroughHeaterElec object the energy input in type 'heat' could not
