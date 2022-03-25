@@ -37,7 +37,7 @@ bld_16.demand_profile['hot_water_demand'] = [1.1, 0, 1, 1, 0]
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 topo_file = os.path.join(base_path, 'data', 'topology',
-                         'solar_coll_TW_boi.csv')
+                         'solar_coll_TW_THE.csv')
 bld_16.add_topology(topo_file)
 bld_16.add_components(project.environment)
 project.add_building(bld_16)
