@@ -500,6 +500,10 @@ class Building(object):
     def _constraint_total_cost(self, model, env):
         """Calculate the total annual cost for the building energy system."""
         bld_annual_cost = model.find_component('annual_cost_' + self.name)
+        # The following elements (buy_elec, ...) are the energy purchase and
+        # sale volume in time series and used to avoid that the constraint
+        # added is not executed properly if there is a None. The reason for
+        # 8761 steps is the different index of python list and pyomo.
         buy_elec = [0] * 8761
         sell_elec = [0] * 8761
         buy_gas = [0] * 8761
@@ -530,14 +534,18 @@ class Building(object):
     def _constraint_operation_cost(self, model, env):
         """Calculate the total operation cost for the building energy system."""
         bld_operation_cost = model.find_component('operation_cost_' + self.name)
+        # The following elements (buy_elec, ...) are the energy purchase and
+        # sale volume in time series and used to avoid that the constraint
+        # added is not executed properly if there is a None. The reason for
+        # 8761 steps is the different index of python list and pyomo.
         buy_elec = [0] * 8761
         sell_elec = [0] * 8761
         buy_gas = [0] * 8761
         buy_heat = [0] * 8761
 
-        comp_cost_list = []
+        # comp_cost_list = []
         for comp in self.components:
-            comp_cost_list.append(model.find_component('annual_cost_' + comp))
+            # comp_cost_list.append(model.find_component('annual_cost_' + comp))
             if isinstance(self.components[comp],
                           module_dict['ElectricityGrid']):
                 buy_elec = model.find_component('output_elec_' + comp)
