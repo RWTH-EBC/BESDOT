@@ -548,8 +548,10 @@ class Building(object):
             # comp_cost_list.append(model.find_component('annual_cost_' + comp))
             if isinstance(self.components[comp],
                           module_dict['ElectricityGrid']):
-                buy_elec = model.find_component('output_elec_' + comp)
-                sell_elec = model.find_component('input_elec_' + comp)
+                if self.components[comp].energy_flows['input'] is not None:
+                    sell_elec = model.find_component('input_elec_' + comp)
+                if self.components[comp].energy_flows['output'] is not None:
+                    buy_elec = model.find_component('output_elec_' + comp)
             elif isinstance(self.components[comp], module_dict['GasGrid']):
                 buy_gas = model.find_component('output_gas_' + comp)
             elif isinstance(self.components[comp], module_dict['HeatGrid']):
