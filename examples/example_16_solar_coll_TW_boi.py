@@ -54,4 +54,18 @@ project.run_optimization(save_lp=True, save_result=True)
 
 result_output_path = os.path.join(base_path, 'data', 'opt_output',
                                   project.name + '_result.csv')
-post_pro.plot_all(result_output_path, time_interval=[0, env_16.time_step])
+# post_pro.plot_all(result_output_path, time_interval=[0, env_16.time_step])
+'''
+post_pro.plot_double(result_output_path, "solar_coll", "water_tes", 365, "heat"
+                     , "heat")
+post_pro.plot_double(result_output_path, "water_tes", "tp_val", 365, "heat",
+                     "heat")
+post_pro.plot_double(result_output_path, "tp_val", "e_boi", 365, "heat",
+                     "heat")
+post_pro.plot_double(result_output_path, "e_boi", "hw_cns", 365, "heat",
+                     "heat")
+'''
+post_pro.plot_double_24h(result_output_path, "solar_coll", "water_tes")
+post_pro.plot_double_24h(result_output_path, "water_tes", "tp_val")
+post_pro.plot_double_24h(result_output_path, "tp_val", "e_boi")
+post_pro.plot_double_24h(result_output_path, "e_boi", "hw_cns")
