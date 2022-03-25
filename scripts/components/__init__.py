@@ -21,4 +21,5 @@ from .GasGrid import GasGrid
 from .UnderfloorHeat import UnderfloorHeat
 from .StratificationStorage import StratificationStorage
 from .StandardBoiler import StandardBoiler
-from. CondensingBoiler import CondensingBoiler
+from .CondensingBoiler import CondensingBoiler
+from .ThroughHeaterElec import ThroughHeaterElec
