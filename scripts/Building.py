@@ -501,8 +501,8 @@ class Building(object):
     def _constraint_total_cost(self, model, env):
         """Calculate the total annual cost for the building energy system."""
         bld_annual_cost = model.find_component('annual_cost_' + self.name)
-        buy_elec = [0.3] * 8761  # ct/kWh
-        sell_elec = [0.08] * 8761  # ct/kWh
+        buy_elec = [0] * 8761  # ct/kWh
+        sell_elec = [0] * 8761  # ct/kWh
         buy_gas = [0] * 8761
         buy_heat = [0] * 8761
 
@@ -531,8 +531,8 @@ class Building(object):
     def _constraint_operation_cost(self, model, env):
         """Calculate the total operation cost for the building energy system."""
         bld_operation_cost = model.find_component('operation_cost_' + self.name)
-        buy_elec = [0.3] * 8761
-        sell_elec = [0.08] * 8761
+        buy_elec = [0] * 8761
+        sell_elec = [0] * 8761
         buy_gas = [0] * 8761
         buy_heat = [0] * 8761
 
