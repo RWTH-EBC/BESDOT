@@ -20,14 +20,6 @@ class HomoStorageST(HomoStorage):
             model.cons.add(temp_var[t] >= self.min_temp)
             model.cons.add(temp_var[t] <= self.max_temp)
 
-        for heat_input in self.heat_flows_in:
-            t_in = model.find_component(heat_input[0] + '_' + heat_input[1] +
-                                        '_' + 'temp')
-            t_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
-                                         '_' + 'temp')
-            for t in range(len(model.time_step)):
-                model.cons.add(t_in[t + 1] >= t_out[t + 1])
-
     def add_cons(self, model):
         self._constraint_conver(model)
         self._constraint_loss(model, loss_type='off')
