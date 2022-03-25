@@ -46,7 +46,7 @@ class SolarThermalCollectorFluid(FluidComponent):
                 model.cons.add(t_in[t] == inlet_temp[t])
                 # Über die max. Temperatur verdampft die Solarflüssigkeit.
                 model.cons.add(outlet_temp[t] <= self.max_temp)
-
+                model.cons.add(inlet_temp[t] <= outlet_temp[t])
 
     def _constraint_efficiency(self, model):
         eff = model.find_component('eff_' + self.name)
