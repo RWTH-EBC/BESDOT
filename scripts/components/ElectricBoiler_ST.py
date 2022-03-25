@@ -28,27 +28,35 @@ class ElectricBoiler_ST(FluidComponent):
                          current_size=current_size)
 
     def _constraint_mass_temp(self, model):
-        for heat_input in self.heat_flows_in:
-            m_out_cold = model.find_component(
-                heat_input[1] + '_' + heat_input[0] +
-                '_' + 'mass')
-            t_out_cold = model.find_component(
-                heat_input[1] + '_' + heat_input[0] +
-                '_' + 'temp')
-            t_in_cold = model.find_component(
-                heat_input[0] + '_' + heat_input[1] +
-                '_' + 'temp')
-            for heat_output in self.heat_flows_out:
-                m_in_hot = model.find_component(
-                    heat_output[1] + '_' + heat_output[0] + '_' + 'mass')
-                t_in_hot = model.find_component(
-                    heat_output[1] + '_' + heat_output[0] + '_' + 'temp')
-                t_out_hot = model.find_component(
-                    heat_output[0] + '_' + heat_output[1] + '_' + 'temp')
-                for t in model.time_step:
-                    model.cons.add(m_out_cold[t] == m_in_hot[t])
-                    model.cons.add(t_out_cold[t] == t_in_hot[t])
-                    model.cons.add(t_in_cold[t] <= t_out_hot[t])
+        for energy_flow_in in self.energy_flows['input']['heat']:
+            if energy_flow_in in self.heat_flows_in:
+                m_in_cold = model.find_component(energy_flow_in[0] + '_' +
+                                                    energy_flow_in[1] + '_mass')
+                t_in_cold = model.find_component(energy_flow_in[0] + '_' +
+                                                    energy_flow_in[1] + '_temp')
+                m_out_cold = model.find_component(energy_flow_in[1] + '_' +
+                                                    energy_flow_in[0] + '_mass')
+                t_out_cold = model.find_component(energy_flow_in[1] + '_' +
+                                                    energy_flow_in[0] + '_temp')
+        for energy_flow_out in self.energy_flows['output']['heat']:
+            if energy_flow_out in self.heat_flows_out:
+                m_out_hot = model.find_component(energy_flow_out[0] + '_' +
+                                                     energy_flow_out[
+                                                         1] + '_mass')
+                t_out_hot = model.find_component(energy_flow_out[0] + '_' +
+                                                     energy_flow_out[
+                                                         1] + '_temp')
+                m_in_hot = model.find_component(energy_flow_out[1] + '_' +
+                                                 energy_flow_out[
+                                                     0] + '_mass')
+                t_in_hot = model.find_component(energy_flow_out[1] + '_' +
+                                                 energy_flow_out[
+                                                     0] + '_temp')
+
+        for t in model.time_step:
+            model.cons.add(m_out_cold[t] == m_in_hot[t])
+            model.cons.add(t_out_cold[t] == t_in_hot[t])
+            model.cons.add(t_in_cold[t] <= t_out_hot[t])
 
     def _constraint_conver(self, model):
         e_boi_properties_path = os.path.join(base_path, "data",
