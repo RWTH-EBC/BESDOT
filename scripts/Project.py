@@ -109,7 +109,7 @@ class Project(object):
         solvers:
         glpk(bad for milp), cbc(good for milp), gurobi: linear, ipopt: nonlinear
         """
-        pyo.TransformationFactory('gdp.bigm').apply_to(self.model)
+        #pyo.TransformationFactory('gdp.bigm').apply_to(self.model)
         solver = pyo.SolverFactory(solver_name)
         # Attention! The option was set for the dimension optimization for
         # HomoStorage

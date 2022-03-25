@@ -156,8 +156,11 @@ class Building(object):
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
-                elif comp_type in ['PV', 'SolarThermalCollector']:
+                elif comp_type in ['PV', 'SolarThermalCollector',
+                                   'SolarThermalCollectorFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
+                                                      temp_profile=
+                                                      env.temp_profile,
                                                       irr_profile=
                                                       env.irr_profile,
                                                       comp_model=comp_model,
@@ -182,7 +185,8 @@ class Building(object):
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
-                elif comp_type == 'HotWaterConsumption':
+                elif comp_type in ['HotWaterConsumption',
+                                   'HotWaterConsumptionFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       consum_profile=
                                                       self.demand_profile[
@@ -225,13 +229,6 @@ class Building(object):
         simp_matrix.set_index(['comp_name'], inplace=True)
         energy_flow = {}
         heat_flows = {}
-        # The elec_flows is created for the component CHP. CHP has both heat
-        # and electricity output. If the energy type from energy_flow is not
-        # clearly, errors of optimization might occur.
-        # Except for CHP, some innovative technology such as electrolyse could
-        # meet the same problem. It could be fixed in the same way later, when
-        # it occurs.
-        # elec_flows = []
         for index, row in simp_matrix.iteritems():
             # search for Nan value and the mass flow in topology matrix, the
             # unit is kg/h.
@@ -250,10 +247,17 @@ class Building(object):
                     # avoiding duplicate definition, since in building
                     # level the input of one component is the output of
                     # another component.
-                    if 'heat' in self.components[input_comp].outputs and \
-                            'heat' in self.components[index].inputs or \
-                            'heat' in self.components[input_comp].inputs and \
-                            'heat' in self.components[index].outputs:
+                    # todo (yni): Check, if need both outputs and inputs and
+                    #  if the following method could cause duplicate variable.
+                    if 'heat' in self.components[input_comp].outputs or \
+                            'heat' in self.components[input_comp].inputs:
+                        # Check if the component has the attribution of
+                        # 'flows', which shows if the model contains
+                        # temperature variables.
+                        # todo (yni): check, wenn the following command could
+                        #  be required.
+                        # if hasattr(self.components[input_comp],
+                        #            'heat_flows_in'):
                         heat_flows[(input_comp, index)] = {}
                         heat_flows[(index, input_comp)] = {}
                         # mass flow from component 'input_comp' to
@@ -284,11 +288,6 @@ class Building(object):
                         model.add_component(index + '_' + input_comp +
                                             '_' + 'temp', heat_flows[(
                             index, input_comp)]['temp'])
-                    # elif 'elec' in self.components[input_comp].outputs and \
-                    #         'elec' in self.components[index].inputs or \
-                    #         'elec' in self.components[input_comp].inputs and \
-                    #         'elec' in self.components[index].outputs:
-                    #     elec_flows.append((index, input_comp))
 
         # Save the simplified matrix and energy flow for energy balance
         self.simp_matrix = simp_matrix
@@ -310,18 +309,16 @@ class Building(object):
         self._constraint_mass_balance(model)
         # todo (yni): Attention in the optimization for operation cost should
         #  comment constrain for solar area. This should be done automated.
-        # self._constraint_solar_area(model)
+        self._constraint_solar_area(model)
         self._constraint_total_cost(model, env)
         self._constraint_operation_cost(model, env)
         for comp in self.components:
             if hasattr(self.components[comp], 'heat_flows_in'):
                 if isinstance(self.components[comp].heat_flows_in, list):
-                    self.components[comp].add_heat_flows_in(
-                        self.heat_flows.keys())
+                    self.components[comp].add_heat_flows_in(self.energy_flow)
             if hasattr(self.components[comp], 'heat_flows_out'):
                 if isinstance(self.components[comp].heat_flows_out, list):
-                    self.components[comp].add_heat_flows_out(
-                        self.heat_flows.keys())
+                    self.components[comp].add_heat_flows_out(self.energy_flow)
             self.components[comp].add_cons(model)
 
     def _constraint_energy_balance(self, model):
@@ -338,22 +335,18 @@ class Building(object):
         for index, row in self.simp_matrix.iteritems():
             if self.components[index].inputs is not None:
                 for energy_type in self.components[index].inputs:
-                    if len(row[row > 0].index.tolist() +
-                           row[row.isnull()].index.tolist()) > 0:
-                        self.components[index].constraint_sum_inputs(
-                            model=model, other_comp=row,
-                            energy_type=energy_type,
-                            energy_flow=self.energy_flow,
-                            comp_obj=self.components)
-                        # input_components = row[row > 0].index.tolist() + \
-                        #                    row[row.isnull()].index.tolist()
-                        # input_energy = model.find_component('input_' +
-                        #                                     energy_type + '_' +
-                        #                                     index)
-                        # for t in model.time_step:
-                        #     model.cons.add(input_energy[t] == sum(
-                        #         self.energy_flow[(input_comp, index)][t] for
-                        #         input_comp in input_components))
+                    if index != 'e_boi':
+                        if len(row[row > 0].index.tolist() +
+                               row[row.isnull()].index.tolist()) > 0:
+                            input_components = row[row > 0].index.tolist() + \
+                                               row[row.isnull()].index.tolist()
+                            input_energy = model.find_component('input_' +
+                                                            energy_type + '_' +
+                                                            index)
+                            for t in model.time_step:
+                                model.cons.add(input_energy[t] == sum(
+                                    self.energy_flow[(input_comp, index)][t] for
+                                    input_comp in input_components))
 
         # Constraints for the outputs
         for index, row in self.simp_matrix.iterrows():
@@ -361,19 +354,15 @@ class Building(object):
                 for energy_type in self.components[index].outputs:
                     if len(row[row > 0].index.tolist() +
                            row[row.isnull()].index.tolist()) > 0:
-                        self.components[index].constraint_sum_outputs(
-                            model=model, other_comp=row,
-                            energy_type=energy_type,
-                            energy_flow=self.energy_flow)
-                        # output_components = row[row > 0].index.tolist() + \
-                        #                     row[row.isnull()].index.tolist()
-                        # output_energy = model.find_component('output_' +
-                        #                                      energy_type + '_' +
-                        #                                      index)
-                        # for t in model.time_step:
-                        #     model.cons.add(output_energy[t] == sum(
-                        #         self.energy_flow[(index, output_comp)][t] for
-                        #         output_comp in output_components))
+                        output_components = row[row > 0].index.tolist() + \
+                                            row[row.isnull()].index.tolist()
+                        output_energy = model.find_component('output_' +
+                                                             energy_type + '_' +
+                                                             index)
+                        for t in model.time_step:
+                            model.cons.add(output_energy[t] == sum(
+                                self.energy_flow[(index, output_comp)][t] for
+                                output_comp in output_components))
 
     def _constraint_solar_area(self, model):
         """The total available solar area should be shared by PV and solar
@@ -384,8 +373,8 @@ class Building(object):
                 solar_area_var_list.append(model.find_component('solar_area_' +
                                                                 component))
             elif isinstance(self.components[component],
-                            module_dict['SolarThermalCollector']):
-                solar_area_var_list.append(model.find_component('solar_area_' +
+                            module_dict['SolarThermalCollectorFluid']):
+                solar_area_var_list.append(model.find_component('size_' +
                                                                 component))
         model.cons.add(sum(item for item in solar_area_var_list) <=
                        self.solar_area)
@@ -469,5 +458,5 @@ class Building(object):
                                                  buy_gas[t] * env.gas_price +
                                                  buy_heat[t] *
                                                  env.heat_price - sell_elec[
-                                                     t] * env.elec_feed_price
+                                                  t] * env.elec_feed_price
                                                  for t in model.time_step))

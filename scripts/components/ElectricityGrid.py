@@ -20,3 +20,4 @@ class ElectricityGrid(Component):
         The Grid has "no" fixed input and therefore it should not be constrainted
         """
         pass
+
