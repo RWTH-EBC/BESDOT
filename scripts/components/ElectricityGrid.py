@@ -33,13 +33,13 @@ class ElectricityGrid(Component):
         invest = pyo.Var(bounds=(0, None))
         model.add_component('invest_' + self.name, invest)
 
-        if self.energy_flows['input'] is not None:
+        if 'elec' in self.energy_flows['input'].keys():
             for energy_type in self.inputs:
                 input_energy = pyo.Var(model.time_step, bounds=(0, 10 ** 8))
                 model.add_component('input_' + energy_type + '_' + self.name,
                                     input_energy)
 
-        if self.energy_flows['output'] is not None:
+        if 'elec' in self.energy_flows['output'].keys():
             for energy_type in self.outputs:
                 output_energy = pyo.Var(model.time_step, bounds=(0, 10 ** 8))
                 model.add_component('output_' + energy_type + '_' + self.name,

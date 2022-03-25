@@ -514,8 +514,11 @@ class Building(object):
             comp_cost_list.append(model.find_component('annual_cost_' + comp))
             if isinstance(self.components[comp],
                           module_dict['ElectricityGrid']):
-                buy_elec = model.find_component('output_elec_' + comp)
-                sell_elec = model.find_component('input_elec_' + comp)
+                if 'elec' in self.components[comp].energy_flows['input'].keys():
+                    sell_elec = model.find_component('input_elec_' + comp)
+                if 'elec' in self.components[comp].energy_flows[
+                    'output'].keys():
+                    buy_elec = model.find_component('output_elec_' + comp)
             elif isinstance(self.components[comp], module_dict['GasGrid']):
                 buy_gas = model.find_component('output_gas_' + comp)
             elif isinstance(self.components[comp], module_dict['HeatGrid']):
@@ -548,9 +551,10 @@ class Building(object):
             # comp_cost_list.append(model.find_component('annual_cost_' + comp))
             if isinstance(self.components[comp],
                           module_dict['ElectricityGrid']):
-                if self.components[comp].energy_flows['input'] is not None:
+                if 'elec' in self.components[comp].energy_flows['input'].keys():
                     sell_elec = model.find_component('input_elec_' + comp)
-                if self.components[comp].energy_flows['output'] is not None:
+                if 'elec' in self.components[comp].energy_flows[
+                    'output'].keys():
                     buy_elec = model.find_component('output_elec_' + comp)
             elif isinstance(self.components[comp], module_dict['GasGrid']):
                 buy_gas = model.find_component('output_gas_' + comp)
