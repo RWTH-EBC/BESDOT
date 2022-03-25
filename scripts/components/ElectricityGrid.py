@@ -21,20 +21,3 @@ class ElectricityGrid(Component):
         """
         pass
 
-    # todo (qli): building.py anpassen
-    def _constraint_elec_balance(self, model):
-        buy_elec = model.find_component('output_elec_' + self.name)
-        # todo (qli): Name anpassen ('chp_big_' + self.name + '_elec')
-        # energy_flow_elec_input = model.find_component(
-        #     'chp_small_' + self.name + '_elec')
-        energy_flow_elec_output = model.find_component(self.name + '_e_boi')
-        for t in model.time_step:
-            # model.cons.add(sell_elec[t] == energy_flow_elec_input[t])
-            model.cons.add(buy_elec[t] == energy_flow_elec_output[t])
-
-    # todo (qli): building.py anpassen
-    def add_cons(self, model):
-        self._constraint_elec_balance(model)
-
-    def add_vars(self, model):
-        super().add_vars(model)
