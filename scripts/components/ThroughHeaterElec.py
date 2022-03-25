@@ -36,7 +36,7 @@ class ThroughHeaterElec(FluidComponent):
         """
         size = model.find_component('size_' + self.name)
 
-        input_elec = model.find_component('output_elec_' + self.name)
+        input_elec = model.find_component('input_elec_' + self.name)
 
         for t in model.time_step:
             model.cons.add(input_elec[t] <= size)
