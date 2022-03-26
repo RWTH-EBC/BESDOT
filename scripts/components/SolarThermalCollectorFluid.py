@@ -113,30 +113,6 @@ class SolarThermalCollectorFluid(FluidComponent):
                             m_out[t] * t_out[t] - m_in[t] * t_in[t]) /
                     self.unit_switch)
 
-
-    def _constraint_output_permit(self, model, off_delta_temp=4,
-                                  on_delta_temp=8):
-        output_energy = model.find_component('output_' + self.outputs[0] +
-                                             '_' + self.name)
-        outlet_temp = model.find_component('outlet_temp_' + self.name)
-        inlet_temp = model.find_component('inlet_temp_' + self.name)
-        status_var = pyo.Var(model.time_step, domain=pyo.Binary)
-        model.add_component('status_' + self.name, status_var)
-        model.cons.add(status_var[1] == 1)
-
-        for t in range(len(model.time_step)-1):
-            if pyo.value(outlet_temp[t+2]) - pyo.value(inlet_temp[t+2]) <= off_delta_temp:
-                model.cons.add(status_var[t+2] == 0)
-            else:
-                model.cons.add(status_var[t+2] == 1)
-            if pyo.value(outlet_temp[t + 2]) - pyo.value(
-                     inlet_temp[t + 2]) >= on_delta_temp:
-                model.cons.add(status_var[t + 2] == 1)
-            else:
-                model.cons.add(status_var[t + 2] == 0)
-        for t in model.time_step:
-            model.cons.add(output_energy[t] == output_energy[t] * status_var[t])
-
     def _constraint_output_permit_gdp(self, model, off_delta_temp=4,
                                   on_delta_temp=8, init_status='on'):
 
@@ -157,9 +133,6 @@ class SolarThermalCollectorFluid(FluidComponent):
                     energy[t+1] = 0
             '''
 
-        # status_var = pyo.Var(model.time_step, domain=pyo.Binary)
-        # model.add_component('status_' + self.name, status_var)
-        status_var = model.find_component('status_' + self.name)
         output_energy = model.find_component('output_' + self.outputs[0] +
                                              '_' + self.name)
         outlet_temp = model.find_component('outlet_temp_' + self.name)
@@ -224,13 +197,12 @@ class SolarThermalCollectorFluid(FluidComponent):
                         pyo.lor(c.indicator_var, d.indicator_var)))
             model.add_component('p_4_' + str(t), p_4)
             model.add_component('p_5_' + str(t), p_5)
-            #cons.add(output_energy[t] == output_energy[t] * status_var[t])
 
     def add_cons(self, model, heat_cap_type='var'):
         self._constraint_vdi2067(model)
         self._constraint_temp(model)
         self._constraint_efficiency(model)
-        #self._constraint_output_permit(model)
+        self._constraint_output_permit_gdp(model)
         if heat_cap_type =='con':
             # todo(qli): Wirkungsgrad = Konst
             self._constraint_conver(model)
@@ -243,17 +215,14 @@ class SolarThermalCollectorFluid(FluidComponent):
     def add_vars(self, model):
         super().add_vars(model)
 
-        inlet_temp = pyo.Var(model.time_step, bounds=(0, None))
+        inlet_temp = pyo.Var(model.time_step, bounds=(0, 95))
         model.add_component('inlet_temp_' + self.name, inlet_temp)
 
-        outlet_temp = pyo.Var(model.time_step, bounds=(0, None))
+        outlet_temp = pyo.Var(model.time_step, bounds=(0, 135))
         model.add_component('outlet_temp_' + self.name, outlet_temp)
 
         eff = pyo.Var(model.time_step, bounds=(0, 1))
         model.add_component('eff_' + self.name, eff)
-
-        #status_var = pyo.Var(model.time_step, domain=pyo.Binary)
-        #model.add_component('status_' + self.name, status_var)
 
         # todo(qli):
         heat_cap = pyo.Var(model.time_step, bounds=(0, None))
