@@ -1,5 +1,7 @@
 import warnings
 import pyomo.environ as pyo
+from pyomo.gdp import Disjunct, Disjunction
+
 from scripts.FluidComponent import FluidComponent
 from scripts.components.CHP import CHP
 from tools.calc_annuity_vdi2067 import calc_annuity
@@ -82,7 +84,7 @@ class CHPFluidBig(CHP, FluidComponent):
         self._constraint_vdi2067_chp(model)
         #self._constraint_start_stop_ratio(model)
         # todo (qli): building.py anpassen
-        #self._constraint_start_cost(model)
+        self._constraint_start_cost(model)
         # todo (qli): building.py anpassen
         self._constraint_chp_elec_sell_price(model)
 
@@ -104,8 +106,8 @@ class CHPFluidBig(CHP, FluidComponent):
         status = pyo.Var(model.time_step, domain=pyo.Binary)
         model.add_component('status_' + self.name, status)
 
-        # output_elec = pyo.Var(model.time_step, bounds=(0, None))
-        # model.add_component('output_elec_' + self.name, output_elec)
+        status1 = pyo.Var(range(1, len(model.time_step)+2), domain=pyo.Binary)
+        model.add_component('status1_' + self.name, status1)
 
         # todo (qli): building.py anpassen
         start_cost = pyo.Var(bounds=(0, None))
@@ -155,11 +157,39 @@ class CHPFluidBig(CHP, FluidComponent):
         pass
 
     def _constraint_start_cost(self, model):
-        start_times = model.find_component('start_' + self.name)
+        status = model.find_component('status_' + self.name)
+        start = model.find_component('start_' + self.name)
         # todo (qli): building.py anpassen
         start_cost = model.find_component('start_cost_' + self.name)
-        model.cons.add(start_cost == self.start_price * sum(start_times[t] for
-                       t in model.time_step))
+        status1 = model.find_component('status1_' + self.name)
+        model.cons.add(status1[1] == 0)
+        for t in model.time_step:
+            model.cons.add(status1[t + 1] == status[t])
+        for t in range(1, len(model.time_step)):
+            g = Disjunct()
+            c_13 = pyo.Constraint(expr=status1[t+1] - status1[t] == 1)
+            c_14 = pyo.Constraint(expr=start[t] == 1)
+            model.add_component('g_dis_' + str(t), g)
+            g.add_component('g_1' + str(t), c_13)
+            g.add_component('g_2' + str(t), c_14)
+            h = Disjunct()
+            c_15 = pyo.Constraint(expr=status1[t+1] - status1[t] == 0)
+            c_16 = pyo.Constraint(expr=start[t] == 0)
+            model.add_component('h_dis_' + str(t), h)
+            h.add_component('h_1' + str(t), c_15)
+            h.add_component('h_2' + str(t), c_16)
+            i = Disjunct()
+            c_17 = pyo.Constraint(expr=status1[t + 1] - status1[t] == -1)
+            c_18 = pyo.Constraint(expr=start[t] == 0)
+            model.add_component('i_dis_' + str(t), i)
+            i.add_component('i_1' + str(t), c_17)
+            i.add_component('i_2' + str(t), c_18)
+
+            dj = Disjunction(expr=[g, h, i])
+            model.add_component('dj_dis2_' + str(t), dj)
+
+        model.cons.add(start_cost == self.start_price * sum(start[t] for t in
+                                                            model.time_step))
 
     def _constraint_chp_elec_sell_price(self, model):
         kwk_zuschlag = 0.08  # €/kWh

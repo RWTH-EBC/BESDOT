@@ -73,6 +73,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\data\opt_output\project_12_result.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\data\opt_output\project_16_result.csv">
           <value>
             <Attribute>
@@ -88,6 +95,13 @@
           </value>
         </entry>
         <entry key="\data\topology\basic.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\topology\chp_fluid_small.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
