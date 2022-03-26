@@ -3,6 +3,8 @@ import warnings
 
 import pandas as pd
 import pyomo.environ as pyo
+from pyomo.gdp import Disjunct, Disjunction
+
 from scripts.FluidComponent import FluidComponent
 from scripts.components.CHP import CHP
 from tools.calc_annuity_vdi2067 import calc_annuity
@@ -51,11 +53,30 @@ class CHPFluidSmall(CHP, FluidComponent):
             model.cons.add(therm_eff[t] == 0.705 - 0.0008 * (Qth - 44) -
                            0.006 * (inlet_temp[t] - 30))
 
+    def _constraint_therm_eff_gdp(self, model):
+        small_num = 0.00001
+        Qth = model.find_component('therm_size_' + self.name)
+        inlet_temp = model.find_component('inlet_temp_' + self.name)
+        therm_eff = model.find_component('therm_eff_' + self.name)
+        for t in model.time_step:
+            model.unit1 = Disjunct()
+            model.unit1.t_inlet = pyo.Constraint(expr=inlet_temp[t] <= 50)
+            model.unit1.eff = pyo.Constraint(
+                expr=therm_eff[t] == 0.705 - 0.0008 * (Qth - 44) - 0.006 * (
+                            inlet_temp[t] - 30))
+            model.unit2 = Disjunct()
+            model.unit2.t_inlet = pyo.Constraint(expr=inlet_temp[t] >= 50 +
+                                                  small_num)
+            model.unit2.eff = pyo.Constraint(
+                expr=therm_eff[t] == -0.0000355 * Qth + 0.498)
+            model.use_unit1or2 = Disjunction(expr=[model.unit1, model.unit2])
+
     # verbinden die Parameter der einzelnen Anlage mit den Parametern zwischen
     # zwei Anlagen (simp_matrix).
     # Die Rücklauftemperatur der BHKW muss kleiner als 50 Grad sein,
     # damit der Brennwert ausgenutzt werden kann.
     # Zu hohe Temperaturspreizng (>25 Grad) führt zur Beschädigung der Anlagen.
+
     def _constraint_temp(self, model):
         outlet_temp = model.find_component('outlet_temp_' + self.name)
         inlet_temp = model.find_component('inlet_temp_' + self.name)
@@ -96,30 +117,30 @@ class CHPFluidSmall(CHP, FluidComponent):
 
     def add_cons(self, model):
         self._constraint_Pel(model)
-        self._constraint_therm_eff(model)
+        self._constraint_therm_eff_gdp(model)
         self._constraint_temp(model)
         self._constraint_conver(model)
 
         self._constraint_vdi2067_chp(model)
-        #self._constraint_start_stop_ratio(model)
+        # self._constraint_start_stop_ratio(model)
         # todo (qli): building.py anpassen
-        #self._constraint_start_cost(model)
+        # self._constraint_start_cost(model)
         # todo (qli): building.py anpassen
         self._constraint_chp_elec_sell_price(model)
 
     def add_vars(self, model):
         super().add_vars(model)
 
-        Qth = pyo.Var(bounds=(0, None))
+        Qth = pyo.Var(bounds=(0, 109))
         model.add_component('therm_size_' + self.name, Qth)
 
         therm_eff = pyo.Var(model.time_step, bounds=(0, 1))
         model.add_component('therm_eff_' + self.name, therm_eff)
 
-        outlet_temp = pyo.Var(model.time_step, bounds=(0, None))
+        outlet_temp = pyo.Var(model.time_step, bounds=(12, 95))
         model.add_component('outlet_temp_' + self.name, outlet_temp)
 
-        inlet_temp = pyo.Var(model.time_step, bounds=(0, None))
+        inlet_temp = pyo.Var(model.time_step, bounds=(12, 95))
         model.add_component('inlet_temp_' + self.name, inlet_temp)
 
         status = pyo.Var(model.time_step, domain=pyo.Binary)
@@ -174,7 +195,7 @@ class CHPFluidSmall(CHP, FluidComponent):
         # todo (qli): building.py anpassen
         start_cost = model.find_component('start_cost_' + self.name)
         model.cons.add(start_cost == self.start_price * sum(status[t] for t in
-                       model.time_step))
+                                                            model.time_step))
 
     def _constraint_chp_elec_sell_price(self, model):
         kwk_zuschlag = 0.08  # €/kWh
