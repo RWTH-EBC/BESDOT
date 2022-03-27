@@ -27,6 +27,7 @@ bld_17 = Building(name='bld_17', area=200)
 # bld_2.add_thermal_profile('heat', env_2.temp_profile_original, env_2)
 
 bld_17.demand_profile['heat_demand'] = [10, 10, 0]
+bld_17.demand_profile['hot_water_demand'] = [1, 0, 0]
 bld_17.demand_profile["elec_demand"] = [0, 0, 0]
 #bld_17.add_thermal_profile('heat', env_17.temp_profile_original, env_17)
 # Pre define the building energy system with the topology for different

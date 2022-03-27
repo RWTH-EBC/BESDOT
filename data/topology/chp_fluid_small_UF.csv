@@ -5,5 +5,5 @@ gas_grid,GasGrid,GAS1,0,1000,0,0,0,0,,0,0,0,0
 chp_small,CHPFluidSmall,CHPFluidSmall,3.5,3.5,0,0,400,0,0,,0,0,
 e_grid,ElectricityGrid,GRD1,0,10000,0,0,0,0,0,0,0,0,
 tp_val,ThreePortValve,3WV,0,1000,0,0,0,0,0,0,0,,0
-under_heat,UnderfloorHeat,UFH1,0,2000,0,,0,0,0,0,0,0,0
+under_heat,UnderfloorHeat,UFH1,0,5000000,0,,0,0,0,0,0,0,0
 e_cns,ElectricalConsumption,CNS1,0,100,0,0,0,0,0,0,0,0,0
