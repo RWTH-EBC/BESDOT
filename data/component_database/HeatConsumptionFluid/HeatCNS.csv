@@ -1,0 +1,2 @@
+service life,cost_type	,cost,factor repair effort,factor servicing effort,servicing effort hours,inlet_temp
+100,constant,0,0.01,0.015,20,45

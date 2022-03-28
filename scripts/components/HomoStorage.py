@@ -75,34 +75,36 @@ class HomoStorage(FluidComponent, HotWaterStorage):
         """
         loss_var = model.find_component('loss_' + self.name)
         temp_var = model.find_component('temp_' + self.name)
+        size = model.find_component('size_' + self.name)
 
         if loss_type == 'off':
             for t in range(len(model.time_step)):
                 model.cons.add(loss_var[t + 1] == 0)
         else:
-            # FIXME (yni): The energy loss equation shouldn't be like the
-            #  following format, which is only used for validation.
-            # FiXME (yni): mindesten should be loss determined by the device
-            #  size
+            # FIXME (yni): The energy loss equation supposed to be unchanged,
+            #  but the hard coding values are not be validated. It should be
+            #  got from a plausible resource
             for t in range(len(model.time_step)):
                 model.cons.add(loss_var[t + 1] == 1.5 * ((temp_var[t + 1] -
-                                                          20) / 1000))
+                                                          20) / 1000) * size)
 
-    def _constraint_temp(self, model, init_temp=58):
+    def _constraint_temp(self, model, init_temp=30):
         # Initial temperature for water in storage is define with a constant
         # value.
         temp_var = model.find_component('temp_' + self.name)
         model.cons.add(temp_var[1] == init_temp)
+        for t in model.time_step:
+            model.cons.add(self.max_temp >= temp_var[t])
+            model.cons.add(self.min_temp <= temp_var[t])
 
         for heat_input in self.heat_flows_in:
             t_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
                                          '_' + 'temp')
             for t in range(len(model.time_step)):
                 model.cons.add(temp_var[t + 1] == t_out[t + 1])
-
         for heat_output in self.heat_flows_out:
-            t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
-                                         '_' + 'temp')
+            t_out = model.find_component(
+                heat_output[0] + '_' + heat_output[1] + '_' + 'temp')
             for t in range(len(model.time_step)):
                 model.cons.add(temp_var[t + 1] == t_out[t + 1])
 
@@ -123,7 +125,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
                                          '_' + 'temp')
             model.cons.add(t_in[1] == t_out[1])
 
-    def _constraint_input_permit(self, model, min_temp=30, max_temp=68,
+    def _constraint_input_permit(self, model, min_temp=30, max_temp=95,
                                  init_status='on'):
         """
         The input to water tank is controlled by tank temperature, which is
@@ -270,7 +272,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
         # connect the variable in component and building, just as energy flow.
         # first Method is chosen in 22.12.2021
 
-        temp = pyo.Var(model.time_step, bounds=(0, 100))
+        temp = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('temp_' + self.name, temp)
 
         loss = pyo.Var(model.time_step, bounds=(0, None))

@@ -12,7 +12,7 @@ loss_cycling = 0.95
 
 class GroundHeatPumpFluid(HeatPump, FluidComponent):
 
-    def __init__(self, comp_name, temp_profile=10, comp_type="GroundHeatPumpFluid",
+    def __init__(self, comp_name, temp_profile, comp_type="GroundHeatPumpFluid",
                  comp_model=None,
                  min_size=0, max_size=1000, current_size=0):
         # Define inputs and outputs before the initialisation of component,

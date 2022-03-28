@@ -1,0 +1,2 @@
+optical_eff,K,cost_type,cost,factor repair effort,factor servicing effort,servicing effort hours,fix_cost_factor,service life
+0.8,4.806,constant,0,0.01,0.015,20,0.025,20

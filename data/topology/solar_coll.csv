@@ -1,0 +1,5 @@
+comp_name,comp_type,model,min_size,max_size,current_size,solar_coll,strat_water_tes,heat_ex_dhw,dhw_cns
+solar_coll,SolarThermalCollectorFluid,FlatPlateCollector,0,10,0,0,50,0,0
+strat_water_tes,StratificationStorage,TSS_strat,0,10,0,0,0,None,0
+heat_ex_dhw,HeatExchangerFluid,HE1,0,100,0,0,0,0,50
+dhw_cns,HotWaterConsumption,HWCNS1,0,100,0,0,0,0,0
