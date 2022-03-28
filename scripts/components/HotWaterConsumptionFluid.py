@@ -83,4 +83,3 @@ class HotWaterConsumptionFluid(FluidComponent):
         model.add_component('input_' + self.inputs[0] + '_' + self.name,
                             input_energy)
 
-

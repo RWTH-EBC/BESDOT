@@ -13,7 +13,7 @@ unit_switch = 3600 * 1000  # J/kWh
 
 class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
     def __init__(self, comp_name, comp_type="UnderfloorHeat", comp_model=None,
-                 min_size=0, max_size=1000, current_size=0):
+                 min_size=0, max_size=5000000, current_size=0):
         super().__init__(comp_name=comp_name,
                          comp_type=comp_type,
                          comp_model=comp_model,
@@ -82,7 +82,7 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
                     (floor_temp_approximate-room_temp)**1.1+1.1 *
                     (floor_temp_approximate-room_temp)**0.1 * (floor_temp[t + 1]
                     - floor_temp_approximate)))
-            model.cons.add(delta_t[t + 1] == (floor_temp[t + 1] - room_temp))
+            #model.cons.add(delta_t[t + 1] == (floor_temp[t + 1] - room_temp))
             model.cons.add(input_energy[t+1] * 1000 == heat_flux[t + 1] * area)
             model.cons.add(input_energy[t + 1] == output_energy[t + 1])
 
@@ -95,6 +95,12 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
             for t in range(len(model.time_step)):
                 model.cons.add(m_in[t + 1] == m_out[t + 1])
 
+    # todo (qli):
+    def _constraint_heat_water_return_temp(self, model, room_temp=21):
+        return_temp_var = model.find_component('return_temp_' + self.name)
+        for t in model.time_step:
+            model.cons.add(room_temp <= return_temp_var[t])
+
     def add_cons(self, model):
         self._constraint_conver(model)
         self._constraint_temp(model)
@@ -103,6 +109,8 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
         self._constraint_heat_inputs(model)
         self._constraint_floor_temp(model)
         self._constraint_vdi2067(model)
+        # todo (qli):
+        #self._constraint_heat_water_return_temp(model)
 
     def add_vars(self, model):
         super().add_vars(model)
