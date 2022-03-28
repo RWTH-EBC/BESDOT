@@ -15,7 +15,7 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ################################################################################
 
 # Generate a project object at first.
-project = Project(name='project_8', typ='building')
+project = Project(name='project_8_1', typ='building')
 
 # Generate the environment object
 env_8 = Environment(time_step=24)
