@@ -44,7 +44,7 @@ class Radiator(HeatExchangerFluid, FluidComponent):
     def _constraint_temp(self, model, init_temp=45):
         temp_var = model.find_component('temp_' + self.name)
         for t in model.time_step:
-            model.cons.add(temp_var[t] == init_temp)
+            model.cons.add(temp_var[1] == init_temp)
         for heat_input in self.heat_flows_in:
             t_out = model.find_component(heat_input[0] + '_' + heat_input[1] +
                                          '_' + 'temp')
@@ -72,7 +72,7 @@ class Radiator(HeatExchangerFluid, FluidComponent):
         self._constraint_conver(model)
         self._constraint_temp(model)
         self._constraint_return_temp(model)
-        #self._constraint_mass_flow(model)
+        self._constraint_mass_flow(model)
         self._constraint_heat_inputs(model)
         self._constraint_vdi2067(model)
 

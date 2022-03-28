@@ -19,7 +19,7 @@ project = Project(name='project_10', typ='building')
 
 
 # Generate the environment object
-env_10 = Environment(time_step=8760)
+env_10 = Environment(time_step=100)
 project.add_environment(env_10)
 
 # If the objective of the project is the optimization for building, a building
