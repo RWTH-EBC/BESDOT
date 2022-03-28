@@ -78,8 +78,11 @@ class Building(object):
         self.topology = None
         self.components = {}
         self.simp_matrix = None
-        self.energy_flow = None
-        self.heat_flows = None
+        self.energy_flows = {"elec": {},
+                             "heat": {},
+                             "cool": {},
+                             "gas": {}}
+        self.heat_flows = {}
 
     def add_annual_demand(self, energy_sector):
         """Calculate the annual heat demand according to the TEK provided
@@ -156,8 +159,11 @@ class Building(object):
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
-                elif comp_type in ['PV', 'SolarThermalCollector']:
+                elif comp_type in ['PV', 'SolarThermalCollector',
+                                   'SolarThermalCollectorFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
+                                                      temp_profile=
+                                                      env.temp_profile,
                                                       irr_profile=
                                                       env.irr_profile,
                                                       comp_model=comp_model,
@@ -182,7 +188,8 @@ class Building(object):
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
-                elif comp_type == 'HotWaterConsumption':
+                elif comp_type in ['HotWaterConsumption',
+                                   'HotWaterConsumptionFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       consum_profile=
                                                       self.demand_profile[
@@ -201,6 +208,63 @@ class Building(object):
                                                       current_size=current_size)
                 self.components[comp_name] = comp_obj
 
+        self.add_energy_flows()
+
+    def add_energy_flows(self):
+        # Assign the variables for the energy flows according to system
+        # topology. The input energy type and output energy type could be
+        # used to reduce the number of variables.
+        # Simplify the matrix at first, only the topology related information
+        # are left. Then search the items, which equal to 1, that means the
+        # energy could flow from the index component to the column component.
+        # The component pairs are stored in the dictionary energy_flow.
+        simp_matrix = self.topology.drop(['comp_type', 'model', 'min_size',
+                                          'max_size', 'current_size'], axis=1)
+        simp_matrix.set_index(['comp_name'], inplace=True)
+        self.simp_matrix = simp_matrix
+
+        for index, row in simp_matrix.iteritems():
+            if len(row[row > 0].index.tolist() +
+                   row[row.isnull()].index.tolist()) > 0:
+                for input_comp in row[row > 0].index.tolist() + \
+                                  row[row.isnull()].index.tolist():
+                    if 'heat' in self.components[input_comp].outputs and \
+                            'heat' in self.components[index].inputs or \
+                            'heat' in self.components[input_comp].inputs and \
+                            'heat' in self.components[index].outputs:
+                        self.energy_flows['heat'][(input_comp, index)] = None
+                        self.components[input_comp].add_energy_flows(
+                            'output', 'heat', (input_comp, index))
+                        self.components[index].add_energy_flows(
+                            'input', 'heat', (input_comp, index))
+                    if 'elec' in self.components[input_comp].outputs and \
+                            'elec' in self.components[index].inputs or \
+                            'elec' in self.components[input_comp].inputs and \
+                            'elec' in self.components[index].outputs:
+                        self.energy_flows['elec'][(input_comp, index)] = None
+                        self.components[input_comp].add_energy_flows(
+                            'output', 'elec', (input_comp, index))
+                        self.components[index].add_energy_flows(
+                            'input', 'elec', (input_comp, index))
+                    if 'cool' in self.components[input_comp].outputs and \
+                            'cool' in self.components[index].inputs or \
+                            'cool' in self.components[input_comp].inputs and \
+                            'cool' in self.components[index].outputs:
+                        self.energy_flows['cool'][(input_comp, index)] = None
+                        self.components[input_comp].add_energy_flows(
+                            'output', 'cool', (input_comp, index))
+                        self.components[index].add_energy_flows(
+                            'input', 'cool', (input_comp, index))
+                    if 'gas' in self.components[input_comp].outputs and \
+                            'gas' in self.components[index].inputs or \
+                            'gas' in self.components[input_comp].inputs and \
+                            'gas' in self.components[index].outputs:
+                        self.energy_flows['gas'][(input_comp, index)] = None
+                        self.components[input_comp].add_energy_flows(
+                            'output', 'gas', (input_comp, index))
+                        self.components[index].add_energy_flows(
+                            'input', 'gas', (input_comp, index))
+
     def add_vars(self, model):
         """Add Pyomo variables into the ConcreteModel, which is defined in
         project object. So the model should be given in project object
@@ -213,87 +277,111 @@ class Building(object):
             assigned in each component object. For each time step.
             Component size: should be assigned in component object, for once.
         """
-        # Assign the variables for the energy flows according to system
-        # topology. The input energy type and output energy type could be
-        # used to reduce the number of variables.
-        # Simplify the matrix at first, only the topology related information
-        # are left. Then search the items, which equal to 1, that means the
-        # energy could flow from the index component to the column component.
-        # The component pairs are stored in the dictionary energy_flow.
-        simp_matrix = self.topology.drop(['comp_type', 'model', 'min_size',
-                                          'max_size', 'current_size'], axis=1)
-        simp_matrix.set_index(['comp_name'], inplace=True)
-        energy_flow = {}
-        heat_flows = {}
-        # The elec_flows is created for the component CHP. CHP has both heat
-        # and electricity output. If the energy type from energy_flow is not
-        # clearly, errors of optimization might occur.
-        # Except for CHP, some innovative technology such as electrolyse could
-        # meet the same problem. It could be fixed in the same way later, when
-        # it occurs.
-        # elec_flows = []
-        for index, row in simp_matrix.iteritems():
-            # search for Nan value and the mass flow in topology matrix, the
-            # unit is kg/h.
-            # print(row[row.isnull()].index.tolist())
-            if len(row[row > 0].index.tolist() +
-                   row[row.isnull()].index.tolist()) > 0:
-                for input_comp in row[row > 0].index.tolist() + \
-                                  row[row.isnull()].index.tolist():
-                    energy_flow[(input_comp, index)] = pyo.Var(
-                        model.time_step, bounds=(0, None))
-                    model.add_component(input_comp + '_' + index,
-                                        energy_flow[(input_comp, index)])
-
-                    # Check, if heat is the output of the component,
-                    # input should not be considered. The reason for it is
-                    # avoiding duplicate definition, since in building
-                    # level the input of one component is the output of
-                    # another component.
-                    if 'heat' in self.components[input_comp].outputs and \
-                            'heat' in self.components[index].inputs or \
-                            'heat' in self.components[input_comp].inputs and \
-                            'heat' in self.components[index].outputs:
-                        heat_flows[(input_comp, index)] = {}
-                        heat_flows[(index, input_comp)] = {}
-                        # mass flow from component 'input_comp' to
-                        # component 'index'.
-                        heat_flows[(input_comp, index)]['mass'] = \
-                            pyo.Var(model.time_step, bounds=(0, None))
-                        model.add_component(input_comp + '_' + index +
-                                            '_' + 'mass', heat_flows[(
-                            input_comp, index)]['mass'])
-                        # mass flow from component 'index' to
-                        # component 'index'.
-                        heat_flows[(index, input_comp)]['mass'] = \
-                            pyo.Var(model.time_step, bounds=(0, None))
-                        model.add_component(index + '_' + input_comp +
-                                            '_' + 'mass', heat_flows[(
-                            index, input_comp)]['mass'])
-                        # temperature of heat flow from component
-                        # 'input_comp' to component 'index'.
-                        heat_flows[(input_comp, index)]['temp'] = \
-                            pyo.Var(model.time_step, bounds=(0, None))
-                        model.add_component(input_comp + '_' + index +
-                                            '_' + 'temp', heat_flows[(
-                            input_comp, index)]['temp'])
-                        # temperature of heat flow from component
-                        # 'index' to component 'input_comp'.
-                        heat_flows[(index, input_comp)]['temp'] = \
-                            pyo.Var(model.time_step, bounds=(0, None))
-                        model.add_component(index + '_' + input_comp +
-                                            '_' + 'temp', heat_flows[(
-                            index, input_comp)]['temp'])
-                    # elif 'elec' in self.components[input_comp].outputs and \
-                    #         'elec' in self.components[index].inputs or \
-                    #         'elec' in self.components[input_comp].inputs and \
-                    #         'elec' in self.components[index].outputs:
-                    #     elec_flows.append((index, input_comp))
+        # heat_flows = {}
+        # for index, row in simp_matrix.iteritems():
+        #     # search for Nan value and the mass flow in topology matrix, the
+        #     # unit is kg/h.
+        #     # print(row[row.isnull()].index.tolist())
+        #     if len(row[row > 0].index.tolist() +
+        #            row[row.isnull()].index.tolist()) > 0:
+        #         for input_comp in row[row > 0].index.tolist() + \
+        #                           row[row.isnull()].index.tolist():
+        #             energy_flow[(input_comp, index)] = pyo.Var(
+        #                 model.time_step, bounds=(0, None))
+        #             model.add_component(input_comp + '_' + index,
+        #                                 energy_flow[(input_comp, index)])
+        #
+        #             # Check, if heat is the output of the component,
+        #             # input should not be considered. The reason for it is
+        #             # avoiding duplicate definition, since in building
+        #             # level the input of one component is the output of
+        #             # another component.
+        #             if 'heat' in self.components[input_comp].outputs and \
+        #                     'heat' in self.components[index].inputs or \
+        #                     'heat' in self.components[input_comp].inputs and \
+        #                     'heat' in self.components[index].outputs:
+        #                 heat_flows[(input_comp, index)] = {}
+        #                 heat_flows[(index, input_comp)] = {}
+        #                 # mass flow from component 'input_comp' to
+        #                 # component 'index'.
+        #                 heat_flows[(input_comp, index)]['mass'] = \
+        #                     pyo.Var(model.time_step, bounds=(0, None))
+        #                 model.add_component(input_comp + '_' + index +
+        #                                     '_' + 'mass', heat_flows[(
+        #                     input_comp, index)]['mass'])
+        #                 # mass flow from component 'index' to
+        #                 # component 'index'.
+        #                 heat_flows[(index, input_comp)]['mass'] = \
+        #                     pyo.Var(model.time_step, bounds=(0, None))
+        #                 model.add_component(index + '_' + input_comp +
+        #                                     '_' + 'mass', heat_flows[(
+        #                     index, input_comp)]['mass'])
+        #                 # temperature of heat flow from component
+        #                 # 'input_comp' to component 'index'.
+        #                 heat_flows[(input_comp, index)]['temp'] = \
+        #                     pyo.Var(model.time_step, bounds=(0, None))
+        #                 model.add_component(input_comp + '_' + index +
+        #                                     '_' + 'temp', heat_flows[(
+        #                     input_comp, index)]['temp'])
+        #                 # temperature of heat flow from component
+        #                 # 'index' to component 'input_comp'.
+        #                 heat_flows[(index, input_comp)]['temp'] = \
+        #                     pyo.Var(model.time_step, bounds=(0, None))
+        #                 model.add_component(index + '_' + input_comp +
+        #                                     '_' + 'temp', heat_flows[(
+        #                     index, input_comp)]['temp'])
+        #             # elif 'elec' in self.components[input_comp].outputs and \
+        #             #         'elec' in self.components[index].inputs or \
+        #             #         'elec' in self.components[input_comp].inputs and \
+        #             #         'elec' in self.components[index].outputs:
+        #             #     elec_flows.append((index, input_comp))
 
         # Save the simplified matrix and energy flow for energy balance
-        self.simp_matrix = simp_matrix
-        self.energy_flow = energy_flow
-        self.heat_flows = heat_flows
+        # self.heat_flows = heat_flows
+
+        for energy in self.energy_flows.keys():
+            for flow in self.energy_flows[energy]:
+                self.energy_flows[energy][flow] = pyo.Var(
+                    model.time_step, bounds=(0, None))
+                model.add_component(flow[0] + '_' + flow[1],
+                                    self.energy_flows[energy][flow])
+
+                if energy == 'heat':
+                    if hasattr(self.components[flow[0]], 'heat_flows_out') and \
+                            hasattr(self.components[flow[1]], 'heat_flows_in'):
+                        if self.components[flow[0]].heat_flows_out is not None \
+                                and self.components[flow[1]].heat_flows_in is \
+                                not None:
+                            self.heat_flows[flow] = {}
+                            self.heat_flows[(flow[1], flow[0])] = {}
+                            # mass flow from component 'input_comp' to
+                            # component 'index'.
+                            self.heat_flows[flow]['mass'] = \
+                                pyo.Var(model.time_step, bounds=(0, None))
+                            model.add_component(flow[0] + '_' + flow[1] + '_'
+                                                + 'mass', self.heat_flows[flow][
+                                                    'mass'])
+                            # mass flow from component 'index' to
+                            # component 'index'.
+                            self.heat_flows[(flow[1], flow[0])]['mass'] = \
+                                pyo.Var(model.time_step, bounds=(0, None))
+                            model.add_component(flow[1] + '_' + flow[0] +
+                                                '_' + 'mass', self.heat_flows[(
+                                flow[1], flow[0])]['mass'])
+                            # temperature of heat flow from component
+                            # 'input_comp' to component 'index'.
+                            self.heat_flows[flow]['temp'] = \
+                                pyo.Var(model.time_step, bounds=(0, None))
+                            model.add_component(flow[0] + '_' + flow[1] +
+                                                '_' + 'temp', self.heat_flows[
+                                                    flow]['temp'])
+                            # temperature of heat flow from component
+                            # 'index' to component 'input_comp'.
+                            self.heat_flows[(flow[1], flow[0])]['temp'] = \
+                                pyo.Var(model.time_step, bounds=(0, None))
+                            model.add_component(flow[1] + '_' + flow[0] +
+                                                '_' + 'temp', self.heat_flows[(
+                                flow[1], flow[0])]['temp'])
 
         total_annual_cost = pyo.Var(bounds=(0, None))
         total_operation_cost = pyo.Var(bounds=(0, None))
@@ -310,7 +398,7 @@ class Building(object):
         self._constraint_mass_balance(model)
         # todo (yni): Attention in the optimization for operation cost should
         #  comment constrain for solar area. This should be done automated.
-        # self._constraint_solar_area(model)
+        self._constraint_solar_area(model)
         self._constraint_total_cost(model, env)
         self._constraint_operation_cost(model, env)
         for comp in self.components:
@@ -341,10 +429,8 @@ class Building(object):
                     if len(row[row > 0].index.tolist() +
                            row[row.isnull()].index.tolist()) > 0:
                         self.components[index].constraint_sum_inputs(
-                            model=model, other_comp=row,
-                            energy_type=energy_type,
-                            energy_flow=self.energy_flow,
-                            comp_obj=self.components)
+                            model=model, energy_type=energy_type,
+                            energy_flows=self.energy_flows)
                         # input_components = row[row > 0].index.tolist() + \
                         #                    row[row.isnull()].index.tolist()
                         # input_energy = model.find_component('input_' +
@@ -362,9 +448,9 @@ class Building(object):
                     if len(row[row > 0].index.tolist() +
                            row[row.isnull()].index.tolist()) > 0:
                         self.components[index].constraint_sum_outputs(
-                            model=model, other_comp=row,
+                            model=model,
                             energy_type=energy_type,
-                            energy_flow=self.energy_flow)
+                            energy_flows=self.energy_flows)
                         # output_components = row[row > 0].index.tolist() + \
                         #                     row[row.isnull()].index.tolist()
                         # output_energy = model.find_component('output_' +
@@ -384,8 +470,8 @@ class Building(object):
                 solar_area_var_list.append(model.find_component('solar_area_' +
                                                                 component))
             elif isinstance(self.components[component],
-                            module_dict['SolarThermalCollector']):
-                solar_area_var_list.append(model.find_component('solar_area_' +
+                            module_dict['SolarThermalCollectorFluid']):
+                solar_area_var_list.append(model.find_component('size_' +
                                                                 component))
         model.cons.add(sum(item for item in solar_area_var_list) <=
                        self.solar_area)
@@ -418,6 +504,10 @@ class Building(object):
     def _constraint_total_cost(self, model, env):
         """Calculate the total annual cost for the building energy system."""
         bld_annual_cost = model.find_component('annual_cost_' + self.name)
+        # The following elements (buy_elec, ...) are the energy purchase and
+        # sale volume in time series and used to avoid that the constraint
+        # added is not executed properly if there is a None. The reason for
+        # 8761 steps is the different index of python list and pyomo.
         buy_elec = [0] * 8761
         sell_elec = [0] * 8761
         buy_gas = [0] * 8761
@@ -428,8 +518,11 @@ class Building(object):
             comp_cost_list.append(model.find_component('annual_cost_' + comp))
             if isinstance(self.components[comp],
                           module_dict['ElectricityGrid']):
-                buy_elec = model.find_component('output_elec_' + comp)
-                sell_elec = model.find_component('input_elec_' + comp)
+                if 'elec' in self.components[comp].energy_flows['input'].keys():
+                    sell_elec = model.find_component('input_elec_' + comp)
+                if 'elec' in self.components[comp].energy_flows[
+                    'output'].keys():
+                    buy_elec = model.find_component('output_elec_' + comp)
             elif isinstance(self.components[comp], module_dict['GasGrid']):
                 buy_gas = model.find_component('output_gas_' + comp)
             elif isinstance(self.components[comp], module_dict['HeatGrid']):
@@ -448,18 +541,25 @@ class Building(object):
     def _constraint_operation_cost(self, model, env):
         """Calculate the total operation cost for the building energy system."""
         bld_operation_cost = model.find_component('operation_cost_' + self.name)
+        # The following elements (buy_elec, ...) are the energy purchase and
+        # sale volume in time series and used to avoid that the constraint
+        # added is not executed properly if there is a None. The reason for
+        # 8761 steps is the different index of python list and pyomo.
         buy_elec = [0] * 8761
         sell_elec = [0] * 8761
         buy_gas = [0] * 8761
         buy_heat = [0] * 8761
 
-        comp_cost_list = []
+        # comp_cost_list = []
         for comp in self.components:
-            comp_cost_list.append(model.find_component('annual_cost_' + comp))
+            # comp_cost_list.append(model.find_component('annual_cost_' + comp))
             if isinstance(self.components[comp],
                           module_dict['ElectricityGrid']):
-                buy_elec = model.find_component('output_elec_' + comp)
-                sell_elec = model.find_component('input_elec_' + comp)
+                if 'elec' in self.components[comp].energy_flows['input'].keys():
+                    sell_elec = model.find_component('input_elec_' + comp)
+                if 'elec' in self.components[comp].energy_flows[
+                    'output'].keys():
+                    buy_elec = model.find_component('output_elec_' + comp)
             elif isinstance(self.components[comp], module_dict['GasGrid']):
                 buy_gas = model.find_component('output_gas_' + comp)
             elif isinstance(self.components[comp], module_dict['HeatGrid']):
@@ -469,5 +569,5 @@ class Building(object):
                                                  buy_gas[t] * env.gas_price +
                                                  buy_heat[t] *
                                                  env.heat_price - sell_elec[
-                                                     t] * env.elec_feed_price
+                                                  t] * env.elec_feed_price
                                                  for t in model.time_step))
