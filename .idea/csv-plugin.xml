@@ -185,6 +185,27 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\data\topology\solar_coll_TW_THE.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\topology\solar_coll_TW_boi.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\topology\solar_coll_TW_tp.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\data\topology\standardboiler.csv">
           <value>
             <Attribute>

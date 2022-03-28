@@ -11,8 +11,8 @@ from pyomo.gdp import Disjunct, Disjunction
 from scripts.FluidComponent import FluidComponent
 from scripts.components.HotWaterStorage import HotWaterStorage
 
-small_num = 0.0001
 
+small_num = 0.0001
 
 class HomoStorage(FluidComponent, HotWaterStorage):
     def __init__(self, comp_name, comp_type="HomoStorage", comp_model=None,
@@ -85,7 +85,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
             #  but the hard coding values are not be validated. It should be
             #  got from a plausible resource
             for t in range(len(model.time_step)):
-                model.cons.add(loss_var[t + 1] == 0.6 * ((temp_var[t + 1] -
+                model.cons.add(loss_var[t + 1] == 1.5 * ((temp_var[t + 1] -
                                                           20) / 1000) * size)
 
     def _constraint_temp(self, model, init_temp=30):

@@ -1,0 +1,5 @@
+comp_name,comp_type,model,min_size,max_size,current_size,solar_coll,water_tes,hw_cns,heat_ex
+solar_coll,SolarThermalCollectorFluid,FPC,50,50,0,0,,0,0
+water_tes,HomoStorageST_TWS,TES_homo_ST,5,5,0,0,0,0,
+hw_cns,HotWaterConsumptionFluid,HWCNS,20,20,0,0,0,0,0
+heat_ex,HeatExchangerFluid,HE1,2,2,0,0,0,,0
