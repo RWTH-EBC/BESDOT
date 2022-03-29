@@ -94,6 +94,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\data\opt_output\project_24_result.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\data\opt_output\project_4_result.csv">
           <value>
             <Attribute>
@@ -109,6 +116,27 @@
           </value>
         </entry>
         <entry key="\data\topology\basic.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\topology\chp_fluid_small_w+h_boi.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\topology\chp_fluid_small_w+h_boi_hi.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\topology\condensingboiler.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

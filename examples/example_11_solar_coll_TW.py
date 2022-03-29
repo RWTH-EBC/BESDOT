@@ -27,7 +27,7 @@ bld_11 = Building(name='bld_11', area=200, solar_area=50)
 
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
-# bld_7.add_thermal_profile('heat', env_7.temp_profile_original, env_7)
+# bld_11.add_thermal_profile('heat', env_11.temp_profile_original, env_11)
 
 # todo: That is another possible demand profile, you could try it for
 #  validation

@@ -27,7 +27,8 @@ bld_16 = Building(name='bld_16', area=200, solar_area=50)
 
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
-# bld_7.add_thermal_profile('heat', env_7.temp_profile_original, env_7)
+# bld_16.add_thermal_profile('heat', env_16.temp_profile_original, env_16)
+# bld_16.add_elec_profile(2021, env_16)
 
 # todo (qli): solar_coll testen (size_e_boi=0)
 bld_16.demand_profile['hot_water_demand'] = [1.1, 0, 1, 1, 0]

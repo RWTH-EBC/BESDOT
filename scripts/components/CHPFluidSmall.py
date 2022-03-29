@@ -127,9 +127,9 @@ class CHPFluidSmall(CHP, FluidComponent):
         self._constraint_conver(model)
 
         self._constraint_vdi2067_chp(model)
-        # self._constraint_start_stop_ratio_gdp(model)
+        self._constraint_start_stop_ratio_gdp(model)
         # todo (qli): building.py anpassen
-        self._constraint_start_cost(model)
+        #self._constraint_start_cost(model)
         # todo (qli): building.py anpassen
         self._constraint_chp_elec_sell_price(model)
 
