@@ -464,6 +464,8 @@ class Building(object):
     def _constraint_solar_area(self, model):
         """The total available solar area should be shared by PV and solar
         thermal collector."""
+        # 'solar_area_PV' means the area for PV, 'size_PV' means the peak power.
+        #  'size_sollar_coll' means the area of solar collector.
         solar_area_var_list = []
         for component in self.components:
             if isinstance(self.components[component], module_dict['PV']):
