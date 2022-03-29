@@ -9,7 +9,8 @@ from pyomo.gdp import Disjunct, Disjunction
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
     __file__))))
 
-unit_switch = 1000  # W/kWh
+unit_switch_W = 1000  # Wh/kWh
+unit_switch_J = 3600 * 1000  # J/kWh
 small_num = 0.00001
 
 class SolarThermalCollectorFluid(FluidComponent):
@@ -29,7 +30,6 @@ class SolarThermalCollectorFluid(FluidComponent):
         self.irr_profile = irr_profile
         # todo: (qli) solar_liquid_heat_cap korrigieren
         self.solar_liquid_heat_cap = 3690  # J/kgK
-        self.unit_switch = 3600 * 1000  # J/kWh
         self.max_temp = 135
         self.mass_flow = None  # kg/h
 
@@ -92,7 +92,7 @@ class SolarThermalCollectorFluid(FluidComponent):
         comp_size = model.find_component('size_' + self.name)
         for t in model.time_step:
             model.cons.add(input_energy[t] == self.irr_profile[t - 1] * eff[
-                t] * comp_size / unit_switch)
+                t] * comp_size / unit_switch_W)
         output_energy = model.find_component('output_' + self.outputs[0] +
                                              '_' + self.name)
         for heat_output in self.heat_flows_out:
@@ -111,7 +111,7 @@ class SolarThermalCollectorFluid(FluidComponent):
                 model.cons.add(
                     output_energy[t] == self.solar_liquid_heat_cap * (
                             m_out[t] * t_out[t] - m_in[t] * t_in[t]) /
-                    self.unit_switch)
+                    unit_switch_J)
 
     def _constraint_output_permit_gdp(self, model, off_delta_temp=4,
                                   on_delta_temp=8, init_status='on'):
@@ -260,7 +260,7 @@ class SolarThermalCollectorFluid(FluidComponent):
         comp_size = model.find_component('size_' + self.name)
         for t in model.time_step:
             model.cons.add(input_energy[t] == self.irr_profile[t - 1] * eff[
-                t] * comp_size / unit_switch)
+                t] * comp_size / unit_switch_W)
         output_energy = model.find_component('output_' + self.outputs[0] +
                                              '_' + self.name)
         for heat_output in self.heat_flows_out:
@@ -276,4 +276,4 @@ class SolarThermalCollectorFluid(FluidComponent):
                 # model.cons.add(0 <= output_energy[t])
                 model.cons.add(
                     output_energy[t] == heat_cap[t] * self.mass_flow * (
-                                t_out[t] - t_in[t]) / self.unit_switch)
+                                t_out[t] - t_in[t]) / unit_switch_J)
