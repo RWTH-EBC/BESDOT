@@ -88,7 +88,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
                 model.cons.add(loss_var[t + 1] == 1.5 * ((temp_var[t + 1] -
                                                           20) / 1000) * size)
 
-    def _constraint_temp(self, model, init_temp=30):
+    def _constraint_temp(self, model, init_temp=60):
         # Initial temperature for water in storage is define with a constant
         # value.
         temp_var = model.find_component('temp_' + self.name)
