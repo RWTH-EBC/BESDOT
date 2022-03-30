@@ -25,6 +25,7 @@ bld_25 = Building(name='bld_25', area=200)
 # Attention! generate thermal with profile whole year temperature profile
 # bld_25.add_thermal_profile('heat', env_25.temp_profile_original, env_25)
 # bld_25.add_elec_profile(2021, env_25)
+# bld_25.add_hot_water_profile(env_25)
 
 bld_25.demand_profile['heat_demand'] = [9, 8, 0, 9, 9, 9, 9, 9, 9,9,0]
 bld_25.demand_profile['elec_demand'] = [0, 0, 0,5,4,1,1,1,1,0,2]
