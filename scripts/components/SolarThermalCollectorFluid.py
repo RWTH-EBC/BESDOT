@@ -76,13 +76,12 @@ class SolarThermalCollectorFluid(FluidComponent):
                     (inlet_temp[t] + outlet_temp[t]) / 2 -
                     self.temp_profile[t - 1]) / 1000)
 
-    """
     # Test
-    def _constraint_efficiency(self, model):
+    def _constraint_efficiency_con(self, model):
         eff = model.find_component('eff_' + self.name)
         for t in model.time_step:
-            model.cons.add(eff[t] == 0.5)
-    """
+            model.cons.add(eff[t] == 0.55)
+
 
     # 'size' bezieht sich auf die Fläche der Solarthermie.
     def _constraint_conver(self, model):
@@ -107,7 +106,7 @@ class SolarThermalCollectorFluid(FluidComponent):
             for t in model.time_step:
                 # todo:Beim Stagnationszustand gilt output_energy< input_energy
                 # aber das Ergebnis ist komisch
-                model.cons.add(output_energy[t] == input_energy[t])
+                model.cons.add(output_energy[t] <= input_energy[t])
                 model.cons.add(
                     output_energy[t] == self.solar_liquid_heat_cap * (
                             m_out[t] * t_out[t] - m_in[t] * t_in[t]) /
@@ -198,10 +197,13 @@ class SolarThermalCollectorFluid(FluidComponent):
             model.add_component('p_4_' + str(t), p_4)
             model.add_component('p_5_' + str(t), p_5)
 
-    def add_cons(self, model, heat_cap_type='var'):
+    def add_cons(self, model, heat_cap_type='con', test='off'):
         self._constraint_vdi2067(model)
         self._constraint_temp(model)
-        self._constraint_efficiency(model)
+        if test == 'on':
+            self._constraint_efficiency_con(model)
+        if test == 'off':
+            self._constraint_efficiency(model)
         self._constraint_output_permit_gdp(model)
         if heat_cap_type =='con':
             # todo(qli): Wirkungsgrad = Konst

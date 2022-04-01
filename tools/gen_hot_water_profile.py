@@ -142,7 +142,7 @@ def plot_profile(heat_profile, save_plot=False):
     plt.show()
 
 
-def calc_residential_demand(bld_type, bld_year, bld_area,
+def calc_residential_hot_water_demand(bld_type, bld_year, bld_area,
                             method='TABULA Berechnungsverfahren / korrigiert '
                                    'auf Niveau von Verbrauchswerten',
                             scenario='Ist-Zustand'):
@@ -160,16 +160,14 @@ def calc_residential_demand(bld_type, bld_year, bld_area,
                     (tabula_df['Berechnungsverfahren'] == method) &
                     (tabula_df['Szenario'] == scenario)]
 
-    heating_demand = bld['Heizung (Wärmeerzeugung)'].values[0] * bld_area
     hot_water_demand = bld['Warmwasser (Wärmeerzeugung)'].values[0] * bld_area
 
-    print(heating_demand)
     print(hot_water_demand)
-    return heating_demand, hot_water_demand
+    return hot_water_demand
 
 
 if __name__ == "__main__":
     # calc_total_demand("Verwaltungsgebäude", "mittel", 10000)
     # gen_hot_water_profile("Verwaltungsgebäude", 300, plot=True)
     # print(calc_bld_demand("Verwaltungsgebäude", 300))
-    calc_residential_demand('EFH', 1968, 200)
+    calc_residential_hot_water_demand('EFH', 1968, 200)
