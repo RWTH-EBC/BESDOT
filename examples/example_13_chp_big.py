@@ -15,21 +15,22 @@ project = Project(name='project_13', typ='building')
 
 
 # Generate the environment object
-env_13 = Environment(time_step=3)
+env_13 = Environment(time_step=24)
 project.add_environment(env_13)
 
 # If the objective of the project is the optimization for building, a building
 # should be added to the project.
-bld_13 = Building(name='bld_13', area=200)
+bld_13 = Building(name='bld_13', area=3000)
 
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
-# bld_13.add_thermal_profile('heat', env_13.temp_profile_original, env_13)
-# bld_13.add_elec_profile(2021, env_13)
-# bld_13.add_hot_water_profile(env_13)
+bld_13.add_thermal_profile('heat', env_13.temp_profile_original, env_13)
+bld_13.add_elec_profile(2021, env_13)
+bld_13.add_hot_water_profile(env_13)
+# bld_13.add_hot_water_profile_TBL(1968, env_13)
 
-bld_13.demand_profile['heat_demand'] = [80, 80, 0]
-bld_13.demand_profile["elec_demand"] = [0, 0, 0]
+# bld_13.demand_profile['heat_demand'] = [80, 80, 0]
+# bld_13.demand_profile["elec_demand"] = [0, 0, 0]
 
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
