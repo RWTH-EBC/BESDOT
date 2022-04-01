@@ -178,6 +178,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\data\topology\chp_fluid_big.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\data\topology\chp_fluid_big_UF.csv">
           <value>
             <Attribute>
