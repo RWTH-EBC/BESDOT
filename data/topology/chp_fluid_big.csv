@@ -4,5 +4,5 @@ water_tes,HomoStorage,TES_homo,0,100,0,0,0,0,0,0,,0
 gas_grid,GasGrid,GAS1,0,1000,0,0,0,0,,0,0,0
 chp_big,CHPFluidBig,CHPFluidBig,50,50,0,0,4000,0,0,,0,
 e_grid,ElectricityGrid,GRD1,0,100,0,0,0,0,0,0,0,
-tp_val,ThreePortValve,3WV,0,1000,0,,0,0,0,0,0,0
+tp_val,ThreePortValve,,,,0,,0,0,0,0,0,0
 e_cns,ElectricalConsumption,CNS1,0,100,0,0,0,0,0,0,0,0
