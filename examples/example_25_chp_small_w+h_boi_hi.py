@@ -14,7 +14,7 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 project = Project(name='project_25', typ='building')
 
 # Generate the environment object
-env_25 = Environment(time_step=11)
+env_25 = Environment(time_step=24)
 project.add_environment(env_25)
 
 # If the objective of the project is the optimization for building, a building
@@ -23,12 +23,14 @@ bld_25 = Building(name='bld_25', area=200)
 
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
-# bld_25.add_thermal_profile('heat', env_25.temp_profile_original, env_25)
-# bld_25.add_elec_profile(2021, env_25)
+bld_25.add_thermal_profile('heat', env_25.temp_profile_original, env_25)
+bld_25.add_elec_profile(2021, env_25)
+bld_25.add_hot_water_profile(env_25)
+# bld_25.add_hot_water_profile_TBL(1968, env_25)
 
-bld_25.demand_profile['heat_demand'] = [9, 8, 0, 9, 9, 9, 9, 9, 9,9,0]
-bld_25.demand_profile['elec_demand'] = [0, 0, 0,5,4,1,1,1,1,0,2]
-bld_25.demand_profile['hot_water_demand'] = [9, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+# bld_25.demand_profile['heat_demand'] = [9, 8, 0, 9, 9, 9, 9, 9, 9, 9, 0]
+# bld_25.demand_profile['elec_demand'] = [0, 0, 0, 5, 4, 1, 1, 1, 1, 0, 2]
+# bld_25.demand_profile['hot_water_demand'] = [9, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 # Pre define the building energy system with the topology for different
 # components and add components to the building.

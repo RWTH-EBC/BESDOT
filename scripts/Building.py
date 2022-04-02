@@ -8,6 +8,8 @@ import numpy as np
 from tools.gen_heat_profile import *
 from tools.gen_elec_profile import gen_elec_profile
 from tools import get_all_class
+from tools.gen_hot_water_profile import gen_hot_water_profile, \
+    calc_residential_hot_water_demand
 
 module_dict = get_all_class.run()
 
@@ -133,6 +135,20 @@ class Building(object):
         self.demand_profile["elec_demand"] = elec_demand_profile[
                                              env.start_time:
                                              env.start_time + env.time_step]
+
+    def add_hot_water_profile(self, env):
+        hot_water_demand_profile = gen_hot_water_profile(self.building_typ,
+                                                         self.area)
+        self.demand_profile["hot_water_demand"] = hot_water_demand_profile[
+                                                  env.start_time:
+                                                  env.start_time + env.time_step]
+
+    def add_hot_water_profile_TBL(self, year, env):
+        hot_water_demand_profile = calc_residential_hot_water_demand(
+            self.building_typ, year, self.area)
+        self.demand_profile["hot_water_demand"] = hot_water_demand_profile[
+                                                  env.start_time:
+                                                  env.start_time + env.time_step]
 
     def add_topology(self, topology):
         topo_matrix = pd.read_csv(topology)
@@ -571,5 +587,5 @@ class Building(object):
                                                  buy_gas[t] * env.gas_price +
                                                  buy_heat[t] *
                                                  env.heat_price - sell_elec[
-                                                  t] * env.elec_feed_price
+                                                     t] * env.elec_feed_price
                                                  for t in model.time_step))

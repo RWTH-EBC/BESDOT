@@ -28,10 +28,12 @@ bld_11 = Building(name='bld_11', area=200, solar_area=50)
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
 # bld_11.add_thermal_profile('heat', env_11.temp_profile_original, env_11)
+bld_11.add_hot_water_profile(env_11)
+#bld_11.add_hot_water_profile_TBL(1968, env_11)
 
 # todo: That is another possible demand profile, you could try it for
 #  validation
-bld_11.demand_profile['hot_water_demand'] = [1.1, 0, 1, 1, 0]
+#bld_11.demand_profile['hot_water_demand'] = [1.1, 0, 1, 1, 0]
 
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
