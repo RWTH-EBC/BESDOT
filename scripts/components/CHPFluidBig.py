@@ -25,6 +25,7 @@ class CHPFluidBig(CHP, FluidComponent):
         # todo (qli): building.py Zeile 342 anpassen
         self.heat_flows_in = None
         self.heat_flows_out = []
+        self.other_op_cost = True
 
     # Pel = elektrische Nennleistung = comp_size
     # Qth = thermische Nennleistung
@@ -84,7 +85,7 @@ class CHPFluidBig(CHP, FluidComponent):
         self._constraint_vdi2067_chp(model)
         self._constraint_start_stop_ratio_gdp(model)
         # todo (qli): building.py anpassen
-        #self._constraint_start_cost(model)
+        self._constraint_start_cost(model)
         # todo (qli): building.py anpassen
         self._constraint_chp_elec_sell_price(model)
 
@@ -191,6 +192,7 @@ class CHPFluidBig(CHP, FluidComponent):
         # todo (qli): building.py anpassen
         start_cost = model.find_component('start_cost_' + self.name)
         status1 = model.find_component('status1_' + self.name)
+        other_op_cost = model.find_component('other_op_cost_' + self.name)
         model.cons.add(status1[1] == 0)
         for t in model.time_step:
             model.cons.add(status1[t + 1] == status[t])
@@ -219,6 +221,7 @@ class CHPFluidBig(CHP, FluidComponent):
 
         model.cons.add(start_cost == self.start_price * sum(start[t] for t in
                                                             model.time_step))
+        model.cons.add(other_op_cost == start_cost)
 
     def _constraint_chp_elec_sell_price(self, model):
         kwk_zuschlag = 0.08  # €/kWh

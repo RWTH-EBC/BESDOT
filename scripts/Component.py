@@ -297,5 +297,5 @@ class Component(object):
                                     output_energy)
 
         if self.other_op_cost:
-            other_op_cost = pyo.Var(model.time_step, bounds=(0, 10 ** 8))
+            other_op_cost = pyo.Var(bounds=(0, 10 ** 8))
             model.add_component('other_op_cost_' + self.name, other_op_cost)
