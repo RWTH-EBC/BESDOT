@@ -5,7 +5,7 @@ import os
 from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
-import tools.post_processing as post_pro
+import tools.post_processing_solar_chp as post
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -57,16 +57,45 @@ result_output_path = os.path.join(base_path, 'data', 'opt_output',
                                   project.name + '_result.csv')
 # post_pro.plot_all(result_output_path, time_interval=[0, env_16.time_step])
 '''
-post_pro.plot_double(result_output_path, "solar_coll", "water_tes", 365, "heat"
+post_pro.plot_double(result_output_path, "solar_coll", "water_tes", 200, "solar"
                      , "heat")
-post_pro.plot_double(result_output_path, "water_tes", "tp_val", 365, "heat",
-                     "heat")
+
 post_pro.plot_double(result_output_path, "tp_val", "e_boi", 365, "heat",
                      "heat")
 post_pro.plot_double(result_output_path, "e_boi", "hw_cns", 365, "heat",
                      "heat")
 '''
-post_pro.plot_double_24h(result_output_path, "solar_coll", "water_tes")
-post_pro.plot_double_24h(result_output_path, "water_tes", "tp_val")
-post_pro.plot_double_24h(result_output_path, "tp_val", "e_boi")
-post_pro.plot_double_24h(result_output_path, "e_boi", "hw_cns")
+# post_pro.plot_double_24h(result_output_path, "solar_coll", "water_tes")
+# post_pro.plot_double_24h(result_output_path, "water_tes", "tp_val")
+# post_pro.plot_double_24h(result_output_path, "tp_val", "e_boi")
+# post_pro.plot_double_24h(result_output_path, "e_boi", "hw_cns")
+# post_pro.plot_double(result_output_path, "water_tes", "tp_val",150, "heat","heat")
+# post_pro.plot_step_profile("heat", demand, result_output_path,
+# env_16.time_step)
+# post_pro.plot_short_time(0, env_16.time_step, result_output_path,
+# demand_heat, demand_elec)
+# post_pro.plot_output_solar(result_output_path)
+
+post.print_size(result_output_path)
+post.plot_one_line(result_output_path, 'output_heat_solar_coll',
+                       'Output energy of Solar Collector', r'Power (kW)')
+post.plot_one_line(result_output_path, 'water_tes_tp_val_temp',
+                       'Profile of Storage Temperature ',
+                       r'Temperature ($^\circ$C)', 1.02)
+post.plot_one_line(result_output_path, 'input_elec_e_boi',
+                       'Profile of E-boiler ',
+                       r'Power (kW)', 1.05)
+post.plot_two_lines(result_output_path, 'inlet_temp_solar_coll',
+                         'outlet_temp_solar_coll', 'outlet', 'inlet',
+                         'Temperature of solar collector',
+                         r'Temperature ($^\circ$C)', 1.05)
+post.plot_two_lines(result_output_path, 'input_heat_water_tes',
+                         'input_heat_tp_val', 'Input', 'Output',
+                         'Energy of Water Storage',
+                         r'Power (kW)', 1.05)
+post.plot_solar_water_tes(result_output_path)
+post.plot_three_lines(result_output_path, 'output_heat_water_tes',
+                      'input_elec_e_boi', 'input_heat_hw_cns',
+                      'Heat from Solarcollector', 'Heat from E-Boiler',
+                      'Hot Water Demand', 'Energy Solar Collector',
+                      r'Power ('r'kW)', l3='--')

@@ -2,7 +2,7 @@ import os
 from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
-import tools.post_processing as post_pro
+import tools.post_processing_solar_chp as post_pro
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -54,4 +54,35 @@ project.run_optimization('gurobi', save_lp=True, save_result=True)
 
 result_output_path = os.path.join(base_path, 'data', 'opt_output',
                                   project.name + '_result.csv')
-# post_pro.plot_all(result_output_path, time_interval=[0, env_25.time_step])
+post_pro.plot_all(result_output_path, time_interval=[0, env_25.time_step])
+'''
+post_pro.plot_double(result_output_path, "solar_coll", "water_tes", 365, "heat"
+                     , "heat")
+post_pro.plot_double(result_output_path, "water_tes", "tp_val", 365, "heat",
+                     "heat")
+post_pro.plot_double(result_output_path, "tp_val", "e_boi", 365, "heat",
+                     "heat")
+post_pro.plot_double(result_output_path, "e_boi", "hw_cns", 365, "heat",
+                     "heat")
+
+post_pro.plot_double_24h(result_output_path, "solar_coll", "water_tes")
+post_pro.plot_double_24h(result_output_path, "water_tes", "tp_val")
+post_pro.plot_double_24h(result_output_path, "tp_val", "e_boi")
+post_pro.plot_double_24h(result_output_path, "e_boi", "hw_cns")
+'''
+post_pro.print_size(result_output_path)
+post_pro.plot_one_line(result_output_path, 'therm_eff_chp', 'Efficiency of CHP',
+                       r'Efficiency', 1.05)
+post_pro.plot_two_lines(result_output_path, 'input_elec_e_grid',
+                         'output_elec_e_grid', 'Input', 'Output',
+                         'Profile of E-grid',
+                         r'Power (kW)', 1.05)
+post_pro.plot_two_lines(result_output_path, 'inlet_temp_chp',
+                         'outlet_temp_chp', 'Inlet', 'Outlet',
+                         'Temperature of E-grid',
+                         r'Temperature ($^\circ$C)', 1.05)
+post_pro.plot_four_lines(result_output_path, 'output_heat_chp',
+                          'output_heat_boi', 'input_heat_hw_cns',
+                          'input_heat_therm_cns', 'Heat of CHP',
+                          'Heat of Boiler', 'Heat Demand', 'Hot Water Demand',
+                          'Energy ', r'Power (kW)', 1.05)
