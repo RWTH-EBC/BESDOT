@@ -74,4 +74,4 @@ class Environment(object):
         self.temp_profile = temp_profile[start_time:start_time+time_step]
         self.wind_profile = wind_profile[start_time:start_time+time_step]
         self.irr_profile = irr_profile[start_time:start_time+time_step]
-        temp_profile[3624:5832] = 0
+        temp_profile[3624:5832] = 30

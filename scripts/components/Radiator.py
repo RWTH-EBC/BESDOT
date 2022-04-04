@@ -72,7 +72,7 @@ class Radiator(HeatExchangerFluid, FluidComponent):
         self._constraint_conver(model)
         self._constraint_temp(model)
         self._constraint_return_temp(model)
-        self._constraint_mass_flow(model)
+        #self._constraint_mass_flow(model)
         self._constraint_heat_inputs(model)
         self._constraint_vdi2067(model)
 
