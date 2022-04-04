@@ -266,5 +266,6 @@ def cluster(inputs, number_clusters=12, norm=2, time_limit=300, mip_gap=0.0,
 def cluster_2():
     pass
 
+
 if __name__ == '__main__':
     pass
