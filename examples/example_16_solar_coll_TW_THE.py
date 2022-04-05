@@ -77,25 +77,26 @@ post_pro.plot_double(result_output_path, "e_boi", "hw_cns", 365, "heat",
 # post_pro.plot_output_solar(result_output_path)
 
 post.print_size(result_output_path)
-post.plot_one_line(result_output_path, 'output_heat_solar_coll',
-                       'Output energy of Solar Collector', r'Power (kW)')
-post.plot_one_line(result_output_path, 'water_tes_tp_val_temp',
-                       'Profile of Storage Temperature ',
-                       r'Temperature ($^\circ$C)', 1.02)
-post.plot_one_line(result_output_path, 'input_elec_e_boi',
-                       'Profile of E-boiler ',
-                       r'Power (kW)', 1.05)
-post.plot_two_lines(result_output_path, 'inlet_temp_solar_coll',
+
+post.step_plot_one_line(result_output_path, 200, 'water_tes_tp_val_temp',
+                       'Temperatur des Speichers ',
+                       r'Temperatur ($^\circ$C)', 1.02)
+post.step_plot_one_line(result_output_path, 200, 'input_elec_e_boi',
+                       'Stromverbrauch des Elektroheizkessels ',
+                       r'Leistung (kW)', 1.05)
+post.step_plot_two_lines(result_output_path, 200, 'inlet_temp_solar_coll',
                          'outlet_temp_solar_coll', 'outlet', 'inlet',
-                         'Temperature of solar collector',
-                         r'Temperature ($^\circ$C)', 1.05)
-post.plot_two_lines(result_output_path, 'input_heat_water_tes',
+                         'Temperature der Solarkollektor',
+                         r'Temperatur ($^\circ$C)', 1.05)
+post.step_plot_two_lines(result_output_path, 200, 'input_heat_water_tes',
                          'input_heat_tp_val', 'Input', 'Output',
-                         'Energy of Water Storage',
-                         r'Power (kW)', 1.05)
-post.plot_solar_water_tes(result_output_path)
-post.plot_three_lines(result_output_path, 'output_heat_water_tes',
+                         'Energieveränderung des Speichers',
+                         r'Leistung (kW)', 1.05)
+post.step_plot_solar_water_tes(result_output_path, 200)
+post.step_plot_three_lines(result_output_path, 200, 'output_heat_water_tes',
                       'input_elec_e_boi', 'input_heat_hw_cns',
-                      'Heat from Solarcollector', 'Heat from E-Boiler',
-                      'Hot Water Demand', 'Energy Solar Collector',
-                      r'Power ('r'kW)', l3='--')
+                      'Wärme aus Speicher', 'Wärme aus Elektroheizkessel',
+                      'Warmwasserbedarf', 'Wärme aus Solarkollector',
+                      r'Leistung ('r'kW)', l3='--')
+post.step_plot_one_line(result_output_path, 200, 'output_heat_solar_coll',
+                       'Wärme aus Solarkollektor', r'Leistung (kW)')

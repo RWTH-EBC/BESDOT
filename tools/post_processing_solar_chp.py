@@ -561,55 +561,6 @@ def print_size(csv_file):
                 size_dict[element] = elements_dict[element][0]
                 print(element, ' = ', size_dict[element])
 
-
-def plot_solar_water_tes(csv_file):
-    font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
-        'normal', 'size': '18'}
-    font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
-        'normal', 'size': '18'}
-    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
-        'normal', 'size': '23'}
-    plot_output = os.path.join(opt_output_path, 'plot',
-                               'Profile of Solar Water Storage')
-    df = pd.read_csv(csv_file)
-
-    data1 = df[df['var'].str.contains('water_tes_tp_val_temp')]
-    data1 = data1.reset_index(drop=True)
-    value1 = data1['value']
-    data2 = df[df['var'].str.contains('input_heat_water_tes')]
-    data2 = data2.reset_index(drop=True)
-    value2 = data2['value']
-    data3 = df[df['var'].str.contains('output_heat_water_tes')]
-    data3 = data3.reset_index(drop=True)
-    value3 = data3['value']
-
-    fig = plt.figure(figsize=(6.5, 5.5))
-    ax = fig.add_subplot(111)
-    ax.xaxis.set_minor_locator(MultipleLocator(5))
-    ax.grid(linestyle='--', which='both')
-    plt.xticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
-    plt.yticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
-    ax.set_title('Profile of Solar Water Storage', font_titel, y=1.02)
-    lns1 = ax.plot(value1, '--', label='Temperature', linewidth=2, color='k')
-    ax2 = ax.twinx()
-    lns2 = ax2.plot(value2, label='Input energy', linewidth=2, color='r',
-                    alpha=0.7)
-    lns3 = ax2.plot(value3, label='Output energy', linewidth=2, color='b',
-                    alpha=0.7)
-    ax.set_ylim(ymax=max(max(value1), max(value2)) * 1.3)
-    lns = lns1 + lns2 + lns3
-    labs = [l.get_label() for l in lns]
-    plt.legend(lns, labs, loc='best', prop=font_legend)
-
-    ax.set_xlabel("Time (h)", font_label)
-    ax.set_ylabel(r"Temperature ($^\circ$C)", font_label)
-    ax2.set_ylabel(r"Power (kW)", font_label)
-    plt.xticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
-    plt.yticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
-    fig.tight_layout()
-
-    plt.savefig(plot_output)
-
 def step_plot_heat_demand(csv_file, time_step):
     font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
         'normal', 'size': '18'}
@@ -843,7 +794,7 @@ def print_size(csv_file):
                 print(element, ' = ', size_dict[element])
 
 
-def step_plot_solar_water_tes(csv_file):
+def step_plot_solar_water_tes(csv_file, time_step):
     font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
         'normal', 'size': '18'}
     font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
@@ -851,8 +802,9 @@ def step_plot_solar_water_tes(csv_file):
     font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
         'normal', 'size': '23'}
     plot_output = os.path.join(opt_output_path, 'plot',
-                               'Profile of Solar Water Storage')
+                               'Diagramm des Solarspeichers')
     df = pd.read_csv(csv_file)
+    time_steps = range(time_step)
 
     data1 = df[df['var'].str.contains('water_tes_tp_val_temp')]
     data1 = data1.reset_index(drop=True)
@@ -868,23 +820,25 @@ def step_plot_solar_water_tes(csv_file):
     ax = fig.add_subplot(111)
     ax.xaxis.set_minor_locator(MultipleLocator(5))
     ax.grid(linestyle='--', which='both')
+
     plt.xticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
     plt.yticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
-    ax.set_title('Profile of Solar Water Storage', font_titel, y=1.02)
-    lns1 = ax.plot(value1, '--', label='Temperature', linewidth=2, color='k')
+    ax.set_title('Diagramm des Solarspeichers', font_titel, y=1.02)
+    lns1 = ax.step(time_steps, value1, where="post", label='Temperatur',
+                   linestyle='--', color='k', linewidth=2)
     ax2 = ax.twinx()
-    lns2 = ax2.plot(value2, label='Input energy', linewidth=2, color='r',
-                    alpha=0.7)
-    lns3 = ax2.plot(value3, label='Output energy', linewidth=2, color='b',
-                    alpha=0.7)
+    lns2 = ax2.step(time_steps, value2, where="post", label='Input Energie',
+                    color='r', linewidth=2, alpha=0.7)
+    lns3 = ax2.step(time_steps, value3, where="post", label='Output Energie',
+                    color='b', linewidth=2, alpha=0.7)
     ax.set_ylim(ymax=max(max(value1), max(value2)) * 1.3)
     lns = lns1 + lns2 + lns3
     labs = [l.get_label() for l in lns]
     plt.legend(lns, labs, loc='best', prop=font_legend)
 
-    ax.set_xlabel("Time (h)", font_label)
-    ax.set_ylabel(r"Temperature ($^\circ$C)", font_label)
-    ax2.set_ylabel(r"Power (kW)", font_label)
+    ax.set_xlabel("Stunde (h)", font_label)
+    ax.set_ylabel(r"Temperatur ($^\circ$C)", font_label)
+    ax2.set_ylabel(r"Leistung (kW)", font_label)
     plt.xticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
     plt.yticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
     fig.tight_layout()
