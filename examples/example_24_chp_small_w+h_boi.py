@@ -56,23 +56,22 @@ result_output_path = os.path.join(base_path, 'data', 'opt_output',
                                   project.name + '_result.csv')
 # post_pro.plot_all(result_output_path, time_interval=[0, env_24.time_step])
 post_pro.print_size(result_output_path)
-post_pro.plot_one_line(result_output_path, 'therm_eff_chp', 'Efficiency of CHP',
-                       r'Efficiency', 1.05)
-post_pro.plot_two_lines(result_output_path, 'input_elec_e_grid',
+post_pro.step_plot_two_lines(result_output_path, 24, 'input_elec_e_grid',
                         'output_elec_e_grid', 'Input', 'Output',
-                        'Profile of E-grid',
-                        r'Power (kW)', 1.05)
-post_pro.plot_two_lines(result_output_path, 'inlet_temp_chp',
+                        'Energieaustausch des Stromgrids', r'Leistung (kW)')
+post_pro.step_plot_two_lines(result_output_path, 24, 'inlet_temp_chp',
                         'outlet_temp_chp', 'Inlet', 'Outlet',
-                        'Temperature of E-grid',
-                        r'Temperature ($^\circ$C)', 1.05)
-post_pro.plot_four_lines(result_output_path, 'output_heat_chp',
+                        'Temperatur des BHKW',
+                        r'Temperatur ($^\circ$C)', n=1.05)
+post_pro.step_plot_four_lines(result_output_path, 24, 'output_heat_chp',
                          'output_heat_boi', 'input_heat_hw_cns',
-                         'input_heat_therm_cns', 'Heat from CHP',
-                         'Heat from Boiler', 'Heat Demand', 'Hot Water Demand',
-                         'Energy CHP', r'Power (kW)')
-post_pro.plot_one_line(result_output_path, 'therm_eff_chp', 'Efficiency of CHP',
-                       r'Efficiency', 1.05)
-post_pro.plot_one_line(result_output_path, 'status_chp', 'Status of CHP',
-                       r'Status', 1.05)
-post_pro.plot_chp(result_output_path)
+                         'input_heat_therm_cns', 'Wärme aus BHKW',
+                         'Wärme aus Kessel', 'Wärmebedarf', 'Warmwasserbedarf',
+                         'Energieerzeugung', r'Leistung (kW)', n=1.5)
+post_pro.step_plot_one_line(result_output_path, 24, 'therm_eff_chp',
+                            'Thermische Effizienz', r'Effizienz', n=1.02)
+post_pro.step_plot_one_line(result_output_path, 24, 'status_chp',
+                            'Status des BHKW', r'Status')
+post_pro.step_plot_chp(result_output_path, 24)
+post_pro.step_plot_heat_demand(result_output_path, 24)
+
