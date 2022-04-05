@@ -3,5 +3,5 @@ therm_cns,HeatConsumption,HeatCNS1,10,10,0,0,0,0,0,0,0
 under_heat,UnderfloorHeat,UFH1,200,200,0,0,0,0,0,,0
 water_tes,HomoStorage,TES_homo,0,1000,0,0,0,0,0,0,
 gas_grid,GasGrid,GAS1,10,100,0,0,0,0,100,0,0
-boi,CondensingBoiler,BOI_district,0,100,0,0,120,0,0,0,0
+boi,CondensingBoiler,BOI_district,0,100,0,0,,0,0,0,0
 tp_val,ThreePortValve,,,,,,0,0,0,0,0

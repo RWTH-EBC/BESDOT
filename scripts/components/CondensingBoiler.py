@@ -89,7 +89,7 @@ class CondensingBoiler(FluidComponent, GasBoiler):
                            (160 - return_temp_var[t + 1]))
 
     # todo(yca): init_temp is too high, think about it.
-    def _constraint_temp(self, model, init_temp=70):
+    def _constraint_temp(self, model, init_temp=55):
         temp_var = model.find_component('temp_' + self.name)
         for t in model.time_step:
             model.cons.add(temp_var[t] == init_temp)
