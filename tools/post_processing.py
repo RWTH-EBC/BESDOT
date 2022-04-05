@@ -97,7 +97,7 @@ def plot_double_24h(csv_file, comp_name1, comp_name2):
         comp_name1))]
     data4 = data4.reset_index(drop=True)
     profile_outputpower = data4['value']
-    fig = plt.figure(figsize=(8, 8))
+    fig = plt.figure(figsize=(6.5, 5.5))
     ax = fig.add_subplot(111)
     ax.plot(profile_inputpower, '-', label='input')
     ax.plot(profile_outputpower, '-', label='output')
@@ -108,11 +108,11 @@ def plot_double_24h(csv_file, comp_name1, comp_name2):
     ax.legend(loc='center left', bbox_to_anchor=(0, 1.07), ncol=1)
     ax.grid()
     ax.set_xlabel("Time (h)")
-    ax.set_title('Profile of ' + comp_name1)
+    ax.set_title('Profile of ' + comp_name1, fontsize=9)
     ax.set_ylabel(r"Power (KW)")
     ax2.set_ylabel(r"Temperature ($^\circ$C)")
     ax.set_xlim(xmax=len(profile_temp))
-    ax2.legend(loc='upper right', bbox_to_anchor=(1.1, 1.12), ncol=1)
+    ax2.legend(loc='upper right', bbox_to_anchor=(1.1, 1.15), ncol=1)
     plt.savefig(plot_output)
 
 def plot_double(csv_file, comp_name1, comp_name2, time_step, inputenergy,
@@ -135,7 +135,7 @@ def plot_double(csv_file, comp_name1, comp_name2, time_step, inputenergy,
             profile_return_temp = profile_return_temp_original[i-1]
             profile_inputpower = profile_inputpower_original[i-1]
             profile_outputpower = profile_outputpower_original[i-1]
-            fig = plt.figure(figsize=(8, 8))
+            fig = plt.figure(figsize=(6.5, 5.5))
             ax = fig.add_subplot(111)
             ax.plot(profile_inputpower, '-', label='input')
             ax.plot(profile_outputpower, '--', label='output')
@@ -148,11 +148,12 @@ def plot_double(csv_file, comp_name1, comp_name2, time_step, inputenergy,
             ax.legend(loc='center left', bbox_to_anchor=(0, 1.07), ncol=1)
             ax.grid()
             ax.set_xlabel("Time (h)")
-            ax.set_title('Profile of ' + comp_name1 + ' day ' + str(i))
+            ax.set_title('Profile of ' + comp_name1 + ' day ' + str(i),
+                         fontsize=9)
             ax.set_ylabel(r"Power (KW)")
             ax2.set_ylabel(r"Temperature ($^\circ$C)")
             ax.set_xlim(xmax=24)
-            ax2.legend(loc='upper right', bbox_to_anchor=(1.1, 1.12), ncol=1)
+            ax2.legend(loc='upper right', bbox_to_anchor=(1.1, 1.15), ncol=1)
             plt.savefig(plot_output)
             i = i + 1
 
