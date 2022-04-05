@@ -1,0 +1,6 @@
+comp_name,comp_type,model,min_size,max_size,current_size,under_heat,gas_grid,boi,therm_cns,eboi
+therm_cns,HeatConsumption,HeatCNS1,10,10,0,0,0,0,0,0
+under_heat,UnderfloorHeat,UFH1,200,200,0,0,0,0,1,0
+gas_grid,GasGrid,GAS1,10,100,0,0,0,1,0,0
+boi,StandardBoiler,BOI_district,0,20,0,0,0,0,0,
+eboi,ThroughHeaterElec,BOI3,0,100,0,,0,0,0,0

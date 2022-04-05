@@ -23,6 +23,7 @@ class HeatConsumption(Component):
         inflexible electrical demand of the prosumer to the energy supply system.
         Therefore the component has an efficiency of 1. The
         """
+
         if not hasattr(self, 'efficiency'):
             self.efficiency = 1
 
@@ -58,3 +59,4 @@ class HeatConsumption(Component):
     #     flows['heat'][self.name][1].append(output_flow)  # Add output flow
     #
     #     var_dict[output_flow] = input_profiles['therm_demand']
+

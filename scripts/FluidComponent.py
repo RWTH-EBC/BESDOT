@@ -50,9 +50,6 @@ class FluidComponent(Component):
         Equation between energy input and related heat flows, which consists of
         temperature and mass flow.
         """
-        input_energy = model.find_component('input_' + self.inputs[0] +
-                                            '_' + self.name)
-
         # analyze quantities of circulation for component.
         energy_flow = {}  # storage all the energy flows in every circulation
         for heat_input in self.heat_flows_in:
@@ -66,25 +63,18 @@ class FluidComponent(Component):
                                          '_' + 'temp')
             energy_flow[heat_input] = model.find_component(heat_input[0] + '_' +
                                                            heat_input[1])
-            for t in range(len(model.time_step)):
-                model.cons.add(energy_flow[heat_input][t + 1] ==
-                               (m_in[t + 1] * t_in[t + 1] - m_out[t + 1] *
-                                t_out[t + 1]) * water_heat_cap / unit_switch)
-                model.cons.add(t_in[t + 1] >= t_out[t + 1])
-
-        # sum all energy flow for input energy and output energy
-        # for t in range(len(model.time_step)):
-        #     model.cons.add(input_energy[t + 1] == sum(energy_flow[flow][t + 1]
-        #                                               for flow in
-        #                                               self.heat_flows_in))
+            if energy_flow[heat_input] is not None:
+                for t in range(len(model.time_step)):
+                    model.cons.add(energy_flow[heat_input][t + 1] ==
+                                   (m_in[t + 1] * t_in[t + 1] - m_out[t + 1] *
+                                    t_out[t + 1]) * water_heat_cap / unit_switch)
+                    model.cons.add(t_in[t + 1] >= t_out[t + 1])
 
     def _constraint_heat_outputs(self, model):
         """
         Equation between energy output and related heat flows, which consists of
         temperature and mass flow.
         """
-        output_energy = model.find_component('output_' + self.outputs[0] +
-                                             '_' + self.name)
         energy_flow = {}
         for heat_output in self.heat_flows_out:
             m_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
@@ -98,33 +88,9 @@ class FluidComponent(Component):
             energy_flow[heat_output] = model.find_component(heat_output[0] +
                                                             '_' +
                                                             heat_output[1])
-            for t in range(len(model.time_step)):
-                model.cons.add(energy_flow[heat_output][t + 1] ==
-                               (m_out[t + 1] * t_out[t + 1] - m_in[t + 1] *
-                                t_in[t + 1]) * water_heat_cap / unit_switch)
-                model.cons.add(t_in[t + 1] <= t_out[t + 1])
-
-        # for t in range(len(model.time_step)):
-        #     model.cons.add(output_energy[t + 1] == sum(energy_flow[flow][t + 1]
-        #                                                for flow in
-        #                                                self.heat_flows_out))
-
-    # def _constraint_mass_flow(self, model):
-    #     # The mass flow is set to be constant as circulation pumps
-    #     # mass flow unit kg/h
-    #
-    #     for heat_input in self.heat_flows_in:
-    #         m_in = model.find_component(heat_input[0] + '_' + heat_input[1] +
-    #                                     '_' + 'mass')
-    #         m_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
-    #                                      '_' + 'mass')
-    #         for t in range(len(model.time_step)):
-    #             model.cons.add(m_in[t + 1] == m_out[t + 1])
-    #
-    #     for heat_output in self.heat_flows_out:
-    #         m_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
-    #                                     '_' + 'mass')
-    #         m_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
-    #                                      '_' + 'mass')
-    #         for t in range(len(model.time_step)):
-    #             model.cons.add(m_in[t + 1] == m_out[t + 1])
+            if energy_flow[heat_output] is not None:
+                for t in range(len(model.time_step)):
+                    model.cons.add(energy_flow[heat_output][t + 1] ==
+                                   (m_out[t + 1] * t_out[t + 1] - m_in[t + 1] *
+                                    t_in[t + 1]) * water_heat_cap / unit_switch)
+                    model.cons.add(t_in[t + 1] <= t_out[t + 1])
