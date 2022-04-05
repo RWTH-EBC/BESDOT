@@ -1,17 +1,9 @@
-"""
-Tool to analyse the output csv from optimization
-"""
-
 import os
 import copy
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-
-# Attention! The elec_list and heat_list use the name from topology
-# matrix, for different scenario the name for each component may change.
-# Need to check for every scenario or fix the component name in topology.
 from matplotlib.ticker import MultipleLocator
 
 elec_comp_list = ['heat_pump', 'pv', 'bat', 'e_grid', 'e_boi', 'e_cns',
@@ -26,13 +18,6 @@ opt_output_path = os.path.join(base_path, 'data', 'opt_output')
 
 
 def plot_all(csv_file, time_interval):
-    """
-
-    Args:
-        csv_file:
-        time_interval: list, first element is the beginning time for plot and
-        second element is the end time for plot
-    """
     output_df = pd.read_csv(csv_file)
     elements_dict = find_element(output_df)
     size_dict = {}
@@ -45,19 +30,6 @@ def plot_all(csv_file, time_interval):
             if sum(elements_dict[element]) > 0.001:
                 plot_single(element, elements_dict[element][time_interval[0]:
                                                             time_interval[1]])
-
-        #    fig, ax = plt.figure()
-        #    ax = fig.add_subplot(111)
-        #    ax1 = plot_single(element, elements_dict[element][time_interval[0]:
-        #                                                      time_interval[1]])
-        #    ax2 = ax1.twinx()
-        #    ax2 = plot_single(element, elements_dict[element][time_interval[0]:
-        #                                                      time_interval[1]])
-
-        # print(element)
-        # if element == 'heat_pump_water_tes':
-        # plot_single(element, elements_dict[element])
-
 
 def plot_single(name, profile):
     plot_output = os.path.join(opt_output_path, 'plot', 'Profile of ' + name)
@@ -121,12 +93,6 @@ def plot_double_24h(csv_file, comp_name1, comp_name2):
 
 def plot_double(csv_file, comp_name1, comp_name2, time_step, inputenergy,
                 outputenergy):
-    # plot_output = os.path.join(opt_output_path, 'plot', 'profile of ' +
-    #                           comp_name1)
-    df = pd.read_csv(csv_file)
-    # data1 = df[df['var'].str.contains(comp_name1 + '_' + comp_name2 + '_temp')]
-    # data1 = data1.reset_index(drop=True)
-    # profile_temp = data1['value']
     profile_temp_original, profile_return_temp_original, \
     profile_inputpower_original, profile_outputpower_original = \
         get_info_for_figu(csv_file, comp_name1, comp_name2, time_step,
@@ -335,14 +301,6 @@ def plot_step_profile(energy_type, demand, profile, time_step):
     fig.suptitle(t='hourly profile', fontsize=18)
     plt.show()
 
-    # plot_path = os.path.join(OUTPUTS_PATH, str(datetime.datetime.now(
-    #     ).strftime('%Y-%m-%d_%H_%M_%S_')) + day + '.png')
-
-    # plot_path = os.path.join(OUTPUTS_PATH, name + day + '.png')
-    # plt.savefig(plot_path)
-    # plt.close()
-
-
 def find_element(output_df):
     """find all elements in dataframe, the variables with same name but
     different time step would be stored in a list"""
@@ -358,28 +316,7 @@ def find_element(output_df):
 
     return elements_dict
 
-
-if __name__ == '__main__':
-    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    opt_output_path = os.path.join(base_path, 'data', 'opt_output')
-    # opt_output = os.path.join(opt_output_path, 'denmark_energy_hub_result.csv')
-    opt_output = os.path.join(opt_output_path, 'project_1_result.csv')
-    plot_output = os.path.join(opt_output_path, 'plot')
-
-    demand_input = os.path.join(base_path, 'data', 'denmark_energy_hub',
-                                'energyprofile(kwh).csv')
-    demand_df = pd.read_csv(demand_input)
-    commercial_heat = demand_df['commercial heat'].astype('float64').values
-    resident_heat = demand_df['residential heat'].astype('float64').values
-    total_heat = commercial_heat + resident_heat
-    total_elec = demand_df['total electricity'].astype('float64').values
-
-    # plot_all(opt_output)
-    plot_short_time(start_time=0, time_step=24, csv_file=opt_output,
-                    demand_heat=total_heat, demand_elec=total_elec)
-
-
-def plot_one_line(csv_file, comp, titel, ylabel, n=1.1, form='line'):
+def plot_one_line(csv_file, comp, titel, ylabel, n=1.1):
     font_label = {'family': 'Times New Roman', 'weight': 'medium', 'style':
         'normal', 'size': '18'}
     font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
