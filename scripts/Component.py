@@ -207,7 +207,7 @@ class Component(object):
         else:
             min_size = self.min_size
 
-        if not None:
+        if self.socket_cost is not None:
             dis_not_select = Disjunct()
             not_select_size = pyo.Constraint(expr=size == 0)
             not_select_inv = pyo.Constraint(expr=invest == 0)
