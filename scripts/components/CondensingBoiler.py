@@ -68,7 +68,7 @@ class CondensingBoiler(FluidComponent, GasBoiler):
         self.loss = 0
         for t in range(len(model.time_step)):
             model.cons.add(output_energy[t + 1] <= size)
-            model.cons.add(output_energy[t + 1] >= 0.3 * size)
+            #model.cons.add(output_energy[t + 1] >= 0.3 * size)
             # Calculate the mass of condensate from the combustion power
             self.loss = self.exhaust_gas_loss + radiation_loss
             model.cons.add(input_energy[t + 1] ==
@@ -89,7 +89,7 @@ class CondensingBoiler(FluidComponent, GasBoiler):
                            (160 - return_temp_var[t + 1]))
 
     # todo(yca): init_temp is too high, think about it.
-    def _constraint_temp(self, model, init_temp=58):
+    def _constraint_temp(self, model, init_temp=55):
         temp_var = model.find_component('temp_' + self.name)
         for t in model.time_step:
             model.cons.add(temp_var[t] == init_temp)
@@ -101,8 +101,8 @@ class CondensingBoiler(FluidComponent, GasBoiler):
 
     def _constraint_return_temp(self, model):
         return_temp_var = model.find_component('return_temp_' + self.name)
-        for t in model.time_step:
-            model.cons.add(return_temp_var[t] <= 55)
+        #for t in model.time_step:
+            #model.cons.add(return_temp_var[t] <= 55)
         for heat_output in self.heat_flows_out:
             t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
                                         '_' + 'temp')
@@ -115,8 +115,9 @@ class CondensingBoiler(FluidComponent, GasBoiler):
                                         '_' + 'mass')
             m_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'mass')
-            for t in range(len(model.time_step)):
+            for t in range(len(model.time_step) - 1):
                 model.cons.add(m_in[t + 1] == m_out[t + 1])
+                model.cons.add(m_in[t + 2] == m_in[t + 1])
 
     def add_cons(self, model):
         self._constraint_conver(model)
