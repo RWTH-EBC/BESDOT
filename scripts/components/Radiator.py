@@ -20,7 +20,7 @@ class Radiator(HeatExchangerFluid, FluidComponent):
                          current_size=current_size)
         self.heat_flows_out = None
 
-    def _constraint_conver(self, model, room_temp=20):
+    def _constraint_conver(self, model, room_temp=21):
         temp_var = model.find_component('temp_' + self.name)
         return_temp_var = model.find_component('return_temp_' + self.name)
         temp_difference = model.find_component('temp_difference_' + self.name)
