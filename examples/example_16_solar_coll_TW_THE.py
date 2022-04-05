@@ -8,7 +8,7 @@ from scripts.Building import Building
 import tools.post_solar_chp as post
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+a = 288
 ################################################################################
 #                           Generate python objects
 ################################################################################
@@ -18,7 +18,7 @@ project = Project(name='project_16', typ='building')
 
 # Generate the environment object
 # env_16 = Environment(start_time=4329, time_step=3)
-env_16 = Environment(start_time=0, time_step=200)
+env_16 = Environment(start_time=0, time_step=a)
 project.add_environment(env_16)
 
 # If the objective of the project is the optimization for building, a building
@@ -78,25 +78,25 @@ post_pro.plot_double(result_output_path, "e_boi", "hw_cns", 365, "heat",
 
 post.print_size(result_output_path)
 
-post.step_plot_one_line(result_output_path, 200, 'water_tes_tp_val_temp',
+post.step_plot_one_line(result_output_path, a, 'water_tes_tp_val_temp',
                        'Temperatur des Speichers ',
                        r'Temperatur ($^\circ$C)', 1.02)
-post.step_plot_one_line(result_output_path, 200, 'input_elec_e_boi',
+post.step_plot_one_line(result_output_path, a, 'input_elec_e_boi',
                        'Stromverbrauch des Elektroheizkessels ',
                        r'Leistung (kW)', 1.05)
-post.step_plot_two_lines(result_output_path, 200, 'inlet_temp_solar_coll',
+post.step_plot_two_lines(result_output_path, a, 'inlet_temp_solar_coll',
                          'outlet_temp_solar_coll', 'outlet', 'inlet',
                          'Temperature der Solarkollektor',
                          r'Temperatur ($^\circ$C)', 1.05)
-post.step_plot_two_lines(result_output_path, 200, 'input_heat_water_tes',
+post.step_plot_two_lines(result_output_path, a, 'input_heat_water_tes',
                          'input_heat_tp_val', 'Input', 'Output',
                          'Energieveränderung des Speichers',
                          r'Leistung (kW)', 1.05)
-post.step_plot_solar_water_tes(result_output_path, 200)
-post.step_plot_three_lines(result_output_path, 200, 'output_heat_water_tes',
+post.step_plot_solar_water_tes(result_output_path, a)
+post.step_plot_three_lines(result_output_path, a, 'output_heat_water_tes',
                       'input_elec_e_boi', 'input_heat_hw_cns',
                       'Wärme aus Speicher', 'Wärme aus Elektroheizkessel',
                       'Warmwasserbedarf', 'Wärme aus Solarkollector',
                       r'Leistung ('r'kW)', l3='--')
-post.step_plot_one_line(result_output_path, 200, 'output_heat_solar_coll',
+post.step_plot_one_line(result_output_path, a, 'output_heat_solar_coll',
                        'Wärme aus Solarkollektor', r'Leistung (kW)')
