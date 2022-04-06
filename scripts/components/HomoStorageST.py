@@ -12,7 +12,7 @@ class HomoStorageST(HomoStorage):
                          max_size=max_size,
                          current_size=current_size)
 
-    def _constraint_temp(self, model, init_temp=60):
+    def _constraint_temp(self, model, init_temp=30):
         super()._constraint_temp(model=model, init_temp=init_temp)
 
         temp_var = model.find_component('temp_' + self.name)

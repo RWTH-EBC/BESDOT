@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.ticker import MultipleLocator
+from scripts.Environment import Environment
 
 elec_comp_list = ['heat_pump', 'pv', 'bat', 'e_grid', 'e_boi', 'e_cns',
                   'chp']
@@ -500,11 +501,11 @@ def print_size(csv_file):
 
 def step_plot_heat_demand(csv_file, time_step):
     font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
-        'normal', 'size': '18'}
+        'normal', 'size': '15'}
     font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
-        'normal', 'size': '18'}
+        'normal', 'size': '15'}
     font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
-        'normal', 'size': '23'}
+        'normal', 'size': '18'}
     plot_output = os.path.join(opt_output_path, 'plot', 'Wärmebedarf')
     df = pd.read_csv(csv_file)
     time_steps = range(time_step)
@@ -533,10 +534,10 @@ def step_plot_heat_demand(csv_file, time_step):
     ax.set_title('Wärmebedarf', font_titel, y=1.02)
     ax.set_xlabel('Stunde (h)', font_label)
     ax.set_ylabel('Leistung (kW)', font_label)
-    ax.set_xlim(xmin=0, xmax=time_step * 1.1)
+    ax.set_xlim(xmin=0)
     ax.set_ylim(ymax=max(max(value3), max(value4), max(data5)) * 1.3)
-    plt.xticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
-    plt.yticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
     ax.set_axisbelow(True)
     fig.tight_layout()
 
@@ -544,9 +545,9 @@ def step_plot_heat_demand(csv_file, time_step):
 
 def step_plot_one_line(csv_file, time_step, comp, titel, ylabel, n=1.1):
     font_label = {'family': 'Times New Roman', 'weight': 'medium', 'style':
-        'normal', 'size': '18'}
+        'normal', 'size': '15'}
     font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
-        'normal', 'size': '23'}
+        'normal', 'size': '18'}
     plot_output = os.path.join(opt_output_path, 'plot', titel)
     df = pd.read_csv(csv_file)
     time_steps = range(time_step)
@@ -565,11 +566,11 @@ def step_plot_one_line(csv_file, time_step, comp, titel, ylabel, n=1.1):
     ax.set_title(titel, font_titel, y=1.02)
     ax.set_xlabel("Stunde (h)", font_label)
     ax.set_ylabel(ylabel, font_label)
-    ax.set_xlim(xmin=0, xmax=time_step * 1.1)
+    ax.set_xlim(xmin=0)
     ax.set_ylim(ymax=max(value) * n)
     # ax.tick_params(labelsize=12)
-    plt.xticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
-    plt.yticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
     fig.tight_layout()
     plt.savefig(plot_output)
 
@@ -577,11 +578,11 @@ def step_plot_one_line(csv_file, time_step, comp, titel, ylabel, n=1.1):
 def step_plot_two_lines(csv_file, time_step, comp1, comp2, label1, label2,
                         titel, ylabel, n=1.1, legend_pos='best'):
     font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
-        'normal', 'size': '18'}
+        'normal', 'size': '15'}
     font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
-        'normal', 'size': '18'}
+        'normal', 'size': '15'}
     font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
-        'normal', 'size': '23'}
+        'normal', 'size': '18'}
     plot_output = os.path.join(opt_output_path, 'plot', titel)
     df = pd.read_csv(csv_file)
     time_steps = range(time_step)
@@ -607,11 +608,11 @@ def step_plot_two_lines(csv_file, time_step, comp1, comp2, label1, label2,
     ax.set_title(titel, font_titel, y=1.02)
     ax.set_xlabel("Stunde (h)", font_label)
     ax.set_ylabel(ylabel, font_label)
-    ax.set_xlim(xmin=0, xmax=time_step * 1.1)
+    ax.set_xlim(xmin=0)
     ax.set_ylim(ymax=max(max(value1), max(value2)) * n)
     # ax.tick_params(labelsize=12)
-    plt.xticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
-    plt.yticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
     fig.tight_layout()
 
     plt.savefig(plot_output)
@@ -622,11 +623,11 @@ def step_plot_three_lines(csv_file, time_step, comp1, comp2, comp3, label1,
                           c3='g', l1='-', l2='-', l3='-', n=1.1,
                           legend_pos='best'):
     font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
-        'normal', 'size': '18'}
+        'normal', 'size': '15'}
     font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
-        'normal', 'size': '18'}
+        'normal', 'size': '15'}
     font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
-        'normal', 'size': '23'}
+        'normal', 'size': '18'}
     plot_output = os.path.join(opt_output_path, 'plot', 'Wärmebedarf')
     df = pd.read_csv(csv_file)
     time_steps = range(time_step)
@@ -649,7 +650,7 @@ def step_plot_three_lines(csv_file, time_step, comp1, comp2, comp3, label1,
     ax.step(time_steps, value1, where="post", label=label1,
             linestyle=l1, color=c1, linewidth=2, alpha=0.7)
     ax.step(time_steps, value2, where="post", label=label2,
-            linestyle=l2, color=c1, linewidth=2, alpha=0.7)
+            linestyle=l2, color=c2, linewidth=2, alpha=0.7)
     ax.step(time_steps, value3, where="post", label=label3,
             linestyle=l3, color=c3,  linewidth=2, alpha=0.7)
 
@@ -657,10 +658,10 @@ def step_plot_three_lines(csv_file, time_step, comp1, comp2, comp3, label1,
     ax.set_title(titel, font_titel, y=1.02)
     ax.set_xlabel("Stunde (h)", font_label)
     ax.set_ylabel(ylabel, font_label)
-    ax.set_xlim(xmin=0, xmax=time_step * 1.1)
+    ax.set_xlim(xmin=0)
     ax.set_ylim(ymax=max(max(value1), max(value2), max(value3)) * n)
-    plt.xticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
-    plt.yticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
     fig.tight_layout()
 
     plt.savefig(plot_output)
@@ -670,11 +671,11 @@ def step_plot_four_lines(csv_file, time_step, comp1, comp2, comp3, comp4,
                          c2='b', c3='g', c4='k', l1='-', l2='-', l3='--',
                          l4='--', n=1.1, legend_pos='best'):
     font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
-        'normal', 'size': '18'}
+        'normal', 'size': '15'}
     font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
-        'normal', 'size': '18'}
+        'normal', 'size': '15'}
     font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
-        'normal', 'size': '23'}
+        'normal', 'size': '18'}
     plot_output = os.path.join(opt_output_path, 'plot', titel)
     df = pd.read_csv(csv_file)
     time_steps = range(time_step)
@@ -710,11 +711,11 @@ def step_plot_four_lines(csv_file, time_step, comp1, comp2, comp3, comp4,
     ax.set_title(titel, font_titel, y=1.02)
     ax.set_xlabel("Stunde (h)", font_label)
     ax.set_ylabel(ylabel, font_label)
-    ax.set_xlim(xmin=0, xmax=time_step * 1.1)
+    ax.set_xlim(xmin=0)
     ax.set_ylim(ymax=max(max(value1), max(value2), max(value3)) * n)
     # ax.tick_params(labelsize=12)
-    plt.xticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
-    plt.yticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
     fig.tight_layout()
 
     plt.savefig(plot_output)
@@ -733,11 +734,11 @@ def print_size(csv_file):
 
 def step_plot_solar_water_tes(csv_file, time_step):
     font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
-        'normal', 'size': '18'}
+        'normal', 'size': '15'}
     font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
-        'normal', 'size': '18'}
+        'normal', 'size': '15'}
     font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
-        'normal', 'size': '23'}
+        'normal', 'size': '18'}
     plot_output = os.path.join(opt_output_path, 'plot',
                                'Diagramm des Solarspeichers')
     df = pd.read_csv(csv_file)
@@ -756,19 +757,20 @@ def step_plot_solar_water_tes(csv_file, time_step):
     fig = plt.figure(figsize=(6.5, 5.5))
     ax = fig.add_subplot(111)
     ax.xaxis.set_minor_locator(MultipleLocator(5))
+    ax.set_ylim(ymin=10, ymax=75)
     ax.grid(linestyle='--', which='both')
 
-    plt.xticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
-    plt.yticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
     ax.set_title('Diagramm des Solarspeichers', font_titel, y=1.02)
     lns1 = ax.step(time_steps, value1, where="post", label='Temperatur',
-                   linestyle='--', color='k', linewidth=2)
+                   linestyle='-', color='k', linewidth=1.5)
     ax2 = ax.twinx()
     lns2 = ax2.step(time_steps, value2, where="post", label='Input Energie',
-                    color='r', linewidth=2, alpha=0.7)
+                    color='r', linewidth=1.5, alpha=0.7)
     lns3 = ax2.step(time_steps, value3, where="post", label='Output Energie',
-                    color='b', linewidth=2, alpha=0.7)
-    ax.set_ylim(ymax=max(max(value1), max(value2)) * 1.3)
+                    color='b', linewidth=1.5, alpha=0.7)
+    ax2.set_ylim(ymax=max(max(value2), max(value3)) * 1.5)
     lns = lns1 + lns2 + lns3
     labs = [l.get_label() for l in lns]
     plt.legend(lns, labs, loc='best', prop=font_legend)
@@ -776,19 +778,19 @@ def step_plot_solar_water_tes(csv_file, time_step):
     ax.set_xlabel("Stunde (h)", font_label)
     ax.set_ylabel(r"Temperatur ($^\circ$C)", font_label)
     ax2.set_ylabel(r"Leistung (kW)", font_label)
-    plt.xticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
-    plt.yticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
     fig.tight_layout()
 
     plt.savefig(plot_output)
 
 def step_plot_chp(csv_file, time_step):
     font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
-        'normal', 'size': '18'}
+        'normal', 'size': '15'}
     font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
-        'normal', 'size': '18'}
+        'normal', 'size': '15'}
     font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
-        'normal', 'size': '23'}
+        'normal', 'size': '18'}
     plot_output = os.path.join(opt_output_path, 'plot', 'Energieversorgung')
     df = pd.read_csv(csv_file)
     time_steps = range(time_step)
@@ -821,10 +823,286 @@ def step_plot_chp(csv_file, time_step):
     ax.set_title('Energieversorgung', font_titel, y=1.02)
     ax.set_xlabel("Stunde (h)", font_label)
     ax.set_ylabel(r'Leistung (kW)', font_label)
-    ax.set_xlim(xmin=0, xmax=time_step * 1.1)
+    ax.set_xlim(xmin=0)
     ax.set_ylim(ymax=max(max(value1), max(value2), max(data5)) * 1.5)
-    plt.xticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
-    plt.yticks(fontname='Times New Roman', fontsize=18, fontweight='medium')
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    fig.tight_layout()
+
+    plt.savefig(plot_output)
+
+def step_plot_chp_small_eff(csv_file, time_step):
+    font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
+        'normal', 'size': '15'}
+    font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
+    plot_output = os.path.join(opt_output_path, 'plot',
+                               'Thermischer Wirkungsgrad des BHKW')
+    df = pd.read_csv(csv_file)
+    time_steps = range(time_step)
+
+    data1 = df[df['var'].str.contains('inlet_temp_chp')]
+    data1 = data1.reset_index(drop=True)
+    value1 = data1['value']
+    data2 = df[df['var'].str.contains('therm_eff_chp')]
+    data2 = data2.reset_index(drop=True)
+    value2 = data2['value']
+
+    fig = plt.figure(figsize=(6.5, 5.5))
+    ax = fig.add_subplot(111)
+    ax.xaxis.set_minor_locator(MultipleLocator(5))
+    ax.grid(linestyle='--', which='both')
+
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    ax.set_title('Thermischer Wirkungsgrad des BHKW', font_titel, y=1.02)
+    lns1 = ax.step(time_steps, value1, where="post",
+                   label='Eintrittstemperatur',
+                   linestyle='--', color='k', linewidth=2)
+    ax2 = ax.twinx()
+    lns2 = ax2.step(time_steps, value2, where="post",
+                    label='Thermischer Wirkungsgrad',
+                    color='r', linewidth=2, alpha=0.7)
+    ax.set_ylim(ymax = max(value1) * 1.3)
+    lns = lns1 + lns2
+    labs = [l.get_label() for l in lns]
+    plt.legend(lns, labs, loc='best', prop=font_legend)
+
+    ax.set_xlabel("Stunde (h)", font_label)
+    ax.set_ylabel(r"Temperatur ($^\circ$C)", font_label)
+    ax2.set_ylabel(r"Wirkungsgrad", font_label)
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    fig.tight_layout()
+
+    plt.savefig(plot_output)
+
+def step_plot_chp_big_eff(csv_file, time_step):
+    font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
+        'normal', 'size': '15'}
+    font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
+    plot_output = os.path.join(opt_output_path, 'plot',
+                               'Thermischer Wirkungsgrad des BHKW')
+    df = pd.read_csv(csv_file)
+    time_steps = range(time_step)
+
+    data1 = df[df['var'].str.contains('inlet_temp_chp')]
+    data1 = data1.reset_index(drop=True)
+    value1 = data1['value']
+    data2 = df[df['var'].str.contains('outlet_temp_chp')]
+    data2 = data2.reset_index(drop=True)
+    value2 = data2['value']
+    data3 = df[df['var'].str.contains('therm_eff_chp')]
+    data3 = data3.reset_index(drop=True)
+    value3 = data3['value']
+
+    fig = plt.figure(figsize=(6.5, 5.5))
+    ax = fig.add_subplot(111)
+    ax.xaxis.set_minor_locator(MultipleLocator(1))
+    ax.grid(linestyle='--', which='both')
+
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    ax.set_title('Thermischer Wirkungsgrad des BHKW', font_titel, y=1.02)
+    lns1 = ax.step(time_steps, value1, where="post",
+                   label='Thermischer Wirkungsgrad',
+                   linestyle='--', color='k', linewidth=2)
+    ax2 = ax.twinx()
+    lns2 = ax2.step(time_steps, value2, where="post",
+                    label='Eintrittstemperatur',
+                    color='r', linewidth=2, alpha=0.7)
+    lns3 = ax2.step(time_steps, value3, where="post",
+                    label='Austrittstemperatur',
+                    color='b', linewidth=2, alpha=0.7)
+    ax.set_ylim(ymax=max(max(value2), max(value3)) * 1.3)
+    lns = lns1 + lns2 + lns3
+    labs = [l.get_label() for l in lns]
+    plt.legend(lns, labs, loc='best', prop=font_legend)
+
+    ax.set_xlabel("Stunde (h)", font_label)
+    ax.set_ylabel(r"Wirkungsgrad", font_label)
+    ax2.set_ylabel(r"Temperatur ($^\circ$C)", font_label)
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    fig.tight_layout()
+
+    plt.savefig(plot_output)
+
+def step_plot_solar_eff(csv_file, time_step, temp_profile):
+    font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
+        'normal', 'size': '15'}
+    font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '14'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
+    plot_output = os.path.join(opt_output_path, 'plot',
+                               'Wirkungsgrad des Kollektors')
+    df = pd.read_csv(csv_file)
+    time_steps = range(time_step)
+
+    data1 = df[df['var'].str.contains('eff_solar_coll')]
+    data1 = data1.reset_index(drop=True)
+    value1 = data1['value']
+    data2 = df[df['var'].str.contains('inlet_temp_solar_coll')]
+    data2 = data2.reset_index(drop=True)
+    value2 = data2['value']
+    data3 = df[df['var'].str.contains('outlet_temp_solar_coll')]
+    data3 = data3.reset_index(drop=True)
+    value3 = data3['value']
+    data4 = pd.DataFrame(temp_profile)
+    data4 = data4.reset_index(drop=True)
+    value4 = data4[0]
+
+    fig = plt.figure(figsize=(6.5, 5.5))
+    ax = fig.add_subplot(111)
+    ax.xaxis.set_minor_locator(MultipleLocator(5))
+    ax.yaxis.set_minor_locator(MultipleLocator(1))
+    ax.set_ylim(ymin=0.45, ymax=0.75)
+    ax.grid(linestyle='--', which='both')
+
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    ax.set_title('Wirkungsgrad des Kollektors', font_titel, y=1.02)
+    lns1 = ax.step(time_steps, value1, where="post",
+                   label='Wirkungsgrad',
+                   linestyle='-', color='k', linewidth=2)
+    ax2 = ax.twinx()
+    lns2 = ax2.step(time_steps, value2, where="post",
+                    label='Eintrittstemperatur',
+                    color='r', linewidth=2, alpha=0.7)
+    lns3 = ax2.step(time_steps, value3, where="post",
+                    label='Austrittstemperatur', linestyle='--',
+                    color='b', linewidth=2, alpha=0.7)
+    lns4 = ax2.step(time_steps, value4, where="post",
+                    label='Umgebungstemperatur', linestyle='-',
+                    color='g', linewidth=2, alpha=0.7)
+    ax2.yaxis.set_minor_locator(MultipleLocator(1))
+    ax2.set_ylim(ymax=max(max(value2), max(value3)) * 1.3)
+    lns = lns1 + lns2 + lns3 + lns4
+    labs = [l.get_label() for l in lns]
+
+    plt.legend(lns, labs, prop=font_legend, loc='best')
+
+    ax.set_xlabel("Stunde (h)", font_label)
+    ax.set_ylabel(r"Wirkungsgrad", font_label)
+    ax2.set_ylabel(r"Temperatur ($^\circ$C)", font_label)
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    fig.tight_layout()
+
+    plt.savefig(plot_output)
+
+def step_plot_solar_irr(csv_file, time_step, irr_profile):
+    font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
+        'normal', 'size': '15'}
+    font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
+    plot_output = os.path.join(opt_output_path, 'plot',
+                               'Wirkungsgrad ')
+    df = pd.read_csv(csv_file)
+    time_steps = range(time_step)
+
+    data1 = pd.DataFrame(irr_profile)
+    data1 = data1.reset_index(drop=True)
+    value1 = data1[0]
+    data2 = df[df['var'].str.contains('inlet_temp_solar_coll')]
+    data2 = data2.reset_index(drop=True)
+    value2 = data2['value']
+    data3 = df[df['var'].str.contains('outlet_temp_solar_coll')]
+    data3 = data3.reset_index(drop=True)
+    value3 = data3['value']
+
+    fig = plt.figure(figsize=(6.5, 5.5))
+    ax = fig.add_subplot(111)
+    ax.set_ylim(ymax=600)
+    ax.xaxis.set_minor_locator(MultipleLocator(5))
+    ax.grid(linestyle='--', which='both')
+
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    ax.set_title('Wirkungsgrad des Kollektors', font_titel, y=1.02)
+    lns1 = ax.step(time_steps, value1, where="post",
+                   label='Strahlung',
+                   linestyle='-', color='k', linewidth=2)
+    ax2 = ax.twinx()
+    lns2 = ax2.step(time_steps, value2, where="post",
+                    label='Eintrittstemperatur',
+                    color='r', linewidth=2, alpha=0.7)
+    lns3 = ax2.step(time_steps, value3, where="post",
+                    label='Austrittstemperatur', linestyle='--',
+                    color='b', linewidth=2, alpha=0.7)
+
+    lns = lns1 + lns2 + lns3
+    labs = [l.get_label() for l in lns]
+    plt.legend(lns, labs, loc='best', prop=font_legend)
+
+    ax.set_xlabel("Stunde (h)", font_label)
+    ax.set_ylabel(r"Strahlung (W/h)", font_label)
+    ax2.set_ylabel(r"Temperatur ($^\circ$C)", font_label)
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    fig.tight_layout()
+
+    plt.savefig(plot_output)
+
+def step_plot_elec_chp(csv_file, time_step, irr_profile):
+    font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
+        'normal', 'size': '15'}
+    font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
+    plot_output = os.path.join(opt_output_path, 'plot',
+                               'Wirkungsgrad ')
+    df = pd.read_csv(csv_file)
+    time_steps = range(time_step)
+
+    data1 = pd.DataFrame(irr_profile)
+    data1 = data1.reset_index(drop=True)
+    value1 = data1[0]
+    data2 = df[df['var'].str.contains('inlet_temp_solar_coll')]
+    data2 = data2.reset_index(drop=True)
+    value2 = data2['value']
+    data3 = df[df['var'].str.contains('outlet_temp_solar_coll')]
+    data3 = data3.reset_index(drop=True)
+    value3 = data3['value']
+
+    fig = plt.figure(figsize=(6.5, 5.5))
+    ax = fig.add_subplot(111)
+    ax.set_ylim(ymax=600)
+    ax.xaxis.set_minor_locator(MultipleLocator(5))
+    ax.grid(linestyle='--', which='both')
+
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    ax.set_title('Wirkungsgrad des Kollektors', font_titel, y=1.02)
+    lns1 = ax.step(time_steps, value1, where="post",
+                   label='Strahlung',
+                   linestyle='-', color='k', linewidth=2)
+    ax2 = ax.twinx()
+    lns2 = ax2.step(time_steps, value2, where="post",
+                    label='Eintrittstemperatur',
+                    color='r', linewidth=2, alpha=0.7)
+    lns3 = ax2.step(time_steps, value3, where="post",
+                    label='Austrittstemperatur', linestyle='--',
+                    color='b', linewidth=2, alpha=0.7)
+
+    lns = lns1 + lns2 + lns3
+    labs = [l.get_label() for l in lns]
+    plt.legend(lns, labs, loc='best', prop=font_legend)
+
+    ax.set_xlabel("Stunde (h)", font_label)
+    ax.set_ylabel(r"Strahlung (W/h)", font_label)
+    ax2.set_ylabel(r"Temperatur ($^\circ$C)", font_label)
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
     fig.tight_layout()
 
     plt.savefig(plot_output)

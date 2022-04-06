@@ -4,9 +4,9 @@ water_tes,HomoStorage,TES_homo,0,100,0,0,0,0,0,0,,0,0,,0,0
 gas_grid,GasGrid,GAS1,0,1000,0,0,0,0,,0,0,0,0,0,,0
 chp,CHPFluidBig,CHPFluidBig,50,50,0,0,4000,0,0,,0,,0,0,0,0
 e_grid,ElectricityGrid,GRD1,0,100,0,0,0,0,0,0,0,,0,0,0,0
-tp_val_therm,ThreePortValve,,,,0,,0,0,0,0,0,0,0,0,0,0
+tp_val_therm,ThreePortValve,,,,,,0,0,0,0,0,0,0,0,0,0
 e_cns,ElectricalConsumption,CNS1,0,100,0,0,0,0,0,0,0,0,0,0,0,0
 hw_cns,HotWaterConsumptionFluid,HWCNS,0,2000,0,0,0,0,0,0,0,0,0,0,0,0
-tp_val_hw,ThreePortValve,,,,0,0,0,0,0,0,0,0,,0,0,0
+tp_val_hw,ThreePortValve,,,,,0,0,0,0,0,0,0,,0,0,0
 boi,StandardBoiler,BOI_district,100,100,0,0,0,0,0,0,0,0,0,0,0,
-tp_val_boi,ThreePortValve,,,,0,,0,0,0,0,0,0,0,0,0,0
+tp_val_boi,ThreePortValve,,,,,,0,0,0,0,0,0,0,0,0,0
