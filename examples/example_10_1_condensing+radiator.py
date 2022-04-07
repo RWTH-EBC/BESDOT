@@ -15,7 +15,7 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ################################################################################
 
 # Generate a project object at first.
-project = Project(name='project_10', typ='building')
+project = Project(name='project_10_1', typ='building')
 
 
 # Generate the environment object
@@ -38,7 +38,7 @@ bld_10.add_thermal_profile('heat', env_10.temp_profile_original, env_10)
 #topo_file = os.path.join(base_path, 'data', 'topology',
 #                         'final.csv')
 topo_file = os.path.join(base_path, 'data', 'topology',
-                         'threeportvalve.csv')
+                         'boi+tes+radiator.csv')
 bld_10.add_topology(topo_file)
 bld_10.add_components(project.environment)
 project.add_building(bld_10)

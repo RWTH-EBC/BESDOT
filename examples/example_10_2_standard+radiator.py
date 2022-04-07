@@ -15,7 +15,7 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ################################################################################
 
 # Generate a project object at first.
-project = Project(name='project_10', typ='building')
+project = Project(name='project_10_2', typ='building')
 
 
 # Generate the environment object
@@ -56,7 +56,7 @@ project.run_optimization('gurobi', save_lp=True, save_result=True)
 result_output_path = os.path.join(base_path, 'data', 'opt_output',
                                   project.name + '_result.csv')
 post_pro.plot_all(result_output_path, time_interval=[0, env_10.time_step])
-post_pro.plot_double(result_output_path, "boi", "water_tes", 365, "gas",
+"""post_pro.plot_double(result_output_path, "boi", "water_tes", 365, "gas", 
                       "heat")
 post_pro.plot_double(result_output_path, "conden_boi", "water_tes", 365, "gas",
                      "heat")
