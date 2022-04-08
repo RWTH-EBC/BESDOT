@@ -11,7 +11,7 @@ import pyomo.environ as pyo
 # import gurobipy as gp
 import numpy as np
 import pandas as pd
-from sklearn.cluster import KMedoids
+# from sklearn.cluster import KMedoids
 
 
 # Implementation of the k-medoids problem, as it is applied in

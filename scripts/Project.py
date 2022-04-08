@@ -7,6 +7,7 @@ from warnings import warn
 import pyomo.environ as pyo
 import pandas as pd
 import numpy as np
+import tsam.timeseriesaggregation as tsam
 from tools.k_medoids import cluster
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -101,16 +102,28 @@ class Project(object):
 
         for empty_element in empty_element_list:
             del orig_profiles[empty_element]
-        # print(orig_profiles)
-        # print(len(orig_profiles))
 
-        # Turn profiles from dict to numpy array
-        orig_array = np.array(list(orig_profiles.values()))
-        print(orig_array)
-        scaled_typ_days, nc, z = cluster(orig_array)
-        print(scaled_typ_days)
-        print(nc)
-        print(z)
+        # Turn profiles from dict into pandas Dataframe
+        raw = pd.DataFrame(orig_profiles)
+        print(raw)
+        raw.index = pd.to_datetime(arg=raw.index, unit='h',
+                                   origin=pd.Timestamp('2021-01-01'))
+        print('#####')
+        print(raw)
+
+        aggregation = tsam.TimeSeriesAggregation(raw,
+                                                 noTypicalPeriods=12,
+                                                 hoursPerPeriod=24,
+                                                 clusterMethod='k_medoids',
+                                                 extremePeriodMethod='new_cluster_center',
+                                                 addPeakMin=['temp'],
+                                                 addPeakMax=['heat_demand'])
+        typ_periods = aggregation.createTypicalPeriods()
+        print('######')
+        print(typ_periods)
+        predicted_periods = aggregation.predictOriginalData()
+        print('######')
+        print(predicted_periods)
 
         self.cluster = True
 
