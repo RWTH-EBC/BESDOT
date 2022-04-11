@@ -489,16 +489,6 @@ def plot_four_lines(csv_file, comp1, comp2, comp3, comp4, label1, label2,
     plt.savefig(plot_output)
 
 
-def print_size(csv_file):
-    output_df = pd.read_csv(csv_file)
-    elements_dict = find_element(output_df)
-    size_dict = {}
-    for element in elements_dict:
-        if len(elements_dict[element]) == 1:
-            if 'size' in element and not np.isnan(elements_dict[element][0]):
-                size_dict[element] = elements_dict[element][0]
-                print(element, ' = ', size_dict[element])
-
 def step_plot_heat_demand(csv_file, time_step):
     font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
         'normal', 'size': '15'}
@@ -730,7 +720,16 @@ def print_size(csv_file):
             if 'size' in element and not np.isnan(elements_dict[element][0]):
                 size_dict[element] = elements_dict[element][0]
                 print(element, ' = ', size_dict[element])
-
+    for element in elements_dict:
+        if len(elements_dict[element]) == 1:
+            if 'annual_cost_bld' in element and not \
+                    np.isnan(elements_dict[element][0]):
+                size_dict[element] = elements_dict[element][0]
+                print('annual_cost = ', size_dict[element])
+            if 'operation_cost_bld' in element and not \
+                    np.isnan(elements_dict[element][0]):
+                size_dict[element] = elements_dict[element][0]
+                print('operation_cost = ', size_dict[element])
 
 def step_plot_solar_water_tes(csv_file, time_step):
     font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
@@ -795,7 +794,7 @@ def step_plot_chp(csv_file, time_step):
     df = pd.read_csv(csv_file)
     time_steps = range(time_step)
 
-    data1 = df[(df['var'].str.contains('output_heat_chp'))]
+    data1 = df[(df['var'].str.contains('output_heat_water_tes'))]
     data1 = data1.reset_index(drop=True)
     value1 = data1['value']
     data2 = df[(df['var'].str.contains('output_heat_boi'))]
@@ -812,7 +811,7 @@ def step_plot_chp(csv_file, time_step):
     ax.xaxis.set_minor_locator(MultipleLocator(5))
     plt.grid(linestyle='--', which='both')
 
-    ax.step(time_steps, value1, where="post", label='Wärme aus BHKW',
+    ax.step(time_steps, value1, where="post", label='Wärme aus Speicher',
             linewidth=2, alpha=0.7, color='r', linestyle='-')
     ax.step(time_steps, value2, where="post", label='Wärme aus Kessel',
             linewidth=2, alpha=0.7, color='b', linestyle='-')
