@@ -730,6 +730,19 @@ def print_size(csv_file):
                     np.isnan(elements_dict[element][0]):
                 size_dict[element] = elements_dict[element][0]
                 print('operation_cost = ', size_dict[element])
+            if 'input_heat_hw_cns' in element and not \
+                    np.isnan(elements_dict[element][0]):
+                size_dict[element] = elements_dict[element][0]
+                print('hot_water_demand = ', size_dict[element])
+            if 'input_heat_therm_cns' in element and not \
+                    np.isnan(elements_dict[element][0]):
+                size_dict[element] = elements_dict[element][0]
+                print('heat_demand = ', size_dict[element])
+            if 'input_elec_e_cns' in element and not \
+                    np.isnan(elements_dict[element][0]):
+                size_dict[element] = elements_dict[element][0]
+                print('elec_demand = ', size_dict[element])
+
 
 def step_plot_solar_water_tes(csv_file, time_step):
     font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':

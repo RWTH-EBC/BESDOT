@@ -15,7 +15,7 @@ module_dict = get_all_class.run()
 
 class Building(object):
     def __init__(self, name, area, solar_area=None,
-                 bld_typ='Verwaltungsgebäude',
+                 bld_typ='Büro und Dienstleistungsgebäude',
                  annual_heat_demand=None,
                  annual_elec_demand=None):
         """
