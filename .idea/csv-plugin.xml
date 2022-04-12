@@ -45,6 +45,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\data\component_database\HomoStorageST\TES_homo_ST.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\data\component_database\HotWaterStorage\TES1.csv">
           <value>
             <Attribute>
@@ -249,6 +256,13 @@
           </value>
         </entry>
         <entry key="\data\topology\chp_fluid_small_hi_UF.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\topology\chp_fluid_small_hi_solar.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

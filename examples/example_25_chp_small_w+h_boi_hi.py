@@ -5,6 +5,7 @@ from scripts.Building import Building
 import tools.post_solar_chp as post_pro
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+a = 300
 
 ################################################################################
 #                           Generate python objects
@@ -14,7 +15,7 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 project = Project(name='project_25', typ='building')
 
 # Generate the environment object
-env_25 = Environment(time_step=24)
+env_25 = Environment(time_step=a)
 project.add_environment(env_25)
 
 # If the objective of the project is the optimization for building, a building
@@ -45,7 +46,7 @@ project.add_building(bld_25)
 ################################################################################
 #                        Build pyomo model and run optimization
 ################################################################################
-project.build_model(obj_typ='operation_cost')
+project.build_model(obj_typ='annual_cost')
 project.run_optimization('gurobi', save_lp=True, save_result=True)
 
 ################################################################################
@@ -54,56 +55,46 @@ project.run_optimization('gurobi', save_lp=True, save_result=True)
 
 result_output_path = os.path.join(base_path, 'data', 'opt_output',
                                   project.name + '_result.csv')
-#post_pro.plot_all(result_output_path, time_interval=[0, env_25.time_step])
-'''
-post_pro.plot_double(result_output_path, "solar_coll", "water_tes", 365, "heat"
-                     , "heat")
-post_pro.plot_double(result_output_path, "water_tes", "tp_val", 365, "heat",
-                     "heat")
-post_pro.plot_double(result_output_path, "tp_val", "e_boi", 365, "heat",
-                     "heat")
-post_pro.plot_double(result_output_path, "e_boi", "hw_cns", 365, "heat",
-                     "heat")
+# post_pro.plot_all(result_output_path, time_interval=[0, env_25.time_step])
 
-post_pro.plot_double_24h(result_output_path, "solar_coll", "water_tes")
-post_pro.plot_double_24h(result_output_path, "water_tes", "tp_val")
-post_pro.plot_double_24h(result_output_path, "tp_val", "e_boi")
-post_pro.plot_double_24h(result_output_path, "e_boi", "hw_cns")
-'''
-'''
 post_pro.print_size(result_output_path)
-post_pro.plot_one_line(result_output_path, 'therm_eff_chp', 'Efficiency of CHP',
-                       r'Efficiency', n=1.05)
-post_pro.plot_two_lines(result_output_path, 'input_elec_e_grid',
-                         'output_elec_e_grid', 'Input', 'Output',
-                         'Profile of E-grid',
-                         r'Power (kW)', n=1.05)
-post_pro.plot_two_lines(result_output_path, 'inlet_temp_chp',
-                         'outlet_temp_chp', 'Inlet', 'Outlet',
-                         'Temperature of E-grid',
-                         r'Temperature ($^\circ$C)', n=1.05)
-post_pro.plot_four_lines(result_output_path, 'output_heat_chp',
-                          'output_heat_boi', 'input_heat_hw_cns',
-                          'input_heat_therm_cns', 'Heat of CHP',
-                          'Heat of Boiler', 'Heat Demand', 'Hot Water Demand',
-                          'Energy ', r'Power (kW)', n=1.05)
-'''
-post_pro.print_size(result_output_path)
-post_pro.step_plot_two_lines(result_output_path, 24, 'input_elec_e_grid',
-                        'output_elec_e_grid', 'Input', 'Output',
-                        'Energieaustausch des Stromgrids', r'Leistung (kW)')
-post_pro.step_plot_two_lines(result_output_path, 24, 'inlet_temp_chp',
-                        'outlet_temp_chp', 'Inlet', 'Outlet',
-                        'Temperatur des BHKW',
-                        r'Temperatur ($^\circ$C)', n=1.05)
-post_pro.step_plot_four_lines(result_output_path, 24, 'output_heat_chp',
-                         'output_heat_boi', 'input_heat_hw_cns',
-                         'input_heat_therm_cns', 'Wärme aus BHKW',
-                         'Wärme aus Kessel', 'Wärmebedarf', 'Warmwasserbedarf',
-                         'Energieerzeugung', r'Leistung (kW)', n=1.5)
-post_pro.step_plot_one_line(result_output_path, 24, 'therm_eff_chp',
+post_pro.step_plot_two_lines(result_output_path, a,
+                             'input_elec_e_grid',
+                             'output_elec_e_grid', 'Input', 'Output',
+                             'Energieaustausch des Stromgrids',
+                             r'Leistung (kW)')
+post_pro.step_plot_two_lines(result_output_path, a,
+                             'inlet_temp_chp',
+                             'outlet_temp_chp', 'Inlet', 'Outlet',
+                             'Temperatur des BHKW',
+                             r'Temperatur ($^\circ$C)', n=1.05)
+post_pro.step_plot_four_lines(result_output_path, a,
+                              'output_heat_chp',
+                              'output_heat_boi', 'input_heat_hw_cns',
+                              'input_heat_therm_cns', 'Wärme aus BHKW',
+                              'Wärme aus Kessel', 'Wärmebedarf',
+                              'Warmwasserbedarf',
+                              'Energieerzeugung', r'Leistung (kW)', n=1.5)
+post_pro.step_plot_four_lines(result_output_path, a,
+                              'output_heat_water_tes',
+                              'output_heat_boi', 'input_heat_hw_cns',
+                              'input_heat_therm_cns', 'Wärme aus Speicher',
+                              'Wärme aus Kessel', 'Wärmebedarf',
+                              'Warmwasserbedarf',
+                              'Energieerzeugung', r'Leistung (kW)', n=1.5)
+post_pro.step_plot_one_line(result_output_path, a,
+                            'therm_eff_chp',
                             'Thermische Effizienz', r'Effizienz', n=1.02)
-post_pro.step_plot_one_line(result_output_path, 24, 'status_chp',
+post_pro.step_plot_one_line(result_output_path, a+5, 'status_chp',
                             'Status des BHKW', r'Status')
-post_pro.step_plot_chp(result_output_path, 24)
-post_pro.step_plot_heat_demand(result_output_path, 24)
+post_pro.step_plot_chp(result_output_path, a)
+post_pro.step_plot_heat_demand(result_output_path, a)
+post_pro.step_plot_chp_small_eff(result_output_path, a)
+post_pro.step_plot_four_lines(result_output_path, a,
+                              'input_elec_e_cns',
+                              'e_grid_e_cns', 'chp_e_cns', 'chp_e_grid',
+                              'Strombedarf', 'Strom aus E-Grid',
+                              'Strom aus BHKW',
+                              'Stromeinspeisung', 'Stromversorgung',
+                              r'Leistung (kW)', l1='-', l2='--', l3='--',
+                              n=1.3)

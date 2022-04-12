@@ -11,23 +11,6 @@ import matplotlib.pyplot as plt
 from tools.gen_heat_profile import calc_bld_demand
 
 # ==============================================================================
-#                     Non-residential Building List
-# ==============================================================================
-
-building_typ_list = ["Verwaltungsgebäude",
-                     "Büro und Dienstleistungsgebäude",
-                     "Hochschule und Forschung",
-                     "Gesundheitswesen",
-                     "Bildungseinrichtungen",
-                     "Kultureinrichtungen",
-                     "Sporteinrichtungen",
-                     "Beherbergen und Verpflegen",
-                     "Gewerbliche und industrielle",
-                     "Verkaufsstätten",
-                     "Technikgebäude"]
-energy_typ_list = ["sehr hoch", "hoch", "mittel", "gering", "sehr gering"]
-
-# ==============================================================================
 #                       Path for inputs and outputs
 # ==============================================================================
 
@@ -35,12 +18,6 @@ energy_typ_list = ["sehr hoch", "hoch", "mittel", "gering", "sehr gering"]
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 input_profile_path = os.path.join(base_path, "data", "tek_data",
                                   "DHW_profile.xlsx")
-input_energy_path = os.path.join(base_path, "data", "tek_data",
-                                 "TEK_Teilenergiekennwerte.xlsx")
-input_zone_path = os.path.join(base_path, "data", "tek_data",
-                               "GHD_Zonierung.xlsx")
-input_tabula_path = os.path.join(base_path, "data", "tek_data",
-                                 "TABULA_data.xlsx")
 output_path = os.path.join(base_path, "data", "tek_data",
                            "output_hot_water_profile")
 
