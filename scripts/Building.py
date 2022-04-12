@@ -8,6 +8,7 @@ import numpy as np
 from tools.gen_heat_profile import *
 from tools.gen_elec_profile import gen_elec_profile
 from tools import get_all_class
+from scripts.components.Storage import Storage
 
 module_dict = get_all_class.run()
 
@@ -210,6 +211,44 @@ class Building(object):
 
         self.add_energy_flows()
 
+    def update_components(self, cluster):
+        """Update the components, which could be influenced by clustering
+        methods. The most important items are consumption items and storages:
+        consumptions should be replaced by the new clustered profiles and
+        storage should take additional assumption."""
+        for item in self.topology.index:
+            if self.topology['comp_type'][item] in ['HeatConsumption',
+                                                    'HeatConsumptionFluid',
+                                                    'ElectricalConsumption',
+                                                    'HotWaterConsumption',
+                                                    'HotWaterConsumptionFluid'
+                                                    ]:
+                cluster_profile = pd.Series(cluster.clusterPeriodDict[
+                    'heat_demand']).tolist()
+                self.components[item].update_profile(
+                    consum_profile=cluster_profile)
+            if self.topology['comp_type'][item] in ['HeatPump',
+                                                    'GasHeatPump', 'PV',
+                                                    'SolarThermalCollector',
+                                                    'SolarThermalCollectorFluid',
+                                                    ]:
+                cluster_profile = pd.Series(cluster.clusterPeriodDict[
+                                                'temp']).tolist()
+                self.components[item].update_profile(
+                    temp_profile=cluster_profile)
+            if self.topology['comp_type'][item] in ['PV',
+                                                    'SolarThermalCollector',
+                                                    'SolarThermalCollectorFluid',
+                                                    ]:
+                cluster_profile = pd.Series(cluster.clusterPeriodDict[
+                                                'irr']).tolist()
+                self.components[item].update_profile(
+                    irr_profile=cluster_profile)
+            if isinstance(self.components[item], Storage):
+                # The indicator cluster in storage could determine if the
+                # cluster function should be called.
+                self.components[item].cluster = True
+
     def add_energy_flows(self):
         # Assign the variables for the energy flows according to system
         # topology. The input energy type and output energy type could be
@@ -393,14 +432,18 @@ class Building(object):
         for comp in self.components:
             self.components[comp].add_vars(model)
 
-    def add_cons(self, model, env):
+    def add_cons(self, model, env, cluster=None):
         self._constraint_energy_balance(model)
         self._constraint_mass_balance(model)
         # todo (yni): Attention in the optimization for operation cost should
         #  comment constrain for solar area. This should be done automated.
         #self._constraint_solar_area(model)
-        self._constraint_total_cost(model, env)
-        self._constraint_operation_cost(model, env)
+        if cluster is None:
+            self._constraint_total_cost(model, env)
+            self._constraint_operation_cost(model, env)
+        else:
+            pass
+
         for comp in self.components:
             if hasattr(self.components[comp], 'heat_flows_in'):
                 if isinstance(self.components[comp].heat_flows_in, list):
@@ -508,10 +551,11 @@ class Building(object):
         # sale volume in time series and used to avoid that the constraint
         # added is not executed properly if there is a None. The reason for
         # 8761 steps is the different index of python list and pyomo.
-        buy_elec = [0] * 8761
-        sell_elec = [0] * 8761
-        buy_gas = [0] * 8761
-        buy_heat = [0] * 8761
+        buy_elec = [0] * (env.time_step + 1)  # unmatched index for python and
+        # pyomo
+        sell_elec = [0] * (env.time_step + 1)
+        buy_gas = [0] * (env.time_step + 1)
+        buy_heat = [0] * (env.time_step + 1)
 
         comp_cost_list = []
         for comp in self.components:
@@ -545,10 +589,11 @@ class Building(object):
         # sale volume in time series and used to avoid that the constraint
         # added is not executed properly if there is a None. The reason for
         # 8761 steps is the different index of python list and pyomo.
-        buy_elec = [0] * 8761
-        sell_elec = [0] * 8761
-        buy_gas = [0] * 8761
-        buy_heat = [0] * 8761
+        buy_elec = [0] * (env.time_step + 1)  # unmatched index for python and
+        # pyomo
+        sell_elec = [0] * (env.time_step + 1)
+        buy_gas = [0] * (env.time_step + 1)
+        buy_heat = [0] * (env.time_step + 1)
 
         # comp_cost_list = []
         for comp in self.components:

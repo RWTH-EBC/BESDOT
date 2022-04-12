@@ -28,7 +28,7 @@ class Project(object):
         self.model = None
 
         # Infos about time series cluster, default value set to False
-        self.cluster = False
+        self.cluster = None
 
     def add_environment(self, environment):
         """
@@ -58,7 +58,7 @@ class Project(object):
         """
         pass
 
-    def time_cluster(self):
+    def time_cluster(self, nr_periods=12, hours_period=24):
         # The profiles could be clustered are: demand profiles, weather
         # profiles and prices profiles (if necessary). demand profiles are
         # stored in buildings and other information are stored in Environment
@@ -103,21 +103,19 @@ class Project(object):
         for empty_element in empty_element_list:
             del orig_profiles[empty_element]
 
-        # Turn profiles from dict into pandas Dataframe
+        # Turn profiles from dict into pandas Dataframe and use package tsam
         raw = pd.DataFrame(orig_profiles)
-        print(raw)
         raw.index = pd.to_datetime(arg=raw.index, unit='h',
                                    origin=pd.Timestamp('2021-01-01'))
-        print('#####')
-        print(raw)
 
-        aggregation = tsam.TimeSeriesAggregation(raw,
-                                                 noTypicalPeriods=12,
-                                                 hoursPerPeriod=24,
-                                                 clusterMethod='k_medoids',
-                                                 extremePeriodMethod='new_cluster_center',
-                                                 addPeakMin=['temp'],
-                                                 addPeakMax=['heat_demand'])
+        aggregation = \
+            tsam.TimeSeriesAggregation(raw,
+                                       noTypicalPeriods=nr_periods,
+                                       hoursPerPeriod=hours_period,
+                                       clusterMethod='hierarchical',
+                                       extremePeriodMethod='new_cluster_center',
+                                       addPeakMin=['temp'],
+                                       addPeakMax=['heat_demand'])
         typ_periods = aggregation.createTypicalPeriods()
         print('######')
         print(typ_periods)
@@ -125,7 +123,7 @@ class Project(object):
         print('######')
         print(predicted_periods)
 
-        self.cluster = True
+        self.cluster = aggregation
 
     def build_model(self, obj_typ='annual_cost'):
         """
@@ -135,21 +133,37 @@ class Project(object):
         if self.typ == 'building' and len(self.building_list) == 1:
             # Initialisation of ConcreteModel
             self.model = pyo.ConcreteModel(self.name)
-            self.model.time_step = pyo.RangeSet(self.environment.time_step)
             self.model.cons = pyo.ConstraintList()
+
+            if self.cluster is None:
+                self.model.time_step = pyo.RangeSet(self.environment.time_step)
+
+                # # Assign pyomo variables
+                # bld = self.building_list[0]
+                # bld.add_vars(self.model)
+                #
+                # # Add pyomo constraints to model
+                # bld.add_cons(self.model, self.environment)
+            else:
+                # The reduced data are stored in clusterPeriodDict as dict,
+                # the keys are the items, which are used for clustering such
+                # as demand profiles and weather profiles.
+                print(len(list(self.cluster.clusterPeriodDict.values())[0]))
+                self.model.time_step = pyo.RangeSet(len(list(
+                    self.cluster.clusterPeriodDict.values())[0]))
 
             # Assign pyomo variables
             bld = self.building_list[0]
             bld.add_vars(self.model)
 
             # Add pyomo constraints to model
-            bld.add_cons(self.model, self.environment)
+            bld.add_cons(self.model, self.environment, self.cluster)
 
             # Add pyomo objective
             bld_annual_cost = self.model.find_component('annual_cost_' +
                                                         bld.name)
-            bld_operation_cost = self.model.find_component('operation_cost_' +
-                                                           bld.name)
+            bld_operation_cost = self.model.find_component(
+                'operation_cost_' + bld.name)
 
             # If objective is annual cost, the components size should be
             # given in range, so that the dimensioning could be made. If
@@ -218,7 +232,3 @@ class Project(object):
 
             # Get value of single variable
             # print(self.model.size_pv.value)
-
-
-
-

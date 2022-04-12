@@ -46,10 +46,14 @@ project.add_building(bld_24)
 # and other information are stored in Environment objects.
 project.time_cluster()
 
+# After clustering need to update the demand profiles and storage assumptions.
+for bld in project.building_list:
+    bld.update_components(project.cluster)
+
 ################################################################################
 #                        Build pyomo model and run optimization
 ################################################################################
-# project.build_model(obj_typ='annual_cost')
+project.build_model(obj_typ='annual_cost')
 # project.run_optimization('gurobi', save_lp=True, save_result=True)
 
 ################################################################################

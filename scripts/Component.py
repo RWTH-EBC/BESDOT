@@ -107,6 +107,14 @@ class Component(object):
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for servicing effort hours.")
 
+    def update_profile(self, **kwargs):
+        for arg in kwargs:
+            if hasattr(self, arg):
+                setattr(self, arg, kwargs[arg])
+            else:
+                warnings.warn("Can't update the profile for component" +
+                              self.name)
+
     def add_energy_flows(self, io, energy_type, energy_flow):
         if io in ['input', 'output']:
             if energy_type not in self.energy_flows[io].keys():
