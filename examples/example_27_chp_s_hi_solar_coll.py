@@ -8,7 +8,7 @@ from scripts.Building import Building
 import tools.post_solar_chp as post
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-a = 30
+a = 300
 ################################################################################
 #                           Generate python objects
 ################################################################################
@@ -83,11 +83,12 @@ post.step_plot_two_lines(result_output_path, env_16.time_step,
                          'input_heat_tp_val', 'Input', 'Output',
                          'Energieveränderung des Speichers',
                          r'Leistung (kW)', 1.05)
-                         
+                        
 post.step_plot_one_line(result_output_path, env_16.time_step, 
                        'output_heat_solar_coll',
                        'Wärme aus Solarkollektor', r'Leistung (kW)')
-'''
+                       
+###############################################################################
 post.print_size(result_output_path)
 post.step_plot_one_line(result_output_path, a,
                         'input_elec_e_boi',
@@ -106,3 +107,4 @@ post.step_plot_solar_eff(result_output_path, a,
                          project.environment.temp_profile)
 post.step_plot_solar_irr(result_output_path, a,
                          project.environment.irr_profile)
+'''
