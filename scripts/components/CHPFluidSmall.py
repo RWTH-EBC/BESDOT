@@ -34,6 +34,7 @@ class CHPFluidSmall(CHP, FluidComponent):
         # todo (qli): building.py Zeile 342 anpassen
         self.heat_flows_in = None
         self.heat_flows_out = []
+        self.other_op_cost = True
 
     # Pel = elektrische Nennleistung = comp_size
     # Qth = thermische Nennleistung
@@ -64,7 +65,7 @@ class CHPFluidSmall(CHP, FluidComponent):
             c_2 = pyo.Constraint(
                 expr=therm_eff[t] == 0.705 - 0.0008 * (Qth - 44) - 0.006 * (
                             inlet_temp[t] - 30))
-            model.add_component('a_dis_' + str(t),a)
+            model.add_component('a_dis_' + str(t), a)
             a.add_component('a_1' + str(t), c_1)
             a.add_component('a_2' + str(t), c_2)
             b = Disjunct()
@@ -87,7 +88,6 @@ class CHPFluidSmall(CHP, FluidComponent):
     def _constraint_temp(self, model):
         outlet_temp = model.find_component('outlet_temp_' + self.name)
         inlet_temp = model.find_component('inlet_temp_' + self.name)
-        # Zu hohe Temperaturspreizng führt zur Beschädigung der Anlagen.
         #for t in model.time_step:
             # model.cons.add(outlet_temp[t] - inlet_temp[t] <= 25)
             # model.cons.add(inlet_temp[t] <= 50)
@@ -106,7 +106,6 @@ class CHPFluidSmall(CHP, FluidComponent):
         Pel = model.find_component('size_' + self.name)
         Qth = model.find_component('therm_size_' + self.name)
         therm_eff = model.find_component('therm_eff_' + self.name)
-        # elec_eff = model.find_component('elec_eff_' + self.name)
         input_energy = model.find_component('input_' + self.inputs[0] +
                                             '_' + self.name)
         output_heat = model.find_component(
@@ -127,7 +126,7 @@ class CHPFluidSmall(CHP, FluidComponent):
         self._constraint_conver(model)
 
         self._constraint_vdi2067_chp(model)
-        # self._constraint_start_stop_ratio_gdp(model)
+        self._constraint_start_stop_ratio_gdp(model)
         # todo (qli): building.py anpassen
         self._constraint_start_cost(model)
         # todo (qli): building.py anpassen
@@ -136,7 +135,7 @@ class CHPFluidSmall(CHP, FluidComponent):
     def add_vars(self, model):
         super().add_vars(model)
 
-        Qth = pyo.Var(bounds=(0, 109))
+        Qth = pyo.Var(bounds=(7, 109))
         model.add_component('therm_size_' + self.name, Qth)
 
         therm_eff = pyo.Var(model.time_step, bounds=(0, 1))
@@ -151,7 +150,7 @@ class CHPFluidSmall(CHP, FluidComponent):
         status = pyo.Var(model.time_step, domain=pyo.Binary)
         model.add_component('status_' + self.name, status)
 
-        status1 = pyo.Var(range(1, len(model.time_step)+2), domain=pyo.Binary)
+        status1 = pyo.Var(range(1, len(model.time_step)+6), domain=pyo.Binary)
         model.add_component('status1_' + self.name, status1)
 
         # todo (qli): building.py anpassen
@@ -187,8 +186,12 @@ class CHPFluidSmall(CHP, FluidComponent):
         model.cons.add(status1[1] == 0)
         for t in model.time_step:
             model.cons.add(status1[t+1] == status[t])
+            model.cons.add(status1[len(model.time_step)+5] == 0)
+            model.cons.add(status1[len(model.time_step)+4] == 0)
+            model.cons.add(status1[len(model.time_step)+3] == 0)
+            model.cons.add(status1[len(model.time_step)+2] == 0)
+            model.cons.add(status1[len(model.time_step)+1] == 0)
 
-        # todo (qli): GDP Modell
         '''
         for t in model.time_step:
             if status1[t + 1] == 1 and status1[t] == 0:
@@ -199,14 +202,14 @@ class CHPFluidSmall(CHP, FluidComponent):
                  model.cons.add(status1[t + 6] == 1)
         '''
         # len(model.time_step) >= 6
-        for t in range(1, len(model.time_step)-5):
+        for t in range(1, len(model.time_step)):
             d = Disjunct()
             c_5 = pyo.Constraint(expr=status1[t+1] - status1[t] == 1)
-            c_6 = pyo.Constraint(expr=status[t + 1] == 1)
-            c_7 = pyo.Constraint(expr=status[t + 2] == 1)
-            c_8 = pyo.Constraint(expr=status[t + 3] == 1)
-            c_9 = pyo.Constraint(expr=status[t + 4] == 1)
-            c_10 = pyo.Constraint(expr=status[t + 5] == 1)
+            c_6 = pyo.Constraint(expr=status1[t + 2] == 1)
+            c_7 = pyo.Constraint(expr=status1[t + 3] == 1)
+            c_8 = pyo.Constraint(expr=status1[t + 4] == 1)
+            c_9 = pyo.Constraint(expr=status1[t + 5] == 1)
+            c_10 = pyo.Constraint(expr=status1[t + 6] == 1)
             model.add_component('d_dis_' + str(t), d)
             d.add_component('d_1' + str(t), c_5)
             d.add_component('d_2' + str(t), c_6)
@@ -223,13 +226,8 @@ class CHPFluidSmall(CHP, FluidComponent):
             model.add_component('f_dis_' + str(t), f)
             f.add_component('f_1' + str(t), c_12)
 
-            dj = Disjunction(expr=[d,e,f])
+            dj = Disjunction(expr=[d, e, f])
             model.add_component('dj_dis1_' + str(t), dj)
-
-        # todo(qli): 26-30s, wenn status(t=25s)=0, kann es sein,
-        #  status(t=26s)=1, status(t=27s)=0
-        for t in range(len(model.time_step) - 5, len(model.time_step) +1):
-            pass
 
     def _constraint_start_cost(self, model):
         status = model.find_component('status_' + self.name)
@@ -237,10 +235,11 @@ class CHPFluidSmall(CHP, FluidComponent):
         # todo (qli): building.py anpassen
         start_cost = model.find_component('start_cost_' + self.name)
         status1 = model.find_component('status1_' + self.name)
+        other_op_cost = model.find_component('other_op_cost_' + self.name)
         model.cons.add(status1[1] == 0)
         for t in model.time_step:
             model.cons.add(status1[t + 1] == status[t])
-        for t in range(1, len(model.time_step)):
+        for t in range(1, len(model.time_step)+1):
             g = Disjunct()
             c_13 = pyo.Constraint(expr=status1[t+1] - status1[t] == 1)
             c_14 = pyo.Constraint(expr=start[t] == 1)
@@ -265,6 +264,7 @@ class CHPFluidSmall(CHP, FluidComponent):
 
         model.cons.add(start_cost == self.start_price * sum(start[t] for t in
                                                             model.time_step))
+        model.cons.add(other_op_cost == start_cost)
 
     def _constraint_chp_elec_sell_price(self, model):
         kwk_zuschlag = 0.08  # €/kWh

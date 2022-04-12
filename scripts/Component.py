@@ -50,6 +50,12 @@ class Component(object):
         self.max_size = max_size
         self.current_size = current_size
 
+        # other_op_cost is an indicator, which shows if other operation cost
+        # should be considered for the component. The attribute could be set
+        # into False or True. False means no other operation cost should be
+        # taken into account.
+        self.other_op_cost = False
+
         self.energy_flows = {'input': {},
                              'output': {}}
 
@@ -297,3 +303,7 @@ class Component(object):
                 output_energy = pyo.Var(model.time_step, bounds=(0, 10 ** 8))
                 model.add_component('output_' + energy_type + '_' + self.name,
                                     output_energy)
+
+        if self.other_op_cost:
+            other_op_cost = pyo.Var(bounds=(0, 10 ** 8))
+            model.add_component('other_op_cost_' + self.name, other_op_cost)

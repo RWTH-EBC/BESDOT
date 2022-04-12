@@ -86,14 +86,14 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
             model.cons.add(input_energy[t+1] * 1000 == heat_flux[t + 1] * area)
             model.cons.add(input_energy[t + 1] == output_energy[t + 1])
 
-    def _constraint_mass_flow(self, model):
-        for heat_input in self.heat_flows_in:
-            m_in = model.find_component(heat_input[0] + '_' + heat_input[1] +
-                                        '_' + 'mass')
-            m_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
-                                         '_' + 'mass')
-            for t in range(len(model.time_step)):
-                model.cons.add(m_in[t + 1] == m_out[t + 1])
+    # def _constraint_mass_flow(self, model):
+    #    for heat_input in self.heat_flows_in:
+    #        m_in = model.find_component(heat_input[0] + '_' + heat_input[1] +
+    #                                    '_' + 'mass')
+    #        m_out = model.find_component(heat_input[1] + '_' + heat_input[0] +
+    #                                     '_' + 'mass')
+    #        for t in range(len(model.time_step)):
+    #            model.cons.add(m_in[t + 1] == m_out[t + 1])
 
     # todo (qli):
     def _constraint_heat_water_return_temp(self, model, room_temp=21):

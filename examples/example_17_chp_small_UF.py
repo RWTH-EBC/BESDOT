@@ -2,7 +2,7 @@ import os
 from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
-import tools.post_processing as post_pro
+import tools.post_solar_chp as post_pro
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -13,9 +13,8 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Generate a project object at first.
 project = Project(name='project_17', typ='building')
 
-
 # Generate the environment object
-env_17 = Environment(time_step=3)
+env_17 = Environment(time_step=24)
 project.add_environment(env_17)
 
 # If the objective of the project is the optimization for building, a building
@@ -24,12 +23,15 @@ bld_17 = Building(name='bld_17', area=200)
 
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
-# bld_2.add_thermal_profile('heat', env_2.temp_profile_original, env_2)
+bld_17.add_thermal_profile('heat', env_17.temp_profile_original, env_17)
+bld_17.add_elec_profile(2021, env_17)
+bld_17.add_hot_water_profile(env_17)
+# bld_17.add_hot_water_profile_TBL(1968, env_17)
 
-bld_17.demand_profile['heat_demand'] = [10, 10, 0]
-bld_17.demand_profile['hot_water_demand'] = [1, 0, 0]
-bld_17.demand_profile["elec_demand"] = [0, 0, 0]
-#bld_17.add_thermal_profile('heat', env_17.temp_profile_original, env_17)
+# bld_17.demand_profile['heat_demand'] = [10, 10, 0]
+# bld_17.demand_profile['hot_water_demand'] = [1, 0, 0]
+# bld_17.demand_profile["elec_demand"] = [0, 0, 0]
+# bld_17.add_thermal_profile('heat', env_17.temp_profile_original, env_17)
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 # todo: 1 hinter 'chp_fluid_small' kann man löschen oder hinzufügen.
@@ -52,4 +54,4 @@ project.run_optimization('gurobi', save_lp=True, save_result=True)
 
 result_output_path = os.path.join(base_path, 'data', 'opt_output',
                                   project.name + '_result.csv')
-#post_pro.plot_all(result_output_path, time_interval=[0, env_17.time_step])
+# post_pro.plot_all(result_output_path, time_interval=[0, env_17.time_step])

@@ -2,7 +2,7 @@ import os
 from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
-import tools.post_processing as post_pro
+import tools.post_solar_chp as post_pro
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -15,7 +15,7 @@ project = Project(name='project_12', typ='building')
 
 
 # Generate the environment object
-env_12 = Environment(time_step=30)
+env_12 = Environment(time_step=24)
 project.add_environment(env_12)
 
 # If the objective of the project is the optimization for building, a building
@@ -24,10 +24,13 @@ bld_12 = Building(name='bld_12', area=200)
 
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
-# bld_2.add_thermal_profile('heat', env_2.temp_profile_original, env_2)
+bld_12.add_thermal_profile('heat', env_12.temp_profile_original, env_12)
+bld_12.add_elec_profile(2021, env_12)
+bld_12.add_hot_water_profile(env_12)
+# bld_12.add_hot_water_profile_TBL(1968, env_12)
 
-bld_12.demand_profile['heat_demand'] = [10, 10, 0]*10
-bld_12.demand_profile["elec_demand"] = [0, 0, 0]*10
+# bld_12.demand_profile['heat_demand'] = [10, 10, 0]*10
+# bld_12.demand_profile["elec_demand"] = [0, 0, 0]*10
 
 # Pre define the building energy system with the topology for different
 # components and add components to the building.

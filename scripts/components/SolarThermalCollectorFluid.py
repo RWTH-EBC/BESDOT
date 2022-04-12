@@ -9,7 +9,8 @@ from pyomo.gdp import Disjunct, Disjunction
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
     __file__))))
 
-unit_switch = 1000  # W/kWh
+unit_switch_W = 1000  # Wh/kWh
+unit_switch_J = 3600 * 1000  # J/kWh
 small_num = 0.00001
 
 class SolarThermalCollectorFluid(FluidComponent):
@@ -29,7 +30,6 @@ class SolarThermalCollectorFluid(FluidComponent):
         self.irr_profile = irr_profile
         # todo: (qli) solar_liquid_heat_cap korrigieren
         self.solar_liquid_heat_cap = 3690  # J/kgK
-        self.unit_switch = 3600 * 1000  # J/kWh
         self.max_temp = 135
         self.mass_flow = None  # kg/h
 
@@ -76,13 +76,12 @@ class SolarThermalCollectorFluid(FluidComponent):
                     (inlet_temp[t] + outlet_temp[t]) / 2 -
                     self.temp_profile[t - 1]) / 1000)
 
-    """
     # Test
-    def _constraint_efficiency(self, model):
+    def _constraint_efficiency_con(self, model):
         eff = model.find_component('eff_' + self.name)
         for t in model.time_step:
-            model.cons.add(eff[t] == 0.5)
-    """
+            model.cons.add(eff[t] == 0.55)
+
 
     # 'size' bezieht sich auf die Fläche der Solarthermie.
     def _constraint_conver(self, model):
@@ -92,7 +91,7 @@ class SolarThermalCollectorFluid(FluidComponent):
         comp_size = model.find_component('size_' + self.name)
         for t in model.time_step:
             model.cons.add(input_energy[t] == self.irr_profile[t - 1] * eff[
-                t] * comp_size / unit_switch)
+                t] * comp_size / unit_switch_W)
         output_energy = model.find_component('output_' + self.outputs[0] +
                                              '_' + self.name)
         for heat_output in self.heat_flows_out:
@@ -107,11 +106,11 @@ class SolarThermalCollectorFluid(FluidComponent):
             for t in model.time_step:
                 # todo:Beim Stagnationszustand gilt output_energy< input_energy
                 # aber das Ergebnis ist komisch
-                model.cons.add(output_energy[t] == input_energy[t])
+                model.cons.add(output_energy[t] <= input_energy[t])
                 model.cons.add(
                     output_energy[t] == self.solar_liquid_heat_cap * (
                             m_out[t] * t_out[t] - m_in[t] * t_in[t]) /
-                    self.unit_switch)
+                    unit_switch_J)
 
     def _constraint_output_permit_gdp(self, model, off_delta_temp=4,
                                   on_delta_temp=8, init_status='on'):
@@ -198,10 +197,13 @@ class SolarThermalCollectorFluid(FluidComponent):
             model.add_component('p_4_' + str(t), p_4)
             model.add_component('p_5_' + str(t), p_5)
 
-    def add_cons(self, model, heat_cap_type='var'):
+    def add_cons(self, model, heat_cap_type='con', test='off'):
         self._constraint_vdi2067(model)
         self._constraint_temp(model)
-        self._constraint_efficiency(model)
+        if test == 'on':
+            self._constraint_efficiency_con(model)
+        if test == 'off':
+            self._constraint_efficiency(model)
         self._constraint_output_permit_gdp(model)
         if heat_cap_type =='con':
             # todo(qli): Wirkungsgrad = Konst
@@ -260,7 +262,7 @@ class SolarThermalCollectorFluid(FluidComponent):
         comp_size = model.find_component('size_' + self.name)
         for t in model.time_step:
             model.cons.add(input_energy[t] == self.irr_profile[t - 1] * eff[
-                t] * comp_size / unit_switch)
+                t] * comp_size / unit_switch_W)
         output_energy = model.find_component('output_' + self.outputs[0] +
                                              '_' + self.name)
         for heat_output in self.heat_flows_out:
@@ -276,4 +278,4 @@ class SolarThermalCollectorFluid(FluidComponent):
                 # model.cons.add(0 <= output_energy[t])
                 model.cons.add(
                     output_energy[t] == heat_cap[t] * self.mass_flow * (
-                                t_out[t] - t_in[t]) / self.unit_switch)
+                                t_out[t] - t_in[t]) / unit_switch_J)
