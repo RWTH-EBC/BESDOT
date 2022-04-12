@@ -624,15 +624,16 @@ class Building(object):
             nr_day_occur = pd.Series(cluster.clusterPeriodNoOccur).tolist()
             nr_hour_occur = []
             for nr_occur in nr_day_occur:
-                nr_hour_occur.append([nr_occur] * 24)
+                nr_hour_occur += [nr_occur] * 24
 
             model.cons.add(
                 bld_operation_cost == sum(buy_elec[t] * env.elec_price *
-                                          nr_hour_occur[t] + buy_gas[t] *
-                                          env.gas_price * nr_hour_occur[t] +
+                                          nr_hour_occur[t-1] + buy_gas[t] *
+                                          env.gas_price * nr_hour_occur[t-1] +
                                           buy_heat[t] * env.heat_price *
-                                          nr_hour_occur[t] - sell_elec[t] *
-                                          env.elec_feed_price * nr_hour_occur[t]
+                                          nr_hour_occur[t-1] - sell_elec[t] *
+                                          env.elec_feed_price *
+                                          nr_hour_occur[t-1]
                                           for t in model.time_step) +
                 bld_other_op_cost)
 

@@ -54,7 +54,7 @@ for bld in project.building_list:
 #                        Build pyomo model and run optimization
 ################################################################################
 project.build_model(obj_typ='annual_cost')
-# project.run_optimization('gurobi', save_lp=True, save_result=True)
+project.run_optimization('gurobi', save_lp=True, save_result=True)
 
 ################################################################################
 #                                  Post-processing
