@@ -176,7 +176,7 @@ class SolarThermalCollectorFluid(FluidComponent):
             d.add_component('d_2_' + str(t), c_6)
 
             dj = Disjunction(expr=[a, b, c, d])
-            model.add_component('dj_dis_' + str(t), dj)
+            model.add_component('dj3_dis_' + str(t), dj)
 
             if t == 1:
                 p_4 = pyo.LogicalConstraint(

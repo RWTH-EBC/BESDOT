@@ -5,7 +5,7 @@ from scripts.Building import Building
 import tools.post_solar_chp as post_pro
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-a = 300
+a = 10
 
 ################################################################################
 #                           Generate python objects
@@ -27,7 +27,7 @@ bld_25 = Building(name='bld_25', area=200)
 bld_25.add_thermal_profile('heat', env_25.temp_profile_original, env_25)
 bld_25.add_elec_profile(2021, env_25)
 bld_25.add_hot_water_profile(env_25)
-# bld_25.add_hot_water_profile_TBL(1968, env_25)
+
 
 # bld_25.demand_profile['heat_demand'] = [9, 8, 0, 9, 9, 9, 9, 9, 9, 9, 0]
 # bld_25.demand_profile['elec_demand'] = [0, 0, 0, 5, 4, 1, 1, 1, 1, 0, 2]
@@ -82,14 +82,10 @@ post_pro.step_plot_four_lines(result_output_path, a,
                               'Wärme aus Kessel', 'Wärmebedarf',
                               'Warmwasserbedarf',
                               'Energieerzeugung', r'Leistung (kW)', n=1.5)
-post_pro.step_plot_one_line(result_output_path, a,
-                            'therm_eff_chp',
-                            'Thermische Effizienz', r'Effizienz', n=1.02)
 post_pro.step_plot_one_line(result_output_path, a+5, 'status_chp',
                             'Status des BHKW', r'Status')
 post_pro.step_plot_chp(result_output_path, a)
 post_pro.step_plot_heat_demand(result_output_path, a)
-post_pro.step_plot_chp_small_eff(result_output_path, a)
 post_pro.step_plot_four_lines(result_output_path, a,
                               'input_elec_e_cns',
                               'e_grid_e_cns', 'chp_e_cns', 'chp_e_grid',

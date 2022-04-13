@@ -8,7 +8,7 @@ from scripts.Building import Building
 import tools.post_solar_chp as post_pro
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-a = 30
+a = 10
 ################################################################################
 #                           Generate python objects
 ################################################################################
@@ -39,7 +39,7 @@ bld_27.add_hot_water_profile(env_27)
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 topo_file = os.path.join(base_path, 'data', 'topology',
-                         'chp_fluid_small_hi_solar.csv')
+                         'chp_fluid_small_w+h_2.csv')
 bld_27.add_topology(topo_file)
 bld_27.add_components(project.environment)
 project.add_building(bld_27)

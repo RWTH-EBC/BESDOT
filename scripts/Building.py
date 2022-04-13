@@ -351,7 +351,7 @@ class Building(object):
             for flow in self.energy_flows[energy]:
                 self.energy_flows[energy][flow] = pyo.Var(
                     model.time_step, bounds=(0, None))
-                model.add_component(flow[0] + '_' + flow[1],
+                model.add_component(energy + '_' + flow[0] + '_' + flow[1],
                                     self.energy_flows[energy][flow])
 
                 if energy == 'heat':
