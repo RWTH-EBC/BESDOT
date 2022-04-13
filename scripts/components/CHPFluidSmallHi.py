@@ -70,7 +70,12 @@ class CHPFluidSmallHi(CHP, FluidComponent):
             model.cons.add(Qth * status[t + 1] == output_heat[t])
             model.cons.add(Pel * status[t + 1] == output_elec[t])
 
-    def add_cons(self, model):
+    def _constraint_heat_chp_e_boi(self, model):
+        output_heat_e_boi = model.find_component('heat_' + self.name + '_e_boi')
+        for t in model.time_step:
+            model.cons.add(output_heat_e_boi[t] == 0)
+
+    def add_cons(self, model, e_boi=False):
         self._constraint_Pel(model)
         self._constraint_therm_eff(model)
         self._constraint_temp(model)
@@ -81,6 +86,8 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         self._constraint_start_cost(model)
         # todo (qli): building.py anpassen
         self._constraint_chp_elec_sell_price(model)
+        if e_boi:
+            self._constraint_heat_chp_e_boi(model)
 
     def add_vars(self, model):
         super().add_vars(model)
@@ -103,7 +110,7 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         start_cost = pyo.Var(bounds=(0, None))
         model.add_component('start_cost_' + self.name, start_cost)
 
-        start = pyo.Var(range(1, len(model.time_step)), domain=pyo.Binary)
+        start = pyo.Var(model.time_step, domain=pyo.Binary)
         model.add_component('start_' + self.name, start)
 
         # todo (qli): building.py anpassen
@@ -144,7 +151,7 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         '''
         # len(model.time_step) >= 6
         for t in range(1, len(model.time_step)):
-            d = Disjunct()
+            d1 = Disjunct()
             c_5 = pyo.Constraint(expr=status[t + 1] - status[t] == 1)
             c_6 = pyo.Constraint(expr=status[t + 2] == 1)
             c_7 = pyo.Constraint(expr=status[t + 3] == 1)
@@ -152,35 +159,30 @@ class CHPFluidSmallHi(CHP, FluidComponent):
             c_9 = pyo.Constraint(expr=status[t + 5] == 1)
             c_10 = pyo.Constraint(expr=status[t + 6] == 1)
             c_12 = pyo.Constraint(expr=start[t] == 1)
-            model.add_component('d_dis_' + str(t), d)
-            d.add_component('d_1' + str(t), c_5)
-            d.add_component('d_2' + str(t), c_6)
-            d.add_component('d_3' + str(t), c_7)
-            d.add_component('d_4' + str(t), c_8)
-            d.add_component('d_5' + str(t), c_9)
-            d.add_component('d_6' + str(t), c_10)
-            d.add_component('d_7' + str(t), c_12)
-            e = Disjunct()
-            c_11 = pyo.Constraint(expr=lor(status[t + 1] - status[t] == 0,
-                                           status[t + 1] - status[t] == -1))
+            model.add_component('d1_dis_' + str(t), d1)
+            d1.add_component('d1_1' + str(t), c_5)
+            d1.add_component('d1_2' + str(t), c_6)
+            d1.add_component('d1_3' + str(t), c_7)
+            d1.add_component('d1_4' + str(t), c_8)
+            d1.add_component('d1_5' + str(t), c_9)
+            d1.add_component('d1_6' + str(t), c_10)
+            d1.add_component('d1_7' + str(t), c_12)
+            e1 = Disjunct()
+            c_11 = pyo.Constraint(expr=status[t + 1] - status[t] == 0)
             c_13 = pyo.Constraint(expr=start[t] == 0)
-            model.add_component('e_dis_' + str(t), e)
-            e.add_component('e_1' + str(t), c_11)
-            e.add_component('e_2' + str(t), c_13)
+            model.add_component('e1_dis_' + str(t), e1)
+            e1.add_component('e1_1' + str(t), c_11)
+            e1.add_component('e1_2' + str(t), c_13)
 
-            dj = Disjunction(expr=[d, e])
-            model.add_component('dj_dis2_' + str(t), dj)
-            '''
-            f = Disjunct()
+            f1 = Disjunct()
             c_12 = pyo.Constraint(expr=status[t + 1] - status[t] == -1)
             c_14 = pyo.Constraint(expr=start[t] == 0)
-            model.add_component('f_dis_' + str(t), f)
-            f.add_component('f_1' + str(t), c_12)
-            f.add_component('f_2' + str(t), c_14)
+            model.add_component('f1_dis_' + str(t), f1)
+            f1.add_component('f1_1' + str(t), c_12)
+            f1.add_component('f1_2' + str(t), c_14)
 
-            dj = Disjunction(expr=[d, e, f])
-            model.add_component('dj_dis_' + str(t), dj)
-            '''
+            dj1 = Disjunction(expr=[d1, e1, f1])
+            model.add_component('dj1_dis_' + str(t), dj1)
 
     def _constraint_start_cost(self, model):
         start = model.find_component('start_' + self.name)
