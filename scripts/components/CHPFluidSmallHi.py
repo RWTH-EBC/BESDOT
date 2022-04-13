@@ -75,7 +75,7 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         for t in model.time_step:
             model.cons.add(output_heat_e_boi[t] == 0)
 
-    def add_cons(self, model, e_boi=False):
+    def add_cons(self, model, e_boi=True):
         self._constraint_Pel(model)
         self._constraint_therm_eff(model)
         self._constraint_temp(model)
