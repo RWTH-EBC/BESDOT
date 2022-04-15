@@ -70,11 +70,6 @@ class CHPFluidSmallHi(CHP, FluidComponent):
             model.cons.add(Qth * status[t + 1] == output_heat[t])
             model.cons.add(Pel * status[t + 1] == output_elec[t])
 
-    def _constraint_heat_chp_e_boi(self, model):
-        output_heat_e_boi = model.find_component('heat_' + self.name + '_e_boi')
-        for t in model.time_step:
-            model.cons.add(output_heat_e_boi[t] == 0)
-
     def add_cons(self, model, e_boi=True):
         self._constraint_Pel(model)
         self._constraint_therm_eff(model)
@@ -86,8 +81,6 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         self._constraint_start_cost(model)
         # todo (qli): building.py anpassen
         self._constraint_chp_elec_sell_price(model)
-        if e_boi:
-            self._constraint_heat_chp_e_boi(model)
 
     def add_vars(self, model):
         super().add_vars(model)
