@@ -5,7 +5,7 @@ from scripts.Building import Building
 import tools.post_solar_chp as post_pro
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-a = 300
+a = 10
 
 ################################################################################
 #                           Generate python objects
@@ -67,8 +67,8 @@ post_pro.step_plot_four_lines(result_output_path, a,
                               'output_heat_chp',
                               'output_heat_boi', 'input_heat_hw_cns',
                               'input_heat_therm_cns', 'Wärme aus BHKW',
-                              'Wärme aus Kessel', 'Wärmebedarf',
-                              'Warmwasserbedarf',
+                              'Wärme aus Kessel', 'Warmwasserbedarf',
+                              'Wärmebedarf',
                               'Energieerzeugung', r'Leistung (kW)', n=1.5)
 '''
 post_pro.step_plot_two_lines(result_output_path, a,
@@ -102,3 +102,5 @@ post_pro.step_plot_four_lines(result_output_path, a,
 post_pro.step_plot_chp_diagram_color(result_output_path, a)
 post_pro.step_plot_chp_energy_color(result_output_path, a)
 post_pro.step_plot_chp_water_tes_color(result_output_path, a)
+post_pro.step_plot_heat(result_output_path, a)
+post_pro.step_plot_chp_diagram_color1(result_output_path, a)

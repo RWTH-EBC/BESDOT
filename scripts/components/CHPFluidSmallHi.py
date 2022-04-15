@@ -79,8 +79,6 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         self._constraint_vdi2067_chp(model)
         self._constraint_start_stop_ratio_gdp(model)
         self._constraint_start_cost(model)
-        # todo (qli): building.py anpassen
-        self._constraint_chp_elec_sell_price(model)
 
     def add_vars(self, model):
         super().add_vars(model)
@@ -105,10 +103,6 @@ class CHPFluidSmallHi(CHP, FluidComponent):
 
         start = pyo.Var(model.time_step, domain=pyo.Binary)
         model.add_component('start_' + self.name, start)
-
-        # todo (qli): building.py anpassen
-        elec_sell_price = pyo.Var(bounds=(0, None))
-        model.add_component('elec_sell_price_' + self.name, elec_sell_price)
 
     def _constraint_vdi2067_chp(self, model):
         size = model.find_component('size_' + self.name)
@@ -185,8 +179,4 @@ class CHPFluidSmallHi(CHP, FluidComponent):
                                                             model.time_step))
         model.cons.add(other_op_cost == start_cost)
 
-    def _constraint_chp_elec_sell_price(self, model):
-        kwk_zuschlag = 0.08  # €/kWh
-        stromspotmarktpreis = 0.179  # € / kWh
-        elec_sell_price = model.find_component('elec_sell_price_' + self.name)
-        model.cons.add(elec_sell_price == kwk_zuschlag + stromspotmarktpreis)
+
