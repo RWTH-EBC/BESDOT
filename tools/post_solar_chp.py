@@ -1572,3 +1572,43 @@ def step_plot_chp_diagram_color1(csv_file, time_step):
     plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
     fig.tight_layout()
     plt.savefig(plot_output)
+
+
+def step_plot_status(csv_file, start_time, time_step, comp, titel, ylabel,
+                     n=1.1):
+    font_label = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
+    plot_output = os.path.join(opt_output_path, 'plot', titel)
+    df = pd.read_csv(csv_file)
+
+    data = df[(df['var'].str.contains(comp))]
+    data = data.reset_index(drop=True)
+    value = data['value'][start_time:start_time + time_step]
+    value = value.reset_index(drop=True)
+
+    fig = plt.figure(figsize=(6.5, 5.5))
+    ax = fig.add_subplot(111)
+    ax.xaxis.set_minor_locator(MultipleLocator(5))
+    plt.grid(linestyle='--', which='both')
+
+    ax.step(range(start_time - 1, start_time + time_step - 1), value,
+            where="post",
+            linestyle='-', color='r', linewidth=2, zorder=1.5)
+    ax.fill_between(range(start_time - 1, start_time + time_step - 1), value, 0,
+                    facecolor='r', label='Warme aus BHKW',
+                    zorder=10, step="post", alpha=0.5)
+    # todo(qli): noch vertikale Linien hinzufügen
+    # Der erste Parameter ist die Y-Koordinate.
+    ax.vlines(0, 0, 1, linestyle='-', color='r', linewidth=2, zorder=1.5)
+    ax.set_title(titel, font_titel, y=1.02)
+    ax.set_xlabel("Stunde (h)", font_label)
+    ax.set_ylabel(ylabel, font_label)
+    ax.set_xlim(xmin=0)
+    ax.set_ylim(ymax=max(value) * n)
+    # ax.tick_params(labelsize=12)
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    fig.tight_layout()
+    plt.savefig(plot_output)

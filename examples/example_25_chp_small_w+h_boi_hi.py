@@ -85,7 +85,8 @@ post_pro.step_plot_four_lines(result_output_path, a,
                               'Warmwasserbedarf',
                               'Energieerzeugung', r'Leistung (kW)', n=1.5)
 '''
-post_pro.step_plot_one_line(result_output_path, a + 5, 'status_chp',
+#start_time>=1
+post_pro.step_plot_status(result_output_path, 1, a+1, 'status_chp',
                             'Status des BHKW', r'Status')
 post_pro.step_plot_heat_demand_color(result_output_path, a)
 
