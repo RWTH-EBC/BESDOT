@@ -283,13 +283,6 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\topology\chp_fluid_small_hi_solar1.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
         <entry key="\data\topology\chp_fluid_small_hi_solar2.csv">
           <value>
             <Attribute>
@@ -304,7 +297,7 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\topology\chp_fluid_small_hi_solar_qll.csv">
+        <entry key="\data\topology\chp_fluid_small_hi_solar_all.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
