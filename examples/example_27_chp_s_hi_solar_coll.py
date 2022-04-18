@@ -8,7 +8,7 @@ from scripts.Building import Building
 import tools.post_solar_chp as post_pro
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-a = 10
+a = 300
 ################################################################################
 #                           Generate python objects
 ################################################################################
