@@ -24,7 +24,7 @@ project.add_environment(env_10)
 
 # If the objective of the project is the optimization for building, a building
 # should be added to the project.
-bld_10 = Building(name='bld_10', area=200)
+bld_10 = Building(name='bld_10', area=100)
 
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
@@ -35,10 +35,10 @@ bld_10.add_thermal_profile('heat', env_10.temp_profile_original, env_10)
 
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
-#topo_file = os.path.join(base_path, 'data', 'topology',
-#                         'final.csv')
 topo_file = os.path.join(base_path, 'data', 'topology',
-                         'threeportvalve.csv')
+                         'final.csv')
+#topo_file = os.path.join(base_path, 'data', 'topology',
+#                         'threeportvalve.csv')
 bld_10.add_topology(topo_file)
 bld_10.add_components(project.environment)
 project.add_building(bld_10)

@@ -1,2 +1,2 @@
 efficiency,max input power,socket cost,service life,cost,c,c0,c1,factor repair effort,factor servicing effort,servicing effort hours,k
-1,5,63.118,20,120.33,200,7439.11,-1.325,0.01,0.015,20,350
+1,5,63.118,20,120.33,200,7439.11,-1.325,0.01,0.015,20,0.01
