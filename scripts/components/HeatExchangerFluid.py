@@ -116,7 +116,7 @@ class HeatExchangerFluid(FluidComponent, HeatExchanger):
         In order to ensure the unidirectional flow of energy, there are
         temperature constraints for convection heat exchangers.
         """
-        heat_input = self.heat_flows_in[0]
+        heat_input = self.heat_flows_in[1]
         temp_h = model.find_component(heat_input[0] + '_' + heat_input[1] +
                                       '_' + 'temp')
         return_temp_h = model.find_component(heat_input[1] + '_' +

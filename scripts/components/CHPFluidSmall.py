@@ -127,9 +127,11 @@ class CHPFluidSmall(CHP, FluidComponent):
 
         self._constraint_vdi2067_chp(model)
         self._constraint_start_stop_ratio_gdp(model)
+        '''
         self._constraint_start_cost(model)
         # todo (qli): building.py anpassen
         self._constraint_chp_elec_sell_price(model)
+        '''
 
     def add_vars(self, model):
         super().add_vars(model)
@@ -148,7 +150,7 @@ class CHPFluidSmall(CHP, FluidComponent):
 
         status = pyo.Var(range(1, len(model.time_step) + 6), domain=pyo.Binary)
         model.add_component('status_' + self.name, status)
-
+        '''
         start_cost = pyo.Var(bounds=(0, None))
         model.add_component('start_cost_' + self.name, start_cost)
 
@@ -158,6 +160,7 @@ class CHPFluidSmall(CHP, FluidComponent):
         # todo (qli): building.py anpassen
         elec_sell_price = pyo.Var(bounds=(0, None))
         model.add_component('elec_sell_price_' + self.name, elec_sell_price)
+'''
 
     def _constraint_vdi2067_chp(self, model):
         size = model.find_component('size_' + self.name)
@@ -171,7 +174,7 @@ class CHPFluidSmall(CHP, FluidComponent):
 
     def _constraint_start_stop_ratio_gdp(self, model):
         status = model.find_component('status_' + self.name)
-        start = model.find_component('start_' + self.name)
+        #start = model.find_component('start_' + self.name)
         model.cons.add(status[1] == 0)
         for t in model.time_step:
             if t == model.time_step[-1]:
@@ -199,7 +202,7 @@ class CHPFluidSmall(CHP, FluidComponent):
             c_8 = pyo.Constraint(expr=status[t + 4] == 1)
             c_9 = pyo.Constraint(expr=status[t + 5] == 1)
             c_10 = pyo.Constraint(expr=status[t + 6] == 1)
-            c_12 = pyo.Constraint(expr=start[t] == 1)
+            #c_12 = pyo.Constraint(expr=start[t] == 1)
             model.add_component('h_dis_' + str(t), h)
             h.add_component('h_1' + str(t), c_5)
             h.add_component('h_2' + str(t), c_6)
@@ -207,7 +210,7 @@ class CHPFluidSmall(CHP, FluidComponent):
             h.add_component('h_4' + str(t), c_8)
             h.add_component('h_5' + str(t), c_9)
             h.add_component('h_6' + str(t), c_10)
-            h.add_component('h_7' + str(t), c_12)
+            #h.add_component('h_7' + str(t), c_12)
             '''
             i = Disjunct()
             c_11 = pyo.Constraint(expr=lor(status[t + 1] - status[t] == 0,
@@ -222,21 +225,21 @@ class CHPFluidSmall(CHP, FluidComponent):
             '''
             i = Disjunct()
             c_11 = pyo.Constraint(expr=status[t + 1] - status[t] == 0)
-            c_13 = pyo.Constraint(expr=start[t] == 0)
+            #c_13 = pyo.Constraint(expr=start[t] == 0)
             model.add_component('i_dis_' + str(t), i)
             i.add_component('i_1' + str(t), c_11)
-            i.add_component('i_2' + str(t), c_13)
+            #i.add_component('i_2' + str(t), c_13)
             j = Disjunct()
             c_12 = pyo.Constraint(expr=status[t + 1] - status[t] == -1)
-            c_14 = pyo.Constraint(expr=start[t] == 0)
+            #c_14 = pyo.Constraint(expr=start[t] == 0)
             model.add_component('j_dis_' + str(t), j)
             j.add_component('j_1' + str(t), c_12)
-            j.add_component('j_2' + str(t), c_14)
+            #j.add_component('j_2' + str(t), c_14)
 
             dj = Disjunction(expr=[h, i, j])
             model.add_component('dj_dis1_' + str(t), dj)
 
-
+'''
     def _constraint_start_cost(self, model):
         start = model.find_component('start_' + self.name)
         start_cost = model.find_component('start_cost_' + self.name)
@@ -250,3 +253,4 @@ class CHPFluidSmall(CHP, FluidComponent):
         stromspotmarktpreis = 0.179  # € / kWh
         elec_sell_price = model.find_component('elec_sell_price_' + self.name)
         model.cons.add(elec_sell_price == kwk_zuschlag + stromspotmarktpreis)
+'''
