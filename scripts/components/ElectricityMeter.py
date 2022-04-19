@@ -16,12 +16,6 @@ class ElectricityMeter(Component):
                          max_size=max_size,
                          current_size=current_size)
 
-    def _constraint_conver(self, model):
-        """
-        The Grid has "no" fixed input and therefore it should not be constrainted
-        """
-        pass
-
     def add_cons(self, model):
         self._constraint_conver(model)
 

@@ -14,4 +14,4 @@ solar_coll,SolarThermalCollectorFluid,FPC,0,50,0,0,0,0,0,0,0,0,0,0,0,0,0,400,0,0
 water_tes_solar,HomoStorageST,TES_homo_ST,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,,0
 e_boi,ThroughHeaterElec,BOI3,0,1000,0,0,0,0,0,0,0,0,,0,0,0,0,0,0,0,0
 tp_val_hw_solar,ThreePortValve,,,,,0,0,0,0,0,0,0,0,0,0,0,0,0,,0,0
-e_meter,ElectricityMeter,EM,0,100,0,0,0,0,0,,0,,0,0,0,0,0,0,,0,0
+e_meter,ElectricityMeter,EM,0,100,0,0,0,0,0,0,0,,0,0,0,0,0,0,,0,0
