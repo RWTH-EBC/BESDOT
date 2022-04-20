@@ -34,14 +34,14 @@ class Radiator(HeatExchangerFluid, FluidComponent):
             model.cons.add(temp_difference[t + 1] == (temp_var[t + 1] +
                                                       return_temp_var[t + 1] - 2
                                                       * room_temp) / 2)
-            model.cons.add(input_energy[t + 1] * 1000 == self.k * area *
+            model.cons.add(input_energy[t + 1] == self.k * area *
                            temp_difference[t + 1])
             model.cons.add(input_energy[t + 1] == output_energy[t + 1])
 
     def _read_properties(self, properties):
         super()._read_properties(properties)
 
-    def _constraint_temp(self, model, init_temp=45):
+    def _constraint_temp(self, model, init_temp=40)
         temp_var = model.find_component('temp_' + self.name)
         for t in model.time_step:
             model.cons.add(temp_var[1] == init_temp)
