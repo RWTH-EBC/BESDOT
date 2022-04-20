@@ -45,6 +45,18 @@ bld_27.add_components(project.environment)
 project.add_building(bld_27)
 
 ################################################################################
+#                        Pre-Processing for time clustering
+################################################################################
+# The profiles could be clustered are: demand profiles, weather profiles and
+# prices profiles (if necessary). demand profiles are stored in buildings
+# and other information are stored in Environment objects.
+project.time_cluster()
+
+# After clustering need to update the demand profiles and storage assumptions.
+for bld in project.building_list:
+    bld.update_components(project.cluster)
+
+################################################################################
 #                        Build pyomo model and run optimization
 ################################################################################
 project.build_model(obj_typ='annual_cost')
