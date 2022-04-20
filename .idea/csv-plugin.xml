@@ -38,13 +38,6 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\component_database\GasBoiler\all_brand.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
         <entry key="\data\component_database\GasGrid\GAS1.csv">
           <value>
             <Attribute>
@@ -304,28 +297,7 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\topology\chp_fluid_small_hi_solar2_all.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
         <entry key="\data\topology\chp_fluid_small_hi_solar_all.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\topology\chp_fluid_small_hi_solar_all1.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\topology\chp_fluid_small_hi_solar_all2.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -340,13 +312,6 @@
           </value>
         </entry>
         <entry key="\data\topology\chp_fluid_small_hi_solar_all4.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\topology\chp_fluid_small_hi_solar_all5.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
