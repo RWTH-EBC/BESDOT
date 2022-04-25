@@ -6,6 +6,7 @@ from scripts.FluidComponent import FluidComponent
 from scripts.components.CHP import CHP
 from tools.calc_annuity_vdi2067 import calc_annuity
 
+small_num = 0.0001
 
 # große BHKW (Pel >= 50kW) ohne Brennwertnutzung
 class CHPFluidBig(CHP, FluidComponent):
@@ -78,17 +79,21 @@ class CHPFluidBig(CHP, FluidComponent):
             model.cons.add(Pel * status[t + 1] == output_elec[t])
 
     def add_cons(self, model):
-        self._constraint_Pel(model)
         self._constraint_therm_eff(model)
         self._constraint_temp(model)
         self._constraint_conver(model)
 
-        self._constraint_vdi2067_chp(model)
         self._constraint_start_stop_ratio_gdp(model)
-        self._constraint_start_cost(model)
+        #self._constraint_start_cost(model)
         # todo (qli): building.py anpassen
-        self._constraint_chp_elec_sell_price(model)
+        #self._constraint_chp_elec_sell_price(model)
 
+        self._constraint_Pel(model)
+        self._constraint_vdi2067_chp(model)
+        '''
+        # todo: fix cost
+        self._constraint_vdi2067_chp_gdp(model)
+        '''
     def add_vars(self, model):
         super().add_vars(model)
 
@@ -126,6 +131,53 @@ class CHPFluidBig(CHP, FluidComponent):
         annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w,
                                self.f_op)
         model.cons.add(annuity == annual_cost)
+
+    def _constraint_vdi2067_chp_gdp(self, model):
+        annual_cost = model.find_component('annual_cost_' + self.name)
+        invest = model.find_component('invest_' + self.name)
+        Pel = model.find_component('size_' + self.name)
+        Qth = model.find_component('therm_size_' + self.name)
+        #status = model.find_component('status_' + self.name)
+
+        if self.min_size == 0:
+            min_size = small_num
+        else:
+            min_size = self.min_size
+
+
+        dis_not_select = Disjunct()
+        not_select_size = pyo.Constraint(expr=Pel == 0)
+        not_select_inv = pyo.Constraint(expr=invest == 0)
+        not_select_therm_size = pyo.Constraint(expr=Qth == 0)
+        model.add_component('dis_not_select_' + self.name, dis_not_select)
+        dis_not_select.add_component('not_select_size_' + self.name,
+                                        not_select_size)
+        dis_not_select.add_component('not_select_inv_' + self.name,
+                                        not_select_inv)
+        dis_not_select.add_component('not_select_therm_size_' + self.name,
+                                        not_select_therm_size)
+
+        dis_select = Disjunct()
+        select_size = pyo.Constraint(expr=Pel >= min_size)
+        select_inv = pyo.Constraint(expr=invest == Pel * 458 + 57433)
+        select_therm_size = pyo.Constraint(expr=Pel == 0.8148 * Qth - 16.89)
+
+        model.add_component('dis_select_' + self.name, dis_select)
+        dis_not_select.add_component('select_size_' + self.name,
+                                        select_size)
+        dis_not_select.add_component('select_inv_' + self.name,
+                                        select_inv)
+        dis_not_select.add_component('select_therm_size_' + self.name,
+                                        select_therm_size)
+
+        dj_size = Disjunction(expr=[dis_not_select, dis_select])
+        model.add_component('disjunction_size' + self.name, dj_size)
+
+
+        annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w,
+                               self.f_op)
+        model.cons.add(annuity == annual_cost)
+
 
     def _constraint_start_stop_ratio_gdp(self, model):
         status = model.find_component('status_' + self.name)
