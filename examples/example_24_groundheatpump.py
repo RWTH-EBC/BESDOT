@@ -15,7 +15,7 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ################################################################################
 
 # Generate a project object at first.
-project = Project(name='project_8', typ='building')
+project = Project(name='project_24', typ='building')
 
 # Generate the environment object
 env_8 = Environment(time_step=24)
@@ -34,7 +34,7 @@ bld_8.demand_profile['heat_demand'] = [1, 0] * 360
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 topo_file = os.path.join(base_path, 'data', 'topology',
-                         'hptpuf.csv')
+                         'groundheatpump.csv')
 bld_8.add_topology(topo_file)
 bld_8.add_components(project.environment)
 project.add_building(bld_8)

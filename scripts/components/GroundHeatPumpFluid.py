@@ -1,5 +1,6 @@
 from typing import Union, Any
 
+import os
 import pyomo.environ as pyo
 from scripts.components.HeatPump import HeatPump
 import pandas as pd
@@ -9,7 +10,12 @@ import warnings
 eff_continuous = 0.33
 loss_noload = 0.90
 loss_cycling = 0.95
-
+base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
+    __file__))))
+path = os.path.join(base_path, "data", "weather_data",
+                           "Dusseldorf", "soil_temp.csv")
+data = pd.read_csv(path)
+soil_temperature_profile = data.loc[:, ['temperature']]
 class GroundHeatPumpFluid(HeatPump, FluidComponent):
 
     def __init__(self, comp_name, temp_profile, comp_type="GroundHeatPumpFluid",
@@ -36,9 +42,8 @@ class GroundHeatPumpFluid(HeatPump, FluidComponent):
                           max_size=max_size,
                           current_size=current_size)
 
-
         self.energy_flows_in = None
-        #self.temp_profile = temp_profile
+        self.temp_profile = soil_temperature_profile.values.tolist()
 
 
     def _constraint_conver(self, model):
@@ -63,7 +68,7 @@ class GroundHeatPumpFluid(HeatPump, FluidComponent):
         for t in model.time_step:
             # index in pyomo model and python list is different
 
-            cop = HeatPump.calc_cop(self, 10, 58)
+            cop = HeatPump.calc_cop(self, self.temp_profile[t][0], 58)
 
             model.cons.add(
                 output_powers[t] == input_powers[t] * cop *
@@ -79,7 +84,7 @@ class GroundHeatPumpFluid(HeatPump, FluidComponent):
             for t in range(len(model.time_step)):
                 model.cons.add(temp_var[t + 1] == t_out[t + 1])
 
-    def _constraint_return_temp(self, model, init_return_temp=55):
+    def _constraint_return_temp(self, model, init_return_temp=35):
         return_temp_var = model.find_component('return_temp_' + self.name)
         for t in model.time_step:
             model.cons.add(return_temp_var[t] <= init_return_temp)

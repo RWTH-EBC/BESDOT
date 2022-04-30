@@ -38,8 +38,8 @@ class AirHeatPumpFluid(HeatPump, FluidComponent):
 
 
         self.energy_flows_in = None
-        #self.temp_profile = temp_profile
-        #self.cop = HeatPump.cop
+        # self.temp_profile = temp_profile
+        # self.cop = HeatPump.cop
 
     def _constraint_conver(self, model, t_on=10):
         """

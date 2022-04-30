@@ -125,7 +125,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
                                          '_' + 'temp')
             model.cons.add(t_in[1] == t_out[1])
 
-    def _constraint_input_permit(self, model, min_temp=30, max_temp=95,
+    def _constraint_input_permit(self, model, min_temp=30, max_temp=40,
                                  init_status='on'):
         """
         The input to water tank is controlled by tank temperature, which is

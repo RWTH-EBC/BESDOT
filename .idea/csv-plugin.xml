@@ -3,7 +3,35 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
+        <entry key="/data/component_database/HeatPump/EHP2.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/data/component_database/HomoStorage/TES_homo.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/data/opt_output/project_24_result.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/data/opt_output/project_2_2_result.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/data/opt_output/project_2_result.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -108,6 +136,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/data/topology/hptpuf.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/data/topology/solar_coll_TW.csv">
           <value>
             <Attribute>
@@ -158,6 +193,13 @@
           </value>
         </entry>
         <entry key="/data/topology/underfloorheat.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/data/weather_data/Dusseldorf/soil_temp.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -228,55 +270,6 @@
           </value>
         </entry>
         <entry key="\data\component_database\StratificationStorage\TSS_strat.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\opt_output\project_12_result.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\opt_output\project_13_result.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\opt_output\project_16_result.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\opt_output\project_17_result.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\opt_output\project_18_result.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\opt_output\project_19_result.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\opt_output\project_5_result.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
