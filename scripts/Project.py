@@ -202,8 +202,8 @@ class Project(object):
         # Attention! The option was set for the dimension optimization for
         # HomoStorage
         solver.options['NonConvex'] = 2
-        solver.options['MIPGap'] = 0.01
-
+        solver.options['MIPGap'] = 0.02
+        solver.options['Heuristics'] = 0.05
         opt_result = solver.solve(self.model, tee=True)
 
         # Save model in lp file, this only works with linear model. That is

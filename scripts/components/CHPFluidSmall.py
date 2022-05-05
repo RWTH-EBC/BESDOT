@@ -54,6 +54,7 @@ class CHPFluidSmall(CHP, FluidComponent):
         for t in model.time_step:
             model.cons.add(therm_eff[t] == 0.705 - 0.0008 * (Qth - 44) -
                            0.006 * (inlet_temp[t] - 30))
+            model.cons.add(inlet_temp[t] <= 50)
 
     def _constraint_therm_eff_gdp(self, model):
         small_num = 0.00001
@@ -61,23 +62,23 @@ class CHPFluidSmall(CHP, FluidComponent):
         inlet_temp = model.find_component('inlet_temp_' + self.name)
         therm_eff = model.find_component('therm_eff_' + self.name)
         for t in model.time_step:
-            a = Disjunct()
+            x = Disjunct()
             c_1 = pyo.Constraint(expr=inlet_temp[t] <= 50)
             c_2 = pyo.Constraint(
                 expr=therm_eff[t] == 0.705 - 0.0008 * (Qth - 44) - 0.006 * (
                         inlet_temp[t] - 30))
-            model.add_component('a_dis_' + str(t), a)
-            a.add_component('a_1' + str(t), c_1)
-            a.add_component('a_2' + str(t), c_2)
-            b = Disjunct()
+            model.add_component('x_dis_' + str(t), x)
+            x.add_component('x_1' + str(t), c_1)
+            x.add_component('x_2' + str(t), c_2)
+            q = Disjunct()
             c_3 = pyo.Constraint(expr=inlet_temp[t] >= 50 + small_num)
             c_4 = pyo.Constraint(
                 expr=therm_eff[t] == -0.0000355 * Qth + 0.498)
-            model.add_component('b_dis_' + str(t), b)
-            b.add_component('b_1' + str(t), c_3)
-            b.add_component('b_2' + str(t), c_4)
+            model.add_component('p_dis_' + str(t), q)
+            q.add_component('p_1' + str(t), c_3)
+            q.add_component('p_2' + str(t), c_4)
 
-            dj = Disjunction(expr=[a, b])
+            dj = Disjunction(expr=[x, q])
             model.add_component('dj_dis_' + str(t), dj)
 
     # verbinden die Parameter der einzelnen Anlage mit den Parametern zwischen
@@ -121,7 +122,7 @@ class CHPFluidSmall(CHP, FluidComponent):
             model.cons.add(Pel * status[t + 1] == output_elec[t])
 
     def add_cons(self, model):
-        self._constraint_therm_eff_gdp(model)
+        self._constraint_therm_eff(model)
         self._constraint_temp(model)
         self._constraint_conver(model)
 
@@ -131,7 +132,7 @@ class CHPFluidSmall(CHP, FluidComponent):
         # todo (qli): building.py anpassen
         self._constraint_chp_elec_sell_price(model)
         '''
-
+        
         self._constraint_Pel(model)
         self._constraint_vdi2067_chp(model)
         '''

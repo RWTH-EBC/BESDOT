@@ -3,6 +3,13 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
+        <entry key="\data\component_database\CHPFluidSmallHi\CHPFluidSmallHi.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\data\component_database\CHPFluidSmall\CHPFluidSmall.csv">
           <value>
             <Attribute>
@@ -206,20 +213,6 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\opt_output\project_27_result.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\opt_output\project_27_result1_all_1.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
         <entry key="\data\opt_output\project_27_result_1_all.csv">
           <value>
             <Attribute>
@@ -227,14 +220,14 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\opt_output\project_27_result_3_all.csv">
+        <entry key="\data\opt_output\project_27_result_1_all_gdp.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\opt_output\project_27_result_all1_1_r.csv">
+        <entry key="\data\opt_output\project_27_result_3_all.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -325,21 +318,35 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\topology\chp_fluid_small_hi_solar1_all_1.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\topology\chp_fluid_small_hi_solar1_all_r.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
         <entry key="\data\topology\chp_fluid_small_hi_solar2.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\topology\chp_fluid_small_hi_solar2_all.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\topology\chp_fluid_small_hi_solar3_all.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\topology\chp_fluid_small_hi_solar4_all.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\topology\chp_fluid_small_hi_solar5_all.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -353,42 +360,7 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\topology\chp_fluid_small_hi_solar_all1_1.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\topology\chp_fluid_small_hi_solar_all1_r.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
         <entry key="\data\topology\chp_fluid_small_hi_solar_all3.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\topology\chp_fluid_small_hi_solar_all4.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\topology\chp_fluid_small_hi_solar_all5.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\topology\chp_fluid_small_hi_solar_all6.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
