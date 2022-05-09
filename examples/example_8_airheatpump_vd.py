@@ -15,7 +15,7 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ################################################################################
 
 # Generate a project object at first.
-project = Project(name='project_24', typ='building')
+project = Project(name='project_8_2', typ='building')
 
 # Generate the environment object
 env_8 = Environment(time_step=24)
@@ -29,12 +29,12 @@ bld_8 = Building(name='bld_8', area=200)
 # Attention! generate thermal with profile whole year temperature profile
 # bld_2.add_thermal_profile('heat', env_2.temp_profile_original, env_2)
 
-bld_8.demand_profile['heat_demand'] = [1, 0] * 360
+bld_8.demand_profile['heat_demand'] = [1, 0, 5, 2] * 6
 #bld_8.add_thermal_profile('heat', env_8.temp_profile_original, env_8)
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 topo_file = os.path.join(base_path, 'data', 'topology',
-                         'groundheatpump.csv')
+                         'airheatpump_tp.csv')
 bld_8.add_topology(topo_file)
 bld_8.add_components(project.environment)
 project.add_building(bld_8)

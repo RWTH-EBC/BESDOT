@@ -34,7 +34,7 @@ bld_8.demand_profile['heat_demand'] = [1, 0] * 12
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 topo_file = os.path.join(base_path, 'data', 'topology',
-                         'airheatpump.csv')
+                         'ahptpuf.csv')
 bld_8.add_topology(topo_file)
 bld_8.add_components(project.environment)
 project.add_building(bld_8)
@@ -46,7 +46,9 @@ project.build_model(obj_typ='annual_cost')
 project.run_optimization('gurobi', save_lp=True, save_result=True)
 
 ################################################################################
-#                                  Post-processing
+result_output_path = os.path.join(base_path, 'data', 'opt_output',
+                                  project.name + '_result.csv')
+post_pro.plot_all(result_output_path, time_interval=[0, env_8.time_step])
 ################################################################################
 
 result_output_path = os.path.join(base_path, 'data', 'opt_output',

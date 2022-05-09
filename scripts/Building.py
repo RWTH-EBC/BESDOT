@@ -151,7 +151,8 @@ class Building(object):
                 min_size = self.topology['min_size'][item]
                 max_size = self.topology['max_size'][item]
                 current_size = self.topology['current_size'][item]
-                if comp_type in ['GroundHeatPumpFluid', 'AirHeatPumpFluid']:
+                if comp_type in ['HeatPump', 'GasHeatPump',
+                                 'GroundHeatPumpFluid', 'AirHeatPumpFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       temp_profile=
                                                       env.temp_profile,
@@ -398,7 +399,7 @@ class Building(object):
         self._constraint_mass_balance(model)
         # todo (yni): Attention in the optimization for operation cost should
         #  comment constrain for solar area. This should be done automated.
-        #self._constraint_solar_area(model)
+        # self._constraint_solar_area(model)
         self._constraint_total_cost(model, env)
         self._constraint_operation_cost(model, env)
         for comp in self.components:
@@ -569,5 +570,5 @@ class Building(object):
                                                  buy_gas[t] * env.gas_price +
                                                  buy_heat[t] *
                                                  env.heat_price - sell_elec[
-                                                  t] * env.elec_feed_price
+                                                     t] * env.elec_feed_price
                                                  for t in model.time_step))

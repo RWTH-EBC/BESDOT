@@ -1,14 +1,10 @@
-from typing import Union, Any
-
+import warnings
+import os
+import pandas as pd
 import pyomo.environ as pyo
 from scripts.components.HeatPump import HeatPump
-import pandas as pd
 from scripts.FluidComponent import FluidComponent
-import warnings
 
-eff_continuous = 0.33
-loss_noload = 0.90
-loss_cycling = 0.95
 
 class AirHeatPumpFluid(HeatPump, FluidComponent):
 
@@ -22,22 +18,27 @@ class AirHeatPumpFluid(HeatPump, FluidComponent):
         self.outputs = ['heat']
 
         HeatPump.__init__(self, comp_name=comp_name,
-                         temp_profile=temp_profile,
-                         comp_type=comp_type,
-                         comp_model=comp_model,
-                         min_size=min_size,
-                         max_size=max_size,
-                         current_size=current_size)
-
-        FluidComponent.__init__(self, comp_name=comp_name,
+                          temp_profile=temp_profile,
                           comp_type=comp_type,
                           comp_model=comp_model,
                           min_size=min_size,
                           max_size=max_size,
                           current_size=current_size)
 
+        FluidComponent.__init__(self, comp_name=comp_name,
+                                comp_type=comp_type,
+                                comp_model=comp_model,
+                                min_size=min_size,
+                                max_size=max_size,
+                                current_size=current_size)
 
+        '''The parameters in the model are from 'A semi-theoretical model for
+         energy efficiency assessment of air source heat pump systems':
+           
+         '''
         self.energy_flows_in = None
+        # self.loss_noload = 0.90
+        # self.loss_cycling = 0.95
         # self.temp_profile = temp_profile
         # self.cop = HeatPump.cop
 
@@ -67,19 +68,21 @@ class AirHeatPumpFluid(HeatPump, FluidComponent):
 
             model.cons.add(
                 output_powers[t] == input_powers[t] * self.cop[t - 1] *
-                eff_continuous * loss_noload * loss_cycling * loss_defrost)
+                self.efficiency[self.outputs[0]] * loss_defrost)
+            # self.loss_noload * self.loss_cycling)
 
-    def _constraint_temp(self, model, init_temp=35):
+    def _constraint_temp(self, model, init_temp=40):
         temp_var = model.find_component('temp_' + self.name)
         for t in model.time_step:
-            model.cons.add(temp_var[t] == init_temp)
+            size = model.find_component('size_' + self.name)
+            model.cons.add(temp_var[t] == size)
         for heat_output in self.heat_flows_out:
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'temp')
             for t in range(len(model.time_step)):
                 model.cons.add(temp_var[t + 1] == t_out[t + 1])
 
-    def _constraint_return_temp(self, model, init_return_temp=20):
+    def _constraint_return_temp(self, model, init_return_temp=35):
         return_temp_var = model.find_component('return_temp_' + self.name)
         for t in model.time_step:
             model.cons.add(return_temp_var[t] <= init_return_temp)
@@ -89,7 +92,7 @@ class AirHeatPumpFluid(HeatPump, FluidComponent):
             for t in range(len(model.time_step)):
                 model.cons.add(return_temp_var[t + 1] == t_in[t + 1])
 
-    def _constraint_mass_flow(self, model, mass_flow=100):
+    def _constraint_mass_flow(self, model, mass_flow=0):
         for heat_output in self.heat_flows_out:
             m_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
                                         '_' + 'mass')
@@ -97,14 +100,28 @@ class AirHeatPumpFluid(HeatPump, FluidComponent):
                                          '_' + 'mass')
             for t in range(len(model.time_step)):
                 model.cons.add(m_in[t + 1] == m_out[t + 1])
-                #model.cons.add(m_in[t + 1] == mass_flow)
+                '''
+                if t < 5:
+                    model.cons.add(m_in[t + 1] == m_out[t + 1])
+                else:
+                    a = t % 24
+                    if 14 < a < 20:
+                        model.cons.add(m_in[t + 1] == m_out[t + 1])
+                    else:
+                        m_in[t + 1] = 0
+                        m_out[t + 1] = 0
+
+                        
+                        model.cons.add(m_in[t + 1] == mass_flow)
+                        model.cons.add(m_out[t + 1] == mass_flow)
+                        #model.cons.add(m_in[t + 1] == mass_flow)'''
 
     def add_cons(self, model):
         self._constraint_conver(model)
         self._constraint_temp(model)
         self._constraint_return_temp(model)
         self._constraint_vdi2067(model)
-        self._constraint_mass_flow(model)
+        # self._constraint_mass_flow(model)
         self._constraint_heat_outputs(model)
 
     def add_vars(self, model):
