@@ -30,28 +30,33 @@ def plot_all(csv_file, time_interval):
         else:
             if sum(elements_dict[element]) > 0.001:
                 plot_single(element, elements_dict[element][time_interval[0]:
-                                                            time_interval[1]])
+                                                            time_interval[1]],
+                            time_interval)
 
 
-def plot_single(name, profile):
+def plot_single(name, profile, time_interval):
+    font_label = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
     plot_output = os.path.join(opt_output_path, 'plot', 'Profile of ' + name)
-    fig, ax = plt.subplots(figsize=(14, 14))
-    # ax = fig.add_subplot(111)
-    ax.plot(profile, linewidth=2, color='r', marker='o', linestyle='dashed')
-    ax.set_title('Profile of ' + name)
-    ax.set_xlabel('Hours [h]')
+    time_steps = range(time_interval[0], time_interval[1]+1)
+    fig, ax = plt.subplots(figsize=(6.5, 5.5))
+    ax.step(time_steps, profile, where="post", linestyle='-', color='r',
+            linewidth=2, zorder=1.5)
+    ax.set_title('Diagram von ' + name, font_titel)
+    ax.set_xlabel('Stunde [h]', font_label)
     if 'mass' in name:
-        ax.set_ylabel('mass [KG/H]', fontsize=12)
+        ax.set_ylabel('Massstrom [kg/h]', font_label)
     elif 'temp' in name:
-        ax.set_ylabel('temperature [°]', fontsize=12)
+        ax.set_ylabel('Temperaur [°C]', font_label)
     else:
-        ax.set_ylabel('power [KW]', fontsize=12)
+        ax.set_ylabel('leistung [kW]', font_label)
 
     ax.set_xlim(xmin=0)
     ax.set_ylim(ymin=0, ymax=max(profile) * 1.2)
     plt.grid()
 
-    # plt.show()
     plt.savefig(plot_output)
     plt.close()
 

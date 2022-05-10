@@ -67,7 +67,8 @@ class FluidComponent(Component):
                 for t in range(len(model.time_step)):
                     model.cons.add(energy_flow[heat_input][t + 1] ==
                                    (m_in[t + 1] * t_in[t + 1] - m_out[t + 1] *
-                                    t_out[t + 1]) * water_heat_cap / unit_switch)
+                                    t_out[
+                                        t + 1]) * water_heat_cap / unit_switch)
                     model.cons.add(t_in[t + 1] >= t_out[t + 1])
 
     def _constraint_heat_outputs(self, model):
@@ -85,8 +86,9 @@ class FluidComponent(Component):
                                         '_' + 'temp')
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'temp')
-            energy_flow[heat_output] = model.find_component(heat_output[0] +
-                                                            '_' +
+            energy_flow[heat_output] = model.find_component('heat_' +
+                                                            heat_output[
+                                                                0] + '_' +
                                                             heat_output[1])
             if energy_flow[heat_output] is not None:
                 for t in range(len(model.time_step)):

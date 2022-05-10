@@ -213,6 +213,20 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\data\opt_output\project_27_result.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\opt_output\project_27_result_1.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\data\opt_output\project_27_result_1_all.csv">
           <value>
             <Attribute>
@@ -234,7 +248,28 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\data\opt_output\project_27_result_chp_s.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\opt_output\project_27_result_solar.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\data\opt_output\project_5_result.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\tek_data\temperature.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

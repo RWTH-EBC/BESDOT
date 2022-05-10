@@ -125,7 +125,7 @@ class CHPFluidSmall(CHP, FluidComponent):
         self._constraint_therm_eff(model)
         self._constraint_temp(model)
         self._constraint_conver(model)
-
+        self._constraint_heat_outputs(model)
         self._constraint_start_stop_ratio_gdp(model)
         '''
         self._constraint_start_cost(model)

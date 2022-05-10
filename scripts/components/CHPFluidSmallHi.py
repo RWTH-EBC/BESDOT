@@ -71,11 +71,11 @@ class CHPFluidSmallHi(CHP, FluidComponent):
             model.cons.add(Qth * status[t + 1] == output_heat[t])
             model.cons.add(Pel * status[t + 1] == output_elec[t])
 
-    def add_cons(self, model, e_boi=True):
+    def add_cons(self, model):
         self._constraint_therm_eff(model)
         self._constraint_temp(model)
         self._constraint_conver(model)
-
+        self._constraint_heat_outputs(model)
         self._constraint_start_stop_ratio_gdp(model)
         #self._constraint_start_cost(model)
 
