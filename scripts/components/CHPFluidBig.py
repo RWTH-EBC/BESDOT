@@ -87,12 +87,13 @@ class CHPFluidBig(CHP, FluidComponent):
         #self._constraint_start_cost(model)
         # todo (qli): building.py anpassen
         #self._constraint_chp_elec_sell_price(model)
-        '''
+
         self._constraint_Pel(model)
         self._constraint_vdi2067_chp(model)
         '''
         # todo: fix cost
         self._constraint_vdi2067_chp_gdp(model)
+        '''
 
     def add_vars(self, model):
         super().add_vars(model)
