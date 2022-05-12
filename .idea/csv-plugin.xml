@@ -213,49 +213,14 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\opt_output\project_27_result.csv">
+        <entry key="\data\opt_output\project_27_result_b.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\opt_output\project_27_result_1.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\opt_output\project_27_result_1_all.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\opt_output\project_27_result_1_all_gdp.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\opt_output\project_27_result_3_all.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\opt_output\project_27_result_chp_s.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\opt_output\project_27_result_solar.csv">
+        <entry key="\data\opt_output\project_27_result_s_hi.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

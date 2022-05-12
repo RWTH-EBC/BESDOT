@@ -174,7 +174,7 @@ class CHPFluidSmall(CHP, FluidComponent):
         annual_cost = model.find_component('annual_cost_' + self.name)
         invest = model.find_component('invest_' + self.name)
         # todo(qli): https://www.baulinks.de/webplugin/2010/1276.php4
-        model.cons.add(size * 458 + 57433 + 3800 / 50 * size == invest)
+        model.cons.add(size * 1131.2 + 14490 + 3800 / 50 * size == invest)
         annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w,
                                self.f_op)
         model.cons.add(annuity == annual_cost)
