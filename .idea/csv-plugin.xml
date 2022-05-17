@@ -563,21 +563,7 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\topology\solar_coll_TW_THE.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\topology\solar_coll_TW_TWS.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\topology\solar_coll_TW_tp.csv">
+        <entry key="\data\topology\solar_coll_TW_Test.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
