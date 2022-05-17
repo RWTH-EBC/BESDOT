@@ -15,5 +15,5 @@ heat_ex,HeatExchangerFluid,HE1,0,100,0,0,400,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 boi_c,CondensingBoiler,BOI_district,0,100,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 bat,Battery,BAT_district,0,100,0,0,0,0,0,,0,,0,0,0,,0,0,0,0,0,,0
 pv,PV,PV_district,0,50,0,0,0,0,0,,0,0,0,0,0,0,,0,0,0,0,0,0
-heat_pump,HeatPump,EHP_district,0,100000,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+heat_pump,HeatPumpFluid,EHP_district,0,100000,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 boi_s,StandardBoiler,BOI_district,0,100,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
