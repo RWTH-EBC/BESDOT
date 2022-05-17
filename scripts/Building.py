@@ -160,7 +160,7 @@ class Building(object):
                 min_size = self.topology['min_size'][item]
                 max_size = self.topology['max_size'][item]
                 current_size = self.topology['current_size'][item]
-                if comp_type in ['HeatPump', 'GasHeatPump']:
+                if comp_type in ['HeatPump', 'GasHeatPump','HeatPumpFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       temp_profile=
                                                       env.temp_profile,
