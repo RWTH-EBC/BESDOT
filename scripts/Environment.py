@@ -56,8 +56,8 @@ class Environment(object):
         # todo (yni): the default value should be check with the aktuell data
         # todo (yni): price could be set into series or list, for exchanger
         #  price
-        self.elec_price = 0.3  # €/kWh
-        self.gas_price = 0.1  # €/kWh
+        self.elec_price = 0.3  # €/kWh #0.3
+        self.gas_price = 0.1  # €/kWh #0.1
         self.heat_price = 0.08  # €/kWh
         self.elec_feed_price = 0.1  # €/kWh
         self.elec_emission = 397  # g/kWh

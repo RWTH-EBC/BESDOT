@@ -8,7 +8,7 @@ from scripts.Building import Building
 import tools.post_solar_chp as post_pro
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-a = 300
+a = 8760
 ################################################################################
 #                           Generate python objects
 ################################################################################
@@ -23,7 +23,7 @@ project.add_environment(env_27)
 
 # If the objective of the project is the optimization for building, a building
 # should be added to the project.
-bld_27 = Building(name='bld_27', area=200, solar_area=50)
+bld_27 = Building(name='bld_27', area=200)
 
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
@@ -39,10 +39,26 @@ bld_27.add_hot_water_profile(env_27)
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 topo_file = os.path.join(base_path, 'data', 'topology',
-                         'chp_fluid_small_hi_solar_all4.csv')
+                         'chp_fluid_small_hi_solar5_all.csv')
+'''
+topo_file = os.path.join(base_path, 'data', 'topology',
+                         'solar_coll_TW_Test.csv')
+                         '''
 bld_27.add_topology(topo_file)
 bld_27.add_components(project.environment)
 project.add_building(bld_27)
+
+################################################################################
+#                        Pre-Processing for time clustering
+################################################################################
+# The profiles could be clustered are: demand profiles, weather profiles and
+# prices profiles (if necessary). demand profiles are stored in buildings
+# and other information are stored in Environment objects.
+project.time_cluster()
+
+# After clustering need to update the demand profiles and storage assumptions.
+for bld in project.building_list:
+    bld.update_components(project.cluster)
 
 ################################################################################
 #                        Build pyomo model and run optimization

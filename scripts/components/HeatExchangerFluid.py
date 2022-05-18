@@ -132,7 +132,7 @@ class HeatExchangerFluid(FluidComponent, HeatExchanger):
             model.cons.add(return_temp_h[t+1] >= temp_c[t+1])
 
     def add_cons(self, model):
-        self._constraint_heat_inputs(model)
+        #self._constraint_heat_inputs(model)
         self._constraint_heat_outputs(model)
         #self._constraint_mass_flow(model)
         self._constraint_loss(model)
