@@ -41,7 +41,7 @@ class Radiator(HeatExchangerFluid, FluidComponent):
     def _read_properties(self, properties):
         super()._read_properties(properties)
 
-    def _constraint_temp(self, model, init_temp=40)
+    def _constraint_temp(self, model, init_temp=40):
         temp_var = model.find_component('temp_' + self.name)
         for t in model.time_step:
             model.cons.add(temp_var[t] == init_temp)
