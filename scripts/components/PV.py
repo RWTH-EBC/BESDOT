@@ -5,8 +5,8 @@ from scripts.Component import Component
 
 class PV(Component):
 
-    def __init__(self, comp_name, irr_profile, comp_type="PV", comp_model=None,
-                 min_size=0, max_size=1000, current_size=0):
+    def __init__(self, comp_name, temp_profile,irr_profile, comp_type="PV",
+                 comp_model=None, min_size=0, max_size=1000, current_size=0):
         self.inputs = ['solar']
         self.outputs = ['elec']
 

@@ -289,7 +289,7 @@ class Component(object):
         annual_cost = pyo.Var(bounds=(0, None))
         model.add_component('annual_cost_' + self.name, annual_cost)
 
-        invest = pyo.Var(bounds=(0, None))
+        invest = pyo.Var(bounds=(0, 100000))
         model.add_component('invest_' + self.name, invest)
 
         if self.inputs is not None:

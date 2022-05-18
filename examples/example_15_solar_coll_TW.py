@@ -23,13 +23,12 @@ project.add_environment(env_15)
 
 # If the objective of the project is the optimization for building, a building
 # should be added to the project.
-bld_15 = Building(name='bld_15', area=200, solar_area=50)
+bld_15 = Building(name='bld_15', area=200)
 
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
 # bld_15.add_thermal_profile('heat', env_15.temp_profile_original, env_15)
 bld_15.add_hot_water_profile(env_15)
-# bld_15.add_hot_water_profile_TBL(1968, env_15)
 
 # todo (qli): solar_coll testen (size_e_boi=0)
 # bld_15.demand_profile['hot_water_demand'] = [1.1, 0, 1, 1, 0]
@@ -39,7 +38,7 @@ bld_15.add_hot_water_profile(env_15)
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 topo_file = os.path.join(base_path, 'data', 'topology',
-                         'solar_coll_TW_tp.csv')
+                         'solar_coll_TW_Test.csv')
 bld_15.add_topology(topo_file)
 bld_15.add_components(project.environment)
 project.add_building(bld_15)
@@ -68,3 +67,4 @@ post_pro.plot_double(result_output_path, "tp_val", "hw_cns", 365, "heat",
 post_pro.plot_double_24h(result_output_path, "solar_coll", "water_tes")
 post_pro.plot_double_24h(result_output_path, "water_tes", "tp_val")
 post_pro.plot_double_24h(result_output_path, "tp_val", "hw_cns")
+post_pro.print_size(result_output_path)

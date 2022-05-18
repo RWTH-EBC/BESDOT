@@ -234,8 +234,8 @@ def calc_residential_demand(bld_type, bld_year, bld_area,
 
 
 if __name__ == "__main__":
-    # calc_total_demand("Verwaltungsgebäude", "mittel", 10000)
+    print(calc_bld_demand("Wohngebäude (MFH)", 10000, 'heat'))
     # temperature = pd.read_csv(input_temp_path)['temperature'].values
-    # gen_heat_profile("Verwaltungsgebäude", 300, temperature, plot=True)
+    # gen_heat_profile("Wohngebäude", 300, temperature, plot=True)
     # print(calc_bld_demand("Verwaltungsgebäude", 300, "elec"))
-    calc_residential_demand('EFH', 1968, 200)
+    # calc_residential_demand('EFH', 1968, 200)

@@ -160,7 +160,7 @@ class Building(object):
                 min_size = self.topology['min_size'][item]
                 max_size = self.topology['max_size'][item]
                 current_size = self.topology['current_size'][item]
-                if comp_type in ['HeatPump', 'GasHeatPump']:
+                if comp_type in ['HeatPump', 'GasHeatPump','HeatPumpFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       temp_profile=
                                                       env.temp_profile,
@@ -229,13 +229,18 @@ class Building(object):
             if self.topology['comp_type'][item] in ['HeatConsumption',
                                                     'HeatConsumptionFluid',
                                                     'ElectricalConsumption',
-                                                    'HotWaterConsumption',
-                                                    'HotWaterConsumptionFluid'
                                                     ]:
                 cluster_profile = pd.Series(cluster.clusterPeriodDict[
                     'heat_demand']).tolist()
                 self.components[comp_name].update_profile(
                     consum_profile=cluster_profile)
+            if self.topology['comp_type'][item] in ['HotWaterConsumption',
+                                                    'HotWaterConsumptionFluid'
+                                                    ]:
+                cluster_profile = pd.Series(cluster.clusterPeriodDict[
+                                                'hot_water_demand']).tolist()
+                self.components[comp_name].update_profile(
+                        consum_profile=cluster_profile)
             if self.topology['comp_type'][item] in ['HeatPump',
                                                     'GasHeatPump', 'PV',
                                                     'SolarThermalCollector',
@@ -391,7 +396,7 @@ class Building(object):
             for flow in self.energy_flows[energy]:
                 self.energy_flows[energy][flow] = pyo.Var(
                     model.time_step, bounds=(0, None))
-                model.add_component(flow[0] + '_' + flow[1],
+                model.add_component(energy + '_' + flow[0] + '_' + flow[1],
                                     self.energy_flows[energy][flow])
 
                 if energy == 'heat':
