@@ -9,6 +9,7 @@ from scripts.components import HeatConsumption
 
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
     __file__))))
+small_num = 0.0001
 
 
 class HeatConsumptionFluid(FluidComponent):
@@ -64,10 +65,13 @@ class HeatConsumptionFluid(FluidComponent):
     # todo (qli):
     def _constraint_heat_water_return_temp(self, model, init_temp=21):
         for heat_input in self.heat_flows_in:
+            t_in = model.find_component(
+                heat_input[0] + '_' + heat_input[1] + '_' + 'temp')
             t_out = model.find_component(
                 heat_input[1] + '_' + heat_input[0] + '_' + 'temp')
             for t in range(len(model.time_step)):
                 model.cons.add(init_temp <= t_out[t + 1])
+                model.cons.add(t_out[t + 1] <= t_in[t + 1] - small_num)
 
     def add_cons(self, model):
         self._constraint_conver(model)

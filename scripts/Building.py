@@ -8,6 +8,7 @@ import numpy as np
 from tools.gen_heat_profile import *
 from tools.gen_elec_profile import gen_elec_profile
 from tools import get_all_class
+from scripts.components.Storage import Storage
 from tools.gen_hot_water_profile import gen_hot_water_profile
 
 module_dict = get_all_class.run()
@@ -159,7 +160,7 @@ class Building(object):
                 min_size = self.topology['min_size'][item]
                 max_size = self.topology['max_size'][item]
                 current_size = self.topology['current_size'][item]
-                if comp_type in ['HeatPump', 'GasHeatPump']:
+                if comp_type in ['HeatPump', 'GasHeatPump','HeatPumpFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       temp_profile=
                                                       env.temp_profile,
@@ -217,6 +218,50 @@ class Building(object):
                 self.components[comp_name] = comp_obj
 
         self.add_energy_flows()
+
+    def update_components(self, cluster):
+        """Update the components, which could be influenced by clustering
+        methods. The most important items are consumption items and storages:
+        consumptions should be replaced by the new clustered profiles and
+        storage should take additional assumption."""
+        for item in self.topology.index:
+            comp_name = self.topology['comp_name'][item]
+            if self.topology['comp_type'][item] in ['HeatConsumption',
+                                                    'HeatConsumptionFluid',
+                                                    'ElectricalConsumption',
+                                                    ]:
+                cluster_profile = pd.Series(cluster.clusterPeriodDict[
+                    'heat_demand']).tolist()
+                self.components[comp_name].update_profile(
+                    consum_profile=cluster_profile)
+            if self.topology['comp_type'][item] in ['HotWaterConsumption',
+                                                    'HotWaterConsumptionFluid'
+                                                    ]:
+                cluster_profile = pd.Series(cluster.clusterPeriodDict[
+                                                'hot_water_demand']).tolist()
+                self.components[comp_name].update_profile(
+                        consum_profile=cluster_profile)
+            if self.topology['comp_type'][item] in ['HeatPump',
+                                                    'GasHeatPump', 'PV',
+                                                    'SolarThermalCollector',
+                                                    'SolarThermalCollectorFluid',
+                                                    ]:
+                cluster_profile = pd.Series(cluster.clusterPeriodDict[
+                                                'temp']).tolist()
+                self.components[comp_name].update_profile(
+                    temp_profile=cluster_profile)
+            if self.topology['comp_type'][item] in ['PV',
+                                                    'SolarThermalCollector',
+                                                    'SolarThermalCollectorFluid',
+                                                    ]:
+                cluster_profile = pd.Series(cluster.clusterPeriodDict[
+                                                'irr']).tolist()
+                self.components[comp_name].update_profile(
+                    irr_profile=cluster_profile)
+            if isinstance(self.components[comp_name], Storage):
+                # The indicator cluster in storage could determine if the
+                # cluster function should be called.
+                self.components[comp_name].cluster = True
 
     def add_energy_flows(self):
         # Assign the variables for the energy flows according to system
@@ -351,7 +396,7 @@ class Building(object):
             for flow in self.energy_flows[energy]:
                 self.energy_flows[energy][flow] = pyo.Var(
                     model.time_step, bounds=(0, None))
-                model.add_component(flow[0] + '_' + flow[1],
+                model.add_component(energy + '_' + flow[0] + '_' + flow[1],
                                     self.energy_flows[energy][flow])
 
                 if energy == 'heat':
@@ -403,11 +448,17 @@ class Building(object):
         for comp in self.components:
             self.components[comp].add_vars(model)
 
-    def add_cons(self, model, env):
+    def add_cons(self, model, env, cluster=None):
         self._constraint_energy_balance(model)
         self._constraint_mass_balance(model)
+        # todo (yni): Attention in the optimization for operation cost should
+        #  comment constrain for solar area. This should be done automated.
+        #self._constraint_solar_area(model)
+
         self._constraint_total_cost(model, env)
-        self._constraint_operation_cost(model, env)
+        self._constraint_operation_cost(model, env, cluster)
+        self._constraint_other_op_cost(model)
+
         for comp in self.components:
             if hasattr(self.components[comp], 'heat_flows_in'):
                 if isinstance(self.components[comp].heat_flows_in, list):
@@ -418,7 +469,7 @@ class Building(object):
                     self.components[comp].add_heat_flows_out(
                         self.heat_flows.keys())
             self.components[comp].add_cons(model)
-        self._constraint_other_op_cost(model)
+
         # todo (yni): Attention in the optimization for operation cost should
         #  comment constrain for solar area. This should be done automated.
         for item in self.topology.index:
@@ -532,7 +583,7 @@ class Building(object):
                                               comp_cost_list) +
                        bld_operation_cost + bld_other_op_cost)
 
-    def _constraint_operation_cost(self, model, env):
+    def _constraint_operation_cost(self, model, env, cluster=None):
         """Calculate the total operation cost for the building energy system."""
         bld_operation_cost = model.find_component('operation_cost_' + self.name)
         bld_other_op_cost = model.find_component('other_op_cost_' + self.name)
@@ -540,10 +591,11 @@ class Building(object):
         # sale volume in time series and used to avoid that the constraint
         # added is not executed properly if there is a None. The reason for
         # 8761 steps is the different index of python list and pyomo.
-        buy_elec = [0] * 8761
-        sell_elec = [0] * 8761
-        buy_gas = [0] * 8761
-        buy_heat = [0] * 8761
+        buy_elec = [0] * (env.time_step + 1)  # unmatched index for python and
+        # pyomo
+        sell_elec = [0] * (env.time_step + 1)
+        buy_gas = [0] * (env.time_step + 1)
+        buy_heat = [0] * (env.time_step + 1)
 
         # comp_cost_list = []
         for comp in self.components:
@@ -560,15 +612,39 @@ class Building(object):
             elif isinstance(self.components[comp], module_dict['HeatGrid']):
                 buy_heat = model.find_component('output_heat_' + comp)
 
-        model.cons.add(bld_operation_cost == sum(buy_elec[t] * env.elec_price +
-                                                 buy_gas[t] * env.gas_price +
-                                                 buy_heat[t] *
-                                                 env.heat_price - sell_elec[
-                                                  t] * env.elec_feed_price
-                                                 for t in model.time_step) +
-                       bld_other_op_cost)
+        if cluster is None:
+            model.cons.add(
+                bld_operation_cost == sum(buy_elec[t] * env.elec_price +
+                                          buy_gas[t] * env.gas_price +
+                                          buy_heat[t] *
+                                          env.heat_price - sell_elec[
+                                              t] * env.elec_feed_price
+                                          for t in model.time_step) +
+                bld_other_op_cost)
+        else:
+            # Attention! The period only for 24 hours is developed,
+            # other segments are not considered.
+            period_length = 24
+
+            nr_day_occur = pd.Series(cluster.clusterPeriodNoOccur).tolist()
+            nr_hour_occur = []
+            for nr_occur in nr_day_occur:
+                nr_hour_occur += [nr_occur] * 24
+
+            model.cons.add(
+                bld_operation_cost == sum(buy_elec[t] * env.elec_price *
+                                          nr_hour_occur[t-1] + buy_gas[t] *
+                                          env.gas_price * nr_hour_occur[t-1] +
+                                          buy_heat[t] * env.heat_price *
+                                          nr_hour_occur[t-1] - sell_elec[t] *
+                                          env.elec_feed_price *
+                                          nr_hour_occur[t-1]
+                                          for t in model.time_step) +
+                bld_other_op_cost)
 
     def _constraint_other_op_cost(self, model):
+        # todo (qli&yni): the other operation cost should be tested with
+        #  cluster methods
         bld_other_op_cost = model.find_component('other_op_cost_' + self.name)
 
         other_op_comp_list = []

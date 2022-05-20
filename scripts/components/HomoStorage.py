@@ -275,13 +275,14 @@ class HomoStorage(FluidComponent, HotWaterStorage):
 
     def add_cons(self, model):
         self._constraint_conver(model)
-        self._constraint_loss(model, loss_type='off')
+        self._constraint_loss(model, loss_type='on')
         self._constraint_temp(model)
         # self._constraint_init_fluid_temp(model)
         # todo (yni): the constraint about return temperature should be
         #  determined by consumer, fix this later
         # self._constraint_mass_flow(model)
-        self._constraint_heat_inputs(model)
+        #todo: unterschiedliche Wärmekapazität
+        #self._constraint_heat_inputs(model)
         self._constraint_heat_outputs(model)
         # self._constraint_input_permit(model, min_temp=30, init_status='on')
         self._constraint_vdi2067(model)

@@ -30,27 +30,33 @@ def plot_all(csv_file, time_interval):
         else:
             if sum(elements_dict[element]) > 0.001:
                 plot_single(element, elements_dict[element][time_interval[0]:
-                                                            time_interval[1]])
+                                                            time_interval[1]],
+                            time_interval)
 
-def plot_single(name, profile):
+
+def plot_single(name, profile, time_interval):
+    font_label = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
     plot_output = os.path.join(opt_output_path, 'plot', 'Profile of ' + name)
-    fig, ax = plt.subplots(figsize=(14, 14))
-    # ax = fig.add_subplot(111)
-    ax.plot(profile, linewidth=2, color='r', marker='o', linestyle='dashed')
-    ax.set_title('Profile of ' + name)
-    ax.set_xlabel('Hours [h]')
+    time_steps = range(time_interval[0], time_interval[1] + 1)
+    fig, ax = plt.subplots(figsize=(6.5, 5.5))
+    ax.step(time_steps, profile, where="post", linestyle='-', color='r',
+            linewidth=2, zorder=1.5)
+    ax.set_title('Diagram von ' + name, font_titel)
+    ax.set_xlabel('Stunde [h]', font_label)
     if 'mass' in name:
-        ax.set_ylabel('mass [KG/H]', fontsize=12)
+        ax.set_ylabel('Massstrom [kg/h]', font_label)
     elif 'temp' in name:
-        ax.set_ylabel('temperature [°]', fontsize=12)
+        ax.set_ylabel('Temperaur [°C]', font_label)
     else:
-        ax.set_ylabel('power [KW]', fontsize=12)
+        ax.set_ylabel('leistung [kW]', font_label)
 
     ax.set_xlim(xmin=0)
     ax.set_ylim(ymin=0, ymax=max(profile) * 1.2)
     plt.grid()
 
-    # plt.show()
     plt.savefig(plot_output)
     plt.close()
 
@@ -302,6 +308,7 @@ def plot_step_profile(energy_type, demand, profile, time_step):
     fig.suptitle(t='hourly profile', fontsize=18)
     plt.show()
 
+
 def find_element(output_df):
     """find all elements in dataframe, the variables with same name but
     different time step would be stored in a list"""
@@ -316,6 +323,7 @@ def find_element(output_df):
         elements_dict[element] = values
 
     return elements_dict
+
 
 def plot_one_line(csv_file, comp, titel, ylabel, n=1.1):
     font_label = {'family': 'Times New Roman', 'weight': 'medium', 'style':
@@ -518,7 +526,7 @@ def step_plot_heat_demand(csv_file, time_step):
     ax.step(time_steps, value4, where="post", label='Wärmebedarf',
             linestyle='-', color='b', linewidth=2, zorder=1.5)
     ax.step(time_steps, data5, where="post", label='Gesamter Wärmebedarf',
-            linestyle='--', color='k',  linewidth=2, zorder=1.5)
+            linestyle='--', color='k', linewidth=2, zorder=1.5)
 
     plt.legend(loc='best', prop=font_legend)
     ax.set_title('Wärmebedarf', font_titel, y=1.02)
@@ -532,6 +540,7 @@ def step_plot_heat_demand(csv_file, time_step):
     fig.tight_layout()
 
     plt.savefig(plot_output)
+
 
 def step_plot_one_line(csv_file, time_step, comp, titel, ylabel, n=1.1):
     font_label = {'family': 'Times New Roman', 'weight': 'medium', 'style':
@@ -590,7 +599,7 @@ def step_plot_two_lines(csv_file, time_step, comp1, comp2, label1, label2,
     plt.grid(linestyle='--', which='both')
 
     ax.step(time_steps, value1, label=label1, where="post", linestyle='-',
-            color='r',  linewidth=2)
+            color='r', linewidth=2)
     ax.step(time_steps, value2, label=label2, where="post", linestyle='--',
             color='b', linewidth=2)
 
@@ -642,7 +651,7 @@ def step_plot_three_lines(csv_file, time_step, comp1, comp2, comp3, label1,
     ax.step(time_steps, value2, where="post", label=label2,
             linestyle=l2, color=c2, linewidth=2, alpha=0.7)
     ax.step(time_steps, value3, where="post", label=label3,
-            linestyle=l3, color=c3,  linewidth=2, alpha=0.7)
+            linestyle=l3, color=c3, linewidth=2, alpha=0.7)
 
     plt.legend(loc=legend_pos, prop=font_legend)
     ax.set_title(titel, font_titel, y=1.02)
@@ -655,6 +664,7 @@ def step_plot_three_lines(csv_file, time_step, comp1, comp2, comp3, label1,
     fig.tight_layout()
 
     plt.savefig(plot_output)
+
 
 def step_plot_four_lines(csv_file, time_step, comp1, comp2, comp3, comp4,
                          label1, label2, label3, label4, titel, ylabel, c1='r',
@@ -689,11 +699,11 @@ def step_plot_four_lines(csv_file, time_step, comp1, comp2, comp3, comp4,
     plt.grid(linestyle='--', which='both')
 
     ax.step(time_steps, value1, label=label1, where="post", linestyle=l1,
-            color=c1,  linewidth=2, alpha=0.7)
+            color=c1, linewidth=2, alpha=0.7)
     ax.step(time_steps, value2, label=label2, where="post", linestyle=l2,
             color=c2, linewidth=2, alpha=0.7)
     ax.step(time_steps, value3, label=label3, where="post", linestyle=l3,
-            color=c3,  linewidth=2, alpha=0.7)
+            color=c3, linewidth=2, alpha=0.7)
     ax.step(time_steps, value4, label=label4, where="post", linestyle=l4,
             color=c4, linewidth=2, alpha=0.7)
 
@@ -730,6 +740,7 @@ def print_size(csv_file):
                     np.isnan(elements_dict[element][0]):
                 size_dict[element] = elements_dict[element][0]
                 print('operation_cost = ', size_dict[element])
+
 
 def step_plot_solar_water_tes(csv_file, time_step):
     font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
@@ -783,6 +794,7 @@ def step_plot_solar_water_tes(csv_file, time_step):
 
     plt.savefig(plot_output)
 
+
 def step_plot_chp(csv_file, time_step):
     font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
         'normal', 'size': '15'}
@@ -830,6 +842,7 @@ def step_plot_chp(csv_file, time_step):
 
     plt.savefig(plot_output)
 
+
 def step_plot_chp_small_eff(csv_file, time_step):
     font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
         'normal', 'size': '15'}
@@ -864,7 +877,7 @@ def step_plot_chp_small_eff(csv_file, time_step):
     lns2 = ax2.step(time_steps, value2, where="post",
                     label='Thermischer Wirkungsgrad',
                     color='r', linewidth=2, alpha=0.7)
-    ax.set_ylim(ymax = max(value1) * 1.3)
+    ax.set_ylim(ymax=max(value1) * 1.3)
     lns = lns1 + lns2
     labs = [l.get_label() for l in lns]
     plt.legend(lns, labs, loc='best', prop=font_legend)
@@ -877,6 +890,7 @@ def step_plot_chp_small_eff(csv_file, time_step):
     fig.tight_layout()
 
     plt.savefig(plot_output)
+
 
 def step_plot_chp_big_eff(csv_file, time_step):
     font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
@@ -932,6 +946,7 @@ def step_plot_chp_big_eff(csv_file, time_step):
 
     plt.savefig(plot_output)
 
+
 def step_plot_solar_eff(csv_file, time_step, temp_profile):
     font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
         'normal', 'size': '15'}
@@ -960,8 +975,8 @@ def step_plot_solar_eff(csv_file, time_step, temp_profile):
     fig = plt.figure(figsize=(6.5, 5.5))
     ax = fig.add_subplot(111)
     ax.xaxis.set_minor_locator(MultipleLocator(5))
-    ax.yaxis.set_minor_locator(MultipleLocator(1))
-    ax.set_ylim(ymin=0.45, ymax=0.75)
+    ax.yaxis.set_minor_locator(MultipleLocator(5))
+    ax.set_ylim(ymin=0)
     ax.grid(linestyle='--', which='both')
 
     plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
@@ -980,8 +995,8 @@ def step_plot_solar_eff(csv_file, time_step, temp_profile):
     lns4 = ax2.step(time_steps, value4, where="post",
                     label='Umgebungstemperatur', linestyle='-',
                     color='g', linewidth=2, alpha=0.7)
-    ax2.yaxis.set_minor_locator(MultipleLocator(1))
-    ax2.set_ylim(ymax=max(max(value2), max(value3)) * 1.3)
+    ax2.yaxis.set_minor_locator(MultipleLocator(10))
+    ax2.set_ylim(ymin=-10, ymax=max(max(value2), max(value3)) * 2)
     lns = lns1 + lns2 + lns3 + lns4
     labs = [l.get_label() for l in lns]
 
@@ -995,6 +1010,7 @@ def step_plot_solar_eff(csv_file, time_step, temp_profile):
     fig.tight_layout()
 
     plt.savefig(plot_output)
+
 
 def step_plot_solar_irr(csv_file, time_step, irr_profile):
     font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
@@ -1020,7 +1036,7 @@ def step_plot_solar_irr(csv_file, time_step, irr_profile):
 
     fig = plt.figure(figsize=(6.5, 5.5))
     ax = fig.add_subplot(111)
-    ax.set_ylim(ymax=600)
+    ax.set_ylim(ymax=1000)
     ax.xaxis.set_minor_locator(MultipleLocator(5))
     ax.grid(linestyle='--', which='both')
 
@@ -1042,6 +1058,7 @@ def step_plot_solar_irr(csv_file, time_step, irr_profile):
     labs = [l.get_label() for l in lns]
     plt.legend(lns, labs, loc='best', prop=font_legend)
 
+    ax2.set_ylim(ymin=0, ymax=max(max(value2), max(value3)) * 1.1)
     ax.set_xlabel("Stunde (h)", font_label)
     ax.set_ylabel(r"Strahlung (W/h)", font_label)
     ax2.set_ylabel(r"Temperatur ($^\circ$C)", font_label)
@@ -1051,7 +1068,53 @@ def step_plot_solar_irr(csv_file, time_step, irr_profile):
 
     plt.savefig(plot_output)
 
-def step_plot_elec_chp(csv_file, time_step, irr_profile):
+
+def step_plot_two_lines_color(csv_file, time_step, comp1, comp2, label1, label2,
+                              titel, ylabel, n=1.1, legend_pos='best'):
+    font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
+        'normal', 'size': '15'}
+    font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
+    plot_output = os.path.join(opt_output_path, 'plot', titel)
+    df = pd.read_csv(csv_file)
+    time_steps = range(time_step)
+
+    data1 = df[(df['var'].str.contains(comp1))]
+    data1 = data1.reset_index(drop=True)
+    value1 = data1['value']
+    data2 = df[(df['var'].str.contains(comp2))]
+    data2 = data2.reset_index(drop=True)
+    value2 = data2['value']
+
+    fig = plt.figure(figsize=(6.5, 5.5))
+    ax = fig.add_subplot(111)
+    ax.xaxis.set_minor_locator(MultipleLocator(5))
+    plt.grid(linestyle='--', which='both', zorder=0)
+
+    ax.step(time_steps, value1, where="post", color='b', linewidth=0.2)
+    ax.fill_between(time_steps, value1, 0, facecolor='b', label=label1,
+                    zorder=10, step="post")
+    ax.step(time_steps, value2, where="post", color='r', linewidth=0.2)
+    ax.fill_between(time_steps, value2, value1, facecolor='r', label=label2,
+                    zorder=10, step="post")
+
+    plt.legend(loc=legend_pos, prop=font_legend)
+    ax.set_title(titel, font_titel, y=1.02)
+    ax.set_xlabel("Stunde (h)", font_label)
+    ax.set_ylabel(ylabel, font_label)
+    ax.set_xlim(xmin=0)
+    ax.set_ylim(ymax=max(max(value1), max(value2)) * n)
+    # ax.tick_params(labelsize=12)
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    fig.tight_layout()
+
+    plt.savefig(plot_output)
+
+
+def step_plot_solar_water_tes_color(csv_file, time_step):
     font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
         'normal', 'size': '15'}
     font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
@@ -1059,49 +1122,812 @@ def step_plot_elec_chp(csv_file, time_step, irr_profile):
     font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
         'normal', 'size': '18'}
     plot_output = os.path.join(opt_output_path, 'plot',
-                               'Wirkungsgrad ')
+                               'Diagramm vom Solarspeicher')
     df = pd.read_csv(csv_file)
     time_steps = range(time_step)
 
-    data1 = pd.DataFrame(irr_profile)
+    data1 = df[df['var'].str.contains('water_tes_tp_val_temp')]
     data1 = data1.reset_index(drop=True)
-    value1 = data1[0]
-    data2 = df[df['var'].str.contains('inlet_temp_solar_coll')]
+    value1 = data1['value']
+    data2 = df[df['var'].str.contains('input_heat_water_tes')]
     data2 = data2.reset_index(drop=True)
     value2 = data2['value']
-    data3 = df[df['var'].str.contains('outlet_temp_solar_coll')]
+    data3 = df[df['var'].str.contains('output_heat_water_tes')]
     data3 = data3.reset_index(drop=True)
     value3 = data3['value']
 
     fig = plt.figure(figsize=(6.5, 5.5))
     ax = fig.add_subplot(111)
-    ax.set_ylim(ymax=600)
     ax.xaxis.set_minor_locator(MultipleLocator(5))
-    ax.grid(linestyle='--', which='both')
+    ax.set_ylim(ymin=10, ymax=75)
+    ax.grid(linestyle='--', which='both', zorder=0)
 
     plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
     plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
-    ax.set_title('Wirkungsgrad des Kollektors', font_titel, y=1.02)
-    lns1 = ax.step(time_steps, value1, where="post",
-                   label='Strahlung',
-                   linestyle='-', color='k', linewidth=2)
+    ax.set_title('Diagramm des Solarspeichers', font_titel, y=1.02)
+    lns1 = ax.step(time_steps, value1, where="post", label='Temperatur',
+                   linestyle='-', color='k', linewidth=1.5, zorder=10)
     ax2 = ax.twinx()
-    lns2 = ax2.step(time_steps, value2, where="post",
-                    label='Eintrittstemperatur',
-                    color='r', linewidth=2, alpha=0.7)
-    lns3 = ax2.step(time_steps, value3, where="post",
-                    label='Austrittstemperatur', linestyle='--',
-                    color='b', linewidth=2, alpha=0.7)
+    ax2.step(time_steps, value2, where="post", linewidth=0.5,
+             label='Input', alpha=0)
+    ax2.step(time_steps, value3, where="post", linewidth=0.5,
+             label='Output', alpha=0)
+    lns2 = ax2.plot([], [], linewidth=8, label='Input', color='r', alpha=0.5)
+    lns3 = ax2.plot([], [], linewidth=8, label='Output', color='b', alpha=0.5)
+    ax2.fill_between(time_steps, value2, 0, facecolor='r', step="post",
+                     zorder=10, alpha=0.5)
+    ax2.fill_between(time_steps, value3, 0, facecolor='b', step="post",
+                     zorder=10, alpha=0.5)
+    ax2.set_ylim(ymax=max(max(value2), max(value3)) * 1.5)
 
     lns = lns1 + lns2 + lns3
     labs = [l.get_label() for l in lns]
     plt.legend(lns, labs, loc='best', prop=font_legend)
 
     ax.set_xlabel("Stunde (h)", font_label)
-    ax.set_ylabel(r"Strahlung (W/h)", font_label)
-    ax2.set_ylabel(r"Temperatur ($^\circ$C)", font_label)
+    ax.set_ylabel(r"Temperatur ($^\circ$C)", font_label)
+    ax2.set_ylabel(r"Leistung (kW)", font_label)
     plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
     plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
     fig.tight_layout()
 
+    plt.savefig(plot_output)
+
+
+def step_plot_heat_demand_color(csv_file, time_step):
+    font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
+        'normal', 'size': '15'}
+    font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
+    plot_output = os.path.join(opt_output_path, 'plot', 'Wärmebedarf')
+    df = pd.read_csv(csv_file)
+    time_steps = range(time_step)
+
+    data3 = df[(df['var'].str.contains('input_heat_hw_cns'))]
+    data3 = data3.reset_index(drop=True)
+    value3 = data3['value']
+    data4 = df[(df['var'].str.contains('input_heat_therm_cns'))]
+    data4 = data4.reset_index(drop=True)
+    value4 = data4['value']
+    data5 = value3 + value4
+
+    fig = plt.figure(figsize=(6.5, 5.5))
+    ax = fig.add_subplot(1, 1, 1)
+    ax.xaxis.set_minor_locator(MultipleLocator(5))
+    ax.grid(linestyle='--', which='both', alpha=0.6)
+
+    ax.step(time_steps, value3, where="post", color='b', linewidth=0.2)
+    ax.fill_between(time_steps, value3, 0, facecolor='b',
+                    label='Warmwasserbedarf', zorder=10, step="post")
+    ax.step(time_steps, data5, where="post", color='r', linewidth=0.2)
+    ax.fill_between(time_steps, data5, value3, facecolor='r',
+                    label='Heizungsbedarf', zorder=10, step="post")
+
+    plt.legend(loc='best', prop=font_legend)
+    ax.set_title('Wärmebedarf', font_titel, y=1.02)
+    ax.set_xlabel('Stunde (h)', font_label)
+    ax.set_ylabel('Leistung (kW)', font_label)
+    ax.set_xlim(xmin=0)
+    ax.set_ylim(ymax=max(max(value3), max(value4), max(data5)) * 1.3)
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    ax.set_axisbelow(True)
+    fig.tight_layout()
+
+    plt.savefig(plot_output)
+
+
+def step_plot_chp_color(csv_file, time_step):
+    font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
+        'normal', 'size': '15'}
+    font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
+    plot_output = os.path.join(opt_output_path, 'plot', 'Energieversorgung')
+    df = pd.read_csv(csv_file)
+    time_steps = range(time_step)
+
+    data1 = df[(df['var'].str.contains('output_heat_water_tes'))]
+    data1 = data1.reset_index(drop=True)
+    value1 = data1['value']
+    # data2 = df[(df['var'].str.contains('output_heat_boi'))]
+    # data2 = data2.reset_index(drop=True)
+    # value2 = data2['value']
+    data3 = df[(df['var'].str.contains('input_heat_hw_cns'))]['value']
+    data3 = data3.reset_index(drop=True)
+    data4 = df[(df['var'].str.contains('input_heat_therm_cns'))]['value']
+    data4 = data4.reset_index(drop=True)
+    data5 = data3 + data4
+
+    fig = plt.figure(figsize=(6.5, 5.5))
+    ax = fig.add_subplot(111)
+    ax.xaxis.set_minor_locator(MultipleLocator(5))
+    plt.grid(linestyle='--', which='both')
+
+    ax.step(time_steps, value1, where="post", color='r', linewidth=0.2)
+    ax.fill_between(time_steps, value1, 0, facecolor='r',
+                    label='Wärme aus BHKW', zorder=10, step="post")
+    ax.step(time_steps, data5, where="post", color='b', linewidth=0.2)
+    ax.fill_between(time_steps, data5, value1, facecolor='b',
+                    label='Wärme aus Kessel', zorder=10, step="post")
+
+    plt.legend(loc='best', prop=font_legend)
+    ax.set_title('Energieversorgung', font_titel, y=1.02)
+    ax.set_xlabel("Stunde (h)", font_label)
+    ax.set_ylabel(r'Leistung (kW)', font_label)
+    ax.set_xlim(xmin=0)
+    ax.set_ylim(ymax=max(max(value1), max(data5)) * 1.5)
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    fig.tight_layout()
+
+    plt.savefig(plot_output)
+
+
+def step_plot_chp_diagram_color(csv_file, time_step):
+    font_label = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
+    plot_output = os.path.join(opt_output_path, 'plot', 'demand')
+    df = pd.read_csv(csv_file)
+    time_steps = range(time_step)
+
+    data1 = df[(df['var'].str.contains('output_heat_chp'))]['value']
+    data1 = data1.reset_index(drop=True)
+    df1 = pd.DataFrame(data1)
+    df1.sort_values(by=df1.columns[0], axis=0, ascending=False, inplace=True)
+    ts1 = pd.Series(df1['value'].values, index=time_steps)
+    data3 = df[(df['var'].str.contains('input_heat_hw_cns'))]['value']
+    data3 = data3.reset_index(drop=True)
+    data4 = df[(df['var'].str.contains('input_heat_therm_cns'))]['value']
+    data4 = data4.reset_index(drop=True)
+    data5 = data3 + data4
+    df2 = pd.DataFrame(data5)
+    df2.sort_values(by=df2.columns[0], axis=0, ascending=False, inplace=True)
+    ts2 = pd.Series(df2['value'].values, index=time_steps)
+
+    fig = plt.figure(figsize=(6.5, 5.5))
+    ax = fig.add_subplot(111)
+    ax.xaxis.set_minor_locator(MultipleLocator(5))
+    plt.grid(linestyle='--', which='both')
+
+    ax.step(time_steps, ts1, where="post", color='r', linewidth=0.2)
+    ax.fill_between(time_steps, ts1, 0, facecolor='r',
+                    zorder=10, step="post", alpha=0.5)
+    ax.step(time_steps, ts2, where="post", color='b', linewidth=0.2)
+    ax.fill_between(time_steps, ts2, 0, facecolor='b',
+                    zorder=10, step="post", alpha=0.5)
+    ax.plot([], [], linewidth=8, label='Warme aus BHKW', color='r',
+            alpha=0.5)
+    ax.plot([], [], linewidth=8, label='Gesamter Wärmebedarf', color='b',
+            alpha=0.5)
+
+    plt.legend(loc='best', prop=font_legend)
+
+    ax.set_title('Test', font_titel, y=1.02)
+    ax.set_xlabel("Stunde (h)", font_label)
+    ax.set_ylabel('demand', font_label)
+    ax.set_xlim(xmin=0)
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    fig.tight_layout()
+    plt.savefig(plot_output)
+
+
+def step_plot_chp_energy_color(csv_file, time_step):
+    font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
+        'normal', 'size': '15'}
+    font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
+    plot_output = os.path.join(opt_output_path, 'plot',
+                               'Energieerzeugung mit BHKW')
+    df = pd.read_csv(csv_file)
+    time_steps = range(time_step)
+
+    data1 = df[df['var'].str.contains('temp_water_tes')]
+    data1 = data1.reset_index(drop=True)
+    value1 = data1['value']
+    data2 = df[df['var'].str.contains('input_heat_water_tes')]
+    data2 = data2.reset_index(drop=True)
+    value2 = data2['value']
+    data3 = df[df['var'].str.contains('output_heat_water_tes')]
+    data3 = data3.reset_index(drop=True)
+    value3 = data3['value']
+    data4 = df[df['var'].str.contains('output_heat_boi_s')]
+    data4 = data4.reset_index(drop=True)
+    value4 = data4['value']
+    value5 = value4 + value3
+
+    fig = plt.figure(figsize=(6.5, 5.5))
+    ax = fig.add_subplot(111)
+    ax.xaxis.set_minor_locator(MultipleLocator(5))
+    ax.set_ylim(ymin=0, ymax=120)
+    ax.grid(linestyle='--', which='both', zorder=0)
+
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    ax.set_title('Energieerzeugung', font_titel, y=1.02)
+    lns1 = ax.step(time_steps, value1, where="post",
+                   label='Temperatur des Speichers',
+                   linestyle='-', color='k', linewidth=1.5, zorder=10)
+    ax2 = ax.twinx()
+    ax2.step(time_steps, value2, where="post", linewidth=0.5,
+             label='Input', alpha=0)
+    ax2.fill_between(time_steps, value2, 0, facecolor='r', step="post",
+                     zorder=10, alpha=0.5)
+    ax2.step(time_steps, value3, where="post", linewidth=0.5,
+             label='Output', alpha=0)
+    ax2.fill_between(time_steps, value3, 0, facecolor='b', step="post",
+                     zorder=10, alpha=0.5)
+    ax2.step(time_steps, value4, where="post", linewidth=0.5,
+             label='Wärme aus Kessel', alpha=0)
+    ax2.fill_between(time_steps, value5, value3, facecolor='g', step="post",
+                     zorder=10, alpha=0.5)
+    lns2 = ax2.plot([], [], linewidth=8, label='Input', color='r', alpha=0.5)
+    lns3 = ax2.plot([], [], linewidth=8, label='Output', color='b', alpha=0.5)
+    lns4 = ax2.plot([], [], linewidth=8, label='Wärme aus Kessel', color='g',
+                    alpha=0.5)
+
+    ax2.set_ylim(ymax=max(max(value2), max(value3)) * 1.5)
+
+    lns = lns1 + lns2 + lns3 + lns4
+    labs = [l.get_label() for l in lns]
+    plt.legend(lns, labs, loc='best', prop=font_legend)
+
+    ax.set_xlabel("Stunde (h)", font_label)
+    ax.set_ylabel(r"Temperatur ($^\circ$C)", font_label)
+    ax2.set_ylabel(r"Leistung (kW)", font_label)
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    fig.tight_layout()
+
+    plt.savefig(plot_output)
+
+
+def step_plot_chp_water_tes_color(csv_file, time_step):
+    font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
+        'normal', 'size': '15'}
+    font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
+    plot_output = os.path.join(opt_output_path, 'plot',
+                               'BHKW')
+    df = pd.read_csv(csv_file)
+    time_steps = range(time_step)
+
+    data1 = df[df['var'].str.contains('temp_water_tes')]
+    data1 = data1.reset_index(drop=True)
+    value1 = data1['value']
+    data2 = df[df['var'].str.contains('input_heat_water_tes')]
+    data2 = data2.reset_index(drop=True)
+    value2 = data2['value']
+    data3 = df[df['var'].str.contains('output_heat_water_tes')]
+    data3 = data3.reset_index(drop=True)
+    value3 = data3['value']
+
+    fig = plt.figure(figsize=(6.5, 5.5))
+    ax = fig.add_subplot(111)
+    ax.xaxis.set_minor_locator(MultipleLocator(5))
+    ax.set_ylim(ymin=0, ymax=120)
+    ax.grid(linestyle='--', which='both', zorder=0)
+
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    ax.set_title('Diagramm des Speicher', font_titel, y=1.02)
+    lns1 = ax.step(time_steps, value1, where="post",
+                   label='Temperatur',
+                   linestyle='-', color='k', linewidth=1.5, zorder=10)
+    ax2 = ax.twinx()
+    ax2.step(time_steps, value2, where="post", linewidth=0.5,
+             label='Input', alpha=0)
+    ax2.fill_between(time_steps, value2, 0, facecolor='r', step="post",
+                     zorder=10, alpha=0.5)
+    ax2.step(time_steps, value3, where="post", linewidth=0.5,
+             label='Output', alpha=0)
+    ax2.fill_between(time_steps, value3, 0, facecolor='b', step="post",
+                     zorder=10, alpha=0.5)
+    lns2 = ax2.plot([], [], linewidth=8, label='Input', color='r', alpha=0.5)
+    lns3 = ax2.plot([], [], linewidth=8, label='Output', color='b', alpha=0.5)
+
+    ax2.set_ylim(ymax=max(max(value2), max(value3)) * 1.5)
+
+    lns = lns1 + lns2 + lns3
+    labs = [l.get_label() for l in lns]
+    plt.legend(lns, labs, loc='best', prop=font_legend)
+
+    ax.set_xlabel("Stunde (h)", font_label)
+    ax.set_ylabel(r"Temperatur ($^\circ$C)", font_label)
+    ax2.set_ylabel(r"Leistung (kW)", font_label)
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    fig.tight_layout()
+
+    plt.savefig(plot_output)
+
+
+def step_plot_heat(csv_file, time_step):
+    font_label = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
+    plot_output = os.path.join(opt_output_path, 'plot', 'Energieerzeugung')
+    df = pd.read_csv(csv_file)
+    time_steps = range(time_step)
+
+    data1 = df[df['var'].str.contains('output_heat_chp')]
+    data1 = data1.reset_index(drop=True)
+    value1 = data1['value']
+    data2 = df[df['var'].str.contains('output_heat_boi_s')]
+    data2 = data2.reset_index(drop=True)
+    value2 = data2['value']
+    data3 = df[df['var'].str.contains('input_heat_hw_cns')]
+    data3 = data3.reset_index(drop=True)
+    value3 = data3['value']
+    data4 = df[df['var'].str.contains('input_heat_therm_cns')]
+    data4 = data4.reset_index(drop=True)
+    value4 = data4['value']
+    value5 = value3 + value4
+    data6 = df[df['var'].str.contains('temp_water_tes')]
+    data6 = data6.reset_index(drop=True)
+    value6 = data6['value']
+
+    fig = plt.figure(figsize=(6.5, 5.5))
+    ax = fig.add_subplot(111)
+    ax.xaxis.set_minor_locator(MultipleLocator(5))
+    plt.grid(linestyle='--', which='both')
+
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    ax.set_title('Energieerzeugung', font_titel, y=1.02)
+    lns1 = ax.step(time_steps, value6, where="post", label='Temperatur',
+                   linestyle='-.', color='r', linewidth=1.5, zorder=10)
+    ax2 = ax.twinx()
+    lns2 = ax2.step(time_steps, value1, where="post", label='Wärme aus BHKW',
+                    linestyle='--', color='g', linewidth=1.5, zorder=10)
+    lns3 = ax2.step(time_steps, value2, where="post", label='Wärme aus Kessel',
+                    linestyle='-', color='k', linewidth=1.5, zorder=10)
+    ax2.step(time_steps, value3, where="post", color='r', linewidth=0.2)
+    ax2.fill_between(time_steps, value3, 0, facecolor='r',
+                     zorder=10, step="post", alpha=0.5)
+    ax2.step(time_steps, value5, where="post", color='b', linewidth=0.2)
+    ax2.fill_between(time_steps, value5, value3, facecolor='b',
+                     zorder=10, step="post", alpha=0.5)
+    lns4 = ax2.plot([], [], linewidth=8, label='Warmwasserbedarf',
+                    color='k', alpha=0.5)
+    lns5 = ax2.plot([], [], linewidth=8, label='Gesamter Wärmebedarf',
+                    color='b', alpha=0.5)
+    ax2.plot([], [], linewidth=1.5, label='Temperatur', linestyle='-.',
+             color='r', alpha=0.5)
+
+    lns = lns1 + lns2 + lns3 + lns4 + lns5
+    labs = [l.get_label() for l in lns]
+    plt.legend(lns, labs, loc='best', prop=font_legend)
+
+    ax.set_xlabel("Stunde (h)", font_label)
+    ax.set_ylabel(r"Temperatur ($^\circ$C)", font_label)
+    ax2.set_ylabel(r"Leistung (kW)", font_label)
+    ax2.set_xlim(xmin=0)
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    fig.tight_layout()
+
+    plt.savefig(plot_output)
+
+
+def step_plot_chp_diagram_color1(csv_file, time_step):
+    font_label = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
+    plot_output = os.path.join(opt_output_path, 'plot', 'demand')
+    df = pd.read_csv(csv_file)
+    time_steps = range(time_step)
+
+    data1 = df[(df['var'].str.contains('output_heat_chp'))]['value']
+    df1 = pd.DataFrame(data1)
+    s = df1['value'].sum() / len(time_steps)
+    df1.sort_values(by=df1.columns[0], axis=0, ascending=False, inplace=True)
+    ts1 = pd.Series(df1['value'].values, index=time_steps)
+    data3 = df[(df['var'].str.contains('input_heat_hw_cns'))]['value']
+    data3 = data3.reset_index(drop=True)
+    data4 = df[(df['var'].str.contains('input_heat_therm_cns'))]['value']
+    data4 = data4.reset_index(drop=True)
+    data5 = data3 + data4
+    df2 = pd.DataFrame(data5)
+    df2.sort_values(by=df2.columns[0], axis=0, ascending=False, inplace=True)
+    ts2 = pd.Series(df2['value'].values, index=time_steps)
+
+    fig = plt.figure(figsize=(6.5, 5.5))
+    ax = fig.add_subplot(111)
+    ax.xaxis.set_minor_locator(MultipleLocator(5))
+    plt.grid(linestyle='--', which='both')
+
+    ax.hlines(s, 0, len(time_steps), color='g', linewidth=0.2, alpha=0)
+    ax.fill_between(time_steps, s, 0, facecolor='g', hatch='///',
+                    label='Durchschnittswärme aus BHKW',
+                    zorder=10, step="post", alpha=0.5)
+    ax.step(time_steps, ts1, where="post", color='r', linewidth=0.2)
+    ax.fill_between(time_steps, ts1, 0, facecolor='r', label='Warme aus BHKW',
+                    zorder=10, step="post", alpha=0.5)
+    ax.step(time_steps, ts2, where="post", color='b', linewidth=0.2)
+    ax.fill_between(time_steps, ts2, 0, facecolor='b',
+                    label='Gesamter Wärmebedarf',
+                    zorder=10, step="post", alpha=0.5)
+
+    plt.legend(loc='best', prop=font_legend)
+
+    ax.set_title('Test', font_titel, y=1.02)
+    ax.set_xlabel("Stunde (h)", font_label)
+    ax.set_ylabel('demand', font_label)
+    ax.set_xlim(xmin=0)
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    fig.tight_layout()
+    plt.savefig(plot_output)
+
+
+def step_plot_status(csv_file, start_time, time_step, comp, titel, ylabel,
+                     n=1.1):
+    font_label = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
+    plot_output = os.path.join(opt_output_path, 'plot', titel)
+    df = pd.read_csv(csv_file)
+
+    data = df[(df['var'].str.contains(comp))]
+    data = data.reset_index(drop=True)
+    value = data['value'][start_time:start_time + time_step]
+    value = value.reset_index(drop=True)
+
+    fig = plt.figure(figsize=(6.5, 5.5))
+    ax = fig.add_subplot(111)
+    ax.xaxis.set_minor_locator(MultipleLocator(5))
+    plt.grid(linestyle='--', which='both')
+
+    ax.step(range(start_time - 1, start_time + time_step - 1), value,
+            where="post",
+            linestyle='-', color='r', linewidth=2, zorder=1.5)
+    ax.fill_between(range(start_time - 1, start_time + time_step - 1), value, 0,
+                    facecolor='r', label='Warme aus BHKW',
+                    zorder=10, step="post", alpha=0.5)
+    # todo(qli): noch vertikale Linien hinzufügen
+    # Der erste Parameter ist die Y-Koordinate.
+    ax.vlines(0, 0, 1, linestyle='-', color='r', linewidth=2, zorder=1.5)
+    ax.set_title(titel, font_titel, y=1.02)
+    ax.set_xlabel("Stunde (h)", font_label)
+    ax.set_ylabel(ylabel, font_label)
+    ax.set_xlim(xmin=0)
+    ax.set_ylim(ymax=max(value) * n)
+    # ax.tick_params(labelsize=12)
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    fig.tight_layout()
+    plt.savefig(plot_output)
+
+
+def step_plot_heat_water_tes(csv_file, time_step):
+    font_label = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
+    plot_output = os.path.join(opt_output_path, 'plot', 'Wärmeerzeugung')
+    df = pd.read_csv(csv_file)
+    time_steps = range(time_step)
+
+    data1 = df[df['var'].str.contains('output_heat_chp')]
+    data1 = data1.reset_index(drop=True)
+    value1 = data1['value']
+    data2 = df[df['var'].str.contains('output_heat_boi_s')]
+    data2 = data2.reset_index(drop=True)
+    value2 = data2['value']
+    data3 = df[df['var'].str.contains('output_heat_boi_c')]
+    data3 = data3.reset_index(drop=True)
+    value3 = data3['value']
+    data4 = df[df['var'].str.contains('output_heat_heat_pump')]
+    data4 = data4.reset_index(drop=True)
+    value4 = data4['value']
+    data5 = df[df['var'].str.contains('output_heat_heat_ex')]
+    data5 = data5.reset_index(drop=True)
+    value5 = data5['value']
+    data6 = df[df['var'].str.contains('output_heat_water_tes')]
+    data6 = data6.reset_index(drop=True)
+    value6 = data6['value']
+    value7 = value1 + value2
+    value8 = value7 + value3
+    value9 = value8 + value4
+    value10 = value9 + value5
+
+    fig = plt.figure(figsize=(6.5, 5.5))
+    ax = fig.add_subplot(111)
+    ax.xaxis.set_minor_locator(MultipleLocator(5))
+    plt.grid(linestyle='--', which='both')
+
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    ax.set_title('Energieerzeugung', font_titel, y=1.02)
+    ax.step(time_steps, value1, where="post",
+            linestyle='-.', color='r', linewidth=1.5, zorder=10)
+    ax.fill_between(time_steps, value1, 0, facecolor='r',
+                    zorder=10, step="post", alpha=0.5)
+    ax.step(time_steps, value7, where="post",
+            linestyle='-.', color='r', linewidth=1.5, zorder=10)
+    ax.fill_between(time_steps, value7, value1, facecolor='g',
+                    zorder=10, step="post", alpha=0.5)
+    ax.step(time_steps, value8, where="post",
+            linestyle='-', color='y', linewidth=1.5, zorder=10)
+    ax.fill_between(time_steps, value8, value7, facecolor='y',
+                    zorder=10, step="post", alpha=0.5)
+    ax.step(time_steps, value9, where="post",
+            linestyle='-', color='b', linewidth=1.5, zorder=10)
+    ax.fill_between(time_steps, value9, value8, facecolor='b',
+                    zorder=10, step="post", alpha=0.5)
+    ax.step(time_steps, value10, where="post",
+            linestyle='-', color='m', linewidth=1.5, zorder=10)
+    ax.fill_between(time_steps, value10, value9, facecolor='m',
+                    zorder=10, step="post", alpha=0.5)
+    lns6 = ax.step(time_steps, value6, where="post", label='Direkt genutzte '
+                                                           'Wärme',
+                   linestyle='-', color='k', linewidth=1.5, zorder=10)
+
+    lns1 = ax.plot([], [], linewidth=8, label='Wärme aus BHKW',
+                   color='r', alpha=0.5)
+    lns2 = ax.plot([], [], linewidth=8, label='Wärme aus Heizkessel',
+                   color='g', alpha=0.5)
+    lns3 = ax.plot([], [], linewidth=8, label='Wärme aus Brennwertkessel',
+                   color='y', alpha=0.5)
+    lns4 = ax.plot([], [], linewidth=8, label='Wärme aus Wärmepumpe',
+                   color='b', alpha=0.5)
+    lns5 = ax.plot([], [], linewidth=8, label='Wärme aus Solarthermie',
+                   color='m', alpha=0.5)
+
+    lns = lns1 + lns2 + lns3 + lns4 + lns5 + lns6
+    labs = [l.get_label() for l in lns]
+    plt.legend(lns, labs, loc='best', prop=font_legend)
+
+    ax.set_xlabel("Stunde (h)", font_label)
+    ax.set_ylabel(r"Leistung (kW)", font_label)
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    fig.tight_layout()
+
+    plt.savefig(plot_output)
+
+
+def step_plot_heat_speicher(csv_file, time_step):
+    font_label = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
+    plot_output = os.path.join(opt_output_path, 'plot', 'Wärmedirektnutzung und -speicher')
+    df = pd.read_csv(csv_file)
+    time_steps = range(time_step)
+
+    data1 = df[df['var'].str.contains('output_heat_chp')]
+    data1 = data1.reset_index(drop=True)
+    value1 = data1['value']
+    data2 = df[df['var'].str.contains('output_heat_boi_s')]
+    data2 = data2.reset_index(drop=True)
+    value2 = data2['value']
+    data3 = df[df['var'].str.contains('output_heat_boi_c')]
+    data3 = data3.reset_index(drop=True)
+    value3 = data3['value']
+    data4 = df[df['var'].str.contains('output_heat_heat_pump')]
+    data4 = data4.reset_index(drop=True)
+    value4 = data4['value']
+    data5 = df[df['var'].str.contains('output_heat_heat_ex')]
+    data5 = data5.reset_index(drop=True)
+    value5 = data5['value']
+    data6 = df[df['var'].str.contains('output_heat_water_tes')]
+    data6 = data6.reset_index(drop=True)
+    value6 = data6['value']
+    value7 = value1 + value2 + value3 + value4 + value5 - value6
+
+    fig = plt.figure(figsize=(6.5, 5.5))
+    ax = fig.add_subplot(111)
+    ax.xaxis.set_minor_locator(MultipleLocator(5))
+    plt.grid(linestyle='--', which='both')
+    ax.fill_between(time_steps, value7, 0, facecolor='r',
+                    zorder=10, step="post", alpha=0.5)
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    ax.set_title('Energiespeicher', font_titel, y=1.02)
+
+    ax.set_xlabel("Stunde (h)", font_label)
+    ax.set_ylabel(r"Leistung (kW)", font_label)
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    fig.tight_layout()
+
+    plt.savefig(plot_output)
+
+def step_plot_elec(csv_file, time_step):
+    font_label = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
+    plot_output = os.path.join(opt_output_path, 'plot', 'Stromerzeugung')
+    df = pd.read_csv(csv_file)
+    time_steps = range(time_step)
+
+    data1 = df[df['var'].str.contains('output_elec_e_meter')]
+    data1 = data1.reset_index(drop=True)
+    value1 = data1['value']
+    data2 = df[df['var'].str.contains('input_elec_e_boi')]
+    data2 = data2.reset_index(drop=True)
+    value2 = data2['value']
+    data3 = df[df['var'].str.contains('input_elec_heat_pump')]
+    data3 = data3.reset_index(drop=True)
+    value3 = data3['value']
+    data4 = df[df['var'].str.contains('input_elec_e_cns')]
+    data4 = data4.reset_index(drop=True)
+    value4 = data4['value']
+    value6 = value1 - value2 - value3 - value4
+
+    fig = plt.figure(figsize=(6.5, 5.5))
+    ax = fig.add_subplot(111)
+    ax.xaxis.set_minor_locator(MultipleLocator(5))
+    plt.grid(linestyle='--', which='both')
+
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    ax.set_title('Stromerzeugung', font_titel, y=1.02)
+    ax.step(time_steps, value6, where="post", label='Strom Eigenerzeugung',
+            linestyle='-.', color='k', linewidth=1.5, zorder=10)
+    ax.fill_between(time_steps, value6, 0, facecolor='r',
+                    zorder=10, step="post", alpha=0.5)
+    ax.set_xlabel("Stunde (h)", font_label)
+    ax.set_ylabel(r"Leistung (kW)", font_label)
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    lns = ax.plot([], [], linewidth=8, label='Strom aus Stromnetz',
+                   color='r', alpha=0.5)
+    labs = [l.get_label() for l in lns]
+    plt.legend(lns, labs, loc='best', prop=font_legend)
+
+    fig.tight_layout()
+
+    plt.savefig(plot_output)
+
+def step_plot_elec_bilanz(csv_file, time_step):
+    font_label = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
+    plot_output = os.path.join(opt_output_path, 'plot', 'Strombilanz')
+    df = pd.read_csv(csv_file)
+    time_steps = range(time_step)
+
+    data1 = df[df['var'].str.contains('output_elec_chp')]
+    data1 = data1.reset_index(drop=True)
+    value1 = data1['value']
+    data2 = df[df['var'].str.contains('output_elec_pv')]
+    data2 = data2.reset_index(drop=True)
+    value2 = data2['value']
+    data3 = df[df['var'].str.contains('input_elec_e_boi')]
+    data3 = data3.reset_index(drop=True)
+    value3 = data3['value']
+    data4 = df[df['var'].str.contains('input_elec_heat_pump')]
+    data4 = data4.reset_index(drop=True)
+    value4 = data4['value']
+    data5 = df[df['var'].str.contains('input_elec_e_cns')]
+    data5 = data5.reset_index(drop=True)
+    value5 = data5['value']
+
+    value7 = value1 + value2
+    value8 = value4 + value3
+    value9 = value8 + value5
+
+    fig = plt.figure(figsize=(6.5, 5.5))
+    ax = fig.add_subplot(111)
+    ax.xaxis.set_minor_locator(MultipleLocator(5))
+    plt.grid(linestyle='--', which='both')
+
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    ax.set_title('Energieerzeugung', font_titel, y=1.02)
+    ax.step(time_steps, value1, where="post",
+            linestyle='-.', color='r', linewidth=1.5, zorder=10)
+    ax.step(time_steps, value7, where="post",
+            linestyle='-.', color='k', linewidth=1.5, zorder=10)
+    ax.fill_between(time_steps, value3, 0, facecolor='y',
+                    zorder=10, step="post", alpha=0.5)
+    ax.fill_between(time_steps, value8, value3, facecolor='g',
+                    zorder=10, step="post", alpha=0.5)
+    ax.fill_between(time_steps, value9, value8, facecolor='b',
+                    zorder=10, step="post", alpha=0.5)
+
+
+    lns3 = ax.plot([], [], linewidth=8, label='Strombedarf von Elektroheizkessel',
+                   color='r', alpha=0.5)
+    lns4 = ax.plot([], [], linewidth=8, label='Strombedarf von Wärmepumpe',
+                   color='g', alpha=0.5)
+    lns5 = ax.plot([], [], linewidth=8, label='Sonstiger Strombedarf',
+                   color='b', alpha=0.5)
+
+    lns = lns3 + lns4 + lns5
+    labs = [l.get_label() for l in lns]
+    plt.legend(lns, labs, loc='best', prop=font_legend)
+
+    ax.set_xlabel("Stunde (h)", font_label)
+    ax.set_ylabel(r"Leistung (kW)", font_label)
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    fig.tight_layout()
+
+    plt.savefig(plot_output)
+
+def step_plot_chp_last(csv_file, time_step):
+    font_label = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
+    plot_output = os.path.join(opt_output_path, 'plot', 'last')
+    df = pd.read_csv(csv_file)
+    time_steps = range(time_step)
+
+    data3 = df[(df['var'].str.contains('input_heat_hw_cns'))]['value']
+    data3 = data3.reset_index(drop=True)
+    data4 = df[(df['var'].str.contains('input_heat_therm_cns'))]['value']
+    data4 = data4.reset_index(drop=True)
+    data5 = data3 + data4
+    df2 = pd.DataFrame(data5)
+    df2.sort_values(by=df2.columns[0], axis=0, ascending=False, inplace=True)
+    ts2 = pd.Series(df2['value'].values, index=time_steps)
+
+    data1 = df[(df['var'].str.contains('output_heat_chp'))]['value']
+    data1 = data1.reset_index(drop=True)
+    df1 = pd.DataFrame(data1)
+    df1.sort_values(by=df1.columns[0], axis=0, ascending=False, inplace=True)
+    ts1 = pd.Series(df1['value'].values, index=time_steps)
+
+
+    fig = plt.figure(figsize=(6.5, 5.5))
+    ax = fig.add_subplot(111)
+    ax.xaxis.set_minor_locator(MultipleLocator(5))
+    plt.grid(linestyle='--', which='both')
+
+    ax.step(time_steps, ts1, where="post", color='r', linewidth=0.2)
+    ax.fill_between(time_steps, ts1, 0, facecolor='r',
+                    zorder=10, step="post", alpha=0.5)
+    ax.step(time_steps, ts2, where="post", color='b', linewidth=0.2)
+    ax.fill_between(time_steps, ts2, 0, facecolor='b',
+                    zorder=10, step="post", alpha=0.5)
+    ax.plot([], [], linewidth=8, label='Warme aus BHKW', color='r',
+            alpha=0.5)
+    ax.plot([], [], linewidth=8, label='Gesamter Wärmebedarf', color='b',
+            alpha=0.5)
+
+    plt.legend(loc='best', prop=font_legend)
+
+    ax.set_title('1', font_titel, y=1.02)
+    ax.set_xlabel("Stunde (h)", font_label)
+    ax.set_ylabel('demand', font_label)
+    ax.set_xlim(xmin=0)
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    fig.tight_layout()
     plt.savefig(plot_output)
