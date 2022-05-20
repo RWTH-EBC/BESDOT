@@ -59,7 +59,7 @@ def plot_all(csv_file, time_interval):
 
 def plot_single(name, profile):
     plot_output = os.path.join(opt_output_path, 'plot', 'Profile of ' + name)
-    fig, ax = plt.subplots(figsize=(14, 14))
+    fig, ax = plt.subplots(figsize=(6.5, 5.5))
     #ax = fig.add_subplot(111)
     ax.plot(profile, linewidth=2, color='r', linestyle='-')
     ax.set_title('Profile of ' + name)

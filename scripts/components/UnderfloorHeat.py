@@ -65,7 +65,6 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
         output_energy = model.find_component('output_' + self.outputs[0] +
                                              '_' + self.name)
         floor_temp = model.find_component('floor_temp_' + self.name)
-        delta_t = model.find_component('delta_t_' + self.name)
         area = model.find_component('size_' + self.name)
 
         temp_var = model.find_component('temp_' + self.name)
@@ -82,7 +81,6 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
                     (floor_temp_approximate-room_temp)**1.1+1.1 *
                     (floor_temp_approximate-room_temp)**0.1 * (floor_temp[t + 1]
                     - floor_temp_approximate)))
-            #model.cons.add(delta_t[t + 1] == (floor_temp[t + 1] - room_temp))
             model.cons.add(input_energy[t+1] * 1000 == heat_flux[t + 1] * area)
             model.cons.add(input_energy[t + 1] == output_energy[t + 1])
 
@@ -123,9 +121,6 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
 
         floor_temp = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('floor_temp_' + self.name, floor_temp)
-
-        delta_t = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('delta_t_' + self.name, delta_t)
 
         average_t = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('average_t_' + self.name, average_t)
