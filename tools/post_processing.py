@@ -61,7 +61,7 @@ def plot_single(name, profile):
     plot_output = os.path.join(opt_output_path, 'plot', 'Profile of ' + name)
     fig, ax = plt.subplots(figsize=(6.5, 5.5))
     #ax = fig.add_subplot(111)
-    ax.plot(profile, linewidth=2, color='r', marker='o', linestyle='dashed')
+    ax.plot(profile, linewidth=2, color='r', linestyle='-')
     ax.set_title('Profile of ' + name)
     ax.set_xlabel('Hours [h]')
     if 'mass' in name:
@@ -172,7 +172,7 @@ def get_info_for_figu(csv_file, comp_name1, comp_name2, time_step,
     output_power = []
     pa = []
     pa_co = 1
-    for i in range(1, 8761):
+    for i in range(1, 313):
         if pa_co != part:
             pa.append(df["value"][df[df["var"] == str(name1[:-2] + str(i)+"]")].
                       index].to_list()[0])
@@ -183,7 +183,7 @@ def get_info_for_figu(csv_file, comp_name1, comp_name2, time_step,
                       index].to_list()[0])
             temp.append(pa)
             pa = []
-    for i in range(1, 8761):
+    for i in range(1, 313):
         if pa_co != part:
             pa.append(
                 df["value"][df[df["var"] == str(name2[:-2] + str(i) + "]")].
@@ -196,7 +196,7 @@ def get_info_for_figu(csv_file, comp_name1, comp_name2, time_step,
                 index].to_list()[0])
             return_temp.append(pa)
             pa = []
-    for i in range(1, 8761):
+    for i in range(1, 313):
         if pa_co != part:
             pa.append(
                 df["value"][df[df["var"] == str(name3[:-2] + str(i) + "]")].
@@ -209,7 +209,7 @@ def get_info_for_figu(csv_file, comp_name1, comp_name2, time_step,
                 index].to_list()[0])
             input_power.append(pa)
             pa = []
-    for i in range(1, 8761):
+    for i in range(1, 313):
         if pa_co != part:
             pa.append(
                 df["value"][df[df["var"] == str(name4[:-2] + str(i) + "]")].

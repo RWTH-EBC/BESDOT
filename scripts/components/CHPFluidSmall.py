@@ -3,6 +3,7 @@ import warnings
 
 import pandas as pd
 import pyomo.environ as pyo
+from pyomo.core import lor
 from pyomo.gdp import Disjunct, Disjunction
 
 from scripts.FluidComponent import FluidComponent
@@ -11,6 +12,7 @@ from tools.calc_annuity_vdi2067 import calc_annuity
 
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
     __file__))))
+small_num = 0.0001
 
 
 # kleine BHKW (Pel <= 50kW) mit Brennwertnutzung
@@ -31,7 +33,6 @@ class CHPFluidSmall(CHP, FluidComponent):
 
         # todo (qli): start_price
         self.start_price = 5  # €/start
-        # todo (qli): building.py Zeile 342 anpassen
         self.heat_flows_in = None
         self.heat_flows_out = []
         self.other_op_cost = True
@@ -53,6 +54,7 @@ class CHPFluidSmall(CHP, FluidComponent):
         for t in model.time_step:
             model.cons.add(therm_eff[t] == 0.705 - 0.0008 * (Qth - 44) -
                            0.006 * (inlet_temp[t] - 30))
+            model.cons.add(inlet_temp[t] <= 50)
 
     def _constraint_therm_eff_gdp(self, model):
         small_num = 0.00001
@@ -60,23 +62,23 @@ class CHPFluidSmall(CHP, FluidComponent):
         inlet_temp = model.find_component('inlet_temp_' + self.name)
         therm_eff = model.find_component('therm_eff_' + self.name)
         for t in model.time_step:
-            a = Disjunct()
+            x = Disjunct()
             c_1 = pyo.Constraint(expr=inlet_temp[t] <= 50)
             c_2 = pyo.Constraint(
                 expr=therm_eff[t] == 0.705 - 0.0008 * (Qth - 44) - 0.006 * (
-                            inlet_temp[t] - 30))
-            model.add_component('a_dis_' + str(t), a)
-            a.add_component('a_1' + str(t), c_1)
-            a.add_component('a_2' + str(t), c_2)
-            b = Disjunct()
+                        inlet_temp[t] - 30))
+            model.add_component('x_dis_' + str(t), x)
+            x.add_component('x_1' + str(t), c_1)
+            x.add_component('x_2' + str(t), c_2)
+            q = Disjunct()
             c_3 = pyo.Constraint(expr=inlet_temp[t] >= 50 + small_num)
             c_4 = pyo.Constraint(
                 expr=therm_eff[t] == -0.0000355 * Qth + 0.498)
-            model.add_component('b_dis_' + str(t), b)
-            b.add_component('b_1' + str(t), c_3)
-            b.add_component('b_2' + str(t), c_4)
+            model.add_component('p_dis_' + str(t), q)
+            q.add_component('p_1' + str(t), c_3)
+            q.add_component('p_2' + str(t), c_4)
 
-            dj = Disjunction(expr=[a,b])
+            dj = Disjunction(expr=[x, q])
             model.add_component('dj_dis_' + str(t), dj)
 
     # verbinden die Parameter der einzelnen Anlage mit den Parametern zwischen
@@ -88,9 +90,9 @@ class CHPFluidSmall(CHP, FluidComponent):
     def _constraint_temp(self, model):
         outlet_temp = model.find_component('outlet_temp_' + self.name)
         inlet_temp = model.find_component('inlet_temp_' + self.name)
-        #for t in model.time_step:
-            # model.cons.add(outlet_temp[t] - inlet_temp[t] <= 25)
-            # model.cons.add(inlet_temp[t] <= 50)
+        # for t in model.time_step:
+        # model.cons.add(outlet_temp[t] - inlet_temp[t] <= 25)
+        # model.cons.add(inlet_temp[t] <= 50)
         for heat_output in self.heat_flows_out:
             t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
                                         '_' + 'temp')
@@ -116,21 +118,27 @@ class CHPFluidSmall(CHP, FluidComponent):
 
         for t in model.time_step:
             model.cons.add(input_energy[t] * therm_eff[t] == output_heat[t])
-            model.cons.add(Qth * status[t] == output_heat[t])
-            model.cons.add(Pel * status[t] == output_elec[t])
+            model.cons.add(Qth * status[t + 1] == output_heat[t])
+            model.cons.add(Pel * status[t + 1] == output_elec[t])
 
     def add_cons(self, model):
-        self._constraint_Pel(model)
-        self._constraint_therm_eff_gdp(model)
+        self._constraint_therm_eff(model)
         self._constraint_temp(model)
         self._constraint_conver(model)
-
-        self._constraint_vdi2067_chp(model)
+        self._constraint_heat_outputs(model)
         self._constraint_start_stop_ratio_gdp(model)
-        # todo (qli): building.py anpassen
+        '''
         self._constraint_start_cost(model)
         # todo (qli): building.py anpassen
         self._constraint_chp_elec_sell_price(model)
+        '''
+        
+        self._constraint_Pel(model)
+        self._constraint_vdi2067_chp(model)
+        '''
+        # todo: fix cost
+        self._constraint_vdi2067_chp_gdp(model)
+        '''
 
     def add_vars(self, model):
         super().add_vars(model)
@@ -147,13 +155,9 @@ class CHPFluidSmall(CHP, FluidComponent):
         inlet_temp = pyo.Var(model.time_step, bounds=(12, 95))
         model.add_component('inlet_temp_' + self.name, inlet_temp)
 
-        status = pyo.Var(model.time_step, domain=pyo.Binary)
+        status = pyo.Var(range(1, len(model.time_step) + 6), domain=pyo.Binary)
         model.add_component('status_' + self.name, status)
-
-        status1 = pyo.Var(range(1, len(model.time_step)+6), domain=pyo.Binary)
-        model.add_component('status1_' + self.name, status1)
-
-        # todo (qli): building.py anpassen
+        '''
         start_cost = pyo.Var(bounds=(0, None))
         model.add_component('start_cost_' + self.name, start_cost)
 
@@ -163,105 +167,136 @@ class CHPFluidSmall(CHP, FluidComponent):
         # todo (qli): building.py anpassen
         elec_sell_price = pyo.Var(bounds=(0, None))
         model.add_component('elec_sell_price_' + self.name, elec_sell_price)
+'''
 
     def _constraint_vdi2067_chp(self, model):
-        """
-        t: observation period in years
-        r: price change factor (not really relevant since we have n=0)
-        q: interest factor
-        n: number of replacements
-        """
         size = model.find_component('size_' + self.name)
         annual_cost = model.find_component('annual_cost_' + self.name)
         invest = model.find_component('invest_' + self.name)
-        # todo(qli): WÜ Preis
-        model.cons.add(size * 458 + 57433 == invest)
+        # todo(qli): https://www.baulinks.de/webplugin/2010/1276.php4
+        model.cons.add(size * 1131.2 + 14490 + 3800 / 50 * size == invest)
+        annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w,
+                               self.f_op)
+        model.cons.add(annuity == annual_cost)
+
+    def _constraint_vdi2067_chp_gdp(self, model):
+        annual_cost = model.find_component('annual_cost_' + self.name)
+        invest = model.find_component('invest_' + self.name)
+        Pel = model.find_component('size_' + self.name)
+        Qth = model.find_component('therm_size_' + self.name)
+        # status = model.find_component('status_' + self.name)
+
+        if self.min_size == 0:
+            min_size = small_num
+        else:
+            min_size = self.min_size
+
+        dis_not_select = Disjunct()
+        not_select_size = pyo.Constraint(expr=Pel == 0)
+        not_select_inv = pyo.Constraint(expr=invest == 0)
+        not_select_therm_size = pyo.Constraint(expr=Qth == 0)
+        model.add_component('dis_not_select_' + self.name, dis_not_select)
+        dis_not_select.add_component('not_select_size_' + self.name,
+                                     not_select_size)
+        dis_not_select.add_component('not_select_inv_' + self.name,
+                                     not_select_inv)
+        dis_not_select.add_component('not_select_therm_size_' + self.name,
+                                     not_select_therm_size)
+
+        dis_select = Disjunct()
+        select_size = pyo.Constraint(expr=Pel >= min_size)
+        select_inv = pyo.Constraint(
+            expr=invest == Pel * 458 + 57433 + 3800 / 50 * Pel)
+        select_therm_size = pyo.Constraint(expr=Qth == 2.1178 * Pel + 2.5991)
+
+        model.add_component('dis_select_' + self.name, dis_select)
+        dis_not_select.add_component('select_size_' + self.name,
+                                     select_size)
+        dis_not_select.add_component('select_inv_' + self.name,
+                                     select_inv)
+        dis_not_select.add_component('select_therm_size_' + self.name,
+                                     select_therm_size)
+
+        dj_size = Disjunction(expr=[dis_not_select, dis_select])
+        model.add_component('disjunction_size' + self.name, dj_size)
+
         annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w,
                                self.f_op)
         model.cons.add(annuity == annual_cost)
 
     def _constraint_start_stop_ratio_gdp(self, model):
         status = model.find_component('status_' + self.name)
-        status1 = model.find_component('status1_' + self.name)
-        model.cons.add(status1[1] == 0)
+        # start = model.find_component('start_' + self.name)
+        model.cons.add(status[1] == 0)
         for t in model.time_step:
-            model.cons.add(status1[t+1] == status[t])
-            model.cons.add(status1[len(model.time_step)+5] == 0)
-            model.cons.add(status1[len(model.time_step)+4] == 0)
-            model.cons.add(status1[len(model.time_step)+3] == 0)
-            model.cons.add(status1[len(model.time_step)+2] == 0)
-            model.cons.add(status1[len(model.time_step)+1] == 0)
-
+            if t == model.time_step[-1]:
+                model.cons.add(status[len(model.time_step) + 5] == 0)
+                model.cons.add(status[len(model.time_step) + 4] == 0)
+                model.cons.add(status[len(model.time_step) + 3] == 0)
+                model.cons.add(status[len(model.time_step) + 2] == 0)
+                model.cons.add(status[len(model.time_step) + 1] == 0)
         '''
         for t in model.time_step:
-            if status1[t + 1] == 1 and status1[t] == 0:
-                 model.cons.add(status1[t + 2] == 1)
-                 model.cons.add(status1[t + 3] == 1)
-                 model.cons.add(status1[t + 4] == 1)
-                 model.cons.add(status1[t + 5] == 1)
-                 model.cons.add(status1[t + 6] == 1)
+            if status[t + 1] == 1 and status[t] == 0:
+                 model.cons.add(status[t + 2] == 1)
+                 model.cons.add(status[t + 3] == 1)
+                 model.cons.add(status[t + 4] == 1)
+                 model.cons.add(status[t + 5] == 1)
+                 model.cons.add(status[t + 6] == 1)
+                 model.cons.add(start[t + 1] == 1)
         '''
         # len(model.time_step) >= 6
         for t in range(1, len(model.time_step)):
-            d = Disjunct()
-            c_5 = pyo.Constraint(expr=status1[t+1] - status1[t] == 1)
-            c_6 = pyo.Constraint(expr=status1[t + 2] == 1)
-            c_7 = pyo.Constraint(expr=status1[t + 3] == 1)
-            c_8 = pyo.Constraint(expr=status1[t + 4] == 1)
-            c_9 = pyo.Constraint(expr=status1[t + 5] == 1)
-            c_10 = pyo.Constraint(expr=status1[t + 6] == 1)
-            model.add_component('d_dis_' + str(t), d)
-            d.add_component('d_1' + str(t), c_5)
-            d.add_component('d_2' + str(t), c_6)
-            d.add_component('d_3' + str(t), c_7)
-            d.add_component('d_4' + str(t), c_8)
-            d.add_component('d_5' + str(t), c_9)
-            d.add_component('d_6' + str(t), c_10)
-            e = Disjunct()
-            c_11 = pyo.Constraint(expr=status1[t + 1] - status1[t] == 0)
-            model.add_component('e_dis_' + str(t), e)
-            e.add_component('e_1' + str(t), c_11)
-            f = Disjunct()
-            c_12 = pyo.Constraint(expr=status1[t + 1] - status1[t] == -1)
-            model.add_component('f_dis_' + str(t), f)
-            f.add_component('f_1' + str(t), c_12)
+            h = Disjunct()
+            c_5 = pyo.Constraint(expr=status[t + 1] - status[t] == 1)
+            c_6 = pyo.Constraint(expr=status[t + 2] == 1)
+            c_7 = pyo.Constraint(expr=status[t + 3] == 1)
+            c_8 = pyo.Constraint(expr=status[t + 4] == 1)
+            c_9 = pyo.Constraint(expr=status[t + 5] == 1)
+            c_10 = pyo.Constraint(expr=status[t + 6] == 1)
+            # c_12 = pyo.Constraint(expr=start[t] == 1)
+            model.add_component('h_dis_' + str(t), h)
+            h.add_component('h_1' + str(t), c_5)
+            h.add_component('h_2' + str(t), c_6)
+            h.add_component('h_3' + str(t), c_7)
+            h.add_component('h_4' + str(t), c_8)
+            h.add_component('h_5' + str(t), c_9)
+            h.add_component('h_6' + str(t), c_10)
+            # h.add_component('h_7' + str(t), c_12)
+            '''
+            i = Disjunct()
+            c_11 = pyo.Constraint(expr=lor(status[t + 1] - status[t] == 0,
+                                           status[t + 1] - status[t] == -1))
+            c_13 = pyo.Constraint(expr=start[t] == 0)
+            model.add_component('i_dis_' + str(t), i)
+            i.add_component('i_1' + str(t), c_11)
+            i.add_component('i_2' + str(t), c_13)
 
-            dj = Disjunction(expr=[d, e, f])
+            dj = Disjunction(expr=[h, i])
+            model.add_component('dj_dis1_' + str(t), dj)
+            '''
+            i = Disjunct()
+            c_11 = pyo.Constraint(expr=status[t + 1] - status[t] == 0)
+            # c_13 = pyo.Constraint(expr=start[t] == 0)
+            model.add_component('i_dis_' + str(t), i)
+            i.add_component('i_1' + str(t), c_11)
+            # i.add_component('i_2' + str(t), c_13)
+            j = Disjunct()
+            c_12 = pyo.Constraint(expr=status[t + 1] - status[t] == -1)
+            # c_14 = pyo.Constraint(expr=start[t] == 0)
+            model.add_component('j_dis_' + str(t), j)
+            j.add_component('j_1' + str(t), c_12)
+            # j.add_component('j_2' + str(t), c_14)
+
+            dj = Disjunction(expr=[h, i, j])
             model.add_component('dj_dis1_' + str(t), dj)
 
+
+'''
     def _constraint_start_cost(self, model):
-        status = model.find_component('status_' + self.name)
         start = model.find_component('start_' + self.name)
-        # todo (qli): building.py anpassen
         start_cost = model.find_component('start_cost_' + self.name)
-        status1 = model.find_component('status1_' + self.name)
         other_op_cost = model.find_component('other_op_cost_' + self.name)
-        model.cons.add(status1[1] == 0)
-        for t in model.time_step:
-            model.cons.add(status1[t + 1] == status[t])
-        for t in range(1, len(model.time_step)+1):
-            g = Disjunct()
-            c_13 = pyo.Constraint(expr=status1[t+1] - status1[t] == 1)
-            c_14 = pyo.Constraint(expr=start[t] == 1)
-            model.add_component('g_dis_' + str(t), g)
-            g.add_component('g_1' + str(t), c_13)
-            g.add_component('g_2' + str(t), c_14)
-            h = Disjunct()
-            c_15 = pyo.Constraint(expr=status1[t+1] - status1[t] == 0)
-            c_16 = pyo.Constraint(expr=start[t] == 0)
-            model.add_component('h_dis_' + str(t), h)
-            h.add_component('h_1' + str(t), c_15)
-            h.add_component('h_2' + str(t), c_16)
-            i = Disjunct()
-            c_17 = pyo.Constraint(expr=status1[t + 1] - status1[t] == -1)
-            c_18 = pyo.Constraint(expr=start[t] == 0)
-            model.add_component('i_dis_' + str(t), i)
-            i.add_component('i_1' + str(t), c_17)
-            i.add_component('i_2' + str(t), c_18)
-
-            dj = Disjunction(expr=[g, h, i])
-            model.add_component('dj_dis2_' + str(t), dj)
-
         model.cons.add(start_cost == self.start_price * sum(start[t] for t in
                                                             model.time_step))
         model.cons.add(other_op_cost == start_cost)
@@ -271,3 +306,4 @@ class CHPFluidSmall(CHP, FluidComponent):
         stromspotmarktpreis = 0.179  # € / kWh
         elec_sell_price = model.find_component('elec_sell_price_' + self.name)
         model.cons.add(elec_sell_price == kwk_zuschlag + stromspotmarktpreis)
+'''

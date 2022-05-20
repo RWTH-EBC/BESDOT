@@ -115,9 +115,16 @@ class Component(object):
         else:
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for servicing effort hours.")
-
         if 'socket cost' in properties.columns:
             self.socket_cost = float(properties['socket cost'])
+
+    def update_profile(self, **kwargs):
+        for arg in kwargs:
+            if hasattr(self, arg):
+                setattr(self, arg, kwargs[arg])
+            else:
+                warnings.warn("Can't update the profile for component" +
+                              self.name)
 
     def add_energy_flows(self, io, energy_type, energy_flow):
         if io in ['input', 'output']:
@@ -327,7 +334,7 @@ class Component(object):
         annual_cost = pyo.Var(bounds=(0, None))
         model.add_component('annual_cost_' + self.name, annual_cost)
 
-        invest = pyo.Var(bounds=(0, None))
+        invest = pyo.Var(bounds=(0, 100000))
         model.add_component('invest_' + self.name, invest)
 
         if self.inputs is not None:
