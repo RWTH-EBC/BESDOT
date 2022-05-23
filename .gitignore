@@ -4,4 +4,5 @@
 /tools/analysis_lp_new.txt
 /tools/analysis_lp_temp.txt
 # macOS Desktop Services Store
+.DS_Store
 */.DS_Store

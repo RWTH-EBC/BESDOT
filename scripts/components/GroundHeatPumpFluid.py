@@ -68,14 +68,13 @@ class GroundHeatPumpFluid(HeatPump, FluidComponent):
             cop = HeatPump.calc_cop(self, self.temp_profile[t], 40)
 
             model.cons.add(
-                output_powers[t] == input_powers[t] * cop *
-                self.efficiency[self.outputs[0]])
+                output_powers[t] == input_powers[t] * cop)
 
     def _constraint_temp(self, model, init_temp=40):
         temp_var = model.find_component('temp_' + self.name)
-        size = model.find_component('size_' + self.name)
+        '''size = model.find_component('size_' + self.name)
         for t in model.time_step:
-            model.cons.add(temp_var[t] == size)
+            model.cons.add(temp_var[t] == init_temp)'''
         for heat_output in self.heat_flows_out:
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'temp')

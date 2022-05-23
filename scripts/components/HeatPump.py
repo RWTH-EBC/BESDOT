@@ -28,8 +28,8 @@ class HeatPump(Component):
         Calculate the COP value in each time step, with default set
         temperature of 60 degree and machine efficiency of 40%.
         """
-        cop = (set_t + 273.15) / (set_t - amb_t)
-              #* self.efficiency[self.outputs[0]]
+        cop = (set_t + 273.15) / (set_t - amb_t) * self.efficiency[
+            self.outputs[0]]
         return cop
 
     def _constraint_conver(self, model):
@@ -45,4 +45,5 @@ class HeatPump(Component):
 
         for t in model.time_step:
             # index in pyomo model and python list is different
-            model.cons.add(output_powers[t] == input_powers[t] * self.cop[t-1])
+            model.cons.add(
+                output_powers[t] == input_powers[t] * self.cop[t - 1])
