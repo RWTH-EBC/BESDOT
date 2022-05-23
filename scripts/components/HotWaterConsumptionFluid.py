@@ -24,6 +24,7 @@ class HotWaterConsumptionFluid(FluidComponent):
 
         self.consum_profile = consum_profile
         self.cold_water_temp = 12
+        self.heat_flows_out = None
 
     def _constraint_vdi2067(self, model):
         """

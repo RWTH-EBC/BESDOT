@@ -14,3 +14,12 @@ class HotWaterStorage(Storage):
                          min_size=min_size,
                          max_size=max_size,
                          current_size=current_size)
+
+    def _constraint_unchanged_periode(self, model, aggregation):
+        """This constraint is used for the situation, in which the temporal
+        clustering method is considered. The classical method to model the
+        storage soc assumes, that the soc remains the same at the beginning
+        and end of the period. This is not suitable for seasonal storage,
+        but acceptable in the buildings with small storage."""
+
+

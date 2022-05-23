@@ -16,6 +16,8 @@ class Storage(Component):
                          max_size=max_size,
                          current_size=current_size)
 
+        self.cluster = None
+
     def _read_properties(self, properties):
         super()._read_properties(properties)
         if hasattr(self, 'efficiency'):
@@ -117,11 +119,33 @@ class Storage(Component):
             model.cons.add(stored_energy[t] <= self.max_soc * size)
             model.cons.add(stored_energy[t] >= self.min_soc * size)
 
+    def _constraint_conserve(self, model):
+        """This constraint is used in the situation that cluster algorithm is
+        used. According to the paper
+        'Time series aggregation for energy system design: Modeling seasonal
+        storage'
+        Leander Kotzur, Peter Markewitz, Martin Robinius, Detlef Stolten
+        For energy system, which storage does not play a determining role,
+        the simplify of energy conserve in a period would not influence the
+        optimization results.
+        """
+        # Attention! The period only for 24 hours is developed,
+        # other segments are not considered.
+        period_length = 24
+
+        stored_energy = model.find_component('energy_' + self.name)
+
+        for t in model.time_step:
+            if t % period_length == 0:
+                model.cons.add(stored_energy[t] == stored_energy[1])
+
     def add_cons(self, model):
         self._constraint_conver(model)
         self._constraint_maxpower(model)
         self._constraint_maxcap(model)
         self._constraint_vdi2067(model)
+        if self.cluster is not None:
+            self._constraint_conserve(model)
 
     def add_vars(self, model):
         """

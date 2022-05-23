@@ -8,9 +8,11 @@ import os
 import warnings
 import pandas as pd
 import pyomo.environ as pyo
+from pyomo.gdp import Disjunct, Disjunction
 from tools.calc_annuity_vdi2067 import calc_annuity
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+small_num = 0.0001
 
 
 class Component(object):
@@ -49,6 +51,13 @@ class Component(object):
         self.min_size = min_size
         self.max_size = max_size
         self.current_size = current_size
+
+        # other_op_cost is an indicator, which shows if other operation cost
+        # should be considered for the component. The attribute could be set
+        # into False or True. False means no other operation cost should be
+        # taken into account.
+        self.other_op_cost = False
+        self.socket_cost = None
 
         self.energy_flows = {'input': {},
                              'output': {}}
@@ -106,6 +115,16 @@ class Component(object):
         else:
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for servicing effort hours.")
+        if 'socket cost' in properties.columns:
+            self.socket_cost = float(properties['socket cost'])
+
+    def update_profile(self, **kwargs):
+        for arg in kwargs:
+            if hasattr(self, arg):
+                setattr(self, arg, kwargs[arg])
+            else:
+                warnings.warn("Can't update the profile for component" +
+                              self.name)
 
     def add_energy_flows(self, io, energy_type, energy_flow):
         if io in ['input', 'output']:
@@ -181,7 +200,45 @@ class Component(object):
         annual_cost = model.find_component('annual_cost_' + self.name)
         invest = model.find_component('invest_' + self.name)
 
-        model.cons.add(size * self.cost == invest)
+        # Take the socket cost for investment into account and use dgp model to
+        # indicate that, if component size is equal to zero, the investment
+        # equal to zero as well. If component size is lager than zero,
+        # the socket cost should be considered.
+        # The small number is given because "larger" is not allowed for
+        # optimization language, so use "larger equal to" replace "larger"
+        # with a small number. If min size is given from the model database,
+        # the small number is no more necessary.
+
+        if self.min_size == 0:
+            min_size = small_num
+        else:
+            min_size = self.min_size
+
+        if self.socket_cost is not None:
+            dis_not_select = Disjunct()
+            not_select_size = pyo.Constraint(expr=size == 0)
+            not_select_inv = pyo.Constraint(expr=invest == 0)
+            model.add_component('dis_not_select_' + self.name, dis_not_select)
+            dis_not_select.add_component('not_select_size_' + self.name,
+                                         not_select_size)
+            dis_not_select.add_component('not_select_inv_' + self.name,
+                                         not_select_inv)
+
+            dis_select = Disjunct()
+            select_size = pyo.Constraint(expr=size >= min_size)
+            select_inv = pyo.Constraint(expr=invest == size * self.cost +
+                                                       self.socket_cost)
+            model.add_component('dis_select_' + self.name, dis_select)
+            dis_not_select.add_component('select_size_' + self.name,
+                                         select_size)
+            dis_not_select.add_component('select_inv_' + self.name,
+                                         select_inv)
+
+            dj_size = Disjunction(expr=[dis_not_select, dis_select])
+            model.add_component('disjunction_size' + self.name, dj_size)
+        else:
+            model.cons.add(size * self.cost == invest)
+
         annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w,
                                self.f_op)
         model.cons.add(annuity == annual_cost)
@@ -221,7 +278,8 @@ class Component(object):
         # Sum up all the inputs
         for t in model.time_step:
             model.cons.add(input_energy[t] == sum(
-                energy_flows[energy_type][input_flow][t] for input_flow in input_flows))
+                energy_flows[energy_type][input_flow][t] for input_flow in
+                input_flows))
 
     def constraint_sum_outputs(self, model, energy_type, energy_flows):
         """
@@ -251,7 +309,8 @@ class Component(object):
         # Sum up all the inputs
         for t in model.time_step:
             model.cons.add(output_energy[t] == sum(
-                energy_flows[energy_type][output_flow][t] for output_flow in output_flows))
+                energy_flows[energy_type][output_flow][t] for output_flow in
+                output_flows))
 
     def add_cons(self, model):
         self._constraint_conver(model)
@@ -275,7 +334,7 @@ class Component(object):
         annual_cost = pyo.Var(bounds=(0, None))
         model.add_component('annual_cost_' + self.name, annual_cost)
 
-        invest = pyo.Var(bounds=(0, None))
+        invest = pyo.Var(bounds=(0, 100000))
         model.add_component('invest_' + self.name, invest)
 
         if self.inputs is not None:
@@ -289,3 +348,7 @@ class Component(object):
                 output_energy = pyo.Var(model.time_step, bounds=(0, 10 ** 8))
                 model.add_component('output_' + energy_type + '_' + self.name,
                                     output_energy)
+
+        if self.other_op_cost:
+            other_op_cost = pyo.Var(bounds=(0, 10 ** 8))
+            model.add_component('other_op_cost_' + self.name, other_op_cost)

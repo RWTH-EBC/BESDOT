@@ -135,16 +135,5 @@ class ThroughHeaterElec(FluidComponent):
         self._constraint_vdi2067(model)
         self._constraint_virtual(model)
 
-    def add_vars(self, model):
-        super().add_vars(model)
-    #
-    #     input_heat = pyo.Var(model.time_step, bounds=(0, None))
-    #     model.add_component('input_heat_' + self.name, input_heat)
-    #
-    #     input_elec = pyo.Var(model.time_step, bounds=(0, None))
-    #     model.add_component('input_elec_' + self.name, input_elec)
-    #
-    #     output_energy = pyo.Var(model.time_step, bounds=(0, None))
-    #     model.add_component('output_heat_' + self.name, output_energy)
 
 
