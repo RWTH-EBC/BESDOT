@@ -45,5 +45,4 @@ class HeatPump(Component):
 
         for t in model.time_step:
             # index in pyomo model and python list is different
-            model.cons.add(
-                output_powers[t] == input_powers[t] * self.cop[t - 1])
+            model.cons.add(output_powers[t] == input_powers[t] * self.cop[t-1])
