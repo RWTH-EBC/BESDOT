@@ -1,2 +1,2 @@
 efficiency,temperature hot,cost_type,cost,fix_cost_factor,service life,factor repair effort,factor servicing effort,servicing effort hours
-0.33,55,constant,3773.7,0.02,20,0.01,0.015,20
+0.4,55,constant,900,0.02,18,0.01,0.015,20

@@ -160,7 +160,10 @@ class Building(object):
                 min_size = self.topology['min_size'][item]
                 max_size = self.topology['max_size'][item]
                 current_size = self.topology['current_size'][item]
-                if comp_type in ['HeatPump', 'GasHeatPump','HeatPumpFluid']:
+
+                if comp_type in ['HeatPump', 'GasHeatPump',
+                                 'GroundHeatPumpFluid', 'AirHeatPumpFluid',
+                                 'HeatPumpFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       temp_profile=
                                                       env.temp_profile,
@@ -231,7 +234,7 @@ class Building(object):
                                                     'ElectricalConsumption',
                                                     ]:
                 cluster_profile = pd.Series(cluster.clusterPeriodDict[
-                    'heat_demand']).tolist()
+                                                'heat_demand']).tolist()
                 self.components[comp_name].update_profile(
                     consum_profile=cluster_profile)
             if self.topology['comp_type'][item] in ['HotWaterConsumption',
@@ -240,7 +243,7 @@ class Building(object):
                 cluster_profile = pd.Series(cluster.clusterPeriodDict[
                                                 'hot_water_demand']).tolist()
                 self.components[comp_name].update_profile(
-                        consum_profile=cluster_profile)
+                    consum_profile=cluster_profile)
             if self.topology['comp_type'][item] in ['HeatPump',
                                                     'GasHeatPump', 'PV',
                                                     'SolarThermalCollector',
@@ -453,7 +456,8 @@ class Building(object):
         self._constraint_mass_balance(model)
         # todo (yni): Attention in the optimization for operation cost should
         #  comment constrain for solar area. This should be done automated.
-        #self._constraint_solar_area(model)
+
+        # self._constraint_solar_area(model)
 
         self._constraint_total_cost(model, env)
         self._constraint_operation_cost(model, env, cluster)
@@ -475,7 +479,7 @@ class Building(object):
         for item in self.topology.index:
             comp_type = self.topology['comp_type'][item]
             if comp_type in ['PV', 'SolarThermalCollector',
-                'SolarThermalCollectorFluid']:
+                             'SolarThermalCollectorFluid']:
                 self._constraint_solar_area(model)
 
     def _constraint_energy_balance(self, model):
@@ -633,12 +637,12 @@ class Building(object):
 
             model.cons.add(
                 bld_operation_cost == sum(buy_elec[t] * env.elec_price *
-                                          nr_hour_occur[t-1] + buy_gas[t] *
-                                          env.gas_price * nr_hour_occur[t-1] +
+                                          nr_hour_occur[t - 1] + buy_gas[t] *
+                                          env.gas_price * nr_hour_occur[t - 1] +
                                           buy_heat[t] * env.heat_price *
-                                          nr_hour_occur[t-1] - sell_elec[t] *
+                                          nr_hour_occur[t - 1] - sell_elec[t] *
                                           env.elec_feed_price *
-                                          nr_hour_occur[t-1]
+                                          nr_hour_occur[t - 1]
                                           for t in model.time_step) +
                 bld_other_op_cost)
 
@@ -656,4 +660,3 @@ class Building(object):
 
         model.cons.add(bld_other_op_cost == sum(comp_op for comp_op
                                                 in other_op_comp_list))
-

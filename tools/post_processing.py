@@ -336,6 +336,34 @@ def plot_step_profile(energy_type, demand, profile, time_step):
     # plt.savefig(plot_path)
     # plt.close()
 
+def plot_temp(name, profile):
+    plot_output = os.path.join(opt_output_path, 'plot', 'Profile of ' + name)
+    fig, ax = plt.subplots(figsize=(14, 14))
+    #ax = fig.add_subplot(111)
+    ax.plot(profile, linewidth=2, color='r', marker='o', linestyle='dashed')
+    ax.set_title('Profile of ' + name, fontsize=24)
+    ax.set_xlabel('Hours [h]', fontsize=24)
+    if 'mass' in name:
+        ax.set_ylabel('mass [KG/H]', fontsize=12)
+    elif 'temp' in name:
+        ax.set_ylabel('temperature [°]', fontsize=24)
+    else:
+        ax.set_ylabel('power [KW]', fontsize=12)
+
+    ax.set_xlim(xmin=0)
+    ax.set_ylim(ymin=0, ymax=max(profile)*1.2)
+
+    plt.xticks([0, 2161, 4345, 6553, 8017],
+               [r'$1.Jar.$', r'$1.Apr.$', r'$1.Jul.$', r'$1.Oct.$',
+                r'$1.Dec.$'], fontsize=29)
+    plt.yticks(fontsize=29)
+
+    plt.grid()
+
+    #plt.show()
+    plt.savefig(plot_output)
+    plt.close()
+
 
 def find_element(output_df):
     """find all elements in dataframe, the variables with same name but
