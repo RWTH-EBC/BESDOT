@@ -4,3 +4,5 @@
 /tools/analysis_lp_new.txt
 /tools/analysis_lp_temp.txt
 .idea/
+.DS_Store
+*/.DS_Store
