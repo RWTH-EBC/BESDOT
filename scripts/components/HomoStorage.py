@@ -91,7 +91,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
                            input_energy[t+1] - output_energy[t+1] -
                            loss_var[t+1])
 
-    def _constraint_loss(self, model):
+    def _constraint_loss(self, model, loss_type='off'):
         """
         According to loss_type choose the wanted constraint about energy loss
         of water tank.
