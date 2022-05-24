@@ -11,8 +11,8 @@ from pyomo.gdp import Disjunct, Disjunction
 from scripts.FluidComponent import FluidComponent
 from scripts.components.HotWaterStorage import HotWaterStorage
 
-
 small_num = 0.0001
+
 
 class HomoStorage(FluidComponent, HotWaterStorage):
     def __init__(self, comp_name, comp_type="HomoStorage", comp_model=None,
@@ -31,11 +31,35 @@ class HomoStorage(FluidComponent, HotWaterStorage):
         else:
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for max temperature.")
+            self.max_temp = 95
+
         if 'min temperature' in properties.columns:
             self.min_temp = float(properties['min temperature'])
         else:
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for min temperature.")
+            self.min_temp = 30
+
+        if 'init temperature' in properties.columns:
+            self.init_temp = float(properties['init temperature'])
+        else:
+            warnings.warn("In the model database for " + self.component_type +
+                          " lack of column for min temperature.")
+            self.init_temp = 60
+
+        if 'loss type' in properties.columns:
+            self.loss_type = float(properties['loss type'])
+        else:
+            warnings.warn("In the model database for " + self.component_type +
+                          " lack of column for loss type.")
+            self.loss_type = 'off'
+
+        if 'init status' in properties.columns:
+            self.min_temp = float(properties['init status'])
+        else:
+            warnings.warn("In the model database for " + self.component_type +
+                          " lack of column for init status.")
+            self.init_status = 'on'
 
     def _constraint_conver(self, model):
         """
@@ -61,13 +85,13 @@ class HomoStorage(FluidComponent, HotWaterStorage):
         temp_var = model.find_component('temp_' + self.name)
         loss_var = model.find_component('loss_' + self.name)
 
-        for t in range(len(model.time_step)-1):
-            model.cons.add((temp_var[t+2] - temp_var[t+1]) * water_density *
+        for t in range(len(model.time_step) - 1):
+            model.cons.add((temp_var[t + 2] - temp_var[t + 1]) * water_density *
                            size * water_heat_cap / unit_switch ==
-                           input_energy[t+1] - output_energy[t+1] -
-                           loss_var[t+1])
+                           input_energy[t + 1] - output_energy[t + 1] -
+                           loss_var[t + 1])
 
-    def _constraint_loss(self, model, loss_type='off'):
+    def _constraint_loss(self, model):
         """
         According to loss_type choose the wanted constraint about energy loss
         of water tank.
@@ -77,7 +101,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
         temp_var = model.find_component('temp_' + self.name)
         size = model.find_component('size_' + self.name)
 
-        if loss_type == 'off':
+        if self.loss_type == 'off':
             for t in range(len(model.time_step)):
                 model.cons.add(loss_var[t + 1] == 0)
         else:
@@ -88,11 +112,11 @@ class HomoStorage(FluidComponent, HotWaterStorage):
                 model.cons.add(loss_var[t + 1] == 0.6 * ((temp_var[t + 1] -
                                                           20) / 1000 * size))
 
-    def _constraint_temp(self, model, init_temp=30):
+    def _constraint_temp(self, model):
         # Initial temperature for water in storage is define with a constant
         # value.
         temp_var = model.find_component('temp_' + self.name)
-        model.cons.add(temp_var[1] == init_temp)
+        model.cons.add(temp_var[1] == self.init_temp)
         for t in model.time_step:
             model.cons.add(self.max_temp >= temp_var[t])
             model.cons.add(self.min_temp <= temp_var[t])
@@ -125,8 +149,8 @@ class HomoStorage(FluidComponent, HotWaterStorage):
                                          '_' + 'temp')
             model.cons.add(t_in[1] == t_out[1])
 
-    def _constraint_input_permit(self, model, min_temp=30, max_temp=95,
-                                 init_status='on'):
+    def _constraint_input_permit(self, model):
+
         """
         The input to water tank is controlled by tank temperature, which is
         close to reality. When the temperature of water tank reaches the
@@ -153,32 +177,33 @@ class HomoStorage(FluidComponent, HotWaterStorage):
                                             '_' + self.name)
 
         # Initial status should be determined by us.
-        if init_status == 'on':
+        if self.init_status == 'on':
             model.cons.add(status_var[1] == 1)
-        elif init_status == 'off':
+        elif self.init_status == 'off':
             model.cons.add(status_var[1] == 0)
 
-        for t in range(len(model.time_step)-1):
+        for t in range(len(model.time_step) - 1):
             # Need a better tutorial for introducing the logical condition
             model.cons.add(status_var[t + 2] >= small_num *
-                           (small_num + (max_temp - min_temp - small_num) *
-                            status_var[t+1] + min_temp - temp_var[t+2]))
+                           (small_num + (self.max_temp - self.min_temp -
+                                         small_num) * status_var[t + 1] +
+                            self.min_temp - temp_var[t + 2]))
             model.cons.add(status_var[t + 2] <= 1 + small_num *
-                           (small_num + (max_temp - min_temp - 2 * small_num) *
-                            status_var[t + 1] + min_temp - temp_var[t + 2]))
+                           (small_num + (self.max_temp - self.min_temp - 2 *
+                                         small_num) * status_var[t + 1] +
+                            self.min_temp - temp_var[t + 2]))
             # fixme (yni): the following equation is wrong!!!, that could be
             #  problematic.
             model.cons.add(input_energy[t + 1] == input_energy[t + 1] *
                            status_var[t + 1])
             # Additional constraint for allowed temperature in storage
-            #model.cons.add(temp_var[t + 2] >= min_temp)
-            #model.cons.add(temp_var[t + 2] <= max_temp)
+            # model.cons.add(temp_var[t + 2] >= min_temp)
+            # model.cons.add(temp_var[t + 2] <= max_temp)
         model.cons.add(input_energy[len(model.time_step)] ==
                        input_energy[len(model.time_step)] *
                        status_var[len(model.time_step)])
 
-    def _constraint_input_permit_gdp(self, model, min_temp=30, max_temp=70,
-                                     init_status='on'):
+    def _constraint_input_permit_gdp(self, model):
         """
         This function use the pyomo GDP model to replace the original constraint
         for input permit. It would be easier to generate the control model.
@@ -195,34 +220,34 @@ class HomoStorage(FluidComponent, HotWaterStorage):
                                             '_' + self.name)
         model.init = pyo.BooleanVar()
 
-        if init_status == 'on':
+        if self.init_status == 'on':
             model.init_log = pyo.LogicalConstraint(
                 expr=model.init.equivalent_to(True))
-        elif init_status == 'off':
+        elif self.init_status == 'off':
             model.init_log = pyo.LogicalConstraint(
                 expr=model.init.equivalent_to(False))
 
         for t in model.time_step:
             a = Disjunct()
-            c_1 = pyo.Constraint(expr=temp_var[t] >= 60)
+            c_1 = pyo.Constraint(expr=temp_var[t] >= self.max_temp)
             c_2 = pyo.Constraint(expr=input_energy[t] == 0)
             model.add_component('a_dis_' + str(t), a)
             a.add_component('a_1_' + str(t), c_1)
             a.add_component('a_2_' + str(t), c_2)
 
             b = Disjunct()
-            c_7 = pyo.Constraint(expr=temp_var[t] <= 60 - small_num)
+            c_7 = pyo.Constraint(expr=temp_var[t] <= self.max_temp - small_num)
             model.add_component('b_dis_' + str(t), b)
             b.add_component('b_1_' + str(t), c_7)
 
             c = Disjunct()
-            c_3 = pyo.Constraint(expr=temp_var[t] <= 30)
+            c_3 = pyo.Constraint(expr=temp_var[t] <= self.min_temp)
             model.add_component('c_dis_' + str(t), c)
             c.add_component('c_' + str(t), c_3)
 
             d = Disjunct()
             c_4 = pyo.Constraint(expr=input_energy[t] == 0)
-            c_6 = pyo.Constraint(expr=temp_var[t] >= 30 + small_num)
+            c_6 = pyo.Constraint(expr=temp_var[t] >= self.min_temp + small_num)
             model.add_component('d_dis_' + str(t), d)
             d.add_component('d_' + str(t), c_4)
             d.add_component('d_2_' + str(t), c_6)
@@ -257,8 +282,8 @@ class HomoStorage(FluidComponent, HotWaterStorage):
         # todo (yni): the constraint about return temperature should be
         #  determined by consumer, fix this later
         # self._constraint_mass_flow(model)
-        #todo: unterschiedliche Wärmekapazität
-        #self._constraint_heat_inputs(model)
+        # todo: unterschiedliche Wärmekapazität
+        # self._constraint_heat_inputs(model)
         self._constraint_heat_outputs(model)
         # self._constraint_input_permit(model, min_temp=30, init_status='on')
         self._constraint_vdi2067(model)

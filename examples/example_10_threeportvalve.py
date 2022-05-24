@@ -24,7 +24,7 @@ project.add_environment(env_10)
 
 # If the objective of the project is the optimization for building, a building
 # should be added to the project.
-bld_10 = Building(name='bld_10', area=200)
+bld_10 = Building(name='bld_10', area=100)
 
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
@@ -62,7 +62,8 @@ project.run_optimization('gurobi', save_lp=True, save_result=True)
 result_output_path = os.path.join(base_path, 'data', 'opt_output',
                                   project.name + '_result.csv')
 post_pro.plot_all(result_output_path, time_interval=[0, env_10.time_step])
-post_pro.plot_double(result_output_path, "boi", "water_tes", 365, "gas", "heat")
+post_pro.plot_double(result_output_path, "boi", "water_tes", 365, "gas",
+                      "heat")
 post_pro.plot_double(result_output_path, "conden_boi", "water_tes", 365, "gas",
                      "heat")
 post_pro.plot_double(result_output_path, "water_tes", "tp_val", 365, "heat",
