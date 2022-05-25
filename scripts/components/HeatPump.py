@@ -28,7 +28,7 @@ class HeatPump(Component):
         Calculate the COP value in each time step, with default set
         temperature of 60 degree and machine efficiency of 40%.
         """
-        cop = model.find_component('cop' + self.name)
+        cop = model.find_component('cop_' + self.name)
         temp_var = model.find_component('temp_' + self.name)
         for t in model.time_step:
             model.cons.add(cop[t] * (temp_var[t] - temp_profile[t - 1]) == (
@@ -54,6 +54,7 @@ class HeatPump(Component):
         self._constraint_conver(model)
         self._constraint_cop(model, self.temp_profile)
         self._constraint_vdi2067(model)
+        self._constraint_maxpower(model)
 
     def add_vars(self, model):
         super().add_vars(model)
@@ -62,4 +63,4 @@ class HeatPump(Component):
         model.add_component('temp_' + self.name, temp)
 
         cop = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('cop' + self.name, cop)
+        model.add_component('cop_' + self.name, cop)

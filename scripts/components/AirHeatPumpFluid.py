@@ -39,7 +39,7 @@ class AirHeatPumpFluid(HeatPump, FluidComponent):
         self.energy_flows_in = None
         # self.loss_noload = 0.90
         # self.loss_cycling = 0.95
-        # self.temp_profile = temp_profile
+        self.temp_profile = temp_profile
         # self.cop = HeatPump.cop
 
     def _constraint_conver(self, model, t_on=10):
@@ -57,6 +57,7 @@ class AirHeatPumpFluid(HeatPump, FluidComponent):
         output_powers = model.find_component('output_' + self.outputs[0] +
                                              '_' + self.name)
         size = model.find_component('size_' + self.name)
+        cop = model.find_component('cop_' + self.name)
 
         temp_var = model.find_component('temp_' + self.name)
         return_temp_var = model.find_component('return_temp_' + self.name)
@@ -67,16 +68,13 @@ class AirHeatPumpFluid(HeatPump, FluidComponent):
             loss_defrost = 1 - (t_on - 9) * 0.089 / 3
 
             model.cons.add(
-                output_powers[t] == input_powers[t] * self.cop[t - 1]
+                output_powers[t] == input_powers[t] * cop[t]
                 * loss_defrost)
-            print(self.cop[t - 1])
+            print(cop[t])
             # self.loss_noload * self.loss_cycling)
 
     def _constraint_temp(self, model, init_temp=40):
         temp_var = model.find_component('temp_' + self.name)
-        for t in model.time_step:
-            size = model.find_component('size_' + self.name)
-            model.cons.add(temp_var[t] == size)
         for heat_output in self.heat_flows_out:
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'temp')
@@ -120,14 +118,12 @@ class AirHeatPumpFluid(HeatPump, FluidComponent):
         self._constraint_temp(model)
         self._constraint_return_temp(model)
         self._constraint_vdi2067(model)
-        # self._constraint_mass_flow(model)
+        self._constraint_maxpower(model)
         self._constraint_heat_outputs(model)
+        self._constraint_cop(model, self.temp_profile)
 
     def add_vars(self, model):
         super().add_vars(model)
-
-        temp = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('temp_' + self.name, temp)
 
         return_temp = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('return_temp_' + self.name, return_temp)

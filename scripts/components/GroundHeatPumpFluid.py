@@ -58,6 +58,7 @@ class GroundHeatPumpFluid(HeatPump, FluidComponent):
         output_powers = model.find_component('output_' + self.outputs[0] +
                                              '_' + self.name)
         size = model.find_component('size_' + self.name)
+        cop = model.find_component('cop_' + self.name)
 
         temp_var = model.find_component('temp_' + self.name)
         return_temp_var = model.find_component('return_temp_' + self.name)
@@ -65,12 +66,10 @@ class GroundHeatPumpFluid(HeatPump, FluidComponent):
         for t in model.time_step:
             # index in pyomo model and python list is different
 
-            cop = HeatPump.calc_cop(self, self.temp_profile[t], 40)
-
             model.cons.add(
-                output_powers[t] == input_powers[t] * cop)
+                output_powers[t] == input_powers[t] * cop[t])
 
-    def _constraint_temp(self, model, init_temp=40):
+    def _constraint_temp(self, model):
         temp_var = model.find_component('temp_' + self.name)
         '''size = model.find_component('size_' + self.name)
         for t in model.time_step:
@@ -81,7 +80,7 @@ class GroundHeatPumpFluid(HeatPump, FluidComponent):
             for t in range(len(model.time_step)):
                 model.cons.add(temp_var[t + 1] == t_out[t + 1])
 
-    def _constraint_return_temp(self, model, init_return_temp=35):
+    def _constraint_return_temp(self, model):
         return_temp_var = model.find_component('return_temp_' + self.name)
         for heat_output in self.heat_flows_out:
             t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
@@ -104,14 +103,12 @@ class GroundHeatPumpFluid(HeatPump, FluidComponent):
         self._constraint_temp(model)
         self._constraint_return_temp(model)
         self._constraint_vdi2067(model)
-        # self._constraint_mass_flow(model)
+        self._constraint_cop(model, self.temp_profile)
         self._constraint_heat_outputs(model)
+        self._constraint_maxpower(model)
 
     def add_vars(self, model):
         super().add_vars(model)
-
-        temp = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('temp_' + self.name, temp)
 
         return_temp = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('return_temp_' + self.name, return_temp)
