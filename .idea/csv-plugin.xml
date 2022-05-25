@@ -31,6 +31,20 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/data/weather_data/Dusseldorf/pmv_coeff.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/data/weather_data/Dusseldorf/soil_temp.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\data\component_database\CHPFluidSmallHi\CHPFluidSmallHi.csv">
           <value>
             <Attribute>
