@@ -45,7 +45,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
         else:
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for min temperature.")
-            self.init_temp = 60
+            self.init_temp = 30
 
         if 'loss type' in properties.columns:
             self.loss_type = float(properties['loss type'])
