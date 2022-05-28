@@ -59,7 +59,8 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
     # model to calculate surface temperature and heat transfer of radiant floor
     # heating and cooling systems, Xiaozhou Wu, Jianing Zhao, Bjarne W. Olesen,
     # Lei Fang, Fenghao Wang
-    def _constraint_floor_temp(self, model, floor_temp_approximate=24):
+    def _constraint_floor_temp(self, model, floor_temp_approximate=24,
+                               room_temp_approximate=21):
         input_energy = model.find_component('input_' + self.inputs[0] +
                                             '_' + self.name)
         output_energy = model.find_component('output_' + self.outputs[0] +
@@ -71,7 +72,7 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
         return_temp_var = model.find_component('return_temp_' + self.name)
         average_t = model.find_component('average_t_' + self.name)
         heat_flux = model.find_component('heat_flux_' + self.name)
-        temp_zoom = model.find_component('temp_zoom')
+        room_temp = model.find_component('temp_zoom')
 
         for t in range(len(model.time_step)):
             model.cons.add(average_t[t + 1] == (temp_var[t + 1] +
@@ -79,9 +80,12 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
             model.cons.add(floor_temp[t + 1] == 0.625 * average_t[t + 1] + 6.875
                            )
             model.cons.add(heat_flux[t + 1] == 8.92 * (
-                    (floor_temp_approximate - temp_zoom[t + 1]) ** 1.1 + 1.1 *
-                    (floor_temp_approximate - temp_zoom[t + 1]) ** 0.1 * (
-                            floor_temp[t + 1] - floor_temp_approximate)))
+                    (floor_temp_approximate - room_temp_approximate) ** 1.1 +
+                    1.1 *
+                    (floor_temp_approximate - room_temp_approximate) ** 0.1 * (
+                            floor_temp[t + 1] - floor_temp_approximate) - 1.1 *
+                    (floor_temp_approximate - room_temp_approximate) ** 0.1 * (
+                            room_temp[t + 1] - room_temp_approximate)))
             model.cons.add(
                 input_energy[t + 1] * 1000 == heat_flux[t + 1] * area)
             model.cons.add(input_energy[t + 1] == output_energy[t + 1])
