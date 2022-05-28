@@ -40,7 +40,7 @@ class HeatPump(Component):
         Heat pump has only one input and one output, maybe? be caution for 5
         generation heat network.
         """
-        cop = model.find_component('cop' + self.name)
+        cop = model.find_component('cop_' + self.name)
         input_powers = model.find_component('input_' + self.inputs[0] + '_' +
                                             self.name)
         output_powers = model.find_component('output_' + self.outputs[0] +

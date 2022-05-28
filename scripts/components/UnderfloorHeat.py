@@ -3,6 +3,7 @@ import warnings
 import pyomo.environ as pyo
 from scripts.FluidComponent import FluidComponent
 from scripts.components.HeatExchangerFluid import HeatExchangerFluid
+from scripts.pmv import *
 import math
 
 # Common parameters
@@ -58,8 +59,7 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
     # model to calculate surface temperature and heat transfer of radiant floor
     # heating and cooling systems, Xiaozhou Wu, Jianing Zhao, Bjarne W. Olesen,
     # Lei Fang, Fenghao Wang
-    def _constraint_floor_temp(self, model, room_temp=21,
-                               floor_temp_approximate=24):
+    def _constraint_floor_temp(self, model, floor_temp_approximate=24):
         input_energy = model.find_component('input_' + self.inputs[0] +
                                             '_' + self.name)
         output_energy = model.find_component('output_' + self.outputs[0] +
@@ -71,17 +71,19 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
         return_temp_var = model.find_component('return_temp_' + self.name)
         average_t = model.find_component('average_t_' + self.name)
         heat_flux = model.find_component('heat_flux_' + self.name)
+        temp_zoom = model.find_component('temp_zoom')
 
         for t in range(len(model.time_step)):
             model.cons.add(average_t[t + 1] == (temp_var[t + 1] +
-                                                return_temp_var[t + 1])/2)
+                                                return_temp_var[t + 1]) / 2)
             model.cons.add(floor_temp[t + 1] == 0.625 * average_t[t + 1] + 6.875
                            )
             model.cons.add(heat_flux[t + 1] == 8.92 * (
-                    (floor_temp_approximate-room_temp)**1.1+1.1 *
-                    (floor_temp_approximate-room_temp)**0.1 * (floor_temp[t + 1]
-                    - floor_temp_approximate)))
-            model.cons.add(input_energy[t+1] * 1000 == heat_flux[t + 1] * area)
+                    (floor_temp_approximate - temp_zoom[t + 1]) ** 1.1 + 1.1 *
+                    (floor_temp_approximate - temp_zoom[t + 1]) ** 0.1 * (
+                            floor_temp[t + 1] - floor_temp_approximate)))
+            model.cons.add(
+                input_energy[t + 1] * 1000 == heat_flux[t + 1] * area)
             model.cons.add(input_energy[t + 1] == output_energy[t + 1])
 
     # def _constraint_mass_flow(self, model):
@@ -103,12 +105,12 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
         self._constraint_conver(model)
         self._constraint_temp(model)
         self._constraint_return_temp(model)
-        #self._constraint_mass_flow(model)
+        # self._constraint_mass_flow(model)
         self._constraint_heat_inputs(model)
         self._constraint_floor_temp(model)
         self._constraint_vdi2067(model)
         # todo (qli):
-        #self._constraint_heat_water_return_temp(model)
+        # self._constraint_heat_water_return_temp(model)
 
     def add_vars(self, model):
         super().add_vars(model)
@@ -127,3 +129,6 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
 
         heat_flux = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('heat_flux_' + self.name, heat_flux)
+
+        temp_zoom = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('temp_zoom', temp_zoom)
