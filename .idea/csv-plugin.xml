@@ -52,6 +52,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/data/opt_output/project_24_result.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/data/opt_output/project_2_result.csv">
           <value>
             <Attribute>

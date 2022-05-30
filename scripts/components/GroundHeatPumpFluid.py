@@ -9,7 +9,7 @@ from scripts.FluidComponent import FluidComponent
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
     __file__))))
 path = os.path.join(base_path, "data", "weather_data",
-                    "Dusseldorf", "type_temp.csv")
+                    "Dusseldorf", "soil_temp.csv")
 data = pd.read_csv(path)
 soil_temperature_profile = data.loc[:, 'temperature']
 
@@ -71,9 +71,8 @@ class GroundHeatPumpFluid(HeatPump, FluidComponent):
 
     def _constraint_temp(self, model):
         temp_var = model.find_component('temp_' + self.name)
-        '''size = model.find_component('size_' + self.name)
         for t in model.time_step:
-            model.cons.add(temp_var[t] == init_temp)'''
+            model.cons.add(temp_var[t] <= 65)
         for heat_output in self.heat_flows_out:
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'temp')
