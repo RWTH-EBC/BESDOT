@@ -230,15 +230,17 @@ class Building(object):
                                                     'HeatConsumptionFluid',
                                                     'ElectricalConsumption',
                                                     ]:
-                cluster_profile = pd.Series(cluster.clusterPeriodDict[
-                    'heat_demand']).tolist()
+                # cluster_profile = pd.Series(cluster.clusterPeriodDict[
+                #     'heat_demand']).tolist()
+                cluster_profile = cluster['heat_demand'].tolist()
                 self.components[comp_name].update_profile(
                     consum_profile=cluster_profile)
             if self.topology['comp_type'][item] in ['HotWaterConsumption',
                                                     'HotWaterConsumptionFluid'
                                                     ]:
-                cluster_profile = pd.Series(cluster.clusterPeriodDict[
-                                                'hot_water_demand']).tolist()
+                # cluster_profile = pd.Series(cluster.clusterPeriodDict[
+                #                                 'hot_water_demand']).tolist()
+                cluster_profile = cluster['hot_water_demand'].tolist()
                 self.components[comp_name].update_profile(
                         consum_profile=cluster_profile)
             if self.topology['comp_type'][item] in ['HeatPump',
@@ -246,16 +248,18 @@ class Building(object):
                                                     'SolarThermalCollector',
                                                     'SolarThermalCollectorFluid',
                                                     ]:
-                cluster_profile = pd.Series(cluster.clusterPeriodDict[
-                                                'temp']).tolist()
+                # cluster_profile = pd.Series(cluster.clusterPeriodDict[
+                #                                 'temp']).tolist()
+                cluster_profile = cluster['temp'].tolist()
                 self.components[comp_name].update_profile(
                     temp_profile=cluster_profile)
             if self.topology['comp_type'][item] in ['PV',
                                                     'SolarThermalCollector',
                                                     'SolarThermalCollectorFluid',
                                                     ]:
-                cluster_profile = pd.Series(cluster.clusterPeriodDict[
-                                                'irr']).tolist()
+                # cluster_profile = pd.Series(cluster.clusterPeriodDict[
+                #                                 'irr']).tolist()
+                cluster_profile = cluster['irr'].tolist()
                 self.components[comp_name].update_profile(
                     irr_profile=cluster_profile)
             if isinstance(self.components[comp_name], Storage):
@@ -624,12 +628,13 @@ class Building(object):
         else:
             # Attention! The period only for 24 hours is developed,
             # other segments are not considered.
-            period_length = 24
-
-            nr_day_occur = pd.Series(cluster.clusterPeriodNoOccur).tolist()
-            nr_hour_occur = []
-            for nr_occur in nr_day_occur:
-                nr_hour_occur += [nr_occur] * 24
+            # period_length = 24
+            #
+            # nr_day_occur = pd.Series(cluster.clusterPeriodNoOccur).tolist()
+            # nr_hour_occur = []
+            # for nr_occur in nr_day_occur:
+            #     nr_hour_occur += [nr_occur] * 24
+            nr_hour_occur = cluster['Occur']
 
             model.cons.add(
                 bld_operation_cost == sum(buy_elec[t] * env.elec_price *
