@@ -17,12 +17,11 @@ data = pd.read_csv(output_path)
 pmv = data.loc[:, 'coeff']
 b = pmv.values.tolist()
 
+
 class PMV(object):
-    def __init__(self, name, typ):
-        self.name = name
-        self.typ = typ
-
-
+    def __init__(self, comp_name, comp_type="ThreePortValve"):
+        self.comp_name = comp_name
+        self.comp_type = comp_type
 
     def _constraint_pmv(self, model):
         """
@@ -39,14 +38,13 @@ class PMV(object):
                                       coeff[1] * pa[t] - coeff[2]))
 
     def add_cons(self, model):
-        self. _constraint_pmv(model)
+        self._constraint_pmv(model)
 
     def add_vars(self, model):
         super().add_vars(model)
 
-        temp_zoom = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('temp_zoom', temp_zoom)
+        temp_room = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('temp_room', temp_room)
 
         pa = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('pa', pa)
-

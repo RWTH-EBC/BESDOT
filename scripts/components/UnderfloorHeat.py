@@ -10,6 +10,13 @@ import math
 water_heat_cap = 4.18 * 10 ** 3  # Unit J/kgK
 water_density = 1000  # kg/m3
 unit_switch = 3600 * 1000  # J/kWh
+base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
+    __file__))))
+output_path = os.path.join(base_path, "data", "weather_data",
+                           "Dusseldorf", "pmv_coeff.csv")
+data = pd.read_csv(output_path)
+pmv = data.loc[:, 'coeff']
+b = pmv.values.tolist()
 
 
 class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
@@ -90,6 +97,20 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
                 input_energy[t + 1] * 1000 == heat_flux[t + 1] * area)
             model.cons.add(input_energy[t + 1] == output_energy[t + 1])
 
+    def _constraint_pmv(self, model):
+        """
+        Calculate the COP value in each time step, with default set
+        temperature of 60 degree and machine efficiency of 40%.
+        """
+        pa = model.find_component('pa')
+        pmv = model.find_component('pmv')
+        temp_zoom = model.find_component('temp_zoom')
+        for t in model.time_step:
+            coeff = eval(b[t])
+            model.cons.add(pa[t] == (85.165 * temp_zoom[t] - 539.063))
+            model.cons.add(pmv[t] == (coeff[0] * temp_zoom[t] +
+                                      coeff[1] * pa[t] - coeff[2]))
+
     # def _constraint_mass_flow(self, model):
     #    for heat_input in self.heat_flows_in:
     #        m_in = model.find_component(heat_input[0] + '_' + heat_input[1] +
@@ -113,6 +134,7 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
         self._constraint_heat_inputs(model)
         self._constraint_floor_temp(model)
         self._constraint_vdi2067(model)
+        #self._constraint_pmv(model)
         # todo (qli):
         # self._constraint_heat_water_return_temp(model)
 
@@ -136,3 +158,11 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
 
         temp_zoom = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('temp_zoom', temp_zoom)
+
+        pa = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('pa', pa)
+
+        pmv = pyo.Var(model.time_step, bounds=(-10, None))
+        model.add_component('pmv', pmv)
+
+
