@@ -69,7 +69,7 @@ class FluidComponent(Component):
                                    (m_in[t + 1] * t_in[t + 1] - m_out[t + 1] *
                                     t_out[
                                         t + 1]) * water_heat_cap / unit_switch)
-                    model.cons.add(t_in[t + 1] >= t_out[t + 1])
+                    #model.cons.add(t_in[t + 1] >= t_out[t + 1])
 
     def _constraint_heat_outputs(self, model):
         """
@@ -95,4 +95,4 @@ class FluidComponent(Component):
                     model.cons.add(energy_flow[heat_output][t + 1] ==
                                    (m_out[t + 1] * t_out[t + 1] - m_in[t + 1] *
                                     t_in[t + 1]) * water_heat_cap / unit_switch)
-                    model.cons.add(t_in[t + 1] <= t_out[t + 1])
+                    #model.cons.add(t_in[t + 1] <= t_out[t + 1])

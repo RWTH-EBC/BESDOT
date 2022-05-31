@@ -48,7 +48,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
             self.init_temp = 60
 
         if 'loss type' in properties.columns:
-            self.loss_type = float(properties['loss type'])
+            self.loss_type = str(properties['loss type'])
         else:
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for loss type.")
@@ -275,7 +275,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
 
     def add_cons(self, model):
         self._constraint_conver(model)
-        self._constraint_loss(model, loss_type='on')
+        self._constraint_loss(model)
         self._constraint_temp(model)
         # self._constraint_init_fluid_temp(model)
         # todo (yni): the constraint about return temperature should be

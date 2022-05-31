@@ -54,7 +54,6 @@ class HeatConsumptionFluid(FluidComponent):
     #
     #     var_dict[output_flow] = input_profiles['therm_demand']
 
-    # todo (qli):
     def _constraint_heat_water_temp(self, model, init_temp=30):
         for heat_input in self.heat_flows_in:
             t_in = model.find_component(
@@ -62,7 +61,7 @@ class HeatConsumptionFluid(FluidComponent):
             for t in range(len(model.time_step)):
                 model.cons.add(init_temp == t_in[t + 1])
 
-    # todo (qli):
+    # outlet temperature >= init_temp
     def _constraint_heat_water_return_temp(self, model, init_temp=21):
         for heat_input in self.heat_flows_in:
             t_in = model.find_component(
@@ -73,10 +72,21 @@ class HeatConsumptionFluid(FluidComponent):
                 model.cons.add(init_temp <= t_out[t + 1])
                 model.cons.add(t_out[t + 1] <= t_in[t + 1] - small_num)
 
-    def add_cons(self, model):
+    # outlet temperature = con = init_temp
+    def _constraint_heat_water_return_temp_con(self, model, init_temp=21):
+        for heat_input in self.heat_flows_in:
+            t_out = model.find_component(
+                heat_input[1] + '_' + heat_input[0] + '_' + 'temp')
+            for t in range(len(model.time_step)):
+                model.cons.add(init_temp == t_out[t + 1])
+
+    def add_cons(self, model, return_temp_con='on'):
         self._constraint_conver(model)
         self._constraint_heat_water_temp(model)
-        self._constraint_heat_water_return_temp(model)
+        if return_temp_con == 'on':
+            self._constraint_heat_water_return_temp_con(model)
+        if return_temp_con == 'off':
+            self._constraint_heat_water_return_temp(model)
         self._constraint_vdi2067(model)
 
     def add_vars(self, model):
