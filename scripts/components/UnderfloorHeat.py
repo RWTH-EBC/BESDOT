@@ -109,7 +109,7 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
             coeff = eval(b[t])
             model.cons.add(pa[t] == (85.165 * room_temp[t] - 539.063)/1000)
             print(coeff[0], coeff[1], coeff[2])
-            model.cons.add(pmv1[t] == 0.1)
+            model.cons.add(pmv1[t] <= 1)
             model.cons.add(pmv1[t] >= -1)
             model.cons.add(pmv1[t] == (coeff[0] * room_temp[t] +
                                       coeff[1] * pa[t] - coeff[2]))
