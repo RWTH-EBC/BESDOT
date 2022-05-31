@@ -70,11 +70,13 @@ class AirHeatPumpFluid(HeatPump, FluidComponent):
             model.cons.add(
                 output_powers[t] == input_powers[t] * cop[t]
                 * loss_defrost)
-            print(cop[t])
+            #print(cop[t])
             # self.loss_noload * self.loss_cycling)
 
     def _constraint_temp(self, model, init_temp=40):
         temp_var = model.find_component('temp_' + self.name)
+        for t in model.time_step:
+            model.cons.add(temp_var[t] <= 55)
         for heat_output in self.heat_flows_out:
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'temp')

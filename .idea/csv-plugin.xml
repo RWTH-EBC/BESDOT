@@ -52,6 +52,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/data/component_database/pmv/EHP1.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/data/opt_output/project_24_result.csv">
           <value>
             <Attribute>
@@ -88,6 +95,13 @@
           </value>
         </entry>
         <entry key="/data/topology/groundheatpump_tp.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/data/weather_data/Dusseldorf/soil_temp.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
