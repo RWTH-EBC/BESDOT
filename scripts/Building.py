@@ -210,6 +210,8 @@ class Building(object):
                                                       current_size=current_size)
                 elif comp_type == 'ThreePortValve':
                     comp_obj = module_dict[comp_type](comp_name=comp_name)
+                elif comp_type == 'pmv':
+                    comp_obj = module_dict[comp_type](comp_name=comp_name)
                 else:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       comp_model=comp_model,
