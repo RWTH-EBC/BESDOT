@@ -44,7 +44,8 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         outlet_temp = model.find_component('outlet_temp_' + self.name)
         inlet_temp = model.find_component('inlet_temp_' + self.name)
         for t in model.time_step:
-            model.cons.add(outlet_temp[t] - inlet_temp[t] <= 25)
+            model.cons.add(outlet_temp[t] - inlet_temp[t] <= 20)
+            model.cons.add(inlet_temp[t] <= 70)
         for heat_output in self.heat_flows_out:
             t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
                                         '_' + 'temp')
@@ -78,18 +79,18 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         self._constraint_heat_outputs(model)
         self._constraint_start_stop_ratio_gdp(model)
         #self._constraint_start_cost(model)
-
+        '''
         self._constraint_Pel(model)
         self._constraint_vdi2067_chp(model)
         '''
         # todo: fix cost
         self._constraint_vdi2067_chp_gdp(model)
-        '''
+
 
     def add_vars(self, model):
         super().add_vars(model)
 
-        Qth = pyo.Var(bounds=(7, 94))
+        Qth = pyo.Var(bounds=(0, 94))
         model.add_component('therm_size_' + self.name, Qth)
 
         therm_eff = pyo.Var(bounds=(0, 1))
@@ -165,11 +166,11 @@ class CHPFluidSmallHi(CHP, FluidComponent):
                     model.time_step) + 1] == 0)
         '''
         model.add_component('dis_select_' + self.name, dis_select)
-        dis_not_select.add_component('select_size_' + self.name,
+        dis_select.add_component('select_size_' + self.name,
                                         select_size)
-        dis_not_select.add_component('select_inv_' + self.name,
+        dis_select.add_component('select_inv_' + self.name,
                                         select_inv)
-        dis_not_select.add_component('select_therm_size_' + self.name,
+        dis_select.add_component('select_therm_size_' + self.name,
                                         select_therm_size)
 
         dj_size = Disjunction(expr=[dis_not_select, dis_select])

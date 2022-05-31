@@ -5,4 +5,4 @@ hw_cns,HotWaterConsumptionFluid,HWCNS,0,1000,0,0,0,0,0,0,0,0
 e_boi,ThroughHeaterElec,BOI3,0,1000,0,0,0,,0,0,0,0
 e_grid,ElectricityGrid,GRD1,0,10000,0,0,0,0,,0,0,0
 tp_val,ThreePortValve,3WV,0,1000,0,0,0,0,,0,0,0
-heat_ex,HeatExchangerFluid,HE1,0,10000,0,0,,0,0,0,0,0
+heat_ex,HeatExchangerFluid_Solar,HE1,0,10000,0,0,,0,0,0,0,0

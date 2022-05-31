@@ -38,12 +38,13 @@ bld_27.add_hot_water_profile(env_27)
 
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
+
 topo_file = os.path.join(base_path, 'data', 'topology',
-                         'chp_fluid_small_hi_solar5_all.csv')
+                         'chp_fluid_small_hi_solar4_all.csv')
 '''
 topo_file = os.path.join(base_path, 'data', 'topology',
                          'solar_coll_TW_Test.csv')
-                         '''
+'''
 bld_27.add_topology(topo_file)
 bld_27.add_components(project.environment)
 project.add_building(bld_27)
@@ -54,7 +55,7 @@ project.add_building(bld_27)
 # The profiles could be clustered are: demand profiles, weather profiles and
 # prices profiles (if necessary). demand profiles are stored in buildings
 # and other information are stored in Environment objects.
-project.time_cluster()
+project.time_cluster(nr_periods=4, hours_period=24)
 
 # After clustering need to update the demand profiles and storage assumptions.
 for bld in project.building_list:
@@ -64,7 +65,7 @@ for bld in project.building_list:
 #                        Build pyomo model and run optimization
 ################################################################################
 project.build_model(obj_typ='annual_cost')
-project.run_optimization(save_lp=True, save_result=True)
+project.run_optimization(solver_name='gurobi', save_lp=True, save_result=True)
 
 ################################################################################
 #                                  Post-processing
