@@ -79,7 +79,7 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
         return_temp_var = model.find_component('return_temp_' + self.name)
         average_t = model.find_component('average_t_' + self.name)
         heat_flux = model.find_component('heat_flux_' + self.name)
-        room_temp = model.find_component('temp_zoom')
+        room_temp = model.find_component('room_temp')
 
         for t in range(len(model.time_step)):
             model.cons.add(average_t[t + 1] == (temp_var[t + 1] +
@@ -103,12 +103,15 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
         temperature of 60 degree and machine efficiency of 40%.
         """
         pa = model.find_component('pa')
-        pmv = model.find_component('pmv')
-        temp_zoom = model.find_component('temp_zoom')
+        pmv1 = model.find_component('pmv1')
+        room_temp = model.find_component('room_temp')
         for t in model.time_step:
             coeff = eval(b[t])
-            model.cons.add(pa[t] == (85.165 * temp_zoom[t] - 539.063))
-            model.cons.add(pmv[t] == (coeff[0] * temp_zoom[t] +
+            model.cons.add(pa[t] == (85.165 * room_temp[t] - 539.063)/1000)
+            print(coeff[0], coeff[1], coeff[2])
+            model.cons.add(pmv1[t] == 0.1)
+            model.cons.add(pmv1[t] >= -1)
+            model.cons.add(pmv1[t] == (coeff[0] * room_temp[t] +
                                       coeff[1] * pa[t] - coeff[2]))
 
     # def _constraint_mass_flow(self, model):
@@ -134,7 +137,7 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
         self._constraint_heat_inputs(model)
         self._constraint_floor_temp(model)
         self._constraint_vdi2067(model)
-        #self._constraint_pmv(model)
+        self._constraint_pmv(model)
         # todo (qli):
         # self._constraint_heat_water_return_temp(model)
 
@@ -156,13 +159,13 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
         heat_flux = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('heat_flux_' + self.name, heat_flux)
 
-        temp_zoom = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('temp_zoom', temp_zoom)
+        room_temp = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('room_temp', room_temp)
 
         pa = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('pa', pa)
 
-        pmv = pyo.Var(model.time_step, bounds=(-10, None))
-        model.add_component('pmv', pmv)
+        pmv1 = pyo.Var(model.time_step, bounds=(None, None))
+        model.add_component('pmv1', pmv1)
 
 

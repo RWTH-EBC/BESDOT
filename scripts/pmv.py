@@ -34,7 +34,7 @@ class PMV(object):
         for t in model.time_step:
             coeff = eval(b[t])
             model.cons.add(pa[t] == (85.165 * temp_zoom[t] - 539.063))
-            model.cons.add(pmv[t] == (coeff[0] * temp_zoom[t] +
+            model.cons.add(pmv1[t] == (coeff[0] * temp_zoom[t] +
                                       coeff[1] * pa[t] - coeff[2]))
 
     def add_cons(self, model):
