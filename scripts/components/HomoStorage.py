@@ -45,7 +45,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
         else:
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for min temperature.")
-            self.init_temp = 60
+            self.init_temp = 30
 
         if 'loss type' in properties.columns:
             self.loss_type = str(properties['loss type'])
@@ -91,7 +91,7 @@ class HomoStorage(FluidComponent, HotWaterStorage):
                            input_energy[t+1] - output_energy[t+1] -
                            loss_var[t+1])
 
-    def _constraint_loss(self, model):
+    def _constraint_loss(self, model, loss_type='off'):
         """
         According to loss_type choose the wanted constraint about energy loss
         of water tank.
