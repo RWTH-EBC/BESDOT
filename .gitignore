@@ -3,7 +3,7 @@
 **/__pycache__
 /tools/analysis_lp_new.txt
 /tools/analysis_lp_temp.txt
-.idea/
+/.idea/
 .DS_Store
 */.DS_Store
 /data/cls_file/
