@@ -7,6 +7,7 @@
 /data/cls_file/
 /tools/analysis_lp_new.txt
 /tools/analysis_lp_temp.txt
+gurobi.log
 
 # files for Mac OS
 .DS_Store
