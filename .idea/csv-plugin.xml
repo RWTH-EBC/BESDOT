@@ -87,6 +87,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/data/tek_data/temperature.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/data/topology/airheatpump_tp.csv">
           <value>
             <Attribute>

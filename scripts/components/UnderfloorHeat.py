@@ -20,7 +20,7 @@ b = pmv.values.tolist()
 
 
 class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
-    def __init__(self, comp_name, comp_type="UnderfloorHeat", comp_model=None,
+    def __init__(self, comp_name, temp_profile, comp_type="UnderfloorHeat", comp_model=None,
                  min_size=0, max_size=5000000, current_size=0):
         super().__init__(comp_name=comp_name,
                          comp_type=comp_type,
@@ -29,6 +29,7 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
                          max_size=max_size,
                          current_size=current_size)
         self.heat_flows_out = None
+        self.temp_profile = temp_profile
 
     def _constraint_conver(self, model):
         input_energy = model.find_component('input_' + self.inputs[0] + '_' +
@@ -80,6 +81,7 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
         average_t = model.find_component('average_t_' + self.name)
         heat_flux = model.find_component('heat_flux_' + self.name)
         room_temp = model.find_component('room_temp')
+        co = model.find_component('co')
 
         for t in range(len(model.time_step)):
             model.cons.add(average_t[t + 1] == (temp_var[t + 1] +
@@ -95,7 +97,10 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
                             room_temp[t + 1] - room_temp_approximate)))
             model.cons.add(
                 input_energy[t + 1] * 1000 == heat_flux[t + 1] * area)
-            model.cons.add(input_energy[t + 1] == output_energy[t + 1])
+            model.cons.add(co[t + 1] == (room_temp[t + 1] -
+                                         self.temp_profile[t])
+                           / (21 - self.temp_profile[t]))
+            model.cons.add(input_energy[t + 1] / co[t + 1] == output_energy[t + 1])
 
     def _constraint_pmv(self, model):
         """
@@ -167,5 +172,8 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
 
         pmv1 = pyo.Var(model.time_step, bounds=(None, None))
         model.add_component('pmv1', pmv1)
+
+        co = pyo.Var(model.time_step, bounds=(None, None))
+        model.add_component('co', co)
 
 
