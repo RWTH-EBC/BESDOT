@@ -18,6 +18,7 @@ heat_comp_list = ['heat_pump', 'therm_cns', 'water_tes', 'solar_coll',
                   'boi', 'e_boi', 'chp']
 elec_sink_tuple = ('heat_pump', 'bat', 'e_grid', 'e_boi')
 heat_sink_tuple = 'water_tes'
+plt.rcParams['axes.unicode_minus']=False
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 opt_output_path = os.path.join(base_path, 'data', 'opt_output')
@@ -68,11 +69,17 @@ def plot_single(name, profile):
         ax.set_ylabel('mass [KG/H]', fontsize=12)
     elif 'temp' in name:
         ax.set_ylabel('temperature [°]', fontsize=12)
+    elif 'pmv' in name:
+        ax.set_ylabel(' ', fontsize=12)
     else:
         ax.set_ylabel('power [KW]', fontsize=12)
 
-    ax.set_xlim(xmin=0)
-    ax.set_ylim(ymin=0, ymax=max(profile)*1.2)
+    if 'pmv' in name:
+        ax.set_xlim(xmin=0)
+        ax.set_ylim(ymin=-3, ymax=3)
+    else:
+        ax.set_xlim(xmin=0)
+        ax.set_ylim(ymin=0, ymax=max(profile) * 1.2)
     plt.grid()
 
     #plt.show()
