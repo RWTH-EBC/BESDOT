@@ -47,15 +47,15 @@ def calc_soil_temp(st, mo):
 
     for t in range(0, 8760):
         if 3 < mo[t] < 9:
-            if 6 < st[t] < 24:
-                Icl[t + 1] = Icl1
+            if 9 < st[t] < 24:
+                Icl[t] = Icl1
             else:
-                Icl[t + 1] = Icl2
+                Icl[t] = Icl2
         else:
-            if 6 < st[t] < 24:
-                Icl[t + 1] = Icl2
+            if 9 < st[t] < 24:
+                Icl[t] = Icl2
             else:
-                Icl[t + 1] = Icl3
+                Icl[t] = Icl3
         #print(Icl[t+1][1])
 
     data = pd.DataFrame(Icl.items(), columns=['time', 'coeff'])
