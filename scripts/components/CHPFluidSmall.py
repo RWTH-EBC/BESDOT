@@ -54,7 +54,7 @@ class CHPFluidSmall(CHP, FluidComponent):
         for t in model.time_step:
             model.cons.add(therm_eff[t] == 0.705 - 0.0008 * (Qth - 44) -
                            0.006 * (inlet_temp[t] - 30))
-            model.cons.add(inlet_temp[t] <= 50)
+            #model.cons.add(inlet_temp[t] <= 50)
 
     def _constraint_therm_eff_gdp(self, model):
         small_num = 0.00001
@@ -90,9 +90,6 @@ class CHPFluidSmall(CHP, FluidComponent):
     def _constraint_temp(self, model):
         outlet_temp = model.find_component('outlet_temp_' + self.name)
         inlet_temp = model.find_component('inlet_temp_' + self.name)
-        # for t in model.time_step:
-        # model.cons.add(outlet_temp[t] - inlet_temp[t] <= 25)
-        # model.cons.add(inlet_temp[t] <= 50)
         for heat_output in self.heat_flows_out:
             t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
                                         '_' + 'temp')
@@ -132,18 +129,18 @@ class CHPFluidSmall(CHP, FluidComponent):
         # todo (qli): building.py anpassen
         self._constraint_chp_elec_sell_price(model)
         '''
-        
+        '''
         self._constraint_Pel(model)
         self._constraint_vdi2067_chp(model)
         '''
         # todo: fix cost
         self._constraint_vdi2067_chp_gdp(model)
-        '''
+
 
     def add_vars(self, model):
         super().add_vars(model)
 
-        Qth = pyo.Var(bounds=(7, 109))
+        Qth = pyo.Var(bounds=(0, 109))
         model.add_component('therm_size_' + self.name, Qth)
 
         therm_eff = pyo.Var(model.time_step, bounds=(0, 1))
@@ -184,6 +181,7 @@ class CHPFluidSmall(CHP, FluidComponent):
         invest = model.find_component('invest_' + self.name)
         Pel = model.find_component('size_' + self.name)
         Qth = model.find_component('therm_size_' + self.name)
+        inlet_temp = model.find_component('inlet_temp_' + self.name)
         # status = model.find_component('status_' + self.name)
 
         if self.min_size == 0:
@@ -202,19 +200,22 @@ class CHPFluidSmall(CHP, FluidComponent):
                                      not_select_inv)
         dis_not_select.add_component('not_select_therm_size_' + self.name,
                                      not_select_therm_size)
-
         dis_select = Disjunct()
+        model.add_component('dis_select_' + self.name, dis_select)
         select_size = pyo.Constraint(expr=Pel >= min_size)
         select_inv = pyo.Constraint(
             expr=invest == Pel * 458 + 57433 + 3800 / 50 * Pel)
         select_therm_size = pyo.Constraint(expr=Qth == 2.1178 * Pel + 2.5991)
+        for t in model.time_step:
+            select_temp_con = pyo.Constraint(expr=inlet_temp[t] <= 50)
+            dis_select.add_component('select_temp_con_' + self.name + str(t),
+                                     select_temp_con)
 
-        model.add_component('dis_select_' + self.name, dis_select)
-        dis_not_select.add_component('select_size_' + self.name,
+        dis_select.add_component('select_size_' + self.name,
                                      select_size)
-        dis_not_select.add_component('select_inv_' + self.name,
+        dis_select.add_component('select_inv_' + self.name,
                                      select_inv)
-        dis_not_select.add_component('select_therm_size_' + self.name,
+        dis_select.add_component('select_therm_size_' + self.name,
                                      select_therm_size)
 
         dj_size = Disjunction(expr=[dis_not_select, dis_select])

@@ -59,7 +59,8 @@ class CHPFluidBig(CHP, FluidComponent):
             for t in model.time_step:
                 model.cons.add(outlet_temp[t] == t_out[t])
                 model.cons.add(inlet_temp[t] == t_in[t])
-                model.cons.add(outlet_temp[t] - inlet_temp[t] <= 25)
+                model.cons.add(outlet_temp[t] - inlet_temp[t] <= 20)
+                model.cons.add(inlet_temp[t] <= 70)
 
     def _constraint_conver(self, model):
         Pel = model.find_component('size_' + self.name)
@@ -87,13 +88,13 @@ class CHPFluidBig(CHP, FluidComponent):
         #self._constraint_start_cost(model)
         # todo (qli): building.py anpassen
         #self._constraint_chp_elec_sell_price(model)
-
+        '''
         self._constraint_Pel(model)
         self._constraint_vdi2067_chp(model)
         '''
         # todo: fix cost
         self._constraint_vdi2067_chp_gdp(model)
-        '''
+
 
     def add_vars(self, model):
         super().add_vars(model)
@@ -159,16 +160,16 @@ class CHPFluidBig(CHP, FluidComponent):
                                         not_select_therm_size)
 
         dis_select = Disjunct()
-        select_size = pyo.Constraint(expr=Pel >= min_size)
+        select_size = pyo.Constraint(expr=Pel >= 50)
         select_inv = pyo.Constraint(expr=invest == Pel * 458 + 57433)
         select_therm_size = pyo.Constraint(expr=Pel == 0.8148 * Qth - 16.89)
 
         model.add_component('dis_select_' + self.name, dis_select)
-        dis_not_select.add_component('select_size_' + self.name,
+        dis_select.add_component('select_size_' + self.name,
                                         select_size)
-        dis_not_select.add_component('select_inv_' + self.name,
+        dis_select.add_component('select_inv_' + self.name,
                                         select_inv)
-        dis_not_select.add_component('select_therm_size_' + self.name,
+        dis_select.add_component('select_therm_size_' + self.name,
                                         select_therm_size)
 
         dj_size = Disjunction(expr=[dis_not_select, dis_select])

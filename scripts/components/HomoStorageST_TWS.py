@@ -53,6 +53,10 @@ class HomoStorageST_TWS(HomoStorage):
         self._constraint_temp(model)
         self._constraint_heat_outputs(model)
         self._constraint_vdi2067(model)
+        if self.cluster is not None:
+            self._constraint_conserve(model)
+        else:
+            self._constriant_unchange(model)
 
     def add_vars(self, model):
         super().add_vars(model)
