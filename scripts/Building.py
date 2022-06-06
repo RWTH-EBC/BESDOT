@@ -161,11 +161,18 @@ class Building(object):
                 max_size = self.topology['max_size'][item]
                 current_size = self.topology['current_size'][item]
                 if comp_type in ['HeatPump', 'GasHeatPump', 'HeatPumpFluid',
-                                 'AirHeatPumpFluid', 'GroundHeatPumpFluid',
-                                 'UnderfloorHeat']:
+                                 'AirHeatPumpFluid', 'UnderfloorHeat']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       temp_profile=
                                                       env.temp_profile,
+                                                      comp_model=comp_model,
+                                                      min_size=min_size,
+                                                      max_size=max_size,
+                                                      current_size=current_size)
+                elif comp_type in ['GroundHeatPumpFluid']:
+                    comp_obj = module_dict[comp_type](comp_name=comp_name,
+                                                      temp_profile=
+                                                      env.soil_temperature_profile,
                                                       comp_model=comp_model,
                                                       min_size=min_size,
                                                       max_size=max_size,

@@ -9,6 +9,12 @@ import pandas as pd
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 weather_data_path = os.path.join(base_path, "data", "weather_data")
 
+base_path_soil = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    #os.path.dirname(os.path.dirname(os.path.dirname(
+    #    os.path.abspath(__file__))))
+Soil_temperature_path = os.path.join(base_path_soil, "data", "weather_data",
+                                     "Dusseldorf", "soil_temp.csv")
+
 
 def _read_weather_file(weather_file=None, city='Dusseldorf', year=2021):
     if weather_file is None:
@@ -28,6 +34,7 @@ def _read_weather_file(weather_file=None, city='Dusseldorf', year=2021):
 
     if year < 2025:
         weather_profile = pd.read_table(weather_file, skiprows=33, sep='\t')
+        soil_data = pd.read_csv(Soil_temperature_path)
     else:
         weather_profile = pd.read_table(weather_file, skiprows=35, sep='\t')
     temperature_profile = weather_profile.iloc[:, 0].str.split('\s+', 17).str[
@@ -40,7 +47,10 @@ def _read_weather_file(weather_file=None, city='Dusseldorf', year=2021):
         13].astype('float64').values
     total_solar_profile = diffuse_solar_profile + direct_solar_profile
 
-    return temperature_profile, wind_profile, total_solar_profile
+    soil_temperature_profile = soil_data.loc[:, 'temperature'].values.tolist()
+
+    return temperature_profile, wind_profile, total_solar_profile, \
+           soil_temperature_profile
 
 
 class Environment(object):
@@ -66,12 +76,14 @@ class Environment(object):
 
         # Read the weather file in the directory "data"
         # todo (yca): add comment for new variables
-        temp_profile, wind_profile, irr_profile = _read_weather_file(
-            weather_file, city, year)
+        temp_profile, wind_profile, irr_profile, soil_temperature_profile = \
+            _read_weather_file(weather_file, city, year)
         self.temp_profile_original = temp_profile
         self.wind_profile_original = wind_profile
         self.irr_profile_original = irr_profile
-        self.temp_profile = temp_profile[start_time:start_time+time_step]
-        self.wind_profile = wind_profile[start_time:start_time+time_step]
-        self.irr_profile = irr_profile[start_time:start_time+time_step]
+        self.soil_temperature_profile_original = soil_temperature_profile
+        self.temp_profile = temp_profile[start_time:start_time + time_step]
+        self.wind_profile = wind_profile[start_time:start_time + time_step]
+        self.irr_profile = irr_profile[start_time:start_time + time_step]
+        self.soil_temperature_profile = soil_temperature_profile[start_time:start_time + time_step]
         temp_profile[3624:5832] = 30

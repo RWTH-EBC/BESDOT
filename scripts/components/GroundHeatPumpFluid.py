@@ -5,14 +5,14 @@ import pyomo.environ as pyo
 from scripts.components.HeatPump import HeatPump
 from scripts.FluidComponent import FluidComponent
 
-
+'''
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
     __file__))))
 path = os.path.join(base_path, "data", "weather_data",
                     "Dusseldorf", "soil_temp.csv")
 data = pd.read_csv(path)
 soil_temperature_profile = data.loc[:, 'temperature']
-
+'''
 
 class GroundHeatPumpFluid(HeatPump, FluidComponent):
 
@@ -41,7 +41,8 @@ class GroundHeatPumpFluid(HeatPump, FluidComponent):
                                 current_size=current_size)
 
         self.energy_flows_in = None
-        self.temp_profile = soil_temperature_profile.values.tolist()
+        self.temp_profile = temp_profile
+            #soil_temperature_profile.values.tolist()
 
     def _constraint_conver(self, model):
         """
@@ -49,15 +50,11 @@ class GroundHeatPumpFluid(HeatPump, FluidComponent):
         Heat pump has only one input and one output, maybe? be caution for 5
         generation heat network.
         """
-        water_heat_cap = 4.18 * 10 ** 3  # Unit J/kgK
-        water_density = 1000  # kg/m3
-        unit_switch = 3600 * 1000  # J/kWh
 
         input_powers = model.find_component('input_' + self.inputs[0] + '_' +
                                             self.name)
         output_powers = model.find_component('output_' + self.outputs[0] +
                                              '_' + self.name)
-        size = model.find_component('size_' + self.name)
         cop = model.find_component('cop_' + self.name)
 
         temp_var = model.find_component('temp_' + self.name)
@@ -69,6 +66,12 @@ class GroundHeatPumpFluid(HeatPump, FluidComponent):
             model.cons.add(
                 output_powers[t] == input_powers[t] * cop[t])
 
+    '''The refrigerant used in almost all air source and geothermal source heat
+         pumps on the market is R410a, and according to the article 'Mass flow rate
+        of R-410A through short tubes working near the critical point' the
+        critical temperature of R410a is 72.031 degrees Celsius, and the maximum
+        heating temperature of common commercially available geothermal source heat
+         pumps is 55 degrees Celsius.'''
     def _constraint_temp(self, model):
         temp_var = model.find_component('temp_' + self.name)
         for t in model.time_step:
@@ -89,15 +92,6 @@ class GroundHeatPumpFluid(HeatPump, FluidComponent):
             for t in range(len(model.time_step)):
                 model.cons.add(return_temp_var[t + 1] == t_in[t + 1])
 
-    def _constraint_mass_flow(self, model):
-        for heat_output in self.heat_flows_out:
-            m_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
-                                        '_' + 'mass')
-            m_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
-                                         '_' + 'mass')
-            for t in range(len(model.time_step)):
-                model.cons.add(m_in[t + 1] == m_out[t + 1])
-                # model.cons.add(m_in[t + 1] == mass_flow)
 
     def add_cons(self, model):
         self._constraint_conver(model)
@@ -113,6 +107,3 @@ class GroundHeatPumpFluid(HeatPump, FluidComponent):
 
         return_temp = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('return_temp_' + self.name, return_temp)
-
-        mass_flow = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component("condensation_mass_" + self.name, mass_flow)

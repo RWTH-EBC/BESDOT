@@ -73,10 +73,17 @@ class AirHeatPumpFluid(HeatPump, FluidComponent):
             #print(cop[t])
             # self.loss_noload * self.loss_cycling)
 
+    '''The refrigerant used in almost all air source and geothermal source heat
+     pumps on the market is R410a, and according to the article 'Mass flow rate
+    of R-410A through short tubes working near the critical point' the
+    critical temperature of R410a is 72.031 degrees Celsius, and the maximum
+    heating temperature of common commercially available air source heat
+     pumps is 55 degrees Celsius.'''
     def _constraint_temp(self, model, init_temp=40):
         temp_var = model.find_component('temp_' + self.name)
         for t in model.time_step:
             model.cons.add(temp_var[t] <= 55)
+
         for heat_output in self.heat_flows_out:
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'temp')
@@ -118,7 +125,7 @@ class AirHeatPumpFluid(HeatPump, FluidComponent):
     def add_cons(self, model):
         self._constraint_conver(model)
         self._constraint_temp(model)
-        self._constraint_return_temp(model)
+        #self._constraint_return_temp(model)
         self._constraint_vdi2067(model)
         self._constraint_maxpower(model)
         self._constraint_heat_outputs(model)
@@ -130,5 +137,3 @@ class AirHeatPumpFluid(HeatPump, FluidComponent):
         return_temp = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('return_temp_' + self.name, return_temp)
 
-        mass_flow = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component("condensation_mass_" + self.name, mass_flow)
