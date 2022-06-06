@@ -18,7 +18,7 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 project = Project(name='project_8', typ='building')
 
 # Generate the environment object
-env_8 = Environment(time_step=10)
+env_8 = Environment(time_step=20)
 project.add_environment(env_8)
 
 # If the objective of the project is the optimization for building, a building
