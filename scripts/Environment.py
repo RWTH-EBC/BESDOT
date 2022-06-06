@@ -8,11 +8,7 @@ import pandas as pd
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 weather_data_path = os.path.join(base_path, "data", "weather_data")
-
-base_path_soil = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    #os.path.dirname(os.path.dirname(os.path.dirname(
-    #    os.path.abspath(__file__))))
-Soil_temperature_path = os.path.join(base_path_soil, "data", "weather_data",
+Soil_temperature_path = os.path.join(base_path, "data", "weather_data",
                                      "Dusseldorf", "soil_temp.csv")
 
 
