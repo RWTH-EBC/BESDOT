@@ -1,6 +1,6 @@
 comp_name,comp_type,model,min_size,max_size,current_size,therm_cns,water_tes,gas_grid,chp_s,e_grid,tp_val_therm,e_cns,hw_cns,tp_val_hw,solar_coll,e_boi,e_meter,heat_ex,bat,pv,heat_pump,boi_s
 therm_cns,HeatConsumptionFluid,HeatCNS,0,100,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-water_tes,HomoStorage,TES_homo,0,2,0,0,0,0,0,0,,0,0,,0,0,0,0,0,0,0,0
+water_tes,HomoStorage,TES_homo_qli,0,2,0,0,0,0,0,0,,0,0,,0,0,0,0,0,0,0,0
 gas_grid,GasGrid,GAS1,0,1000,0,0,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,
 chp_s,CHPFluidSmall,CHPFluidSmall,0,50,0,0,800,0,0,,0,0,0,0,0,0,,0,0,0,0,0
 e_grid,ElectricityGrid,GRD1,0,100,0,0,0,0,0,0,0,,0,0,0,,0,0,,0,,0
