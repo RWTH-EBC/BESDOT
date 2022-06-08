@@ -14,24 +14,24 @@ a = 8760
 ################################################################################
 
 # Generate a project object at first.
-project = Project(name='project_27', typ='building')
+project = Project(name='project_26', typ='building')
 
 # Generate the environment object
 # env_27 = Environment(start_time=4329, time_step=3)
-env_27 = Environment(start_time=0, time_step=a)
-project.add_environment(env_27)
+env_26 = Environment(start_time=0, time_step=a)
+project.add_environment(env_26)
 
 # If the objective of the project is the optimization for building, a building
 # should be added to the project.
-bld_27 = Building(name='bld_27', area=200)
+bld_26 = Building(name='bld_26', area=200)
 
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
 #bld_27.add_thermal_profile('heat', env_27.temp_profile_original, env_27)
 #bld_27.add_elec_profile(2021, env_27)
-bld_27.add_thermal_profile('heat', env_27)
-bld_27.add_elec_profile(env_27.year, env_27)
-bld_27.add_hot_water_profile(env_27)
+bld_26.add_thermal_profile('heat', env_26)
+bld_26.add_elec_profile(env_26.year, env_26)
+bld_26.add_hot_water_profile(env_26)
 
 # todo (qli): solar_coll testen (size_e_boi=0)
 # bld_27.demand_profile['hot_water_demand'] = [1.1, 0, 1, 1, 0]
@@ -42,14 +42,14 @@ bld_27.add_hot_water_profile(env_27)
 # components and add components to the building.
 
 topo_file = os.path.join(base_path, 'data', 'topology',
-                         'chp_fluid_small_hi_solar4_all.csv')
+                         'test_boi.csv')
 '''
 topo_file = os.path.join(base_path, 'data', 'topology',
                          'solar_coll_TW_Test.csv')
 '''
-bld_27.add_topology(topo_file)
-bld_27.add_components(project.environment)
-project.add_building(bld_27)
+bld_26.add_topology(topo_file)
+bld_26.add_components(project.environment)
+project.add_building(bld_26)
 
 ################################################################################
 #                        Pre-Processing for time clustering
@@ -57,7 +57,7 @@ project.add_building(bld_27)
 # The profiles could be clustered are: demand profiles, weather profiles and
 # prices profiles (if necessary). demand profiles are stored in buildings
 # and other information are stored in Environment objects.
-project.time_cluster(nr_periods=4, hours_period=24, save_cls='12day_24hour.csv')
+project.time_cluster(nr_periods=1, hours_period=24, save_cls='12day_24hour.csv')
 
 # After clustering need to update the demand profiles and storage assumptions.
 for bld in project.building_list:
