@@ -41,7 +41,7 @@ def gen_hot_water_profile(building_typ,
             'Wärmebedarf für Trinkwassererwärmung (kWh)'].map(
             lambda x: x / (4180 * 300 * (
                     60 - 12) / 3600 / 1000 * 365) * bld_hot_water_demand)
-    if building_typ is not 'Wohngebäude':
+    if building_typ != 'Wohngebäude':
         for m in range(1, 53): #53weeks
             for n in range(6*m*24, 7*m*24+1):
                 hot_water_heating_demand_df[
