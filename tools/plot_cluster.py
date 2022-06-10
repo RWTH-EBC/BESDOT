@@ -93,5 +93,5 @@ def step_plot_three_lines(von, bis, nr, n=1.1, legend_pos='best'):
     plt.savefig(plot_output)
 
 
-step_plot_one_line(von=0, bis=13 * 24-1, nr=12)
-step_plot_three_lines(von=0, bis=13 * 24-1, nr=12)
+#step_plot_one_line(von=0, bis=9 * 24-1, nr=12)
+#step_plot_three_lines(von=0, bis=9 * 24-1, nr=12)

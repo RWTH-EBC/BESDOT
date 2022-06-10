@@ -6,9 +6,10 @@ from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
 import tools.post_solar_chp as post_pro
+import tools.plot_cluster as plot_cls
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-a = 8760
+days = 3
 ################################################################################
 #                           Generate python objects
 ################################################################################
@@ -18,7 +19,7 @@ project = Project(name='project_27', typ='building')
 
 # Generate the environment object
 # env_27 = Environment(start_time=4329, time_step=3)
-env_27 = Environment(start_time=0, time_step=a)
+env_27 = Environment(start_time=0, time_step=8760)
 project.add_environment(env_27)
 
 # If the objective of the project is the optimization for building, a building
@@ -27,8 +28,8 @@ bld_27 = Building(name='bld_27', area=200)
 
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
-#bld_27.add_thermal_profile('heat', env_27.temp_profile_original, env_27)
-#bld_27.add_elec_profile(2021, env_27)
+# bld_27.add_thermal_profile('heat', env_27.temp_profile_original, env_27)
+# bld_27.add_elec_profile(2021, env_27)
 bld_27.add_thermal_profile('heat', env_27)
 bld_27.add_elec_profile(env_27.year, env_27)
 bld_27.add_hot_water_profile(env_27)
@@ -57,8 +58,9 @@ project.add_building(bld_27)
 # The profiles could be clustered are: demand profiles, weather profiles and
 # prices profiles (if necessary). demand profiles are stored in buildings
 # and other information are stored in Environment objects.
-project.time_cluster(nr_periods=4, hours_period=24, save_cls='12day_24hour.csv')
-
+project.time_cluster(nr_periods=days, hours_period=24, save_cls=str(days) + 'day_24hour.csv')
+plot_cls.step_plot_one_line(von=0, bis=(days + 1) * 24 - 1, nr=str(days))
+plot_cls.step_plot_three_lines(von=0, bis=(days + 1) * 24 - 1, nr=str(days))
 # After clustering need to update the demand profiles and storage assumptions.
 for bld in project.building_list:
     bld.update_components(project.cluster)

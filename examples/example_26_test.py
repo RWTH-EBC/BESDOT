@@ -6,9 +6,10 @@ from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
 import tools.post_solar_chp as post_pro
+import tools.plot_cluster as plot_cls
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-a = 8760
+days = 3
 ################################################################################
 #                           Generate python objects
 ################################################################################
@@ -18,7 +19,7 @@ project = Project(name='project_26', typ='building')
 
 # Generate the environment object
 # env_27 = Environment(start_time=4329, time_step=3)
-env_26 = Environment(start_time=0, time_step=a)
+env_26 = Environment(start_time=0, time_step=8760)
 project.add_environment(env_26)
 
 # If the objective of the project is the optimization for building, a building
@@ -42,7 +43,7 @@ bld_26.add_hot_water_profile(env_26)
 # components and add components to the building.
 
 topo_file = os.path.join(base_path, 'data', 'topology',
-                         'test_boi.csv')
+                         'test_chp.csv')
 '''
 topo_file = os.path.join(base_path, 'data', 'topology',
                          'solar_coll_TW_Test.csv')
@@ -57,7 +58,9 @@ project.add_building(bld_26)
 # The profiles could be clustered are: demand profiles, weather profiles and
 # prices profiles (if necessary). demand profiles are stored in buildings
 # and other information are stored in Environment objects.
-project.time_cluster(nr_periods=1, hours_period=24, save_cls='12day_24hour.csv')
+project.time_cluster(nr_periods=days, hours_period=24, save_cls=str(days) + 'day_24hour.csv')
+plot_cls.step_plot_one_line(von=0, bis=(days + 1) * 24 - 1, nr=str(days))
+plot_cls.step_plot_three_lines(von=0, bis=(days + 1) * 24 - 1, nr=str(days))
 
 # After clustering need to update the demand profiles and storage assumptions.
 for bld in project.building_list:
