@@ -129,13 +129,15 @@ class CHPFluidSmall(CHP, FluidComponent):
         # todo (qli): building.py anpassen
         self._constraint_chp_elec_sell_price(model)
         '''
-        '''
+        # todo(qli)
+        # self._constraint_mass_flow(model)
+
         self._constraint_Pel(model)
         self._constraint_vdi2067_chp(model)
         '''
         # todo: fix cost
         self._constraint_vdi2067_chp_gdp(model)
-
+        '''
 
     def add_vars(self, model):
         super().add_vars(model)
@@ -292,6 +294,15 @@ class CHPFluidSmall(CHP, FluidComponent):
             dj = Disjunction(expr=[h, i, j])
             model.add_component('dj_dis1_' + str(t), dj)
 
+    def _constraint_mass_flow(self, model):
+        for heat_output in self.heat_flows_out:
+            m_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
+                                        '_' + 'mass')
+            m_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
+                                         '_' + 'mass')
+            for t in range(len(model.time_step)-1):
+                model.cons.add(m_in[t + 1] == m_out[t + 1])
+                model.cons.add(m_in[t + 2] == m_in[t + 1])
 
 '''
     def _constraint_start_cost(self, model):

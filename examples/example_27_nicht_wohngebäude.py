@@ -10,6 +10,7 @@ import tools.plot_cluster as plot_cls
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 days = 3
+
 ################################################################################
 #                           Generate python objects
 ################################################################################
@@ -24,7 +25,7 @@ project.add_environment(env_27)
 
 # If the objective of the project is the optimization for building, a building
 # should be added to the project.
-bld_27 = Building(name='bld_27', area=200)
+bld_27 = Building(name='bld_27', area=2000)
 
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
@@ -42,8 +43,7 @@ bld_27.add_hot_water_profile(env_27)
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 
-topo_file = os.path.join(base_path, 'data', 'topology',
-                         'chp_fluid_small_hi_solar4_all.csv')
+topo_file = os.path.join(base_path, 'data', 'topology', 'chp_fluid_solar4.csv')
 '''
 topo_file = os.path.join(base_path, 'data', 'topology',
                          'solar_coll_TW_Test.csv')
