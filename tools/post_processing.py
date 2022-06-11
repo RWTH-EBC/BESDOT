@@ -18,7 +18,7 @@ heat_comp_list = ['heat_pump', 'therm_cns', 'water_tes', 'solar_coll',
                   'boi', 'e_boi', 'chp']
 elec_sink_tuple = ('heat_pump', 'bat', 'e_grid', 'e_boi')
 heat_sink_tuple = 'water_tes'
-plt.rcParams['axes.unicode_minus']=False
+#plt.rcParams['axes.unicode_minus']=False
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 opt_output_path = os.path.join(base_path, 'data', 'opt_output')
@@ -40,7 +40,8 @@ def plot_all(csv_file, time_interval):
                 size_dict[element] = elements_dict[element][0]
                 print('The size of', element, 'is', size_dict[element])
         else:
-            if sum(elements_dict[element]) > 0.001:
+            if sum(elements_dict[element]) > 0.001 or sum(elements_dict[
+                                                              element]) < 0.001:
                 plot_single(element, elements_dict[element][time_interval[0]:
                                                             time_interval[1]])
 
@@ -76,7 +77,7 @@ def plot_single(name, profile):
 
     if 'pmv' in name:
         ax.set_xlim(xmin=0)
-        ax.set_ylim(ymin=-3, ymax=3)
+        ax.set_ylim(ymin=-1, ymax=1)
     else:
         ax.set_xlim(xmin=0)
         ax.set_ylim(ymin=0, ymax=max(profile) * 1.2)

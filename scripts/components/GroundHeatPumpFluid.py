@@ -5,14 +5,6 @@ import pyomo.environ as pyo
 from scripts.components.HeatPump import HeatPump
 from scripts.FluidComponent import FluidComponent
 
-'''
-base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
-    __file__))))
-path = os.path.join(base_path, "data", "weather_data",
-                    "Dusseldorf", "soil_temp.csv")
-data = pd.read_csv(path)
-soil_temperature_profile = data.loc[:, 'temperature']
-'''
 
 class GroundHeatPumpFluid(HeatPump, FluidComponent):
 
@@ -42,7 +34,6 @@ class GroundHeatPumpFluid(HeatPump, FluidComponent):
 
         self.energy_flows_in = None
         self.temp_profile = temp_profile
-            #soil_temperature_profile.values.tolist()
 
     def _constraint_conver(self, model):
         """
@@ -72,6 +63,7 @@ class GroundHeatPumpFluid(HeatPump, FluidComponent):
         critical temperature of R410a is 72.031 degrees Celsius, and the maximum
         heating temperature of common commercially available geothermal source heat
          pumps is 55 degrees Celsius.'''
+
     def _constraint_temp(self, model):
         temp_var = model.find_component('temp_' + self.name)
         for t in model.time_step:
@@ -84,14 +76,13 @@ class GroundHeatPumpFluid(HeatPump, FluidComponent):
 
     def _constraint_return_temp(self, model):
         return_temp_var = model.find_component('return_temp_' + self.name)
-        #for t in range(len(model.time_step)):
-            #model.cons.add(return_temp_var[t + 1] <= 35)
+        # for t in range(len(model.time_step)):
+        # model.cons.add(return_temp_var[t + 1] <= 35)
         for heat_output in self.heat_flows_out:
             t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
                                         '_' + 'temp')
             for t in range(len(model.time_step)):
                 model.cons.add(return_temp_var[t + 1] == t_in[t + 1])
-
 
     def add_cons(self, model):
         self._constraint_conver(model)
