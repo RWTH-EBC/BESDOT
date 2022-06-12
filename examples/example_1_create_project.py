@@ -22,7 +22,7 @@ test_project = Project(name='project_1', typ='building')
 # Generate the environment object, which contains the weather data and price
 # data. If no weather file and city is given, the default weather file of
 # Dusseldorf is used.
-test_env_1 = Environment(time_step=24)
+test_env_1 = Environment(time_step=8760)
 test_project.add_environment(test_env_1)
 
 # If the objective of the project is the optimization for building, a building
@@ -44,7 +44,7 @@ test_project.add_building(test_bld_1)
 #                        Build pyomo model and run optimization
 ################################################################################
 test_project.build_model()
-test_project.run_optimization('gurobi')
+test_project.run_optimization('gurobi', save_lp=True, save_result=True)
 
 ################################################################################
 #                                  Post-processing
