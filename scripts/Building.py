@@ -5,7 +5,6 @@ Simplified Modell for internal use.
 import warnings
 import pyomo.environ as pyo
 import numpy as np
-#todo(qli):_alt
 from tools.gen_heat_profile import *
 from tools.gen_elec_profile import gen_elec_profile
 from tools import get_all_class
@@ -109,10 +108,10 @@ class Building(object):
         # todo (yni): the current version is only for heat, the method could be
         #  developed for cool demand later.
         if energy_sector == 'heat':
-            # todo(qli)
             heat_demand_profile = gen_heat_profile(self.building_typ,
                                                    self.area,
-                                                   env.temp_profile_whole) #,env.year
+                                                   env.temp_profile_whole,
+                                                   env.year)
             self.demand_profile["heat_demand"] = heat_demand_profile[
                                                  env.start_time:
                                                  env.start_time + env.time_step]
