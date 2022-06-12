@@ -18,13 +18,13 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 project = Project(name='project_8', typ='building')
 
 # Generate the environment object
-env_8 = Environment(time_step=300)
+env_8 = Environment(time_step=800)
 project.add_environment(env_8)
 
 # If the objective of the project is the optimization for building, a building
 # should be added to the project.
 bld_8 = Building(name='bld_8', area=200)
-
+                 #, bld_typ='Wohngebäude')
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
 # bld_2.add_thermal_profile('heat', env_2.temp_profile_original, env_2)
