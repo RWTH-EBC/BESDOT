@@ -54,7 +54,7 @@ class CHPFluidSmall(CHP, FluidComponent):
         for t in model.time_step:
             model.cons.add(therm_eff[t] == 0.705 - 0.0008 * (Qth - 44) -
                            0.006 * (inlet_temp[t] - 30))
-            #model.cons.add(inlet_temp[t] <= 50)
+            model.cons.add(inlet_temp[t] <= 55)
 
     def _constraint_therm_eff_gdp(self, model):
         small_num = 0.00001
