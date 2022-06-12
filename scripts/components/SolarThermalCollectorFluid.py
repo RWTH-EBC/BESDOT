@@ -106,7 +106,7 @@ class SolarThermalCollectorFluid(FluidComponent):
             for t in model.time_step:
                 # todo:Beim Stagnationszustand gilt output_energy< input_energy
                 # aber das Ergebnis ist komisch
-                model.cons.add(output_energy[t] <= input_energy[t])
+                model.cons.add(output_energy[t] == input_energy[t])
                 model.cons.add(
                     output_energy[t] == self.solar_liquid_heat_cap * (
                             m_out[t] * t_out[t] - m_in[t] * t_in[t]) /
@@ -197,7 +197,7 @@ class SolarThermalCollectorFluid(FluidComponent):
             model.add_component('p_4_' + str(t), p_4)
             model.add_component('p_5_' + str(t), p_5)
 
-    def add_cons(self, model, heat_cap_type='con', test='off'):
+    def add_cons(self, model, heat_cap_type='con', test='on'):
         self._constraint_vdi2067(model)
         self._constraint_temp(model)
         if test == 'on':
