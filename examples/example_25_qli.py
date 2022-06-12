@@ -9,7 +9,7 @@ import tools.post_solar_chp as post_pro
 import tools.plot_cluster as plot_cls
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-days = 4
+days = 3
 
 ################################################################################
 #                           Generate python objects
@@ -25,7 +25,7 @@ project.add_environment(env_25)
 
 # If the objective of the project is the optimization for building, a building
 # should be added to the project.
-bld_25 = Building(name='bld_25', area=200, bld_typ='Wohngebäude')
+bld_25 = Building(name='bld_25', area=2000, bld_typ='Verwaltungsgebäude')
 
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
