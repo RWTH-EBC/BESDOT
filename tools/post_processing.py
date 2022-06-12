@@ -77,7 +77,7 @@ def plot_single(name, profile):
 
     if 'pmv' in name:
         ax.set_xlim(xmin=0)
-        ax.set_ylim(ymin=-1, ymax=1)
+        ax.set_ylim(ymin=-3, ymax=3)
     else:
         ax.set_xlim(xmin=0)
         ax.set_ylim(ymin=0, ymax=max(profile) * 1.2)
