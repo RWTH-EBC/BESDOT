@@ -61,8 +61,8 @@ project.add_building(bld_25)
 # prices profiles (if necessary). demand profiles are stored in buildings
 # and other information are stored in Environment objects.
 project.time_cluster(nr_periods=days, read_cls=str(days) + 'day_24hour_qli.csv')
-plot_cls.step_plot_one_line(von=0, bis=(days + 1) * 24 - 1, nr=str(days))
-plot_cls.step_plot_three_lines(von=0, bis=(days + 1) * 24 - 1, nr=str(days))
+plot_cls.step_plot_one_line(von=0, bis=(days + 1) * 24 - 1, nr=str(days),name='day_24hour_qli.csv')
+plot_cls.step_plot_three_lines(von=0, bis=(days + 1) * 24 - 1, nr=str(days),name='day_24hour_qli.csv')
 # After clustering need to update the demand profiles and storage assumptions.
 for bld in project.building_list:
     bld.update_components(project.cluster)

@@ -10,8 +10,8 @@ from scripts.Environment import Environment
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-def step_plot_one_line(von, bis, nr, n=1.1, legend_pos='best'):
-    result_output_path = os.path.join(base_path, 'data', 'cls_file', str(nr) + 'day_24hour.csv')
+def step_plot_one_line(von, bis, nr, n=1.1, legend_pos='best',name='day_24hour.csv'):
+    result_output_path = os.path.join(base_path, 'data', 'cls_file', str(nr) + name)
     font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
         'normal', 'size': '15'}
     font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
@@ -48,8 +48,8 @@ def step_plot_one_line(von, bis, nr, n=1.1, legend_pos='best'):
     plt.savefig(plot_output)
 
 
-def step_plot_three_lines(von, bis, nr, n=1.1, legend_pos='best'):
-    result_output_path = os.path.join(base_path, 'data', 'cls_file', str(nr) + 'day_24hour.csv')
+def step_plot_three_lines(von, bis, nr, n=1.1, legend_pos='best',name='day_24hour.csv'):
+    result_output_path = os.path.join(base_path, 'data', 'cls_file', str(nr) + name)
     font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
         'normal', 'size': '15'}
     font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
