@@ -44,7 +44,7 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         outlet_temp = model.find_component('outlet_temp_' + self.name)
         inlet_temp = model.find_component('inlet_temp_' + self.name)
         for t in model.time_step:
-            model.cons.add(outlet_temp[t] - inlet_temp[t] <= 20)
+            model.cons.add(outlet_temp[t] - inlet_temp[t] <= 25)
             model.cons.add(inlet_temp[t] <= 70)
         for heat_output in self.heat_flows_out:
             t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
@@ -88,12 +88,10 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         self._constraint_vdi2067_chp_gdp(model)
         '''
 
-
-
     def add_vars(self, model):
         super().add_vars(model)
 
-        Qth = pyo.Var(bounds=(0, 94))
+        Qth = pyo.Var(bounds=(6.8, 94))
         model.add_component('therm_size_' + self.name, Qth)
 
         therm_eff = pyo.Var(bounds=(0, 1))

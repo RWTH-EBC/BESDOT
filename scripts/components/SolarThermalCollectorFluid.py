@@ -197,7 +197,7 @@ class SolarThermalCollectorFluid(FluidComponent):
             model.add_component('p_4_' + str(t), p_4)
             model.add_component('p_5_' + str(t), p_5)
 
-    def add_cons(self, model, heat_cap_type='con', test='on'):
+    def add_cons(self, model, heat_cap_type='con', test='off'):
         self._constraint_vdi2067(model)
         self._constraint_temp(model)
         if test == 'on':
