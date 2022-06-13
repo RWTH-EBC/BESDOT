@@ -24,7 +24,7 @@ project.add_environment(env_26)
 
 # If the objective of the project is the optimization for building, a building
 # should be added to the project.
-bld_26 = Building(name='bld_26', area=200)
+bld_26 = Building(name='bld_26', area=2000)
 
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
@@ -34,16 +34,11 @@ bld_26.add_thermal_profile('heat', env_26)
 bld_26.add_elec_profile(env_26.year, env_26)
 bld_26.add_hot_water_profile(env_26)
 
-# todo (qli): solar_coll testen (size_e_boi=0)
-# bld_27.demand_profile['hot_water_demand'] = [1.1, 0, 1, 1, 0]
-# todo (qli): solar_coll mit e_boi testen
-# bld_27.demand_profile['hot_water_demand'] = [6, 0, 6, 1, 0]
-
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 
 topo_file = os.path.join(base_path, 'data', 'topology',
-                         'test_chp.csv')
+                         'test_boi.csv')
 '''
 topo_file = os.path.join(base_path, 'data', 'topology',
                          'solar_coll_TW_Test.csv')
@@ -59,8 +54,8 @@ project.add_building(bld_26)
 # prices profiles (if necessary). demand profiles are stored in buildings
 # and other information are stored in Environment objects.
 project.time_cluster(nr_periods=days, hours_period=24, save_cls=str(days) + 'day_24hour.csv')
-plot_cls.step_plot_one_line(von=0, bis=(days + 1) * 24 - 1, nr=str(days))
-plot_cls.step_plot_three_lines(von=0, bis=(days + 1) * 24 - 1, nr=str(days))
+plot_cls.step_plot_one_line(von=0, bis=(days + 1) * 24 - 1, nr=str(days), bld='nwg')
+plot_cls.step_plot_three_lines(von=0, bis=(days + 1) * 24 - 1, nr=str(days), bld='nwg')
 
 # After clustering need to update the demand profiles and storage assumptions.
 for bld in project.building_list:
