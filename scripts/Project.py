@@ -77,7 +77,8 @@ class Project(object):
         demand_profiles = self.building_list[0].demand_profile
         weather_profiles = {"temp": self.environment.temp_profile,
                             "wind": self.environment.wind_profile,
-                            "irr": self.environment.irr_profile}
+                            "irr": self.environment.irr_profile,
+                            "soil_temp": self.environment.soil_temperature_profile}
         price_profiles = {}
         if isinstance(self.environment.elec_price, list):
             price_profiles["elec_price"] = self.environment.elec_price
@@ -105,6 +106,7 @@ class Project(object):
 
         # Turn profiles from dict into pandas Dataframe and use package tsam
         raw = pd.DataFrame(orig_profiles)
+        print(raw)
         raw.index = pd.to_datetime(arg=raw.index, unit='h',
                                    origin=pd.Timestamp('2021-01-01'))
 

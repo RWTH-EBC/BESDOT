@@ -18,7 +18,7 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 project = Project(name='project_8', typ='building')
 
 # Generate the environment object
-env_8 = Environment(time_step=800)
+env_8 = Environment(time_step=8760)
 project.add_environment(env_8)
 
 # If the objective of the project is the optimization for building, a building
@@ -38,6 +38,12 @@ topo_file = os.path.join(base_path, 'data', 'topology',
 bld_8.add_topology(topo_file)
 bld_8.add_components(project.environment)
 project.add_building(bld_8)
+
+project.time_cluster()
+
+# After clustering need to update the demand profiles and storage assumptions.
+for bld in project.building_list:
+    bld.update_components(project.cluster)
 
 ################################################################################
 #                        Build pyomo model and run optimization

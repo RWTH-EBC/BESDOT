@@ -41,8 +41,11 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
 
     def _constraint_temp(self, model, init_temp=23):
         temp_var = model.find_component('temp_' + self.name)
+        return_temp_var = model.find_component('return_temp_' + self.name)
         for t in model.time_step:
             model.cons.add(temp_var[t] <= 40)
+            model.cons.add(return_temp_var[t] + 2<= temp_var[t])
+
         for heat_input in self.heat_flows_in:
             t_out = model.find_component(heat_input[0] + '_' + heat_input[1] +
                                          '_' + 'temp')

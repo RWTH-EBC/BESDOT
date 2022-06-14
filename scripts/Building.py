@@ -269,6 +269,11 @@ class Building(object):
                                                 'irr']).tolist()
                 self.components[comp_name].update_profile(
                     irr_profile=cluster_profile)
+            if self.topology['comp_type'][item] in ['GroundHeatPumpFluid']:
+                cluster_profile = pd.Series(cluster.clusterPeriodDict[
+                                                'soil_temp']).tolist()
+                self.components[comp_name].update_profile(
+                    temp_profile=cluster_profile)
             if isinstance(self.components[comp_name], Storage):
                 # The indicator cluster in storage could determine if the
                 # cluster function should be called.
