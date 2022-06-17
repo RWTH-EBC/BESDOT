@@ -106,7 +106,6 @@ class Project(object):
 
         # Turn profiles from dict into pandas Dataframe and use package tsam
         raw = pd.DataFrame(orig_profiles)
-        print(raw)
         raw.index = pd.to_datetime(arg=raw.index, unit='h',
                                    origin=pd.Timestamp('2021-01-01'))
 
@@ -120,7 +119,10 @@ class Project(object):
                                        addPeakMax=['heat_demand'])
         typ_periods = aggregation.createTypicalPeriods()
         print('######')
+        pd.set_option('display.max_rows', None)
+        print(type(typ_periods))
         print(typ_periods)
+        pd.set_option('display.max_rows', 10)
         predicted_periods = aggregation.predictOriginalData()
         print('######')
         print(predicted_periods)

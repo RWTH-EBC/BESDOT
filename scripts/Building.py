@@ -256,6 +256,7 @@ class Building(object):
                                                     'GasHeatPump', 'PV',
                                                     'SolarThermalCollector',
                                                     'SolarThermalCollectorFluid',
+                                                    'UnderfloorHeat',
                                                     ]:
                 cluster_profile = pd.Series(cluster.clusterPeriodDict[
                                                 'temp']).tolist()
