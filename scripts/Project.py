@@ -78,22 +78,6 @@ class Project(object):
             elif len(self.building_list) > 1:
                 warn("Number of Building object in Project is larger than 1")
 
-        demand_profiles = self.building_list[0].demand_profile
-        weather_profiles = {"temp": self.environment.temp_profile,
-                            "wind": self.environment.wind_profile,
-                            "irr": self.environment.irr_profile,
-                            "soil_temp": self.environment.soil_temperature_profile}
-        price_profiles = {}
-        if isinstance(self.environment.elec_price, list):
-            price_profiles["elec_price"] = self.environment.elec_price
-        if isinstance(self.environment.elec_price, list):
-            price_profiles["gas_price"] = self.environment.elec_price
-        if isinstance(self.environment.elec_price, list):
-            price_profiles["heat_price"] = self.environment.elec_price
-        if isinstance(self.environment.elec_price, list):
-            price_profiles["elec_feed_price"] = self.environment.elec_price
-        if isinstance(self.environment.elec_price, list):
-            price_profiles["co2_price"] = self.environment.elec_price
             demand_profiles = self.building_list[0].demand_profile
             weather_profiles = {"temp": self.environment.temp_profile,
                                 "wind": self.environment.wind_profile,
@@ -152,23 +136,6 @@ class Project(object):
                     os.makedirs(os.path.join(base_path, 'data', 'cls_file'))
                     cls_result = os.path.join(base_path, 'data', 'cls_file',
                                               save_cls)
-        aggregation = \
-            tsam.TimeSeriesAggregation(raw,
-                                       noTypicalPeriods=nr_periods,
-                                       hoursPerPeriod=hours_period,
-                                       clusterMethod='hierarchical',
-                                       extremePeriodMethod='new_cluster_center',
-                                       addPeakMin=['temp'],
-                                       addPeakMax=['heat_demand'])
-        typ_periods = aggregation.createTypicalPeriods()
-        print('######')
-        pd.set_option('display.max_rows', None)
-        print(type(typ_periods))
-        print(typ_periods)
-        pd.set_option('display.max_rows', 10)
-        predicted_periods = aggregation.predictOriginalData()
-        print('######')
-        print(predicted_periods)
 
                 typ_periods.to_csv(cls_result)
         else:
