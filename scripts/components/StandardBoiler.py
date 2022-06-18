@@ -110,6 +110,9 @@ class StandardBoiler(FluidComponent, GasBoiler):
                 model.cons.add(temp_var[t + 1] == t_out[t + 1])
                 model.cons.add(temp_var[t + 1] == init_temp)
 
+            #for t in range(len(model.time_step)-1):
+                #model.cons.add(temp_var[t + 1] == temp_var[t + 2])
+
     def _constraint_return_temp(self, model):
         return_temp_var = model.find_component('return_temp_' + self.name)
         for heat_output in self.heat_flows_out:

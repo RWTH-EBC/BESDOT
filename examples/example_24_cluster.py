@@ -44,7 +44,8 @@ project.add_building(bld_24)
 # The profiles could be clustered are: demand profiles, weather profiles and
 # prices profiles (if necessary). demand profiles are stored in buildings
 # and other information are stored in Environment objects.
-project.time_cluster()
+project.time_cluster(save_cls='12day_24hour.csv')
+# project.time_cluster(read_cls='12day_24hour.csv')
 
 # After clustering need to update the demand profiles and storage assumptions.
 for bld in project.building_list:

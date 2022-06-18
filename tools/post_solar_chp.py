@@ -627,7 +627,7 @@ def step_plot_three_lines(csv_file, time_step, comp1, comp2, comp3, label1,
         'normal', 'size': '15'}
     font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
         'normal', 'size': '18'}
-    plot_output = os.path.join(opt_output_path, 'plot', 'Wärmebedarf')
+    plot_output = os.path.join(opt_output_path, 'plot', '1')
     df = pd.read_csv(csv_file)
     time_steps = range(time_step)
 
@@ -1726,9 +1726,6 @@ def step_plot_heat_speicher(csv_file, time_step):
     data2 = df[df['var'].str.contains('output_heat_boi_s')]
     data2 = data2.reset_index(drop=True)
     value2 = data2['value']
-    data3 = df[df['var'].str.contains('output_heat_boi_c')]
-    data3 = data3.reset_index(drop=True)
-    value3 = data3['value']
     data4 = df[df['var'].str.contains('output_heat_heat_pump')]
     data4 = data4.reset_index(drop=True)
     value4 = data4['value']
@@ -1738,7 +1735,7 @@ def step_plot_heat_speicher(csv_file, time_step):
     data6 = df[df['var'].str.contains('output_heat_water_tes')]
     data6 = data6.reset_index(drop=True)
     value6 = data6['value']
-    value7 = value1 + value2 + value3 + value4 + value5 - value6
+    value7 = value1 + value2 + value4 + value5 - value6
 
     fig = plt.figure(figsize=(6.5, 5.5))
     ax = fig.add_subplot(111)
@@ -1847,14 +1844,19 @@ def step_plot_elec_bilanz(csv_file, time_step):
     plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
     plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
     ax.set_title('Energieerzeugung', font_titel, y=1.02)
-    ax.step(time_steps, value1, where="post",
-            linestyle='-.', color='r', linewidth=1.5, zorder=10)
-    ax.step(time_steps, value7, where="post",
-            linestyle='-.', color='k', linewidth=1.5, zorder=10)
-    ax.fill_between(time_steps, value3, 0, facecolor='y',
+    ax.hlines(value1, 0, len(time_steps), linewidth=0.2, alpha=0)
+    ax.fill_between(time_steps, value1, 0, hatch='///',
+                    label='Strom aus BHKW',
+                    zorder=10, step="post", alpha=0.5)
+    ax.hlines(value7, value1, len(time_steps), linewidth=0.2,
+              alpha=0)
+    ax.fill_between(time_steps, value7, value1, hatch='###',
+                    label='Strom aus PV',
+                    zorder=10, step="post", alpha=0.5)
+    ax.fill_between(time_steps, value3, 0, facecolor='r',
                     zorder=10, step="post", alpha=0.5)
     ax.fill_between(time_steps, value8, value3, facecolor='g',
-                    zorder=10, step="post", alpha=0.5)
+                    zorder=10, step="post", alpha=0.8)
     ax.fill_between(time_steps, value9, value8, facecolor='b',
                     zorder=10, step="post", alpha=0.5)
 

@@ -5,7 +5,7 @@ from scripts.Building import Building
 import tools.post_solar_chp as post_pro
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-a = 300
+a = 3
 ################################################################################
 #                           Generate python objects
 ################################################################################
@@ -36,8 +36,13 @@ bld_24.add_hot_water_profile(env_24)
 # components and add components to the building.
 # todo: 1 hinter 'chp_fluid_small' kann man löschen oder hinzufügen.
 # (keine Auslauftemperaturanforderung)
+'''
 topo_file = os.path.join(base_path, 'data', 'topology',
                          'chp_fluid_small_w+h_boi.csv')
+                         '''
+topo_file = os.path.join(base_path, 'data', 'topology',
+                         'chp_fluid_small_hi_solar_all1.csv')
+
 bld_24.add_topology(topo_file)
 bld_24.add_components(project.environment)
 project.add_building(bld_24)
