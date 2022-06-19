@@ -9,7 +9,7 @@ import tools.post_solar_chp as post_pro
 import tools.plot_cluster as plot_cls
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-days = 3
+days = 12
 ################################################################################
 #                           Generate python objects
 ################################################################################
@@ -53,9 +53,10 @@ project.add_building(bld_26)
 # The profiles could be clustered are: demand profiles, weather profiles and
 # prices profiles (if necessary). demand profiles are stored in buildings
 # and other information are stored in Environment objects.
-project.time_cluster(nr_periods=days, hours_period=24, save_cls=str(days) + 'day_24hour.csv')
-plot_cls.step_plot_one_line(von=0, bis=(days + 1) * 24 - 1, nr=str(days), bld='nwg')
-plot_cls.step_plot_three_lines(von=0, bis=(days + 1) * 24 - 1, nr=str(days), bld='nwg')
+#project.time_cluster(nr_periods=days, hours_period=24, save_cls=str(days) + 'day_24hour.csv')
+project.time_cluster(nr_periods=days, read_cls=str(days) + 'day_24hour_nwg_qli_1.csv')
+plot_cls.step_plot_one_line(von=0, bis=(days + 1) * 24 - 1, nr=str(days), name='day_24hour_nwg_qli.csv', bld='nwg')
+plot_cls.step_plot_three_lines(von=0, bis=(days + 1) * 24 - 1, nr=str(days), name='day_24hour_nwg_qli.csv', bld='nwg')
 
 # After clustering need to update the demand profiles and storage assumptions.
 for bld in project.building_list:
@@ -74,17 +75,8 @@ project.run_optimization(solver_name='gurobi', save_lp=True, save_result=True)
 result_output_path = os.path.join(base_path, 'data', 'opt_output',
                                   project.name + '_result.csv')
 # post_pro.plot_all(result_output_path, time_interval=[0, env_27.time_step])
-'''
-post_pro.plot_double(result_output_path, "solar_coll", "water_tes", 200, "solar"
-                     , "heat")
-'''
-# post_pro.plot_double_24h(result_output_path, "solar_coll", "water_tes")
-# post_pro.plot_double_24h(result_output_path, "water_tes", "tp_val")
-# post_pro.plot_double_24h(result_output_path, "tp_val", "e_boi")
-# post_pro.plot_double_24h(result_output_path, "e_boi", "hw_cns")
-# post_pro.plot_double(result_output_path, "water_tes", "tp_val",150, "heat","heat")
-
 post_pro.print_size(result_output_path)
+post_pro.step_plot_test_qli(result_output_path, 24*14)
 '''
 post.step_plot_one_line(result_output_path, env_27.time_step, 
                        'water_tes_tp_val_temp',
@@ -108,7 +100,6 @@ post.step_plot_one_line(result_output_path, env_27.time_step,
                        'Wärme aus Solarkollektor', r'Leistung (kW)')
                        
 ###############################################################################
-post.print_size(result_output_path)
 post.step_plot_one_line(result_output_path, a,
                         'input_elec_e_boi',
                         'Stromverbrauch des Elektroheizkessels ',

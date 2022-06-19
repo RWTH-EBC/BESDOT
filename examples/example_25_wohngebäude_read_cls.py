@@ -43,9 +43,10 @@ bld_25.add_hot_water_profile(env_25)
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 
-topo_file = os.path.join(base_path, 'data', 'topology', 'chp_fluid_small_hi_solar4_all.csv')
+topo_file = os.path.join(base_path, 'data', 'topology', 'bhkw_klein.csv')
 #chp_fluid_small_hi_solar4_all.csv
 #chp_fluid_solar4.csv
+#chp_solar4_all.csv
 '''
 topo_file = os.path.join(base_path, 'data', 'topology',
                          'solar_coll_TW_Test.csv')
@@ -60,9 +61,10 @@ project.add_building(bld_25)
 # The profiles could be clustered are: demand profiles, weather profiles and
 # prices profiles (if necessary). demand profiles are stored in buildings
 # and other information are stored in Environment objects.
-project.time_cluster(nr_periods=days, read_cls=str(days) + 'day_24hour_qli.csv')
-plot_cls.step_plot_one_line(von=0, bis=(days + 1) * 24 - 1, nr=str(days), name='day_24hour_qli.csv')
-plot_cls.step_plot_three_lines(von=0, bis=(days + 1) * 24 - 1, nr=str(days),name='day_24hour_qli.csv')
+#project.time_cluster(nr_periods=days, read_cls=str(days) + 'day_24hour_qli.csv')
+project.time_cluster(nr_periods=days, read_cls=str(days) + 'day_24hour_wg_qli.csv')
+plot_cls.step_plot_one_line(von=0, bis=(days + 1) * 24 - 1, nr=str(days), name='day_24hour_wg_qli.csv', bld='wg')
+plot_cls.step_plot_three_lines(von=0, bis=(days + 1) * 24 - 1, nr=str(days), name='day_24hour_wg_qli.csv', bld='wg')
 # After clustering need to update the demand profiles and storage assumptions.
 for bld in project.building_list:
     bld.update_components(project.cluster)
@@ -114,7 +116,6 @@ post.step_plot_one_line(result_output_path, env_27.time_step,
                        'Wärme aus Solarkollektor', r'Leistung (kW)')
                        
 ###############################################################################
-post.print_size(result_output_path)
 post.step_plot_one_line(result_output_path, a,
                         'input_elec_e_boi',
                         'Stromverbrauch des Elektroheizkessels ',

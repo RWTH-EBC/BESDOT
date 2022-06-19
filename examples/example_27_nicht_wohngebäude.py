@@ -9,7 +9,7 @@ import tools.post_solar_chp as post_pro
 import tools.plot_cluster as plot_cls
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-days = 3
+days = 12
 
 ################################################################################
 #                           Generate python objects
@@ -35,18 +35,12 @@ bld_27.add_thermal_profile('heat', env_27)
 bld_27.add_elec_profile(env_27.year, env_27)
 bld_27.add_hot_water_profile(env_27)
 
-# todo (qli): solar_coll testen (size_e_boi=0)
-# bld_27.demand_profile['hot_water_demand'] = [1.1, 0, 1, 1, 0]
-# todo (qli): solar_coll mit e_boi testen
-# bld_27.demand_profile['hot_water_demand'] = [6, 0, 6, 1, 0]
-
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 
 topo_file = os.path.join(base_path, 'data', 'topology', 'chp_fluid_small_hi_solar4_all.csv')
 '''
-topo_file = os.path.join(base_path, 'data', 'topology',
-                         'solar_coll_TW_Test.csv')
+topo_file = os.path.join(base_path, 'data', 'topology', 'solar_coll_TW_Test.csv')
 '''
 bld_27.add_topology(topo_file)
 bld_27.add_components(project.environment)
@@ -59,8 +53,9 @@ project.add_building(bld_27)
 # prices profiles (if necessary). demand profiles are stored in buildings
 # and other information are stored in Environment objects.
 project.time_cluster(nr_periods=days, hours_period=24, save_cls=str(days) + 'day_24hour.csv')
-plot_cls.step_plot_one_line(von=0, bis=(days + 1) * 24 - 1, nr=str(days))
-plot_cls.step_plot_three_lines(von=0, bis=(days + 1) * 24 - 1, nr=str(days))
+#project.time_cluster(nr_periods=days, read_cls=str(days) + 'day_24hour_nwg_qli.csv')
+#plot_cls.step_plot_one_line(von=0, bis=(days + 1) * 24 - 1, nr=str(days), name='day_24hour_nwg_qli.csv', bld='nwg')
+#plot_cls.step_plot_three_lines(von=0, bis=(days + 1) * 24 - 1, nr=str(days), name='day_24hour_nwg_qli.csv', bld='nwg')
 # After clustering need to update the demand profiles and storage assumptions.
 for bld in project.building_list:
     bld.update_components(project.cluster)
