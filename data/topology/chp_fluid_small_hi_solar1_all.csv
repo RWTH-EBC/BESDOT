@@ -9,7 +9,7 @@ e_cns,ElectricalConsumption,CNS1,0,100,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 hw_cns,HotWaterConsumptionFluid,HWCNS,0,2000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 tp_val_hw,ThreePortValve,,,,,0,0,0,0,0,0,0,0,0,0,,0,0,0,0,0,0
 solar_coll,SolarThermalCollectorFluid,FPC,0,50,0,0,0,0,0,0,0,0,0,0,0,0,0,,0,0,0,0
-e_boi,ThroughHeaterElec,BOI3,0,100,0,0,0,0,0,0,0,0,,0,0,0,0,0,0,0,0,0
+e_boi,ThroughHeaterElec,BOI3,0,1000,0,0,0,0,0,0,0,0,,0,0,0,0,0,0,0,0,0
 e_meter,ElectricityMeter,EM,0,100,0,0,0,0,0,0,0,,0,0,0,,0,0,,0,,0
 heat_ex,HeatExchangerFluid_Solar,HE1,0,100,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 bat,Battery,BAT_district,0,100,0,0,0,0,0,,0,,0,0,0,,0,0,0,0,,0

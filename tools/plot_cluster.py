@@ -10,7 +10,7 @@ from scripts.Environment import Environment
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-def step_plot_one_line(von, bis, nr, n=1.1, legend_pos='best',name='day_24hour.csv'):
+def step_plot_one_line(von, bis, nr, n=1.1, legend_pos='best', name='day_24hour.csv', bld='wg'):
     result_output_path = os.path.join(base_path, 'data', 'cls_file', str(nr) + name)
     font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
         'normal', 'size': '15'}
@@ -19,7 +19,7 @@ def step_plot_one_line(von, bis, nr, n=1.1, legend_pos='best',name='day_24hour.c
     font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
         'normal', 'size': '18'}
 
-    plot_output = os.path.join(base_path, 'data', 'cls_file', 'Wärmebedarf_' + str(nr))
+    plot_output = os.path.join(base_path, 'data', 'cls_file', 'Wärmebedarf_' + bld)
 
     df = pd.read_csv(result_output_path)
     time_steps = range(von, bis + 1)
@@ -48,7 +48,7 @@ def step_plot_one_line(von, bis, nr, n=1.1, legend_pos='best',name='day_24hour.c
     plt.savefig(plot_output)
 
 
-def step_plot_three_lines(von, bis, nr, n=1.1, legend_pos='best',name='day_24hour.csv'):
+def step_plot_three_lines(von, bis, nr, n=1.1, legend_pos='best', name='day_24hour.csv', bld='wg'):
     result_output_path = os.path.join(base_path, 'data', 'cls_file', str(nr) + name)
     font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
         'normal', 'size': '15'}
@@ -56,7 +56,7 @@ def step_plot_three_lines(von, bis, nr, n=1.1, legend_pos='best',name='day_24hou
         'normal', 'size': '15'}
     font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
         'normal', 'size': '18'}
-    plot_output = os.path.join(base_path, 'data', 'cls_file', 'Bedarf_' + str(nr))
+    plot_output = os.path.join(base_path, 'data', 'cls_file', 'Bedarf_' + bld)
 
     df = pd.read_csv(result_output_path)
     time_steps = range(von, bis + 1)

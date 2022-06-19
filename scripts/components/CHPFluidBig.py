@@ -43,10 +43,16 @@ class CHPFluidBig(CHP, FluidComponent):
         inlet_temp = model.find_component('inlet_temp_' + self.name)
         outlet_temp = model.find_component('outlet_temp_' + self.name)
         for t in model.time_step:
+            #todo
+            '''
             model.cons.add(
                 therm_eff[t] == 0.496 - 0.0001 * (Qth - 267) - 0.002 * (
                         inlet_temp[t] - 47) - 0.0017 * (
                         outlet_temp[t] - 67))
+                        '''
+            model.cons.add(
+                therm_eff[t] == 0.496 - 0.0001 * (Qth - 267) - 0.002 * (
+                        inlet_temp[t] - 47) - 0.0017 * (outlet_temp - 67))
 
     def _constraint_temp(self, model):
         outlet_temp = model.find_component('outlet_temp_' + self.name)
@@ -57,9 +63,11 @@ class CHPFluidBig(CHP, FluidComponent):
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'temp')
             for t in model.time_step:
-                model.cons.add(outlet_temp[t] == t_out[t])
+                #todo
+                model.cons.add(outlet_temp == t_out[t])
                 model.cons.add(inlet_temp[t] == t_in[t])
-                model.cons.add(outlet_temp[t] - inlet_temp[t] <= 20)
+                #todo
+                model.cons.add(outlet_temp - inlet_temp[t] <= 25)
                 model.cons.add(inlet_temp[t] <= 70)
 
     def _constraint_conver(self, model):
@@ -100,13 +108,16 @@ class CHPFluidBig(CHP, FluidComponent):
     def add_vars(self, model):
         super().add_vars(model)
 
-        Qth = pyo.Var(bounds=(0, 600))
+        Qth = pyo.Var(bounds=(82, 600))
         model.add_component('therm_size_' + self.name, Qth)
 
         therm_eff = pyo.Var(model.time_step, bounds=(0, 1))
         model.add_component('therm_eff_' + self.name, therm_eff)
 
-        outlet_temp = pyo.Var(model.time_step, bounds=(12, 95))
+        # todo
+        # outlet_temp = pyo.Var(model.time_step, bounds=(12, 95))
+        # model.add_component('outlet_temp_' + self.name, outlet_temp)
+        outlet_temp = pyo.Var(bounds=(12, 95))
         model.add_component('outlet_temp_' + self.name, outlet_temp)
 
         inlet_temp = pyo.Var(model.time_step, bounds=(12, 95))
