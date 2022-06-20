@@ -29,6 +29,15 @@ class CHPFluidBig(CHP, FluidComponent):
         self.heat_flows_out = []
         self.other_op_cost = True
 
+    def _read_properties(self, properties):
+        super()._read_properties(properties)
+        if 'outlet temperature' in properties.columns:
+            self.outlet_temp = float(properties['outlet temperature'])
+        else:
+            warnings.warn("In the model database for " + self.component_type +
+                          " lack of column for outlet temperature.")
+            self.outlet_temp = 80
+
     # Pel = elektrische Nennleistung = comp_size
     # Qth = thermische Nennleistung
     def _constraint_Pel(self, model):
@@ -41,7 +50,7 @@ class CHPFluidBig(CHP, FluidComponent):
         Qth = model.find_component('therm_size_' + self.name)
         therm_eff = model.find_component('therm_eff_' + self.name)
         inlet_temp = model.find_component('inlet_temp_' + self.name)
-        outlet_temp = model.find_component('outlet_temp_' + self.name)
+        #outlet_temp = model.find_component('outlet_temp_' + self.name)
         for t in model.time_step:
             #todo
             '''
@@ -52,10 +61,10 @@ class CHPFluidBig(CHP, FluidComponent):
                         '''
             model.cons.add(
                 therm_eff[t] == 0.496 - 0.0001 * (Qth - 267) - 0.002 * (
-                        inlet_temp[t] - 47) - 0.0017 * (outlet_temp - 67))
+                        inlet_temp[t] - 47) - 0.0017 * (self.outlet_temp - 67))
 
     def _constraint_temp(self, model):
-        outlet_temp = model.find_component('outlet_temp_' + self.name)
+        #outlet_temp = model.find_component('outlet_temp_' + self.name)
         inlet_temp = model.find_component('inlet_temp_' + self.name)
         for heat_output in self.heat_flows_out:
             t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
@@ -63,11 +72,10 @@ class CHPFluidBig(CHP, FluidComponent):
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'temp')
             for t in model.time_step:
-                #todo
-                model.cons.add(outlet_temp == t_out[t])
+                model.cons.add(self.outlet_temp == t_out[t])
                 model.cons.add(inlet_temp[t] == t_in[t])
                 #todo
-                model.cons.add(outlet_temp - inlet_temp[t] <= 25)
+                #model.cons.add(outlet_temp - inlet_temp[t] <= 25)
                 model.cons.add(inlet_temp[t] <= 70)
 
     def _constraint_conver(self, model):
@@ -117,8 +125,6 @@ class CHPFluidBig(CHP, FluidComponent):
         # todo
         # outlet_temp = pyo.Var(model.time_step, bounds=(12, 95))
         # model.add_component('outlet_temp_' + self.name, outlet_temp)
-        outlet_temp = pyo.Var(bounds=(12, 95))
-        model.add_component('outlet_temp_' + self.name, outlet_temp)
 
         inlet_temp = pyo.Var(model.time_step, bounds=(12, 95))
         model.add_component('inlet_temp_' + self.name, inlet_temp)

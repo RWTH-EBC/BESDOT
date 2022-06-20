@@ -28,6 +28,15 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         self.heat_flows_out = []
         self.other_op_cost = True
 
+    def _read_properties(self, properties):
+        super()._read_properties(properties)
+        if 'outlet temperature' in properties.columns:
+            self.outlet_temp = float(properties['outlet temperature'])
+        else:
+            warnings.warn("In the model database for " + self.component_type +
+                          " lack of column for outlet temperature.")
+            self.outlet_temp = 80
+
     # Pel = elektrische Nennleistung = comp_size
     # Qth = thermische Nennleistung
     def _constraint_Pel(self, model):
@@ -42,12 +51,10 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         model.cons.add(therm_eff == -0.0000355 * Qth + 0.498)
 
     def _constraint_temp(self, model):
-        outlet_temp = model.find_component('outlet_temp_' + self.name)
         inlet_temp = model.find_component('inlet_temp_' + self.name)
         for t in model.time_step:
             # todo
             # model.cons.add(outlet_temp[t] - inlet_temp[t] <= 25)
-            model.cons.add(outlet_temp - inlet_temp[t] <= 25)
             model.cons.add(inlet_temp[t] <= 70)
         for heat_output in self.heat_flows_out:
             t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
@@ -57,7 +64,7 @@ class CHPFluidSmallHi(CHP, FluidComponent):
             for t in model.time_step:
                 # todo
                 # model.cons.add(outlet_temp[t] == t_out[t])
-                model.cons.add(outlet_temp == t_out[t])
+                model.cons.add(self.outlet_temp == t_out[t])
                 model.cons.add(inlet_temp[t] == t_in[t])
 
     def _constraint_conver(self, model):
@@ -105,8 +112,6 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         # todo
         # outlet_temp = pyo.Var(model.time_step, bounds=(12, 95))
         # model.add_component('outlet_temp_' + self.name, outlet_temp)
-        outlet_temp = pyo.Var(bounds=(12, 95))
-        model.add_component('outlet_temp_' + self.name, outlet_temp)
 
         inlet_temp = pyo.Var(model.time_step, bounds=(12, 95))
         model.add_component('inlet_temp_' + self.name, inlet_temp)
