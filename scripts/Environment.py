@@ -4,6 +4,7 @@ could get from data/weather_data with the name of the city and year. Or it could
 be given by the user in the instantiation of an Environment object.
 """
 import os
+import warnings
 import pandas as pd
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -50,9 +51,7 @@ def _read_weather_file(weather_file=None, city='Dusseldorf', year=2021):
 
 
 class Environment(object):
-    # start_time,end_time: data can be saved from start_time until end_time.
-    # time_step should be from 1 to 8759, start_time should be from 0 to 8759,
-    # and the sum of both should be from 1 to 8760.
+
     def __init__(self, weather_file=None, city='Dusseldorf', year=2021,
                  start_time=0, time_step=8760):
         self.city = city
@@ -66,9 +65,17 @@ class Environment(object):
         # 8760.
         self.start_time = start_time
         self.time_step = time_step
-        # todo (yni): the default value should be check with the aktuell data
-        # todo (yni): price could be set into series or list, for exchanger
-        #  price
+        if start_time + time_step <= 0:
+            warnings.warn('The selected interval is too small or the start '
+                          'time is negative')
+        elif start_time + time_step > 8760:
+            warnings.warn('The selected interval is too large or the time '
+                          'selected is across the year')
+
+        # todo: the default value should be check with the aktuell data and
+        #  add source.
+        # todo (yni): price could be set into series, array or list,
+        #  for variable price
         self.elec_price = 0.3  # €/kWh #0.3
         self.gas_price = 0.1  # €/kWh #0.1
         self.heat_price = 0.08  # €/kWh
