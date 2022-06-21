@@ -67,19 +67,108 @@ def gen_heat_profile(building_typ,
     total_heat_profile = []
     total_heat_demand = 0
     for row in range(len(new_zone_df)):
-        zone = new_zone_df.loc[row, 'DIN_Zone']
+        zone = new_zone_df.loc[row, 'DIN_Zone']  # Zone name in DIN
+        print(zone)
+        hour_status = op_time_status(year, zone)
         zone_area = new_zone_df.loc[row, 'new_area']
         zone_heat_demand = calc_zone_demand(demand_df, 'heat', zone, zone_area)
         zone_heat_profile = degree_day(zone, zone_heat_demand, profile_df,
-                                       temperature_profile)
+                                       temperature_profile, hour_status)
+        print(zone_heat_profile[2500:2506])
         total_heat_profile = np.sum([total_heat_profile, zone_heat_profile],
                                     axis=0)
         total_heat_demand += zone_heat_demand
+        print(total_heat_profile[2500:2506])
 
     if plot:
         plot_profile(total_heat_profile, save_plot)
 
     return total_heat_profile
+
+
+def op_time_status(year, zone):
+    """
+    Calculate the operating time for whole year. The weekend and work time
+    could be considered in this function. For different thermal zone the
+    operating time also varies according to DIN V 18599.
+    Args:
+        year: int, target year
+        zone: str, the name should be same as in the standard DIN V 18599
+    Returns:
+        List of status for each hour in whole year
+    """
+    weekday_list = find_weekday(year)
+    profile_df = pd.read_excel(input_profile_path, sheet_name='DIN V 18599')
+    # print(zone)
+    # print(profile_df.loc[profile_df['Raumtyp'] == zone])
+    start_time = profile_df.loc[profile_df['Raumtyp'] == zone][
+        'Nutzungszeit_von'].values[0]
+    end_time = profile_df.loc[profile_df['Raumtyp'] == zone][
+        'Nutzungzeit_bis'].values[0]
+    if end_time == 0:
+        end_time = 24  # 24:00 is 0:00
+
+    status_list = []
+    if profile_df.loc[profile_df['Raumtyp'] == zone]['Nutzungstage'].values[
+        0] in [150, 200, 230, 250]:
+        # The zone are only used in weekday. Zone such as audience hall
+        # with 150 operating days and Zone auch as fabric with 230 operating
+        # days are also considered as the other working zone.
+        day = 0
+        while day < 365:
+            day_status = [0] * 24
+            if weekday_list[day] in [0, 1, 2, 3, 4]:
+                day_status[start_time:end_time] = [1] * (end_time - start_time)
+            status_list += day_status
+            day += 1
+    elif profile_df.loc[profile_df['Raumtyp'] == zone]['Nutzungstage'].values[
+        0] == 300:
+        # The zone which are only used in weekday and Saturday, like restaurant
+        day = 0
+        while day < 365:
+            day_status = [0] * 24
+            if weekday_list[day] in [0, 1, 2, 3, 4, 5]:
+                day_status[start_time:end_time] = [1] * (end_time - start_time)
+            status_list += day_status
+            day += 1
+    elif profile_df.loc[profile_df['Raumtyp'] == zone]['Nutzungstage'].values[
+        0] == 365:
+        # The zone are used everyday, such as bedroom
+        day = 0
+        while day < 365:
+            day_status = [0] * 24
+            day_status[start_time:end_time] = [1] * (end_time - start_time)
+            status_list += day_status
+            day += 1
+    else:
+        # The zone such as hall are not considered
+        warn('The operating days of zone' + zone + 'does not match the DIN V '
+                                                   '18599')
+
+    return status_list
+
+
+def find_weekday(year):
+    """
+    Create a list of weekdays throughout the year. The holidays are not
+    considered in the function.
+    Leap years are also considered to have only 365 days to reduce the work.
+    Args:
+        year: int, target year
+    Returns:
+        list, status for whole year
+    """
+    # weekday() == 4 means Friday, the value could be from 0 to 6
+    day = datetime.date(year, 1, 1).weekday()
+    weekday_list = []
+
+    i = 0
+    while i < 365:
+        weekday_list.append(day)
+        day = (day + 1) % 7
+        i += 1
+
+    return weekday_list
 
 
 def analysis_bld_zone(building_typ, area):
@@ -172,14 +261,18 @@ def degree_day(zone_typ, annual_value, profile_df, temperature_profile,
         night_lower_temp(zone_typ, profile_df)
     else:
         total_degree_day = 0
-        for temp in temperature_profile:
-            if temp < start_temp:
-                total_degree_day += (set_temp_heat - temp)
+        for time_step in range(8760):
+            if temperature_profile[time_step] < start_temp and \
+                    status_list[time_step] == 1:
+                total_degree_day += (set_temp_heat - temperature_profile[
+                    time_step])
 
-        for temp in temperature_profile:
-            if temp < start_temp:
+        for time_step in range(8760):
+            if temperature_profile[time_step] < start_temp and \
+                    status_list[time_step] == 1:
                 heat_profile.append(
-                    (set_temp_heat - temp) / total_degree_day * annual_value)
+                    (set_temp_heat - temperature_profile[time_step]) /
+                    total_degree_day * annual_value)
             else:
                 heat_profile.append(0)
 
@@ -233,8 +326,17 @@ def calc_residential_demand(bld_type, bld_year, bld_area,
 
 
 if __name__ == "__main__":
-    print(calc_bld_demand("Wohngebäude (MFH)", 10000, 'heat'))
-    # temperature = pd.read_csv(input_temp_path)['temperature'].values
+    input_temp_path = os.path.join(base_path, 'data',
+                                   'tek_data', 'temperature.csv')
+    temperature = pd.read_csv(input_temp_path)['temperature'].values
     # gen_heat_profile("Wohngebäude", 300, temperature, plot=True)
+    gen_heat_profile("Verwaltungsgebäude", 300, temperature, plot=True)
+
+    # print(calc_bld_demand("Wohngebäude (MFH)", 10000, 'heat',
+    #                       energy_typ='gering'))
     # print(calc_bld_demand("Verwaltungsgebäude", 300, "elec"))
+
     # calc_residential_demand('EFH', 1968, 200)
+
+    # weekday_lt = find_weekday(2022)
+    # print(op_time_status(2022, 'Bettenzimmer'))
