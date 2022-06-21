@@ -38,7 +38,11 @@ bld_26.add_hot_water_profile(env_26)
 # components and add components to the building.
 
 topo_file = os.path.join(base_path, 'data', 'topology',
-                         'test_boi.csv')
+                         'bhkw_klein+e_boi.csv')
+#chp_fluid_small_hi_solar4_all.csv
+#chp_fluid_solar4.csv
+#chp_solar4_all.csv
+#bhkw_klein+e_boi.csv
 '''
 topo_file = os.path.join(base_path, 'data', 'topology',
                          'solar_coll_TW_Test.csv')

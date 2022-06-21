@@ -116,7 +116,7 @@ class Project(object):
                 tsam.TimeSeriesAggregation(raw,
                                            noTypicalPeriods=nr_periods,
                                            hoursPerPeriod=hours_period,
-                                           clusterMethod='k_medoids',
+                                           clusterMethod='hierarchical',
                                            extremePeriodMethod='new_cluster_center',
                                            addPeakMin=['temp'],
                                            addPeakMax=['heat_demand']) #hierarchical k_medoids
@@ -211,7 +211,7 @@ class Project(object):
         # Attention! The option was set for the dimension optimization for
         # HomoStorage
         solver.options['NonConvex'] = 2
-        solver.options['MIPGap'] = 0.05
+        solver.options['MIPGap'] = 0.02
         #solver.options['Heuristics'] = 0.05
         opt_result = solver.solve(self.model, tee=True)
 

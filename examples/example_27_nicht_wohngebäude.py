@@ -9,7 +9,7 @@ import tools.post_solar_chp as post_pro
 import tools.plot_cluster as plot_cls
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-days = 12
+days = 3
 
 ################################################################################
 #                           Generate python objects
@@ -38,7 +38,12 @@ bld_27.add_hot_water_profile(env_27)
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 
-topo_file = os.path.join(base_path, 'data', 'topology', 'chp_fluid_small_hi_solar4_all.csv')
+topo_file = os.path.join(base_path, 'data', 'topology', 'boi_hw.csv')
+#chp_fluid_small_hi_solar4_all.csv
+#chp_fluid_small_hi_solar4_all.csv
+#chp_fluid_solar4.csv
+#chp_solar4_all.csv
+#bhkw_klein+e_boi.csv
 '''
 topo_file = os.path.join(base_path, 'data', 'topology', 'solar_coll_TW_Test.csv')
 '''
@@ -54,8 +59,8 @@ project.add_building(bld_27)
 # and other information are stored in Environment objects.
 project.time_cluster(nr_periods=days, hours_period=24, save_cls=str(days) + 'day_24hour.csv')
 #project.time_cluster(nr_periods=days, read_cls=str(days) + 'day_24hour_nwg_qli.csv')
-#plot_cls.step_plot_one_line(von=0, bis=(days + 1) * 24 - 1, nr=str(days), name='day_24hour_nwg_qli.csv', bld='nwg')
-#plot_cls.step_plot_three_lines(von=0, bis=(days + 1) * 24 - 1, nr=str(days), name='day_24hour_nwg_qli.csv', bld='nwg')
+plot_cls.step_plot_one_line(von=0, bis=(days + 1) * 24 - 1, nr=str(days), name='day_24hour.csv', bld='nwg')
+plot_cls.step_plot_three_lines(von=0, bis=(days + 1) * 24 - 1, nr=str(days), name='day_24hour.csv', bld='nwg')
 # After clustering need to update the demand profiles and storage assumptions.
 for bld in project.building_list:
     bld.update_components(project.cluster)
