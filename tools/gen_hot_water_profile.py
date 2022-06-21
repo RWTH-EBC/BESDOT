@@ -41,14 +41,12 @@ def gen_hot_water_profile(building_typ, area, year=2021, energy_typ="mittel"):
             lambda x: x / (4180 * 300 * (60 - 12) / 3600 / 1000 * 365) * bld_hot_water_demand)
     hot_water_heating_demand_array = np.array(
         hot_water_heating_demand_df['Aktueller Wärmebedarf für Trinkwassererwärmung (kWh)'])
-    hot_water_heating_demand_list = hot_water_heating_demand_array.tolist()
 
     if building_typ != 'Wohngebäude':
         hour_status_array = np.array(op_time_status(year, zone))
-        hour_status_list = op_time_status(year, zone)
-        total_hot_water_profile_array = np.multiply(hour_status_array, hot_water_heating_demand_array)
+        hot_water_heating_demand_array = np.multiply(hour_status_array, hot_water_heating_demand_array)
 
-    return total_hot_water_profile_array
+    return hot_water_heating_demand_array
 
 
 def op_time_status(year, zone):
