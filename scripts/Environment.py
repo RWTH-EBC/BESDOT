@@ -57,6 +57,13 @@ class Environment(object):
                  start_time=0, time_step=8760):
         self.city = city
         self.year = year
+        # start_time: Start time of the optimization process to be
+        # considered, in hours.
+        # time_step: The number of steps to be considered in the optimization
+        # process, in hours .
+        # should be from 1 to 8759, start_time
+        # should be from 0 to 8759, and the sum of both should be from 1 to
+        # 8760.
         self.start_time = start_time
         self.time_step = time_step
         # todo (yni): the default value should be check with the aktuell data

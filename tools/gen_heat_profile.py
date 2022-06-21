@@ -4,6 +4,7 @@ the building and use the degree day method to generate the demand profile.
 """
 
 import os
+import datetime
 from warnings import warn
 import pandas as pd
 import numpy as np
@@ -39,16 +40,14 @@ input_energy_path = os.path.join(base_path, "data", "tek_data",
 input_zone_path = os.path.join(base_path, "data", "tek_data",
                                "GHD_Zonierung.xlsx")
 input_tabula_path = os.path.join(base_path, "data", "tek_data",
-                               "TABULA_data.xlsx")
+                                 "TABULA_data.xlsx")
 output_path = os.path.join(base_path, "data", "tek_data", "output_heat_profile")
-
-# todo: The temperature profile should be taken from prosumer later
-input_temp_path = os.path.join(base_path, "temperature.csv")
 
 
 def gen_heat_profile(building_typ,
                      area,
                      temperature_profile,
+                     year=2021,
                      energy_typ="mittel",
                      plot=False,
                      save_plot=False):
@@ -162,7 +161,7 @@ def calc_zone_demand(demand_df, demand_typ, zone_typ, zone_area):
 
 
 def degree_day(zone_typ, annual_value, profile_df, temperature_profile,
-               night_lower=False):
+               status_list, night_lower=False):
     heat_profile = []
     start_temp = 15  # The limit for heating on or off, could be the same as
     # set temperature? 15 comes from the german
