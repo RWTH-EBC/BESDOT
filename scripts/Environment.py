@@ -85,15 +85,26 @@ class Environment(object):
         self.co2_price = 35  # €/t
 
         # Read the weather file in the directory "data"
-        # todo (yca): add comment for new variables
-        temp_profile, wind_profile, irr_profile, soil_temperature_profile = \
-            _read_weather_file(weather_file, city, year)
-        self.temp_profile_original = temp_profile
-        self.wind_profile_original = wind_profile
-        self.irr_profile_original = irr_profile
+        # The parameter with suffix '_whole' are the parameter for the whole
+        # year and without suffix '_whole' are slice for given time steps.
+        temp_profile, wind_profile, irr_profile, soil_temperature_profile = _read_weather_file(
+            weather_file, city, year)
+        self.temp_profile_whole = temp_profile
+        self.wind_profile_whole = wind_profile
+        self.irr_profile_whole = irr_profile
         self.soil_temperature_profile_original = soil_temperature_profile
         self.temp_profile = temp_profile[start_time:start_time + time_step]
         self.wind_profile = wind_profile[start_time:start_time + time_step]
         self.irr_profile = irr_profile[start_time:start_time + time_step]
         self.soil_temperature_profile = soil_temperature_profile[start_time:start_time + time_step]
-        temp_profile[3624:5832] = 30
+        # The following slice for temperatur profile is set a virtual
+        # temperature so that there is no heat demand in summer when
+        # calculating heat demand. The hard coded value for 3624 means day
+        # 151, which represents 1. Juni; the last time in slice 5832 means
+        # day 243, which represents 31. August.
+        # Attention!!! The use of this method is very likely to
+        # have a significant impact on other equipment (air source heat
+        # pumps, solar thermal). Special care needs to be taken when using
+        # this method.
+
+        # temp_profile[3624:5832] = 30

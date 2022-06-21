@@ -110,12 +110,11 @@ class Building(object):
         if energy_sector == 'heat':
             heat_demand_profile = gen_heat_profile(self.building_typ,
                                                    self.area,
-                                                   temperature_profile)
-            # Fixme: the heat demand profile is already selected with time step
+                                                   env.temp_profile_whole,
+                                                   env.year)
             self.demand_profile["heat_demand"] = heat_demand_profile[
                                                  env.start_time:
                                                  env.start_time + env.time_step]
-            #self.demand_profile["heat_demand"] = heat_demand_profile
         elif energy_sector == 'cool':
             warn('Profile for cool is still not developed')
         else:

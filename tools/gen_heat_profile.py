@@ -74,11 +74,11 @@ def gen_heat_profile(building_typ,
         zone_heat_demand = calc_zone_demand(demand_df, 'heat', zone, zone_area)
         zone_heat_profile = degree_day(zone, zone_heat_demand, profile_df,
                                        temperature_profile, hour_status)
-        print(zone_heat_profile[2500:2506])
+        print(zone_heat_profile[2535:2540])
         total_heat_profile = np.sum([total_heat_profile, zone_heat_profile],
                                     axis=0)
         total_heat_demand += zone_heat_demand
-        print(total_heat_profile[2500:2506])
+        print(total_heat_profile[2535:2540])
 
     if plot:
         plot_profile(total_heat_profile, save_plot)
