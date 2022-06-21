@@ -99,7 +99,7 @@ class Building(object):
                  "developed, so could not use the method. check again or fixe "
                  "the problem with changing this method add_annual_demand")
 
-    def add_thermal_profile(self, energy_sector, temperature_profile, env):
+    def add_thermal_profile(self, energy_sector, env):
         """The heat and cool demand profile could be calculated with
         temperature profile according to degree day method.
         Attention!!! The temperature profile could only provided in project
@@ -110,12 +110,11 @@ class Building(object):
         if energy_sector == 'heat':
             heat_demand_profile = gen_heat_profile(self.building_typ,
                                                    self.area,
-                                                   temperature_profile)
-            # Fixme: the heat demand profile is already selected with time step
-            # self.demand_profile["heat_demand"] = heat_demand_profile[
-            #                                      env.start_time:
-            #                                      env.start_time + env.time_step]
-            self.demand_profile["heat_demand"] = heat_demand_profile
+                                                   env.temp_profile_whole,
+                                                   env.year)
+            self.demand_profile["heat_demand"] = heat_demand_profile[
+                                                 env.start_time:
+                                                 env.start_time + env.time_step]
         elif energy_sector == 'cool':
             warn('Profile for cool is still not developed')
         else:
