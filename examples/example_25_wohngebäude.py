@@ -9,7 +9,7 @@ import tools.post_solar_chp as post_pro
 import tools.plot_cluster as plot_cls
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-days = 3
+days = 4
 
 ################################################################################
 #                           Generate python objects
