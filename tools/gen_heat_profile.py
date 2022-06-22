@@ -270,9 +270,12 @@ def degree_day(zone_typ, annual_value, profile_df, temperature_profile,
         for time_step in range(8760):
             if temperature_profile[time_step] < start_temp and \
                     status_list[time_step] == 1:
-                heat_profile.append(
-                    (set_temp_heat - temperature_profile[time_step]) /
-                    total_degree_day * annual_value)
+                if set_temp_heat > temperature_profile[time_step]:
+                    heat_profile.append(
+                        (set_temp_heat - temperature_profile[time_step]) /
+                        total_degree_day * annual_value)
+                else:
+                    heat_profile.append(0)
             else:
                 heat_profile.append(0)
 
