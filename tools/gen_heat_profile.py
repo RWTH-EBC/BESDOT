@@ -40,7 +40,7 @@ input_energy_path = os.path.join(base_path, "data", "tek_data",
 input_zone_path = os.path.join(base_path, "data", "tek_data",
                                "GHD_Zonierung.xlsx")
 input_tabula_path = os.path.join(base_path, "data", "tek_data",
-                                 "TABULA_data.xlsx")
+                               "TABULA_data.xlsx")
 output_path = os.path.join(base_path, "data", "tek_data", "output_heat_profile")
 
 

@@ -36,12 +36,12 @@ class HeatExchangerFluid_Solar(HeatExchanger, FluidComponent):
                                                             0] + '_temp')
         for t in model.time_step:
             model.cons.add(in_flow_in_temp[t] == temp[t])
-            #model.cons.add(in_flow_out_temp[t] >= temp[t])
             model.cons.add(out_flow_in_temp[t] == temp[t])
 
     def add_cons(self, model):
         self._constraint_temp(model)
         self._constraint_conver(model)
+        self._constraint_heat_outputs(model)
 
     def add_vars(self, model):
         input_energy = pyo.Var(model.time_step, bounds=(0, None))

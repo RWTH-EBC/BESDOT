@@ -15,7 +15,7 @@ project = Project(name='project_13', typ='building')
 
 
 # Generate the environment object
-env_13 = Environment(time_step=24)
+env_13 = Environment(time_step=8)
 project.add_environment(env_13)
 
 # If the objective of the project is the optimization for building, a building
@@ -24,13 +24,13 @@ bld_13 = Building(name='bld_13', area=3000)
 
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
-bld_13.add_thermal_profile('heat', env_13.temp_profile_original, env_13)
-bld_13.add_elec_profile(2021, env_13)
-bld_13.add_hot_water_profile(env_13)
+#bld_13.add_thermal_profile('heat', env_13)
+#bld_13.add_elec_profile(2021, env_13)
+#bld_13.add_hot_water_profile(env_13)
 # bld_13.add_hot_water_profile_TBL(1968, env_13)
 
-# bld_13.demand_profile['heat_demand'] = [80, 80, 0]
-# bld_13.demand_profile["elec_demand"] = [0, 0, 0]
+bld_13.demand_profile['heat_demand'] = [80, 80, 80, 80, 0, 80, 80, 80]
+bld_13.demand_profile["elec_demand"] = [0, 0, 0]*10
 
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
@@ -53,3 +53,4 @@ project.run_optimization('gurobi', save_lp=True, save_result=True)
 result_output_path = os.path.join(base_path, 'data', 'opt_output',
                                   project.name + '_result.csv')
 #post_pro.plot_all(result_output_path)
+post_pro.print_size(result_output_path)

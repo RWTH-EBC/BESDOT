@@ -156,10 +156,14 @@ class Storage(Component):
         self._constraint_maxpower(model)
         self._constraint_maxcap(model)
         self._constraint_vdi2067(model)
+        '''
+        self._constraint_conserve_temp(model)
+        
         if self.cluster is not None:
             self._constraint_conserve(model)
         else:
             self._constriant_unchange(model)
+        '''
 
     def add_vars(self, model):
         """
@@ -171,3 +175,11 @@ class Storage(Component):
 
         energy = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('energy_' + self.name, energy)
+
+    def _constraint_conserve_temp(self, model):
+        period_length = 24
+        temp_var = model.find_component('temp_' + self.name)
+
+        for t in model.time_step:
+            if t % period_length == 0:
+                model.cons.add(temp_var[t] == temp_var[1])

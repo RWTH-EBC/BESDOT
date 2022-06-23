@@ -129,7 +129,7 @@ class StandardBoiler(FluidComponent, GasBoiler):
                                          '_' + 'mass')
             for t in range(len(model.time_step)-1):
                 model.cons.add(m_in[t + 1] == m_out[t + 1])
-                model.cons.add(m_in[t + 2] == m_in[t + 1])
+                #model.cons.add(m_in[t + 2] == m_in[t + 1])
 
     def add_cons(self, model):
         self._constraint_conver(model)
