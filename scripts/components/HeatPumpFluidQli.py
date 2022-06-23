@@ -30,7 +30,7 @@ class HeatPumpFluidQli(HeatPumpQli, FluidComponent):
                                         '_' + 'temp')
             for t in model.time_step:
                 model.cons.add(t_out[t] == temp_var)
-                #model.cons.add(t_out[t] <= 50)
+                model.cons.add(t_out[t] <= 50)
 
     def add_cons(self, model):
         super().add_cons(model)

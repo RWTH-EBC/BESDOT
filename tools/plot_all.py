@@ -51,11 +51,11 @@ def plot_all(nr='_1', proNr=25, a=120, comp='s_hi'):
                                       'Wärmebedarf',
                                       'Energieerzeugung', r'Leistung (kW)', n=1.5)
 
-        post_pro.step_plot_three_lines(result_output_path, a, 'temp_water_tes',
-                                       'inlet_temp_chp', 'outlet_temp_chp',
-                                       'temp_water_tes', 'Inlet', 'Outlet',
-                                       'Temperatur',
-                                       r'Temperatur ($^\circ$C)', n=1.05)
+        #post_pro.step_plot_three_lines(result_output_path, a, 'temp_water_tes',
+                                       #'inlet_temp_chp', 'outlet_temp_chp',
+                                       #'temp_water_tes', 'Inlet', 'Outlet',
+                                       #'Temperatur',
+                                       #r'Temperatur ($^\circ$C)', n=1.05)
 
         post_pro.step_plot_status(result_output_path, 1, a + 1, 'status_chp',
                                   'Status des BHKW', r'Status')
@@ -84,4 +84,4 @@ def plot_all(nr='_1', proNr=25, a=120, comp='s_hi'):
             post_pro.step_plot_one_line(result_output_path, a, 'therm_eff_chp',
                                         'Thermische Effizienz', r'Effizienz',
                                         n=1.02)
-        plot_all(nr='', proNr=25, a=96, comp='')
+plot_all(nr='', proNr=25, a=120, comp='s_hi')

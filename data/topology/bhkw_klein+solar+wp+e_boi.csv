@@ -14,4 +14,4 @@ e_meter,ElectricityMeter,EM,0,100,0,0,0,0,0,0,0,,0,0,0,,0,0,,0,
 heat_ex,HeatExchangerFluid_Solar,HE1,0,100,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 bat,Battery,BAT_district,0,100,0,0,0,0,0,,0,,0,0,0,,0,0,0,0,
 pv,PV,PV_district,0,50,0,0,0,0,0,,0,0,0,0,0,0,,0,0,0,0
-heat_pump,HeatPumpFluid,EHP_district,0,1000,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+heat_pump,HeatPumpFluidQli,EHP_district,0,1000,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0,0

@@ -9,7 +9,7 @@ import tools.post_solar_chp as post_pro
 import tools.plot_cluster as plot_cls
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-days = 12
+days = 3
 ################################################################################
 #                           Generate python objects
 ################################################################################
@@ -37,12 +37,17 @@ bld_26.add_hot_water_profile(env_26)
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 
-topo_file = os.path.join(base_path, 'data', 'topology',
-                         'bhkw_klein+e_boi.csv')
+topo_file = os.path.join(base_path, 'data', 'topology', 'bhkw_groß+solar+boi+e_boi_nwg.csv')
 #chp_fluid_small_hi_solar4_all.csv
-#chp_fluid_solar4.csv
-#chp_solar4_all.csv
-#bhkw_klein+e_boi.csv
+
+#bhkw_groß+e_boi.csv
+#bhkw_groß+solar+e_boi.csv
+#bhkw_klein+e_boi_nwg.csv
+#bhkw_groß+solar+boi+e_boi_nwg.csv
+
+#bhkw_klein+solar+e_boi_nwg.csv
+#bhkw_klein+solar+boi+e_boi_nwg.csv
+
 '''
 topo_file = os.path.join(base_path, 'data', 'topology',
                          'solar_coll_TW_Test.csv')
@@ -58,7 +63,7 @@ project.add_building(bld_26)
 # prices profiles (if necessary). demand profiles are stored in buildings
 # and other information are stored in Environment objects.
 #project.time_cluster(nr_periods=days, hours_period=24, save_cls=str(days) + 'day_24hour.csv')
-project.time_cluster(nr_periods=days, read_cls=str(days) + 'day_24hour_nwg_qli_1.csv')
+project.time_cluster(nr_periods=days, read_cls=str(days) + 'day_24hour_nwg_qli.csv')
 plot_cls.step_plot_one_line(von=0, bis=(days + 1) * 24 - 1, nr=str(days), name='day_24hour_nwg_qli.csv', bld='nwg')
 plot_cls.step_plot_three_lines(von=0, bis=(days + 1) * 24 - 1, nr=str(days), name='day_24hour_nwg_qli.csv', bld='nwg')
 
@@ -80,7 +85,7 @@ result_output_path = os.path.join(base_path, 'data', 'opt_output',
                                   project.name + '_result.csv')
 # post_pro.plot_all(result_output_path, time_interval=[0, env_27.time_step])
 post_pro.print_size(result_output_path)
-post_pro.step_plot_test_qli(result_output_path, 24*14)
+#post_pro.step_plot_test_qli(result_output_path, 24*14)
 '''
 post.step_plot_one_line(result_output_path, env_27.time_step, 
                        'water_tes_tp_val_temp',

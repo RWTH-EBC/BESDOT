@@ -212,6 +212,7 @@ class Project(object):
         # HomoStorage
         solver.options['NonConvex'] = 2
         solver.options['MIPGap'] = 0.02
+        #solver.options['TimeLimit'] = 10000
         #solver.options['Heuristics'] = 0.05
         opt_result = solver.solve(self.model, tee=True)
 
