@@ -31,8 +31,11 @@ class HeatPump(Component):
         cop = model.find_component('cop_' + self.name)
         temp_var = model.find_component('temp_' + self.name)
         for t in model.time_step:
-            model.cons.add(cop[t] * (temp_var[t] - temp_profile[t - 1]) == (
-                    temp_var[t] + 273.15) * self.efficiency[self.outputs[0]])
+            #todo:qli
+            #model.cons.add(cop[t] * (temp_var[t] - temp_profile[t - 1]) == (
+                    #temp_var[t] + 273.15) * self.efficiency[self.outputs[0]])
+            model.cons.add(cop[t] * (temp_var - temp_profile[t - 1]) == (
+                    temp_var + 273.15) * self.efficiency[self.outputs[0]])
 
     def _constraint_conver(self, model):
         """
@@ -59,7 +62,10 @@ class HeatPump(Component):
     def add_vars(self, model):
         super().add_vars(model)
 
-        temp = pyo.Var(model.time_step, bounds=(0, None))
+        #todo:qli
+        #temp = pyo.Var(model.time_step, bounds=(0, None))
+        #model.add_component('temp_' + self.name, temp)
+        temp = pyo.Var(bounds=(0, None))
         model.add_component('temp_' + self.name, temp)
 
         cop = pyo.Var(model.time_step, bounds=(0, None))

@@ -1,6 +1,6 @@
 import pyomo.environ as pyo
 from scripts.Component import Component
-
+import warnings
 
 class HeatPumpQli(Component):
 
@@ -23,16 +23,24 @@ class HeatPumpQli(Component):
         self.temp_profile = temp_profile
         # self.cop = list(map(self.calc_cop, self.temp_profile))
 
+    def _read_properties(self, properties):
+        super()._read_properties(properties)
+        if 'outlet temperature' in properties.columns:
+            self.outlet_temp = float(properties['outlet temperature'])
+        else:
+            warnings.warn("In the model database for " + self.component_type +
+                          " lack of column for outlet temperature.")
+            self.outlet_temp = 50
+
     def _constraint_cop(self, model, temp_profile):
         """
         Calculate the COP value in each time step, with default set
         temperature of 60 degree and machine efficiency of 40%.
         """
         cop = model.find_component('cop_' + self.name)
-        temp_var = model.find_component('temp_' + self.name)
         for t in model.time_step:
-            model.cons.add(cop[t] * (temp_var - temp_profile[t - 1]) == (
-                    temp_var + 273.15) * self.efficiency[self.outputs[0]])
+            model.cons.add(cop[t] * (self.outlet_temp - temp_profile[t - 1]) == (
+                    self.outlet_temp + 273.15) * self.efficiency[self.outputs[0]])
 
     def _constraint_conver(self, model):
         """
@@ -58,9 +66,6 @@ class HeatPumpQli(Component):
 
     def add_vars(self, model):
         super().add_vars(model)
-
-        temp = pyo.Var(bounds=(0, None))
-        model.add_component('temp_' + self.name, temp)
 
         cop = pyo.Var(model.time_step, bounds=(1, None))
         model.add_component('cop_' + self.name, cop)

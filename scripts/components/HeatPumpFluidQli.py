@@ -3,7 +3,7 @@ from scripts.Component import Component
 from scripts.FluidComponent import FluidComponent
 from scripts.components import HeatPump
 from scripts.components.HeatPumpQli import HeatPumpQli
-
+import warnings
 
 class HeatPumpFluidQli(HeatPumpQli, FluidComponent):
 
@@ -21,16 +21,14 @@ class HeatPumpFluidQli(HeatPumpQli, FluidComponent):
                          max_size=max_size,
                          current_size=current_size)
 
+
+
     def _constraint_temp(self, model):
-        temp_var = model.find_component('temp_' + self.name)
         for heat_output in self.heat_flows_out:
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'temp')
-            t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
-                                        '_' + 'temp')
             for t in model.time_step:
-                model.cons.add(t_out[t] == temp_var)
-                model.cons.add(t_out[t] <= 50)
+                model.cons.add(t_out[t] == self.outlet_temp)
 
     def add_cons(self, model):
         super().add_cons(model)

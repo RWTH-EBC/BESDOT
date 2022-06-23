@@ -71,13 +71,17 @@ class GroundHeatPumpFluid(HeatPump, FluidComponent):
 
     def _constraint_temp(self, model):
         temp_var = model.find_component('temp_' + self.name)
-        for t in model.time_step:
-            model.cons.add(temp_var[t] <= 65)
+        # todo:qli
+        model.cons.add(temp_var<= 65)
+        #for t in model.time_step:
+            #model.cons.add(temp_var[t] <= 65)
         for heat_output in self.heat_flows_out:
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'temp')
             for t in range(len(model.time_step)):
-                model.cons.add(temp_var[t + 1] == t_out[t + 1])
+                #todo:qli
+                #model.cons.add(temp_var[t + 1] == t_out[t + 1])
+                model.cons.add(temp_var == t_out[t + 1])
 
     def _constraint_return_temp(self, model):
         return_temp_var = model.find_component('return_temp_' + self.name)

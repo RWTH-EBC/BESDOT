@@ -37,7 +37,7 @@ bld_26.add_hot_water_profile(env_26)
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 
-topo_file = os.path.join(base_path, 'data', 'topology', 'bhkw_groß+solar+boi+e_boi_nwg.csv')
+topo_file = os.path.join(base_path, 'data', 'topology', 'test_heat_pump.csv')
 #chp_fluid_small_hi_solar4_all.csv
 
 #bhkw_groß+e_boi.csv
