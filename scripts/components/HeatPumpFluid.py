@@ -22,14 +22,17 @@ class HeatPumpFluid(HeatPump, FluidComponent):
                          max_size=max_size,
                          current_size=current_size)
 
-    def _constraint_calc_cop(self, model):
-        for t in model.time_step:
-            self.cop = HeatPump.calc_cop(self, self.temp_profile[t])
+    def _constraint_temp(self, model):
+        for heat_output in self.heat_flows_out:
+            t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
+                                         '_' + 'temp')
+            for t in model.time_step:
+                model.cons.add(t_out[t] <= 50)
 
     def add_cons(self, model):
         self._constraint_heat_outputs(model)
         self._constraint_maxpower(model)
         self._constraint_vdi2067(model)
         self._constraint_conver(model)
-        self._constraint_calc_cop(model)
+        self._constraint_temp(model)
 

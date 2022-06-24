@@ -4,6 +4,7 @@ could get from data/weather_data with the name of the city and year. Or it could
 be given by the user in the instantiation of an Environment object.
 """
 import os
+import warnings
 import pandas as pd
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -50,18 +51,31 @@ def _read_weather_file(weather_file=None, city='Dusseldorf', year=2021):
 
 
 class Environment(object):
-    # start_time,end_time: data can be saved from start_time until end_time.
-    # time_step should be from 1 to 8759, start_time should be from 0 to 8759,
-    # and the sum of both should be from 1 to 8760.
+
     def __init__(self, weather_file=None, city='Dusseldorf', year=2021,
                  start_time=0, time_step=8760):
         self.city = city
         self.year = year
+        # start_time: Start time of the optimization process to be
+        # considered, in hours.
+        # time_step: The number of steps to be considered in the optimization
+        # process, in hours .
+        # should be from 1 to 8759, start_time
+        # should be from 0 to 8759, and the sum of both should be from 1 to
+        # 8760.
         self.start_time = start_time
         self.time_step = time_step
-        # todo (yni): the default value should be check with the aktuell data
-        # todo (yni): price could be set into series or list, for exchanger
-        #  price
+        if start_time + time_step <= 0:
+            warnings.warn('The selected interval is too small or the start '
+                          'time is negative')
+        elif start_time + time_step > 8760:
+            warnings.warn('The selected interval is too large or the time '
+                          'selected is across the year')
+
+        # todo: the default value should be check with the aktuell data and
+        #  add source.
+        # todo (yni): price could be set into series, array or list,
+        #  for variable price
         self.elec_price = 0.3  # €/kWh #0.3
         self.gas_price = 0.1  # €/kWh #0.1
         self.heat_price = 0.08  # €/kWh
@@ -71,15 +85,26 @@ class Environment(object):
         self.co2_price = 35  # €/t
 
         # Read the weather file in the directory "data"
-        # todo (yca): add comment for new variables
-        temp_profile, wind_profile, irr_profile, soil_temperature_profile = \
-            _read_weather_file(weather_file, city, year)
-        self.temp_profile_original = temp_profile
-        self.wind_profile_original = wind_profile
-        self.irr_profile_original = irr_profile
+        # The parameter with suffix '_whole' are the parameter for the whole
+        # year and without suffix '_whole' are slice for given time steps.
+        temp_profile, wind_profile, irr_profile, soil_temperature_profile = _read_weather_file(
+            weather_file, city, year)
+        self.temp_profile_whole = temp_profile
+        self.wind_profile_whole = wind_profile
+        self.irr_profile_whole = irr_profile
         self.soil_temperature_profile_original = soil_temperature_profile
         self.temp_profile = temp_profile[start_time:start_time + time_step]
         self.wind_profile = wind_profile[start_time:start_time + time_step]
         self.irr_profile = irr_profile[start_time:start_time + time_step]
         self.soil_temperature_profile = soil_temperature_profile[start_time:start_time + time_step]
-        temp_profile[3624:5832] = 30
+        # The following slice for temperatur profile is set a virtual
+        # temperature so that there is no heat demand in summer when
+        # calculating heat demand. The hard coded value for 3624 means day
+        # 151, which represents 1. Juni; the last time in slice 5832 means
+        # day 243, which represents 31. August.
+        # Attention!!! The use of this method is very likely to
+        # have a significant impact on other equipment (air source heat
+        # pumps, solar thermal). Special care needs to be taken when using
+        # this method.
+
+        # temp_profile[3624:5832] = 30

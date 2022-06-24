@@ -1,7 +1,5 @@
 import warnings
 import pyomo.environ as pyo
-import scripts
-import math
 from scripts.Component import Component
 
 
@@ -57,7 +55,8 @@ class Storage(Component):
         else:
             self.init_soc = 0.5
             warnings.warn("In the model database for " + self.component_type +
-                          " lack of column for init soc. init soc has been set to be 0.5.")
+                          " lack of column for init soc. init soc has been set"
+                          "to be 0.5.")
         if 'e2p in' in properties.columns:
             self.e2p_in = float(properties['e2p in'])
         elif 'e2p_in' in properties.columns:
@@ -97,7 +96,7 @@ class Storage(Component):
         # Attention! The initial soc of storage is hard coded. for
         # further development should notice this. And the end soc is not
         # set, which is not so important.
-        model.cons.add(stored_energy[1] == 0)
+        # model.cons.add(stored_energy[1] == 0)
 
     def _constraint_maxpower(self, model):
         input_energy = model.find_component('input_' + self.inputs[0] +
@@ -139,6 +138,19 @@ class Storage(Component):
             if t % period_length == 0:
                 model.cons.add(stored_energy[t] == stored_energy[1])
 
+    def _constriant_unchange(self, model):
+        """This is an additional constraint, which makes the final state of
+        energy storage the same as the initial state."""
+        input_energy = model.find_component('input_' + self.inputs[0] +
+                                            '_' + self.name)
+        output_energy = model.find_component('output_' + self.outputs[0] +
+                                             '_' + self.name)
+        stored_energy = model.find_component('energy_' + self.name)
+
+        last_time = len(model.time_step)
+        model.cons.add(stored_energy[last_time] + input_energy[last_time] -
+                       output_energy[last_time] == stored_energy[1])
+
     def add_cons(self, model):
         self._constraint_conver(model)
         self._constraint_maxpower(model)
@@ -146,6 +158,8 @@ class Storage(Component):
         self._constraint_vdi2067(model)
         if self.cluster is not None:
             self._constraint_conserve(model)
+        else:
+            self._constriant_unchange(model)
 
     def add_vars(self, model):
         """

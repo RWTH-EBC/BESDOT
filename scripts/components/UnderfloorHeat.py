@@ -43,9 +43,11 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
         temp_var = model.find_component('temp_' + self.name)
         return_temp_var = model.find_component('return_temp_' + self.name)
         for t in model.time_step:
-            model.cons.add(temp_var[t] <= 40)
-            model.cons.add(return_temp_var[t] + 2 <= temp_var[t])
-
+            if self.temp_profile[t-1] >= 15:
+                model.cons.add(temp_var[t] == 0)
+            else:
+                model.cons.add(temp_var[t] <= 40)
+                model.cons.add(return_temp_var[t] + 2 <= temp_var[t])
         for heat_input in self.heat_flows_in:
             t_out = model.find_component(heat_input[0] + '_' + heat_input[1] +
                                          '_' + 'temp')
@@ -88,18 +90,25 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
         co = model.find_component('co')
 
         for t in range(len(model.time_step)):
-            model.cons.add(return_temp_var[t + 1] >= room_temp[t + 1])
-            model.cons.add(average_t[t + 1] == (temp_var[t + 1] +
-                                                return_temp_var[t + 1]) / 2)
-            model.cons.add(floor_temp[t + 1] == 0.625 * average_t[t + 1] + 6.875
-                           )
-            model.cons.add(heat_flux[t + 1] == 8.92 * (
-                    (floor_temp_approximate - room_temp_approximate) ** 1.1 +
-                    1.1 *
-                    (floor_temp_approximate - room_temp_approximate) ** 0.1 * (
-                            floor_temp[t + 1] - floor_temp_approximate) - 1.1 *
-                    (floor_temp_approximate - room_temp_approximate) ** 0.1 * (
-                            room_temp[t + 1] - room_temp_approximate)))
+            if self.temp_profile[t] >= 15:
+                model.cons.add(average_t[t + 1] == 0)
+                model.cons.add(floor_temp[t + 1] == 0)
+                model.cons.add(heat_flux[t + 1] == 0)
+                model.cons.add(room_temp[t + 1] == 0)
+                model.cons.add(return_temp_var[t + 1] == 0)
+            else:
+                model.cons.add(return_temp_var[t + 1] >= room_temp[t + 1])
+                model.cons.add(average_t[t + 1] == (temp_var[t + 1] +
+                                                    return_temp_var[t + 1]) / 2)
+                model.cons.add(floor_temp[t + 1] == 0.625 * average_t[t + 1] + 6.875
+                               )
+                model.cons.add(heat_flux[t + 1] == 8.92 * (
+                        (floor_temp_approximate - room_temp_approximate) ** 1.1 +
+                        1.1 *
+                        (floor_temp_approximate - room_temp_approximate) ** 0.1 * (
+                                floor_temp[t + 1] - floor_temp_approximate) - 1.1 *
+                        (floor_temp_approximate - room_temp_approximate) ** 0.1 * (
+                                room_temp[t + 1] - room_temp_approximate)))
             model.cons.add(
                 input_energy[t + 1] * 1000 == heat_flux[t + 1] * area)
             print(self.temp_profile[t])
@@ -107,7 +116,6 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
                 co[t + 1] * (21 - self.temp_profile[t]) ==
                 (room_temp[t + 1] - self.temp_profile[t]))
             model.cons.add(input_energy[t + 1] == output_energy[t + 1] * co[t + 1])
-
 
     def _constraint_pmv(self, model):
         """
@@ -118,11 +126,15 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
         pmv = model.find_component('pmv')
         room_temp = model.find_component('room_temp')
         for t in model.time_step:
-            coeff = eval(b[t-1])
-            model.cons.add(pa[t] == (85.165 * room_temp[t] - 539.063) / 1000)
-            model.cons.add(pmv[t] <= 0.5)
-            model.cons.add(pmv[t] >= -0.5)
-            model.cons.add(pmv[t] == (coeff[0] * room_temp[t] +
+            if self.temp_profile[t-1] >= 15:
+                model.cons.add(pmv[t] == -10)
+                model.cons.add(pa[t] == -10)
+            else:
+                coeff = eval(b[t - 1])
+                model.cons.add(pa[t] == (85.165 * room_temp[t] - 539.063) / 1000)
+                model.cons.add(pmv[t] <= 0.5)
+                model.cons.add(pmv[t] >= -0.5)
+                model.cons.add(pmv[t] == (coeff[0] * room_temp[t] +
                                       coeff[1] * pa[t] - coeff[2]))
 
     # def _constraint_mass_flow(self, model):
@@ -172,7 +184,7 @@ class UnderfloorHeat(HeatExchangerFluid, FluidComponent):
         room_temp = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('room_temp', room_temp)
 
-        pa = pyo.Var(model.time_step, bounds=(0, None))
+        pa = pyo.Var(model.time_step, bounds=(-10, None))
         model.add_component('pa', pa)
 
         pmv1 = pyo.Var(model.time_step, bounds=(None, None))
