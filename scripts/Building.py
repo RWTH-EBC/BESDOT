@@ -99,7 +99,7 @@ class Building(object):
                  "developed, so could not use the method. check again or fixe "
                  "the problem with changing this method add_annual_demand")
 
-    def add_thermal_profile(self, energy_sector, temperature_profile, env):
+    def add_thermal_profile(self, energy_sector, env):
         """The heat and cool demand profile could be calculated with
         temperature profile according to degree day method.
         Attention!!! The temperature profile could only provided in project
@@ -160,6 +160,7 @@ class Building(object):
                 max_size = self.topology['max_size'][item]
                 current_size = self.topology['current_size'][item]
                 if comp_type in ['HeatPump', 'GasHeatPump', 'HeatPumpFluid',
+                                 'HeatPumpQli', 'HeatPumpFluidQli',
                                  'AirHeatPumpFluid', 'UnderfloorHeat']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       temp_profile=
@@ -217,8 +218,6 @@ class Building(object):
                                                       current_size=current_size)
                 elif comp_type == 'ThreePortValve':
                     comp_obj = module_dict[comp_type](comp_name=comp_name)
-                elif comp_type == 'pmv':
-                    comp_obj = module_dict[comp_type](comp_name=comp_name)
                 else:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       comp_model=comp_model,
@@ -240,33 +239,37 @@ class Building(object):
                                                     'HeatConsumptionFluid',
                                                     'ElectricalConsumption',
                                                     ]:
-                cluster_profile = pd.Series(cluster.clusterPeriodDict[
-                    'heat_demand']).tolist()
+                # cluster_profile = pd.Series(cluster.clusterPeriodDict[
+                #     'heat_demand']).tolist()
+                cluster_profile = cluster['heat_demand'].tolist()
                 self.components[comp_name].update_profile(
                     consum_profile=cluster_profile)
             if self.topology['comp_type'][item] in ['HotWaterConsumption',
                                                     'HotWaterConsumptionFluid'
                                                     ]:
-                cluster_profile = pd.Series(cluster.clusterPeriodDict[
-                                                'hot_water_demand']).tolist()
+                # cluster_profile = pd.Series(cluster.clusterPeriodDict[
+                #                                 'hot_water_demand']).tolist()
+                cluster_profile = cluster['hot_water_demand'].tolist()
                 self.components[comp_name].update_profile(
-                        consum_profile=cluster_profile)
+                    consum_profile=cluster_profile)
             if self.topology['comp_type'][item] in ['HeatPump',
                                                     'GasHeatPump', 'PV',
                                                     'SolarThermalCollector',
                                                     'SolarThermalCollectorFluid',
                                                     'UnderfloorHeat',
                                                     ]:
-                cluster_profile = pd.Series(cluster.clusterPeriodDict[
-                                                'temp']).tolist()
+                # cluster_profile = pd.Series(cluster.clusterPeriodDict[
+                #                                 'temp']).tolist()
+                cluster_profile = cluster['temp'].tolist()
                 self.components[comp_name].update_profile(
                     temp_profile=cluster_profile)
             if self.topology['comp_type'][item] in ['PV',
                                                     'SolarThermalCollector',
                                                     'SolarThermalCollectorFluid',
                                                     ]:
-                cluster_profile = pd.Series(cluster.clusterPeriodDict[
-                                                'irr']).tolist()
+                # cluster_profile = pd.Series(cluster.clusterPeriodDict[
+                #                                 'irr']).tolist()
+                cluster_profile = cluster['irr'].tolist()
                 self.components[comp_name].update_profile(
                     irr_profile=cluster_profile)
             if self.topology['comp_type'][item] in ['GroundHeatPumpFluid']:
@@ -469,7 +472,7 @@ class Building(object):
         self._constraint_mass_balance(model)
         # todo (yni): Attention in the optimization for operation cost should
         #  comment constrain for solar area. This should be done automated.
-        #self._constraint_solar_area(model)
+        # self._constraint_solar_area(model)
 
         self._constraint_total_cost(model, env)
         self._constraint_operation_cost(model, env, cluster)
@@ -491,7 +494,7 @@ class Building(object):
         for item in self.topology.index:
             comp_type = self.topology['comp_type'][item]
             if comp_type in ['PV', 'SolarThermalCollector',
-                'SolarThermalCollectorFluid']:
+                             'SolarThermalCollectorFluid']:
                 self._constraint_solar_area(model)
 
     def _constraint_energy_balance(self, model):
@@ -640,21 +643,22 @@ class Building(object):
         else:
             # Attention! The period only for 24 hours is developed,
             # other segments are not considered.
-            period_length = 24
-
-            nr_day_occur = pd.Series(cluster.clusterPeriodNoOccur).tolist()
-            nr_hour_occur = []
-            for nr_occur in nr_day_occur:
-                nr_hour_occur += [nr_occur] * 24
+            # period_length = 24
+            #
+            # nr_day_occur = pd.Series(cluster.clusterPeriodNoOccur).tolist()
+            # nr_hour_occur = []
+            # for nr_occur in nr_day_occur:
+            #     nr_hour_occur += [nr_occur] * 24
+            nr_hour_occur = cluster['Occur']
 
             model.cons.add(
                 bld_operation_cost == sum(buy_elec[t] * env.elec_price *
-                                          nr_hour_occur[t-1] + buy_gas[t] *
-                                          env.gas_price * nr_hour_occur[t-1] +
+                                          nr_hour_occur[t - 1] + buy_gas[t] *
+                                          env.gas_price * nr_hour_occur[t - 1] +
                                           buy_heat[t] * env.heat_price *
-                                          nr_hour_occur[t-1] - sell_elec[t] *
+                                          nr_hour_occur[t - 1] - sell_elec[t] *
                                           env.elec_feed_price *
-                                          nr_hour_occur[t-1]
+                                          nr_hour_occur[t - 1]
                                           for t in model.time_step) +
                 bld_other_op_cost)
 
@@ -672,4 +676,3 @@ class Building(object):
 
         model.cons.add(bld_other_op_cost == sum(comp_op for comp_op
                                                 in other_op_comp_list))
-

@@ -37,6 +37,15 @@ class CHPFluidSmall(CHP, FluidComponent):
         self.heat_flows_out = []
         self.other_op_cost = True
 
+    def _read_properties(self, properties):
+        super()._read_properties(properties)
+        if 'outlet temperature' in properties.columns:
+            self.outlet_temp = float(properties['outlet temperature'])
+        else:
+            warnings.warn("In the model database for " + self.component_type +
+                          " lack of column for outlet temperature.")
+            self.outlet_temp = 80
+
     # Pel = elektrische Nennleistung = comp_size
     # Qth = thermische Nennleistung
     # Qth = f(Pel)
@@ -54,7 +63,6 @@ class CHPFluidSmall(CHP, FluidComponent):
         for t in model.time_step:
             model.cons.add(therm_eff[t] == 0.705 - 0.0008 * (Qth - 44) -
                            0.006 * (inlet_temp[t] - 30))
-            #model.cons.add(inlet_temp[t] <= 50)
 
     def _constraint_therm_eff_gdp(self, model):
         small_num = 0.00001
@@ -88,7 +96,7 @@ class CHPFluidSmall(CHP, FluidComponent):
     # Zu hohe Temperaturspreizng (>25 Grad) führt zur Beschädigung der Anlagen.
 
     def _constraint_temp(self, model):
-        outlet_temp = model.find_component('outlet_temp_' + self.name)
+        #outlet_temp = model.find_component('outlet_temp_' + self.name)
         inlet_temp = model.find_component('inlet_temp_' + self.name)
         for heat_output in self.heat_flows_out:
             t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
@@ -96,8 +104,9 @@ class CHPFluidSmall(CHP, FluidComponent):
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'temp')
             for t in model.time_step:
-                model.cons.add(outlet_temp[t] == t_out[t])
+                model.cons.add(self.outlet_temp == t_out[t])
                 model.cons.add(inlet_temp[t] == t_in[t])
+                model.cons.add(inlet_temp[t] <= 50)
 
     # status_chp ----- zur Beschreibung der taktenden Betrieb
     # input * η = output
@@ -129,13 +138,15 @@ class CHPFluidSmall(CHP, FluidComponent):
         # todo (qli): building.py anpassen
         self._constraint_chp_elec_sell_price(model)
         '''
-        '''
+        # todo(qli)
+        # self._constraint_mass_flow(model)
+
         self._constraint_Pel(model)
         self._constraint_vdi2067_chp(model)
         '''
         # todo: fix cost
         self._constraint_vdi2067_chp_gdp(model)
-
+        '''
 
     def add_vars(self, model):
         super().add_vars(model)
@@ -146,8 +157,8 @@ class CHPFluidSmall(CHP, FluidComponent):
         therm_eff = pyo.Var(model.time_step, bounds=(0, 1))
         model.add_component('therm_eff_' + self.name, therm_eff)
 
-        outlet_temp = pyo.Var(model.time_step, bounds=(12, 95))
-        model.add_component('outlet_temp_' + self.name, outlet_temp)
+        #outlet_temp = pyo.Var(model.time_step, bounds=(12, 95))
+        #model.add_component('outlet_temp_' + self.name, outlet_temp)
 
         inlet_temp = pyo.Var(model.time_step, bounds=(12, 95))
         model.add_component('inlet_temp_' + self.name, inlet_temp)
@@ -292,6 +303,15 @@ class CHPFluidSmall(CHP, FluidComponent):
             dj = Disjunction(expr=[h, i, j])
             model.add_component('dj_dis1_' + str(t), dj)
 
+    def _constraint_mass_flow(self, model):
+        for heat_output in self.heat_flows_out:
+            m_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
+                                        '_' + 'mass')
+            m_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
+                                         '_' + 'mass')
+            for t in range(len(model.time_step)-1):
+                model.cons.add(m_in[t + 1] == m_out[t + 1])
+                model.cons.add(m_in[t + 2] == m_in[t + 1])
 
 '''
     def _constraint_start_cost(self, model):

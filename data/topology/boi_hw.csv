@@ -1,0 +1,8 @@
+comp_name,comp_type,model,min_size,max_size,current_size,therm_cns,water_tes,gas_grid,tp_val_therm,hw_cns,tp_val_hw,boi_s
+therm_cns,HeatConsumptionFluid,HeatCNS,0,100,0,0,0,0,0,0,0,0
+water_tes,HomoStorage,TES_homo_60,0,2000,0,0,0,0,,0,,0
+gas_grid,GasGrid,GAS1,0,1000,0,0,0,0,0,0,0,
+tp_val_therm,ThreePortValve,,,,,,0,0,0,0,0,0
+hw_cns,HotWaterConsumptionFluid,HWCNS,0,2000,0,0,0,0,0,0,0,0
+tp_val_hw,ThreePortValve,,,,,0,0,0,0,,0,0
+boi_s,StandardBoiler,BOI_district,0,100,0,0,,0,0,0,0,0

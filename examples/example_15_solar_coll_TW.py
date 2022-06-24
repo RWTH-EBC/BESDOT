@@ -23,7 +23,7 @@ project.add_environment(env_15)
 
 # If the objective of the project is the optimization for building, a building
 # should be added to the project.
-bld_15 = Building(name='bld_15', area=200)
+bld_15 = Building(name='bld_15', area=2000)
 
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
@@ -31,7 +31,7 @@ bld_15 = Building(name='bld_15', area=200)
 bld_15.add_hot_water_profile(env_15)
 
 # todo (qli): solar_coll testen (size_e_boi=0)
-# bld_15.demand_profile['hot_water_demand'] = [1.1, 0, 1, 1, 0]
+bld_15.demand_profile['hot_water_demand'] = [1.0875, 0, 1, 1, 0]
 # todo (qli): solar_coll mit e_boi testen
 # bld_15.demand_profile['hot_water_demand'] = [6, 0, 6, 1, 0]
 

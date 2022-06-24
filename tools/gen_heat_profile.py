@@ -40,7 +40,7 @@ input_energy_path = os.path.join(base_path, "data", "tek_data",
 input_zone_path = os.path.join(base_path, "data", "tek_data",
                                "GHD_Zonierung.xlsx")
 input_tabula_path = os.path.join(base_path, "data", "tek_data",
-                                 "TABULA_data.xlsx")
+                               "TABULA_data.xlsx")
 output_path = os.path.join(base_path, "data", "tek_data", "output_heat_profile")
 
 
@@ -74,11 +74,9 @@ def gen_heat_profile(building_typ,
         zone_heat_demand = calc_zone_demand(demand_df, 'heat', zone, zone_area)
         zone_heat_profile = degree_day(zone, zone_heat_demand, profile_df,
                                        temperature_profile, hour_status)
-        print(zone_heat_profile[2535:2540])
         total_heat_profile = np.sum([total_heat_profile, zone_heat_profile],
                                     axis=0)
         total_heat_demand += zone_heat_demand
-        print(total_heat_profile[2535:2540])
 
     if plot:
         plot_profile(total_heat_profile, save_plot)
@@ -263,7 +261,7 @@ def degree_day(zone_typ, annual_value, profile_df, temperature_profile,
         total_degree_day = 0
         for time_step in range(8760):
             if temperature_profile[time_step] < start_temp and \
-                    status_list[time_step] == 1 and\
+                    status_list[time_step] == 1 and \
                     temperature_profile[time_step] < set_temp_heat:
                 total_degree_day += (set_temp_heat - temperature_profile[
                     time_step])
@@ -272,9 +270,9 @@ def degree_day(zone_typ, annual_value, profile_df, temperature_profile,
             if temperature_profile[time_step] < start_temp and \
                     status_list[time_step] == 1 and \
                     temperature_profile[time_step] < set_temp_heat:
-                    heat_profile.append(
-                        (set_temp_heat - temperature_profile[time_step]) /
-                        total_degree_day * annual_value)
+                heat_profile.append(
+                    (set_temp_heat - temperature_profile[time_step]) /
+                    total_degree_day * annual_value)
             else:
                 heat_profile.append(0)
 

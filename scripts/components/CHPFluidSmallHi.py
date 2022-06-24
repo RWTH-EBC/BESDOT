@@ -9,6 +9,7 @@ from tools.calc_annuity_vdi2067 import calc_annuity
 
 small_num = 0.0001
 
+
 # kleine BHKW (Pel <= 50kW) ohne Brennwertnutzung
 class CHPFluidSmallHi(CHP, FluidComponent):
 
@@ -27,6 +28,15 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         self.heat_flows_out = []
         self.other_op_cost = True
 
+    def _read_properties(self, properties):
+        super()._read_properties(properties)
+        if 'outlet temperature' in properties.columns:
+            self.outlet_temp = float(properties['outlet temperature'])
+        else:
+            warnings.warn("In the model database for " + self.component_type +
+                          " lack of column for outlet temperature.")
+            self.outlet_temp = 80
+
     # Pel = elektrische Nennleistung = comp_size
     # Qth = thermische Nennleistung
     def _constraint_Pel(self, model):
@@ -41,10 +51,10 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         model.cons.add(therm_eff == -0.0000355 * Qth + 0.498)
 
     def _constraint_temp(self, model):
-        outlet_temp = model.find_component('outlet_temp_' + self.name)
         inlet_temp = model.find_component('inlet_temp_' + self.name)
         for t in model.time_step:
-            model.cons.add(outlet_temp[t] - inlet_temp[t] <= 20)
+            # todo
+            # model.cons.add(outlet_temp[t] - inlet_temp[t] <= 25)
             model.cons.add(inlet_temp[t] <= 70)
         for heat_output in self.heat_flows_out:
             t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
@@ -52,7 +62,9 @@ class CHPFluidSmallHi(CHP, FluidComponent):
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'temp')
             for t in model.time_step:
-                model.cons.add(outlet_temp[t] == t_out[t])
+                # todo
+                # model.cons.add(outlet_temp[t] == t_out[t])
+                model.cons.add(self.outlet_temp == t_out[t])
                 model.cons.add(inlet_temp[t] == t_in[t])
 
     def _constraint_conver(self, model):
@@ -78,26 +90,28 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         self._constraint_conver(model)
         self._constraint_heat_outputs(model)
         self._constraint_start_stop_ratio_gdp(model)
-        #self._constraint_start_cost(model)
-        '''
+        # self._constraint_start_cost(model)
+        # todo(qli)
+        # self._constraint_mass_flow(model)
         self._constraint_Pel(model)
         self._constraint_vdi2067_chp(model)
         '''
         # todo: fix cost
         self._constraint_vdi2067_chp_gdp(model)
-
+        '''
 
     def add_vars(self, model):
         super().add_vars(model)
 
-        Qth = pyo.Var(bounds=(0, 94))
+        Qth = pyo.Var(bounds=(6.8, 94))
         model.add_component('therm_size_' + self.name, Qth)
 
         therm_eff = pyo.Var(bounds=(0, 1))
         model.add_component('therm_eff_' + self.name, therm_eff)
 
-        outlet_temp = pyo.Var(model.time_step, bounds=(12, 95))
-        model.add_component('outlet_temp_' + self.name, outlet_temp)
+        # todo
+        # outlet_temp = pyo.Var(model.time_step, bounds=(12, 95))
+        # model.add_component('outlet_temp_' + self.name, outlet_temp)
 
         inlet_temp = pyo.Var(model.time_step, bounds=(12, 95))
         model.add_component('inlet_temp_' + self.name, inlet_temp)
@@ -105,11 +119,11 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         status = pyo.Var(range(1, len(model.time_step) + 6), domain=pyo.Binary)
         model.add_component('status_' + self.name, status)
 
-        #start_cost = pyo.Var(bounds=(0, None))
-        #model.add_component('start_cost_' + self.name, start_cost)
+        # start_cost = pyo.Var(bounds=(0, None))
+        # model.add_component('start_cost_' + self.name, start_cost)
 
-        #start = pyo.Var(model.time_step, domain=pyo.Binary)
-        #model.add_component('start_' + self.name, start)
+        # start = pyo.Var(model.time_step, domain=pyo.Binary)
+        # model.add_component('start_' + self.name, start)
 
     def _constraint_vdi2067_chp(self, model):
         size = model.find_component('size_' + self.name)
@@ -126,13 +140,12 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         invest = model.find_component('invest_' + self.name)
         Pel = model.find_component('size_' + self.name)
         Qth = model.find_component('therm_size_' + self.name)
-        #status = model.find_component('status_' + self.name)
+        # status = model.find_component('status_' + self.name)
 
         if self.min_size == 0:
             min_size = small_num
         else:
             min_size = self.min_size
-
 
         dis_not_select = Disjunct()
         not_select_size = pyo.Constraint(expr=Pel == 0)
@@ -140,11 +153,11 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         not_select_therm_size = pyo.Constraint(expr=Qth == 0)
         model.add_component('dis_not_select_' + self.name, dis_not_select)
         dis_not_select.add_component('not_select_size_' + self.name,
-                                        not_select_size)
+                                     not_select_size)
         dis_not_select.add_component('not_select_inv_' + self.name,
-                                        not_select_inv)
+                                     not_select_inv)
         dis_not_select.add_component('not_select_therm_size_' + self.name,
-                                        not_select_therm_size)
+                                     not_select_therm_size)
 
         dis_select = Disjunct()
         select_size = pyo.Constraint(expr=Pel >= min_size)
@@ -167,15 +180,14 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         '''
         model.add_component('dis_select_' + self.name, dis_select)
         dis_select.add_component('select_size_' + self.name,
-                                        select_size)
+                                 select_size)
         dis_select.add_component('select_inv_' + self.name,
-                                        select_inv)
+                                 select_inv)
         dis_select.add_component('select_therm_size_' + self.name,
-                                        select_therm_size)
+                                 select_therm_size)
 
         dj_size = Disjunction(expr=[dis_not_select, dis_select])
         model.add_component('disjunction_size' + self.name, dj_size)
-
 
         annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w,
                                self.f_op)
@@ -183,7 +195,7 @@ class CHPFluidSmallHi(CHP, FluidComponent):
 
     def _constraint_start_stop_ratio_gdp(self, model):
         status = model.find_component('status_' + self.name)
-        #start = model.find_component('start_' + self.name)
+        # start = model.find_component('start_' + self.name)
         model.cons.add(status[1] == 0)
         for t in model.time_step:
             if t == model.time_step[-1]:
@@ -212,7 +224,7 @@ class CHPFluidSmallHi(CHP, FluidComponent):
             c_8 = pyo.Constraint(expr=status[t + 4] == 1)
             c_9 = pyo.Constraint(expr=status[t + 5] == 1)
             c_10 = pyo.Constraint(expr=status[t + 6] == 1)
-            #c_12 = pyo.Constraint(expr=start[t] == 1)
+            # c_12 = pyo.Constraint(expr=start[t] == 1)
             model.add_component('d1_dis_' + str(t), d1)
             d1.add_component('d1_1' + str(t), c_5)
             d1.add_component('d1_2' + str(t), c_6)
@@ -220,20 +232,20 @@ class CHPFluidSmallHi(CHP, FluidComponent):
             d1.add_component('d1_4' + str(t), c_8)
             d1.add_component('d1_5' + str(t), c_9)
             d1.add_component('d1_6' + str(t), c_10)
-            #d1.add_component('d1_7' + str(t), c_12)
+            # d1.add_component('d1_7' + str(t), c_12)
             e1 = Disjunct()
             c_11 = pyo.Constraint(expr=status[t + 1] - status[t] == 0)
-            #c_13 = pyo.Constraint(expr=start[t] == 0)
+            # c_13 = pyo.Constraint(expr=start[t] == 0)
             model.add_component('e1_dis_' + str(t), e1)
             e1.add_component('e1_1' + str(t), c_11)
-            #e1.add_component('e1_2' + str(t), c_13)
+            # e1.add_component('e1_2' + str(t), c_13)
 
             f1 = Disjunct()
             c_12 = pyo.Constraint(expr=status[t + 1] - status[t] == -1)
-            #c_14 = pyo.Constraint(expr=start[t] == 0)
+            # c_14 = pyo.Constraint(expr=start[t] == 0)
             model.add_component('f1_dis_' + str(t), f1)
             f1.add_component('f1_1' + str(t), c_12)
-            #f1.add_component('f1_2' + str(t), c_14)
+            # f1.add_component('f1_2' + str(t), c_14)
 
             dj1 = Disjunction(expr=[d1, e1, f1])
             model.add_component('dj1_dis_' + str(t), dj1)
@@ -246,4 +258,12 @@ class CHPFluidSmallHi(CHP, FluidComponent):
                                                             model.time_step))
         model.cons.add(other_op_cost == start_cost)
 
-
+    def _constraint_mass_flow(self, model):
+        for heat_output in self.heat_flows_out:
+            m_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
+                                        '_' + 'mass')
+            m_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
+                                         '_' + 'mass')
+            for t in range(len(model.time_step) - 1):
+                model.cons.add(m_in[t + 1] == m_out[t + 1])
+                model.cons.add(m_in[t + 2] == m_in[t + 1])
