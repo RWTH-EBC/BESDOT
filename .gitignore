@@ -1,10 +1,12 @@
 # admin file for git and pycharm
 **/__pycache__
 /.idea/
+.idea/
 
 # output results or intermediate results
 /data/opt_output/
 /data/cls_file/
+/data/denmark_energy_hub/
 /tools/analysis_lp_new.txt
 /tools/analysis_lp_temp.txt
 gurobi.log

@@ -159,11 +159,20 @@ class Building(object):
                 min_size = self.topology['min_size'][item]
                 max_size = self.topology['max_size'][item]
                 current_size = self.topology['current_size'][item]
-                if comp_type in ['HeatPump', 'GasHeatPump', 'HeatPumpFluid','HeatPumpQli','HeatPumpFluidQli',
-                                 'AirHeatPumpFluid', 'GroundHeatPumpFluid']:
+                if comp_type in ['HeatPump', 'GasHeatPump', 'HeatPumpFluid',
+                                 'HeatPumpQli', 'HeatPumpFluidQli',
+                                 'AirHeatPumpFluid', 'UnderfloorHeat']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       temp_profile=
                                                       env.temp_profile,
+                                                      comp_model=comp_model,
+                                                      min_size=min_size,
+                                                      max_size=max_size,
+                                                      current_size=current_size)
+                elif comp_type in ['GroundHeatPumpFluid']:
+                    comp_obj = module_dict[comp_type](comp_name=comp_name,
+                                                      temp_profile=
+                                                      env.soil_temperature_profile,
                                                       comp_model=comp_model,
                                                       min_size=min_size,
                                                       max_size=max_size,
@@ -247,6 +256,7 @@ class Building(object):
                                                     'GasHeatPump', 'PV',
                                                     'SolarThermalCollector',
                                                     'SolarThermalCollectorFluid',
+                                                    'UnderfloorHeat',
                                                     ]:
                 # cluster_profile = pd.Series(cluster.clusterPeriodDict[
                 #                                 'temp']).tolist()
@@ -262,6 +272,11 @@ class Building(object):
                 cluster_profile = cluster['irr'].tolist()
                 self.components[comp_name].update_profile(
                     irr_profile=cluster_profile)
+            if self.topology['comp_type'][item] in ['GroundHeatPumpFluid']:
+                cluster_profile = pd.Series(cluster.clusterPeriodDict[
+                                                'soil_temp']).tolist()
+                self.components[comp_name].update_profile(
+                    temp_profile=cluster_profile)
             if isinstance(self.components[comp_name], Storage):
                 # The indicator cluster in storage could determine if the
                 # cluster function should be called.
