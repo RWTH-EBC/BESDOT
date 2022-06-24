@@ -106,7 +106,7 @@ class SolarThermalCollectorFluid(FluidComponent):
             for t in model.time_step:
                 # todo:Beim Stagnationszustand gilt output_energy< input_energy
                 # aber das Ergebnis ist komisch
-                model.cons.add(output_energy[t] <= input_energy[t])
+                model.cons.add(output_energy[t] == input_energy[t])
                 model.cons.add(
                     output_energy[t] == self.solar_liquid_heat_cap * (
                             m_out[t] * t_out[t] - m_in[t] * t_in[t]) /

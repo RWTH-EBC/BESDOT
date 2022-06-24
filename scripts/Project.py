@@ -119,7 +119,7 @@ class Project(object):
                                            clusterMethod='hierarchical',
                                            extremePeriodMethod='new_cluster_center',
                                            addPeakMin=['temp'],
-                                           addPeakMax=['heat_demand'])
+                                           addPeakMax=['heat_demand']) #hierarchical k_medoids
             typ_periods = aggregation.createTypicalPeriods()
             period_occurs = aggregation.clusterPeriodNoOccur
             typ_periods = typ_periods.reset_index()
@@ -211,7 +211,8 @@ class Project(object):
         # Attention! The option was set for the dimension optimization for
         # HomoStorage
         solver.options['NonConvex'] = 2
-        solver.options['MIPGap'] = 0.03
+        solver.options['MIPGap'] = 0.02
+        #solver.options['TimeLimit'] = 10000
         #solver.options['Heuristics'] = 0.05
         opt_result = solver.solve(self.model, tee=True)
 
