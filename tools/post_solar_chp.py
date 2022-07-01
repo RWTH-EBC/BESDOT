@@ -60,255 +60,6 @@ def plot_single(name, profile, time_interval):
     plt.savefig(plot_output)
     plt.close()
 
-
-def plot_double_24h(csv_file, comp_name1, comp_name2):
-    plot_output = os.path.join(opt_output_path, 'plot', 'profile of ' +
-                               comp_name1)
-    df = pd.read_csv(csv_file)
-    data1 = df[df['var'].str.contains(comp_name1 + '_' + comp_name2 + '_temp')]
-    data1 = data1.reset_index(drop=True)
-    profile_temp = data1['value']
-    data2 = df[df['var'].str.contains(comp_name2 + '_' + comp_name1 + '_temp')]
-    data2 = data2.reset_index(drop=True)
-    profile_return_temp = data2['value']
-    data3 = df[(df['var'].str.contains('input_')) & (df['var'].str.contains(
-        comp_name1))]
-    data3 = data3.reset_index(drop=True)
-    profile_inputpower = data3['value']
-    data4 = df[(df['var'].str.contains('output_')) & (df['var'].str.contains(
-        comp_name1))]
-    data4 = data4.reset_index(drop=True)
-    profile_outputpower = data4['value']
-    fig = plt.figure(figsize=(8, 8))
-    ax = fig.add_subplot(111)
-    ax.plot(profile_inputpower, '-', label='input')
-    ax.plot(profile_outputpower, '-', label='output')
-    ax2 = ax.twinx()
-    ax2.plot(profile_temp, '-r', label=comp_name1 + '_' + comp_name2 + '_temp')
-    ax2.plot(profile_return_temp, '-g', label=comp_name2 + '_' + comp_name1 +
-                                              '_temp')
-    ax.legend(loc='center left', bbox_to_anchor=(0, 1.07), ncol=1)
-    ax.grid(linestyle='--')
-    ax.set_xlabel("Time (h)")
-    ax.set_title('Profile of ' + comp_name1)
-    ax.set_ylabel(r"Power (KW)")
-    ax2.set_ylabel(r"Temperature ($^\circ$C)")
-    ax.set_xlim(xmax=len(profile_temp))
-    ax2.legend(loc='upper right', bbox_to_anchor=(1.1, 1.12), ncol=1)
-    plt.savefig(plot_output)
-
-
-def plot_double(csv_file, comp_name1, comp_name2, time_step, inputenergy,
-                outputenergy):
-    profile_temp_original, profile_return_temp_original, \
-    profile_inputpower_original, profile_outputpower_original = \
-        get_info_for_figu(csv_file, comp_name1, comp_name2, time_step,
-                          inputenergy, outputenergy)
-    for i in range(1, len(profile_temp_original) + 1):
-        if i < len(profile_temp_original) + 1:
-            plot_output = os.path.join(opt_output_path, 'plot', 'profile of ' +
-                                       comp_name1 + ' day ' + str(i))
-            profile_temp = profile_temp_original[i - 1]
-            profile_return_temp = profile_return_temp_original[i - 1]
-            profile_inputpower = profile_inputpower_original[i - 1]
-            profile_outputpower = profile_outputpower_original[i - 1]
-            fig = plt.figure(figsize=(8, 8))
-            ax = fig.add_subplot(111)
-            ax.plot(profile_inputpower, '-', label='input')
-            ax.plot(profile_outputpower, '--', label='output')
-            ax2 = ax.twinx()
-            ax2.plot(profile_temp, '-r',
-                     label=comp_name1 + '_' + comp_name2 + '_temp')
-            ax2.plot(profile_return_temp, '-g',
-                     label=comp_name2 + '_' + comp_name1 +
-                           '_temp')
-            ax.legend(loc='center left', bbox_to_anchor=(0, 1.07), ncol=1)
-            ax.grid()
-            ax.set_xlabel("Time (h)")
-            ax.set_title('Profile of ' + comp_name1 + ' day ' + str(i))
-            ax.set_ylabel(r"Power (KW)")
-            ax2.set_ylabel(r"Temperature ($^\circ$C)")
-            ax.set_xlim(xmax=24)
-            ax2.legend(loc='upper right', bbox_to_anchor=(1.1, 1.12), ncol=1)
-            plt.savefig(plot_output)
-            i = i + 1
-
-
-def get_info_for_figu(csv_file, comp_name1, comp_name2, time_step,
-                      inputenergy, outputenergy):
-    df = pd.read_csv(csv_file)
-    name1 = comp_name1 + '_' + comp_name2 + '_temp[1]'
-    name2 = comp_name2 + '_' + comp_name1 + '_temp[1]'
-    name3 = 'input_' + inputenergy + '_' + comp_name1 + '[1]'
-    name4 = 'output_' + outputenergy + '_' + comp_name1 + '[1]'
-    part = int(8760 / time_step)
-    temp = []
-    return_temp = []
-    input_power = []
-    output_power = []
-    pa = []
-    pa_co = 1
-    for i in range(1, 8761):
-        if pa_co != part:
-            pa.append(
-                df["value"][df[df["var"] == str(name1[:-2] + str(i) + "]")].
-                    index].to_list()[0])
-            pa_co += 1
-        else:
-            pa_co = 1
-            pa.append(
-                df["value"][df[df["var"] == str(name1[:-2] + str(i) + "]")].
-                    index].to_list()[0])
-            temp.append(pa)
-            pa = []
-    for i in range(1, 8761):
-        if pa_co != part:
-            pa.append(
-                df["value"][df[df["var"] == str(name2[:-2] + str(i) + "]")].
-                    index].to_list()[0])
-            pa_co += 1
-        else:
-            pa_co = 1
-            pa.append(
-                df["value"][df[df["var"] == str(name2[:-2] + str(i) + "]")].
-                    index].to_list()[0])
-            return_temp.append(pa)
-            pa = []
-    for i in range(1, 8761):
-        if pa_co != part:
-            pa.append(
-                df["value"][df[df["var"] == str(name3[:-2] + str(i) + "]")].
-                    index].to_list()[0])
-            pa_co += 1
-        else:
-            pa_co = 1
-            pa.append(
-                df["value"][df[df["var"] == str(name3[:-2] + str(i) + "]")].
-                    index].to_list()[0])
-            input_power.append(pa)
-            pa = []
-    for i in range(1, 8761):
-        if pa_co != part:
-            pa.append(
-                df["value"][df[df["var"] == str(name4[:-2] + str(i) + "]")].
-                    index].to_list()[0])
-            pa_co += 1
-        else:
-            pa_co = 1
-            pa.append(
-                df["value"][df[df["var"] == str(name4[:-2] + str(i) + "]")].
-                    index].to_list()[0])
-            output_power.append(pa)
-            pa = []
-    return temp, return_temp, input_power, output_power
-
-
-def get_short_profiles(start_time, time_step, csv_file):
-    def combine_items(ori_list):
-        new_list = []
-        for nr_1 in range(len(ori_list)):
-            for nr_2 in range(len(ori_list)):
-                if nr_2 != nr_1:
-                    new_list.append(ori_list[nr_1] + '_' + ori_list[nr_2])
-        return new_list
-
-    elec_list = combine_items(elec_comp_list)
-    heat_list = combine_items(heat_comp_list)
-
-    output_df = pd.read_csv(csv_file)
-    elements_dict = find_element(output_df)
-
-    short_elec_df = pd.DataFrame()
-    short_heat_df = pd.DataFrame()
-    for element in elements_dict:
-        if len(elements_dict[element]) == 1:
-            pass
-        else:
-            if sum(elements_dict[element][
-                   start_time: start_time + time_step]) == 0:
-                pass
-            else:
-                if element in elec_list:
-                    short_elec_df.insert(0, element,
-                                         elements_dict[element][
-                                         start_time: start_time + time_step])
-                elif element in heat_list:
-                    short_heat_df.insert(0, element,
-                                         elements_dict[element][
-                                         start_time: start_time + time_step])
-
-    return short_elec_df, short_heat_df
-
-
-def plot_short_time(start_time, time_step, csv_file, demand_heat,
-                    demand_elec):
-    """Plot only short time like one day in a graphic"""
-    elec_df, heat_df = get_short_profiles(start_time, time_step, csv_file)
-    # print(elec_df)
-    # print(heat_df)
-
-    demand_heat = demand_heat[start_time: start_time + time_step]
-    demand_elec = demand_elec[start_time: start_time + time_step]
-
-    # plot for heat balance
-    plot_step_profile(energy_type='heat', demand=demand_heat, profile=heat_df,
-                      time_step=time_step)
-
-    # plot for electricity balance
-    plot_step_profile(energy_type='elec', demand=demand_elec, profile=elec_df,
-                      time_step=time_step)
-
-
-def plot_step_profile(energy_type, demand, profile, time_step):
-    fig = plt.figure(figsize=(6, 5.5))
-    ax = fig.add_subplot(1, 1, 1)
-
-    time_steps = range(time_step)
-    accumulate_series = pd.Series([0] * time_step)
-    x_axis = np.linspace(0, time_step - 1, time_step)
-
-    if energy_type == 'heat':
-        sink_tuple = heat_sink_tuple
-    elif energy_type == 'elec':
-        sink_tuple = elec_sink_tuple
-    else:
-        sink_tuple = None
-
-    order_heat = 1.5
-    for device in profile.columns:
-        if not device.endswith(sink_tuple):
-            accumulate_series += profile[device]
-            ax.step(time_steps, accumulate_series, where="post",
-                    label=device, linewidth=2, zorder=order_heat)
-            ax.fill_between(x_axis, accumulate_series,
-                            step="post", zorder=order_heat)
-            order_heat -= 0.1
-    for device in profile.columns:
-        if device.endswith(sink_tuple):
-            last_series_heat = copy.deepcopy(accumulate_series)
-            accumulate_series -= profile[device]
-            ax.step(time_steps, accumulate_series, where="post",
-                    linewidth=0.1, zorder=1.5)
-            ax.fill_between(x_axis, last_series_heat, accumulate_series,
-                            label=device, step="post", zorder=1.6,
-                            hatch='///', alpha=0)
-            order_heat -= 0.1
-    ax.step(time_steps, demand, where="post", label='Bedarf', linestyle='--',
-            linewidth=2, zorder=1.5)
-
-    ax.set_ylabel('Leistung in kW')
-    ax.set_xlim(0, 23)
-    ax.set_ylim(0, None)
-    ax.set_xlabel('Stunde')
-
-    handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles[::-1], labels[::-1], loc='upper right')
-    ax.grid(axis="y", alpha=0.6)
-    ax.set_axisbelow(True)
-    fig.suptitle(t='hourly profile', fontsize=18)
-    plt.show()
-
-
 def find_element(output_df):
     """find all elements in dataframe, the variables with same name but
     different time step would be stored in a list"""
@@ -1932,4 +1683,51 @@ def step_plot_chp_last(csv_file, time_step):
     plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
     plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
     fig.tight_layout()
+    plt.savefig(plot_output)
+
+def step_plot_test_qli(csv_file, time_step):
+    font_label = {'family': 'Times New Roman', 'weight': 'semibold', 'style':
+        'normal', 'size': '15'}
+    font_legend = {'family': 'Times New Roman', 'weight': 'medium', 'style':
+        'normal', 'size': '15'}
+    font_titel = {'family': 'Times New Roman', 'weight': 'bold', 'style':
+        'normal', 'size': '18'}
+    plot_output = os.path.join(opt_output_path, 'plot','Test')
+    df = pd.read_csv(csv_file)
+    time_steps = range(time_step)
+
+    data1 = df[df['var'].str.contains('temp_water_tes')]
+    data1 = data1.reset_index(drop=True)
+    value1 = data1['value']
+    data2 = df[df['var'].str.contains('heat_tp_val_therm_cns')]
+    data2 = data2.reset_index(drop=True)
+    value2 = data2['value']
+
+    fig = plt.figure(figsize=(6.5, 5.5))
+    ax = fig.add_subplot(111)
+    ax.xaxis.set_minor_locator(MultipleLocator(5))
+    ax.grid(linestyle='--', which='both')
+
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    ax.set_title('Test', font_titel, y=1.02)
+    lns1 = ax.step(time_steps, value1, where="post",
+                   label='temp_water_tes',
+                   linestyle='--', color='k', linewidth=2)
+    ax2 = ax.twinx()
+    lns2 = ax2.step(time_steps, value2, where="post",
+                    label='heat_tp_val_therm_cns',
+                    color='r', linewidth=2, alpha=0.7)
+    ax.set_ylim(ymax=max(value1) * 1.3)
+    lns = lns1 + lns2
+    labs = [l.get_label() for l in lns]
+    plt.legend(lns, labs, loc='best', prop=font_legend)
+
+    ax.set_xlabel("Stunde (h)", font_label)
+    ax.set_ylabel(r"Temperatur ($^\circ$C)", font_label)
+    ax2.set_ylabel(r'Leistung (kW)', font_label)
+    plt.xticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    plt.yticks(fontname='Times New Roman', fontsize=15, fontweight='medium')
+    fig.tight_layout()
+
     plt.savefig(plot_output)

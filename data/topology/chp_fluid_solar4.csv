@@ -1,0 +1,14 @@
+comp_name,comp_type,model,min_size,max_size,current_size,therm_cns,water_tes,gas_grid,e_grid,tp_val_therm,e_cns,solar_coll,e_meter,heat_ex,bat,pv,heat_pump,boi_s
+therm_cns,HeatConsumptionFluid,HeatCNS,0,100,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+water_tes,HomoStorage,TES_homo_40,0,2,0,0,0,0,0,,0,0,0,0,0,0,0,0
+gas_grid,GasGrid,GAS1,0,1000,0,0,0,0,0,0,0,0,0,0,0,0,0,
+e_grid,ElectricityGrid,GRD1,0,1000,0,0,0,0,0,0,,0,0,0,,0,,0
+tp_val_therm,ThreePortValve,,,,,,0,0,0,0,0,0,0,0,0,0,0,0
+e_cns,ElectricalConsumption,CNS1,0,10000,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+solar_coll,SolarThermalCollectorFluid,FPC,0,10000,0,0,0,0,0,0,0,0,0,,0,0,0,0
+e_meter,ElectricityMeter,EM,0,10000,0,0,0,0,0,0,,0,0,0,,0,,0
+heat_ex,HeatExchangerFluid_Solar,HE1,0,10000,0,0,,0,0,0,0,0,0,0,0,0,0,0
+bat,Battery,BAT_district,0,10000,0,0,0,0,,0,,0,0,0,0,0,,0
+pv,PV,PV_district,0,10000,0,0,0,0,,0,0,0,,0,0,0,0,0
+heat_pump,HeatPumpFluid,EHP_district,0,100000,0,0,,0,0,0,0,0,0,0,0,0,0,0
+boi_s,StandardBoiler,BOI_district,0,10000,0,0,,0,0,0,0,0,0,0,0,0,0,0

@@ -40,7 +40,7 @@ input_energy_path = os.path.join(base_path, "data", "tek_data",
 input_zone_path = os.path.join(base_path, "data", "tek_data",
                                "GHD_Zonierung.xlsx")
 input_tabula_path = os.path.join(base_path, "data", "tek_data",
-                                 "TABULA_data.xlsx")
+                               "TABULA_data.xlsx")
 output_path = os.path.join(base_path, "data", "tek_data", "output_heat_profile")
 
 
@@ -261,13 +261,15 @@ def degree_day(zone_typ, annual_value, profile_df, temperature_profile,
         total_degree_day = 0
         for time_step in range(8760):
             if temperature_profile[time_step] < start_temp and \
-                    status_list[time_step] == 1:
+                    status_list[time_step] == 1 and \
+                    temperature_profile[time_step] < set_temp_heat:
                 total_degree_day += (set_temp_heat - temperature_profile[
                     time_step])
 
         for time_step in range(8760):
             if temperature_profile[time_step] < start_temp and \
-                    status_list[time_step] == 1:
+                    status_list[time_step] == 1 and \
+                    temperature_profile[time_step] < set_temp_heat:
                 heat_profile.append(
                     (set_temp_heat - temperature_profile[time_step]) /
                     total_degree_day * annual_value)
