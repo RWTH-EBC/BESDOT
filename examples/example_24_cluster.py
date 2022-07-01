@@ -7,7 +7,6 @@ from scripts.Environment import Environment
 from scripts.Building import Building
 import tools.post_processing as post_pro
 
-
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 ################################################################################
@@ -15,8 +14,7 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ################################################################################
 
 # Generate a project object at first.
-project = Project(name='project_24', typ='building')
-
+project = Project(name='project_24_cls', typ='building')
 
 # Generate the environment object
 env_24 = Environment(time_step=8760)
@@ -28,7 +26,7 @@ bld_24 = Building(name='bld_24', area=200)
 
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
-bld_24.add_thermal_profile('heat', env_24.temp_profile_original, env_24)
+bld_24.add_thermal_profile('heat', env_24)
 
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
@@ -44,8 +42,8 @@ project.add_building(bld_24)
 # The profiles could be clustered are: demand profiles, weather profiles and
 # prices profiles (if necessary). demand profiles are stored in buildings
 # and other information are stored in Environment objects.
-project.time_cluster(save_cls='12day_24hour.csv')
-# project.time_cluster(read_cls='12day_24hour.csv')
+# project.time_cluster(save_cls='12day_24hour.csv')
+project.time_cluster(read_cls='12day_24hour.csv')
 
 # After clustering need to update the demand profiles and storage assumptions.
 for bld in project.building_list:
@@ -55,7 +53,12 @@ for bld in project.building_list:
 #                        Build pyomo model and run optimization
 ################################################################################
 project.build_model(obj_typ='annual_cost')
-project.run_optimization('gurobi', save_lp=True, save_result=True)
+# project.run_optimization('gurobi', save_lp=True, save_result=False)
+
+# save model
+lp_model_path = os.path.join(base_path, 'data', 'opt_output',
+                             project.name + '_model.lp')
+project.model.write(lp_model_path, io_options={'symbolic_solver_labels': True})
 
 ################################################################################
 #                                  Post-processing
@@ -64,4 +67,3 @@ project.run_optimization('gurobi', save_lp=True, save_result=True)
 # result_output_path = os.path.join(base_path, 'data', 'opt_output',
 #                                   project.name + '_result.csv')
 # # post_pro.plot_all(result_output_path, time_interval=[0, env_10.time_step])
-
