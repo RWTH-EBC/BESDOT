@@ -14,7 +14,7 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ################################################################################
 
 # Generate a project object at first.
-project = Project(name='project_24_cls', typ='building')
+project = Project(name='project_24', typ='building')
 
 # Generate the environment object
 env_24 = Environment(time_step=8760)
@@ -43,22 +43,22 @@ project.add_building(bld_24)
 # prices profiles (if necessary). demand profiles are stored in buildings
 # and other information are stored in Environment objects.
 # project.time_cluster(save_cls='12day_24hour.csv')
-project.time_cluster(read_cls='12day_24hour.csv')
+# project.time_cluster(read_cls='12day_24hour.csv')
 
 # After clustering need to update the demand profiles and storage assumptions.
-for bld in project.building_list:
-    bld.update_components(project.cluster)
+# for bld in project.building_list:
+#     bld.update_components(project.cluster)
 
 ################################################################################
 #                        Build pyomo model and run optimization
 ################################################################################
 project.build_model(obj_typ='annual_cost')
-# project.run_optimization('gurobi', save_lp=True, save_result=False)
+project.run_optimization('gurobi', save_lp=False, save_result=False)
 
 # save model
-lp_model_path = os.path.join(base_path, 'data', 'opt_output',
-                             project.name + '_model.lp')
-project.model.write(lp_model_path, io_options={'symbolic_solver_labels': True})
+# lp_model_path = os.path.join(base_path, 'data', 'opt_output',
+#                              project.name + '_model.lp')
+# project.model.write(lp_model_path, io_options={'symbolic_solver_labels': True})
 
 ################################################################################
 #                                  Post-processing
