@@ -46,9 +46,15 @@ test_project.add_building(test_bld_1)
 test_project.build_model()
 test_project.run_optimization('gurobi', save_lp=True, save_result=True)
 
+# save model
+# lp_model_path = os.path.join(base_path, 'data', 'opt_output',
+#                              test_project.name + '_model.lp')
+# test_project.model.write(lp_model_path,
+#                          io_options={'symbolic_solver_labels': True})
+
 ################################################################################
 #                                  Post-processing
 ################################################################################
-result_file = os.path.join(base_path, 'data', 'opt_output',
-                           'project_1_result.csv')
+# result_file = os.path.join(base_path, 'data', 'opt_output',
+#                            'project_1_result.csv')
 
