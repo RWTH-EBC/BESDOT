@@ -240,6 +240,5 @@ class Project(object):
             result_df = pd.DataFrame(result_dict.items(), columns=['var',
                                                                    'value'])
             result_df.to_csv(result_output_path)
-
             # Get value of single variable
             # print(self.model.size_pv.value)
