@@ -14,7 +14,7 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ################################################################################
 
 # Generate a project object at first.
-project = Project(name='project_24', typ='building')
+project = Project(name='project_24_cls', typ='building')
 
 # Generate the environment object
 env_24 = Environment(time_step=8760)
@@ -42,12 +42,12 @@ project.add_building(bld_24)
 # The profiles could be clustered are: demand profiles, weather profiles and
 # prices profiles (if necessary). demand profiles are stored in buildings
 # and other information are stored in Environment objects.
-# project.time_cluster(save_cls='12day_24hour.csv')
-# project.time_cluster(read_cls='12day_24hour.csv')
+project.time_cluster(save_cls='4day_24hour.csv', nr_periods=4)
+# project.time_cluster(read_cls='3day_24hour.csv')
 
 # After clustering need to update the demand profiles and storage assumptions.
-# for bld in project.building_list:
-#     bld.update_components(project.cluster)
+for bld in project.building_list:
+    bld.update_components(project.cluster)
 
 ################################################################################
 #                        Build pyomo model and run optimization

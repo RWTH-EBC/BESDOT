@@ -43,7 +43,8 @@ def del_duplicate(lines, file_new):
             file_new.write(line)
             #print(type(lines_seen))
 
+
 if __name__ == "__main__":
-    file_name = 'project_24_cls_model.lp'
+    file_name = 'project_24_model.lp'
     file = os.path.join(base_path, 'data', 'opt_output', file_name)
     analysis_lp_file(file)
