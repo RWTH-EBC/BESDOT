@@ -87,8 +87,8 @@ class Environment(object):
         # Read the weather file in the directory "data"
         # The parameter with suffix '_whole' are the parameter for the whole
         # year and without suffix '_whole' are slice for given time steps.
-        temp_profile, wind_profile, irr_profile, soil_temperature_profile = _read_weather_file(
-            weather_file, city, year)
+        temp_profile, wind_profile, irr_profile, soil_temperature_profile = \
+            _read_weather_file(weather_file, city, year)
         self.temp_profile_whole = temp_profile
         self.wind_profile_whole = wind_profile
         self.irr_profile_whole = irr_profile
@@ -96,7 +96,8 @@ class Environment(object):
         self.temp_profile = temp_profile[start_time:start_time + time_step]
         self.wind_profile = wind_profile[start_time:start_time + time_step]
         self.irr_profile = irr_profile[start_time:start_time + time_step]
-        self.soil_temperature_profile = soil_temperature_profile[start_time:start_time + time_step]
+        self.soil_temperature_profile = soil_temperature_profile[
+                                        start_time: start_time + time_step]
         # The following slice for temperatur profile is set a virtual
         # temperature so that there is no heat demand in summer when
         # calculating heat demand. The hard coded value for 3624 means day
