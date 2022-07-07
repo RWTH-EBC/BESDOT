@@ -274,7 +274,6 @@ class Component(object):
         input_energy = model.find_component('input_' + energy_type + '_' +
                                             self.name)
 
-        print(self.name)
         # Sum up all the inputs
         for t in model.time_step:
             model.cons.add(input_energy[t] == sum(

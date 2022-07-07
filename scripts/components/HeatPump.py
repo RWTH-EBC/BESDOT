@@ -21,18 +21,25 @@ class HeatPump(Component):
                          current_size=current_size)
 
         self.temp_profile = temp_profile
-        # self.cop = list(map(self.calc_cop, self.temp_profile))
+        self.set_temp = 55
 
-    def _constraint_cop(self, model, temp_profile):
+    def _constraint_cop(self, model):
         """
         Calculate the COP value in each time step, with default set
         temperature of 60 degree and machine efficiency of 40%.
+        Setting COP as Parameter instead of Variable could reduce the
+        complexity of mathematical model. Even from non convex model into
+        convex model.
         """
-        cop = model.find_component('cop_' + self.name)
-        temp_var = model.find_component('temp_' + self.name)
+        # The cop_list could only be defined with dict, list is not possible
+        # for pyomo 6.0. The reason is the unmatched index in pyomo and python
+        cop_list = {}
         for t in model.time_step:
-            model.cons.add(cop[t] * (temp_var[t] - temp_profile[t - 1]) == (
-                    temp_var[t] + 273.15) * self.efficiency[self.outputs[0]])
+            cop_list[t] = (self.set_temp + 273.15) * self.efficiency[
+                self.outputs[0]] / (self.set_temp - self.temp_profile[t - 1])
+
+        cop = pyo.Param(model.time_step, initialize=cop_list)
+        model.add_component('cop_' + self.name, cop)
 
     def _constraint_conver(self, model):
         """
@@ -51,16 +58,16 @@ class HeatPump(Component):
             model.cons.add(output_powers[t] == input_powers[t] * cop[t])
 
     def add_cons(self, model):
+        self._constraint_cop(model)
         self._constraint_conver(model)
-        self._constraint_cop(model, self.temp_profile)
         self._constraint_vdi2067(model)
         self._constraint_maxpower(model)
 
-    def add_vars(self, model):
-        super().add_vars(model)
-
-        temp = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('temp_' + self.name, temp)
-
-        cop = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('cop_' + self.name, cop)
+    # def add_vars(self, model):
+    #     """
+    #     This method adds the pyomo variables and parameters
+    #     """
+    #     super().add_vars(model)
+    #
+    #     cop = pyo.Param(model.time_step, initialize=0)
+    #     model.add_component('cop_' + self.name, cop)

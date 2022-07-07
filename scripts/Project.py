@@ -3,6 +3,7 @@ Simplified Modell for internal use.
 """
 
 import os
+import time
 from warnings import warn
 import pyomo.environ as pyo
 import pandas as pd
@@ -214,7 +215,7 @@ class Project(object):
         solver.options['MIPGap'] = 0.02
         #solver.options['TimeLimit'] = 10000
         #solver.options['Heuristics'] = 0.05
-        opt_result = solver.solve(self.model, tee=True)
+        solver.solve(self.model, tee=True)
 
         # Save model in lp file, this only works with linear model. That is
         # not necessary.
@@ -229,17 +230,12 @@ class Project(object):
             result_output_path = os.path.join(base_path, 'data', 'opt_output',
                                               self.name + '_result.csv')
 
-            # Get results for all variable. This is VERY slow.
-            # todo (yni): find an more efficient way to save results
-            result_dict = {}
+            # Get results for all variable.
+            var_list = []
+            value_list = []
             for v in self.model.component_objects(pyo.Var, active=True):
-                # print("Variable component object",v)
-                for index in v:
-                    # print("   ", v[index], v[index].value)
-                    result_dict[str(v[index])] = v[index].value
-            result_df = pd.DataFrame(result_dict.items(), columns=['var',
-                                                                   'value'])
+                var_list += [v.name + '[' + str(nr) + ']' for nr in list(v)]
+                value_list += list(v[:].value)
+            result_df = pd.DataFrame(list(zip(var_list, value_list)),
+                                     columns=['var', 'value'])
             result_df.to_csv(result_output_path)
-
-            # Get value of single variable
-            # print(self.model.size_pv.value)

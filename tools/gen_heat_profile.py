@@ -68,7 +68,6 @@ def gen_heat_profile(building_typ,
     total_heat_demand = 0
     for row in range(len(new_zone_df)):
         zone = new_zone_df.loc[row, 'DIN_Zone']  # Zone name in DIN
-        print(zone)
         hour_status = op_time_status(year, zone)
         zone_area = new_zone_df.loc[row, 'new_area']
         zone_heat_demand = calc_zone_demand(demand_df, 'heat', zone, zone_area)
@@ -97,8 +96,6 @@ def op_time_status(year, zone):
     """
     weekday_list = find_weekday(year)
     profile_df = pd.read_excel(input_profile_path, sheet_name='DIN V 18599')
-    # print(zone)
-    # print(profile_df.loc[profile_df['Raumtyp'] == zone])
     start_time = profile_df.loc[profile_df['Raumtyp'] == zone][
         'Nutzungszeit_von'].values[0]
     end_time = profile_df.loc[profile_df['Raumtyp'] == zone][
@@ -276,7 +273,6 @@ def degree_day(zone_typ, annual_value, profile_df, temperature_profile,
             else:
                 heat_profile.append(0)
 
-    # print(heat_profile)
     return heat_profile
 
 
@@ -320,8 +316,6 @@ def calc_residential_demand(bld_type, bld_year, bld_area,
     heating_demand = bld['Heizung (Wärmeerzeugung)'].values[0] * bld_area
     hot_water_demand = bld['Warmwasser (Wärmeerzeugung)'].values[0] * bld_area
 
-    print(heating_demand)
-    print(hot_water_demand)
     return heating_demand, hot_water_demand
 
 
