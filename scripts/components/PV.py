@@ -44,6 +44,7 @@ class PV(Component):
                                             self.name)
         area = model.find_component('solar_area_' + self.name)
         size = model.find_component('size_' + self.name)
+        # todo: change it with component efficiency?
         model.cons.add(size * 1000 / 450 * 2 == area)
 
         for t in model.time_step:
