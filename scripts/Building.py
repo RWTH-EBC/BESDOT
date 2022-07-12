@@ -236,14 +236,16 @@ class Building(object):
         for item in self.topology.index:
             comp_name = self.topology['comp_name'][item]
             if self.topology['comp_type'][item] in ['HeatConsumption',
-                                                    'HeatConsumptionFluid',
-                                                    'ElectricalConsumption',
-                                                    ]:
+                                                    'HeatConsumptionFluid']:
                 # cluster_profile = pd.Series(cluster.clusterPeriodDict[
                 #     'heat_demand']).tolist()
                 cluster_profile = cluster['heat_demand'].tolist()
                 self.components[comp_name].update_profile(
                     consum_profile=cluster_profile)
+            if self.topology['comp_type'][item] in ['ElectricalConsumption']:
+                    cluster_profile = cluster['elec_demand'].tolist()
+                    self.components[comp_name].update_profile(
+                        consum_profile=cluster_profile)
             if self.topology['comp_type'][item] in ['HotWaterConsumption',
                                                     'HotWaterConsumptionFluid'
                                                     ]:

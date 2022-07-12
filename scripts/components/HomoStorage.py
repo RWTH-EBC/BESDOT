@@ -286,9 +286,9 @@ class HomoStorage(FluidComponent, HotWaterStorage):
         self._constraint_heat_outputs(model)
         # self._constraint_input_permit(model, min_temp=30, init_status='on')
         self._constraint_vdi2067(model)
-        '''
+
         self._constraint_conserve_temp(model)
-        
+        '''
         if self.cluster is not None:
             self._constraint_conserve(model)
         else:
@@ -309,3 +309,8 @@ class HomoStorage(FluidComponent, HotWaterStorage):
 
         loss = pyo.Var(model.time_step, bounds=(0, None))
         model.add_component('loss_' + self.name, loss)
+
+    def _constraint_conserve_temp(self, model):
+        temp_var = model.find_component('temp_' + self.name)
+        model.cons.add(temp_var[len(model.time_step)] == temp_var[1])
+

@@ -1,11 +1,9 @@
 import os
 import warnings
-
 import pandas as pd
 import pyomo.environ as pyo
 from pyomo.core import lor
 from pyomo.gdp import Disjunct, Disjunction
-
 from scripts.FluidComponent import FluidComponent
 from scripts.components.CHP import CHP
 from tools.calc_annuity_vdi2067 import calc_annuity
@@ -61,11 +59,9 @@ class CHPFluidSmall(CHP, FluidComponent):
         inlet_temp = model.find_component('inlet_temp_' + self.name)
         therm_eff = model.find_component('therm_eff_' + self.name)
         for t in model.time_step:
-            model.cons.add(therm_eff[t] == 0.705 - 0.0008 * (Qth - 44) -
-                           0.006 * (inlet_temp[t] - 30))
+            model.cons.add(therm_eff[t] == 0.705 - 0.0008 * (Qth - 44) - 0.006 * (inlet_temp[t] - 30))
 
     def _constraint_therm_eff_gdp(self, model):
-        small_num = 0.00001
         Qth = model.find_component('therm_size_' + self.name)
         inlet_temp = model.find_component('inlet_temp_' + self.name)
         therm_eff = model.find_component('therm_eff_' + self.name)
@@ -73,8 +69,7 @@ class CHPFluidSmall(CHP, FluidComponent):
             x = Disjunct()
             c_1 = pyo.Constraint(expr=inlet_temp[t] <= 50)
             c_2 = pyo.Constraint(
-                expr=therm_eff[t] == 0.705 - 0.0008 * (Qth - 44) - 0.006 * (
-                        inlet_temp[t] - 30))
+                expr=therm_eff[t] == 0.705 - 0.0008 * (Qth - 44) - 0.006 * (inlet_temp[t] - 30))
             model.add_component('x_dis_' + str(t), x)
             x.add_component('x_1' + str(t), c_1)
             x.add_component('x_2' + str(t), c_2)
@@ -96,7 +91,7 @@ class CHPFluidSmall(CHP, FluidComponent):
     # Zu hohe Temperaturspreizng (>25 Grad) führt zur Beschädigung der Anlagen.
 
     def _constraint_temp(self, model):
-        #outlet_temp = model.find_component('outlet_temp_' + self.name)
+        # outlet_temp = model.find_component('outlet_temp_' + self.name)
         inlet_temp = model.find_component('inlet_temp_' + self.name)
         for heat_output in self.heat_flows_out:
             t_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
@@ -106,7 +101,7 @@ class CHPFluidSmall(CHP, FluidComponent):
             for t in model.time_step:
                 model.cons.add(self.outlet_temp == t_out[t])
                 model.cons.add(inlet_temp[t] == t_in[t])
-                model.cons.add(inlet_temp[t] <= 50)
+
 
     # status_chp ----- zur Beschreibung der taktenden Betrieb
     # input * η = output
@@ -147,6 +142,7 @@ class CHPFluidSmall(CHP, FluidComponent):
         # todo: fix cost
         self._constraint_vdi2067_chp_gdp(model)
         '''
+        self._constraint_status(model)
 
     def add_vars(self, model):
         super().add_vars(model)
@@ -157,10 +153,10 @@ class CHPFluidSmall(CHP, FluidComponent):
         therm_eff = pyo.Var(model.time_step, bounds=(0, 1))
         model.add_component('therm_eff_' + self.name, therm_eff)
 
-        #outlet_temp = pyo.Var(model.time_step, bounds=(12, 95))
-        #model.add_component('outlet_temp_' + self.name, outlet_temp)
+        # outlet_temp = pyo.Var(bounds=(12, 95))
+        # model.add_component('outlet_temp_' + self.name, outlet_temp)
 
-        inlet_temp = pyo.Var(model.time_step, bounds=(12, 95))
+        inlet_temp = pyo.Var(model.time_step, bounds=(40, 80))
         model.add_component('inlet_temp_' + self.name, inlet_temp)
 
         status = pyo.Var(range(1, len(model.time_step) + 6), domain=pyo.Binary)
@@ -183,8 +179,7 @@ class CHPFluidSmall(CHP, FluidComponent):
         invest = model.find_component('invest_' + self.name)
         # todo(qli): https://www.baulinks.de/webplugin/2010/1276.php4
         model.cons.add(size * 1131.2 + 14490 + 3800 / 50 * size == invest)
-        annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w,
-                               self.f_op)
+        annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w, self.f_op)
         model.cons.add(annuity == annual_cost)
 
     def _constraint_vdi2067_chp_gdp(self, model):
@@ -192,7 +187,7 @@ class CHPFluidSmall(CHP, FluidComponent):
         invest = model.find_component('invest_' + self.name)
         Pel = model.find_component('size_' + self.name)
         Qth = model.find_component('therm_size_' + self.name)
-        inlet_temp = model.find_component('inlet_temp_' + self.name)
+
         # status = model.find_component('status_' + self.name)
 
         if self.min_size == 0:
@@ -205,29 +200,18 @@ class CHPFluidSmall(CHP, FluidComponent):
         not_select_inv = pyo.Constraint(expr=invest == 0)
         not_select_therm_size = pyo.Constraint(expr=Qth == 0)
         model.add_component('dis_not_select_' + self.name, dis_not_select)
-        dis_not_select.add_component('not_select_size_' + self.name,
-                                     not_select_size)
-        dis_not_select.add_component('not_select_inv_' + self.name,
-                                     not_select_inv)
-        dis_not_select.add_component('not_select_therm_size_' + self.name,
-                                     not_select_therm_size)
+        dis_not_select.add_component('not_select_size_' + self.name, not_select_size)
+        dis_not_select.add_component('not_select_inv_' + self.name, not_select_inv)
+        dis_not_select.add_component('not_select_therm_size_' + self.name, not_select_therm_size)
+
         dis_select = Disjunct()
         model.add_component('dis_select_' + self.name, dis_select)
-        select_size = pyo.Constraint(expr=Pel >= min_size)
-        select_inv = pyo.Constraint(
-            expr=invest == Pel * 458 + 57433 + 3800 / 50 * Pel)
+        select_size = pyo.Constraint(expr=Pel >= small_num)
+        select_inv = pyo.Constraint(expr=invest == Pel * 1131.2 + 14490 + 3800 / 50 * Pel)
         select_therm_size = pyo.Constraint(expr=Qth == 2.1178 * Pel + 2.5991)
-        for t in model.time_step:
-            select_temp_con = pyo.Constraint(expr=inlet_temp[t] <= 50)
-            dis_select.add_component('select_temp_con_' + self.name + str(t),
-                                     select_temp_con)
-
-        dis_select.add_component('select_size_' + self.name,
-                                     select_size)
-        dis_select.add_component('select_inv_' + self.name,
-                                     select_inv)
-        dis_select.add_component('select_therm_size_' + self.name,
-                                     select_therm_size)
+        dis_select.add_component('select_size_' + self.name, select_size)
+        dis_select.add_component('select_inv_' + self.name, select_inv)
+        dis_select.add_component('select_therm_size_' + self.name, select_therm_size)
 
         dj_size = Disjunction(expr=[dis_not_select, dis_select])
         model.add_component('disjunction_size' + self.name, dj_size)
@@ -238,6 +222,7 @@ class CHPFluidSmall(CHP, FluidComponent):
 
     def _constraint_start_stop_ratio_gdp(self, model):
         status = model.find_component('status_' + self.name)
+        inlet_temp = model.find_component('inlet_temp_' + self.name)
         # start = model.find_component('start_' + self.name)
         model.cons.add(status[1] == 0)
         for t in model.time_step:
@@ -266,7 +251,8 @@ class CHPFluidSmall(CHP, FluidComponent):
             c_8 = pyo.Constraint(expr=status[t + 4] == 1)
             c_9 = pyo.Constraint(expr=status[t + 5] == 1)
             c_10 = pyo.Constraint(expr=status[t + 6] == 1)
-            # c_12 = pyo.Constraint(expr=start[t] == 1)
+            c_13 = pyo.Constraint(expr=inlet_temp[t + 1] <= 57)
+            # c_18 = pyo.Constraint(expr=start[t] == 1)
             model.add_component('h_dis_' + str(t), h)
             h.add_component('h_1' + str(t), c_5)
             h.add_component('h_2' + str(t), c_6)
@@ -274,33 +260,37 @@ class CHPFluidSmall(CHP, FluidComponent):
             h.add_component('h_4' + str(t), c_8)
             h.add_component('h_5' + str(t), c_9)
             h.add_component('h_6' + str(t), c_10)
-            # h.add_component('h_7' + str(t), c_12)
-            '''
-            i = Disjunct()
-            c_11 = pyo.Constraint(expr=lor(status[t + 1] - status[t] == 0,
-                                           status[t + 1] - status[t] == -1))
-            c_13 = pyo.Constraint(expr=start[t] == 0)
-            model.add_component('i_dis_' + str(t), i)
-            i.add_component('i_1' + str(t), c_11)
-            i.add_component('i_2' + str(t), c_13)
+            h.add_component('h_7' + str(t), c_13)
+            # h.add_component('h_8' + str(t), c_18)
 
-            dj = Disjunction(expr=[h, i])
-            model.add_component('dj_dis1_' + str(t), dj)
-            '''
             i = Disjunct()
-            c_11 = pyo.Constraint(expr=status[t + 1] - status[t] == 0)
-            # c_13 = pyo.Constraint(expr=start[t] == 0)
+            c_11 = pyo.Constraint(expr=status[t + 1] == 0)
+            c_14 = pyo.Constraint(expr=status[t] == 0)
+            # c_19 = pyo.Constraint(expr=start[t] == 0)
             model.add_component('i_dis_' + str(t), i)
             i.add_component('i_1' + str(t), c_11)
-            # i.add_component('i_2' + str(t), c_13)
+            i.add_component('i_2' + str(t), c_14)
+            #i.add_component('i_3' + str(t), c_19)
+
+            y = Disjunct()
+            c_15 = pyo.Constraint(expr=status[t + 1] == 1)
+            c_16 = pyo.Constraint(expr=status[t] == 1)
+            c_17 = pyo.Constraint(expr=inlet_temp[t + 1] <= 57)
+            # c_20 = pyo.Constraint(expr=start[t] == 0)
+            model.add_component('y_dis_' + str(t), y)
+            y.add_component('y_1' + str(t), c_15)
+            y.add_component('y_2' + str(t), c_16)
+            y.add_component('y_3' + str(t), c_17)
+            # y.add_component('y_4' + str(t), c_20)
+
             j = Disjunct()
             c_12 = pyo.Constraint(expr=status[t + 1] - status[t] == -1)
-            # c_14 = pyo.Constraint(expr=start[t] == 0)
+            # c_21 = pyo.Constraint(expr=start[t] == 0)
             model.add_component('j_dis_' + str(t), j)
             j.add_component('j_1' + str(t), c_12)
-            # j.add_component('j_2' + str(t), c_14)
+            # j.add_component('j_2' + str(t), c_21)
 
-            dj = Disjunction(expr=[h, i, j])
+            dj = Disjunction(expr=[h, i, y, j])
             model.add_component('dj_dis1_' + str(t), dj)
 
     def _constraint_mass_flow(self, model):
@@ -309,11 +299,10 @@ class CHPFluidSmall(CHP, FluidComponent):
                                         '_' + 'mass')
             m_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'mass')
-            for t in range(len(model.time_step)-1):
+            for t in range(len(model.time_step) - 1):
                 model.cons.add(m_in[t + 1] == m_out[t + 1])
                 model.cons.add(m_in[t + 2] == m_in[t + 1])
 
-'''
     def _constraint_start_cost(self, model):
         start = model.find_component('start_' + self.name)
         start_cost = model.find_component('start_cost_' + self.name)
@@ -327,4 +316,12 @@ class CHPFluidSmall(CHP, FluidComponent):
         stromspotmarktpreis = 0.179  # € / kWh
         elec_sell_price = model.find_component('elec_sell_price_' + self.name)
         model.cons.add(elec_sell_price == kwk_zuschlag + stromspotmarktpreis)
-'''
+
+
+    def _constraint_status(self, model):
+        period_length = 24
+        status = model.find_component('status_' + self.name)
+
+        for t in model.time_step:
+            if t % period_length == 0:
+                model.cons.add(status[t] == 0)

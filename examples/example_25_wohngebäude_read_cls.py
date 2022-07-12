@@ -43,17 +43,17 @@ bld_25.add_hot_water_profile(env_25)
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 
-topo_file = os.path.join(base_path, 'data', 'topology', 'groundheatpump_cns.csv')
+topo_file = os.path.join(base_path, 'data', 'topology', 'chp_fluid_small_hi_solar2_all.csv')
 #chp_fluid_small_hi_solar4_all.csv
 #chp_fluid_solar4.csv
 #chp_solar4_all.csv
+
 #bhkw_klein+e_boi.csv
-#bhkw_klein+solar+boi+e_boi_wg
-#bhkw_klein+solar+wp+e_boi
-'''
-topo_file = os.path.join(base_path, 'data', 'topology',
-                         'solar_coll_TW_Test.csv')
-'''
+#bhkw_klein+solar+boi+e_boi_wg.csv
+
+#bhkw_klein+solar+wp+e_boi.csv
+#bhkw_klein_brennwert+e_boi.csv
+
 bld_25.add_topology(topo_file)
 bld_25.add_components(project.environment)
 project.add_building(bld_25)
@@ -65,7 +65,7 @@ project.add_building(bld_25)
 # prices profiles (if necessary). demand profiles are stored in buildings
 # and other information are stored in Environment objects.
 #project.time_cluster(nr_periods=days, read_cls=str(days) + 'day_24hour_qli.csv')
-project.time_cluster(nr_periods=days, read_cls=str(days) + 'day_24hour_wg_qli.csv')
+project.time_cluster(nr_periods=days, read_cls=str(days) + 'day_24hour_wg_qli_1.csv')
 plot_cls.step_plot_one_line(von=0, bis=(days + 1) * 24 - 1, nr=str(days), name='day_24hour_wg_qli.csv', bld='wg')
 plot_cls.step_plot_three_lines(von=0, bis=(days + 1) * 24 - 1, nr=str(days), name='day_24hour_wg_qli.csv', bld='wg')
 # After clustering need to update the demand profiles and storage assumptions.

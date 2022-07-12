@@ -1,2 +1,2 @@
 efficiency,cost,factor repair effort,factor servicing effort,servicing effort hours,fix_cost_factor,service life
-1,137,0.01,0.015,20,0.025,20
+1,40,0.01,0.01,20,0.025,20

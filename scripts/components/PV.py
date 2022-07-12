@@ -43,10 +43,12 @@ class PV(Component):
         input_powers = model.find_component('input_' + self.inputs[0] + '_' +
                                             self.name)
         area = model.find_component('solar_area_' + self.name)
+        size = model.find_component('size_' + self.name)
+        model.cons.add(size * 1000 / 450 * 2 == area)
 
         for t in model.time_step:
             model.cons.add(input_powers[t] == area / 1000 * self.irr_profile[
-                t-1])
+                t - 1])
             # unit fo irradiance is W/m², should be changed to kW/m²
 
     def add_cons(self, model):

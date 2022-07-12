@@ -42,7 +42,7 @@ def gen_hot_water_profile(building_typ, area, year=2021, energy_typ="mittel"):
     hot_water_heating_demand_array = np.array(
         hot_water_heating_demand_df['Aktueller Wärmebedarf für Trinkwassererwärmung (kWh)'])
 
-    if building_typ != 'Wohngebäude':
+    if building_typ == 'Verwaltungsgebäude':
         hour_status_array = np.array(op_time_status(year, zone))
         hot_water_heating_demand_array = np.multiply(hour_status_array, hot_water_heating_demand_array)
 
@@ -129,58 +129,6 @@ def find_weekday(year):
         i += 1
 
     return weekday_list
-
-
-def gen_hot_water_profile_1(building_typ,
-                            area,
-                            energy_typ="mittel",
-                            plot=False,
-                            save_plot=False):
-    bld_hot_water_demand = calc_bld_demand(building_typ, area, 'hot_water',
-                                           energy_typ)
-    hot_water_heating_demand_df = pd.read_excel(input_profile_path,
-                                                sheet_name='DHW',
-                                                header=None, usecols=[2],
-                                                skiprows=1)
-    hot_water_heating_demand_df.columns = [
-        'Wärmebedarf für Trinkwassererwärmung (kWh)']
-    hot_water_heating_demand_df[
-        'Aktueller Wärmebedarf für Trinkwassererwärmung (kWh)'] = \
-        hot_water_heating_demand_df[
-            'Wärmebedarf für Trinkwassererwärmung (kWh)'].map(
-            lambda x: x / (4180 * 300 * (
-                    60 - 12) / 3600 / 1000 * 365) * bld_hot_water_demand)
-    if building_typ != 'Wohngebäude':
-
-        for m in range(1, 53):  # 53weeks
-            for n in range(7 * 24 * (m - 1) + 5 * 24, 7 * 24 * (m - 1) + 7 * 24 + 1):
-                hot_water_heating_demand_df[
-                    'Aktueller Wärmebedarf für Trinkwassererwärmung (kWh)'].iloc[n] = 0
-
-        for x in range(1, 366):
-            for y in range(24 * (x - 1), 7 + 24 * (x - 1)):
-                hot_water_heating_demand_df[
-                    'Aktueller Wärmebedarf für Trinkwassererwärmung (kWh)'].iloc[y] = 0
-            for y in range(19 + 24 * (x - 1), 24 * x):
-                hot_water_heating_demand_df[
-                    'Aktueller Wärmebedarf für Trinkwassererwärmung (kWh)'].iloc[y] = 0
-
-    hot_water_heating_demand_array = np.array(
-        hot_water_heating_demand_df[
-            'Aktueller Wärmebedarf für Trinkwassererwärmung (kWh)'])
-    hot_water_heating_demand_list = hot_water_heating_demand_array.tolist()
-
-    plt.figure()
-    plt.plot(hot_water_heating_demand_list)
-    plt.ylabel('Hot Water Profile')
-    plt.xlabel('Hours [h]')
-    plt.ylim(ymin=0)
-    plt.xlim(xmin=0)
-    plt.grid()
-    plt.savefig(os.path.join(base_path, "data", "tek_data", 'hot_water_profile_figure.jpg'))
-    plt.show()
-
-    return hot_water_heating_demand_list
 
 
 def analysis_bld_zone(building_typ, area):
