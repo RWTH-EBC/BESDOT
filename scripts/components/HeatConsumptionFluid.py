@@ -31,14 +31,14 @@ class HeatConsumptionFluid(FluidComponent):
 
     def _read_properties(self, properties):
         if 'inlet temperature' in properties.columns:
-            self.inlet_temp = float(properties['max temperature'])
+            self.inlet_temp = float(properties['inlet temperature'])
         else:
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for max temperature.")
             self.inlet_temp = 40
 
         if 'outlet temperature' in properties.columns:
-            self.outlet_temp = float(properties['min temperature'])
+            self.outlet_temp = float(properties['outlet temperature'])
         else:
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for min temperature.")

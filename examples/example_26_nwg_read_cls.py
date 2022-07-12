@@ -9,7 +9,7 @@ import tools.post_solar_chp as post_pro
 import tools.plot_cluster as plot_cls
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-days = 3
+days = 6
 ################################################################################
 #                           Generate python objects
 ################################################################################
@@ -37,8 +37,8 @@ bld_26.add_hot_water_profile(env_26)
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 
-topo_file = os.path.join(base_path, 'data', 'topology', 'test_heat_pump.csv')
-#chp_fluid_small_hi_solar4_all.csv
+topo_file = os.path.join(base_path, 'data', 'topology', 'chp_fluid_small_hi_solar4_all_nwg.csv')
+#chp_fluid_small_hi_solar4_all_nwg.csv
 
 #bhkw_groß+e_boi.csv
 #bhkw_groß+solar+e_boi.csv
@@ -48,10 +48,6 @@ topo_file = os.path.join(base_path, 'data', 'topology', 'test_heat_pump.csv')
 #bhkw_klein+solar+e_boi_nwg.csv
 #bhkw_klein+solar+boi+e_boi_nwg.csv
 
-'''
-topo_file = os.path.join(base_path, 'data', 'topology',
-                         'solar_coll_TW_Test.csv')
-'''
 bld_26.add_topology(topo_file)
 bld_26.add_components(project.environment)
 project.add_building(bld_26)

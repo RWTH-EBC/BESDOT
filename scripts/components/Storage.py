@@ -157,7 +157,11 @@ class Storage(Component):
         self._constraint_maxcap(model)
         self._constraint_vdi2067(model)
         '''
-        self._constraint_conserve_temp(model)
+        if self.cluster is not None:
+            self._constraint_conserve_temp(model)
+        else:
+            self._constriant_unchange(model)
+        
         
         if self.cluster is not None:
             self._constraint_conserve(model)
