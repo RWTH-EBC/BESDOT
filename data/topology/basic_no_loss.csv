@@ -4,7 +4,7 @@ therm_cns,HeatConsumption,HeatCNS1,1000,1000,0,0,0,0,0,0,0,0,0,0,0,0
 water_tes,HotWaterStorage,TES1,0,2,0,0,1,0,0,0,0,0,0,0,0,0
 pv,PV,PV1,0,100,0,1,0,0,0,0,1,1,0,0,1,1
 solar_coll,SolarThermalCollector,ST1,0,100,0,0,0,1,0,0,0,0,0,0,0,0
-bat,Battery,BAT1,0,100,0,1,0,0,0,0,0,1,0,0,1,1
+bat,Battery,BAT1_no_loss,0,100,0,1,0,0,0,0,0,1,0,0,1,1
 e_grid,ElectricityGrid,GRD1,0,100,0,1,0,0,0,0,1,0,0,0,1,1
 gas_grid,GasGrid,GAS1,0,100,0,0,0,0,0,0,0,0,0,1,0,0
 boi,GasBoiler,BOI1,0,100,0,0,0,1,0,0,0,0,0,0,0,0

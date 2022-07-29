@@ -23,6 +23,35 @@ heat_sink_tuple = 'water_tes'
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 opt_output_path = os.path.join(base_path, 'data', 'opt_output')
 
+
+def find_size(csv_file):
+    """
+    Search for the results of each component in csv file.
+    """
+    output_df = pd.read_csv(csv_file)
+    elements_dict = find_element(output_df)
+    size_dict = {}
+    for element in elements_dict:
+        if len(elements_dict[element]) == 1:
+            if 'size' in element and not np.isnan(elements_dict[element][0]):
+                size_dict[element] = elements_dict[element][0]
+                print('The size of', element, 'is', size_dict[element])
+            if 'volume' in element and not np.isnan(
+                    elements_dict[element][0]):
+                size_dict[element] = elements_dict[element][0]
+                print('The volume of', element, 'is', size_dict[element])
+
+
+def sum_flow(csv_file, flow_name):
+    """
+    Calculate the sum of a specific energy flow in result file.
+    """
+    output_df = pd.read_csv(csv_file)
+    elements_dict = find_element(output_df)
+    flow_list = elements_dict[flow_name]
+    print(sum(flow_list))
+
+
 def plot_all(csv_file, time_interval):
     """
 
@@ -83,9 +112,10 @@ def plot_single(name, profile):
         ax.set_ylim(ymin=0, ymax=max(profile) * 1.2)
     plt.grid()
 
-    #plt.show()
-    plt.savefig(plot_output)
+    plt.show()
+    # plt.savefig(plot_output)
     plt.close()
+
 
 def plot_double_24h(csv_file, comp_name1, comp_name2):
     plot_output = os.path.join(opt_output_path, 'plot', 'profile of ' +
@@ -122,6 +152,7 @@ def plot_double_24h(csv_file, comp_name1, comp_name2):
     ax.set_xlim(xmax=len(profile_temp))
     ax2.legend(loc='upper right', bbox_to_anchor=(1.1, 1.15), ncol=1)
     plt.savefig(plot_output)
+
 
 def plot_double(csv_file, comp_name1, comp_name2, time_step, inputenergy,
                 outputenergy):
@@ -344,6 +375,7 @@ def plot_step_profile(energy_type, demand, profile, time_step):
     # plt.savefig(plot_path)
     # plt.close()
 
+
 def plot_temp(name, profile):
     plot_output = os.path.join(opt_output_path, 'plot', 'Profile of ' + name)
     fig, ax = plt.subplots(figsize=(14, 14))
@@ -373,8 +405,6 @@ def plot_temp(name, profile):
     plt.close()
 
 
-
-
 def find_element(output_df):
     """find all elements in dataframe, the variables with same name but
     different time step would be stored in a list"""
@@ -392,20 +422,40 @@ def find_element(output_df):
 
 
 if __name__ == '__main__':
-    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    opt_output_path = os.path.join(base_path, 'data', 'opt_output')
-    # opt_output = os.path.join(opt_output_path, 'denmark_energy_hub_result.csv')
-    opt_output = os.path.join(opt_output_path, 'project_1_result.csv')
-    plot_output = os.path.join(opt_output_path, 'plot')
+    pass
+    # base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # opt_output_path = os.path.join(base_path, 'data', 'opt_output')
+    # opt_output = os.path.join(opt_output_path, 'project_1_result.csv')
+    # plot_output = os.path.join(opt_output_path, 'plot')
+    #
+    # demand_input = os.path.join(base_path, 'data', 'denmark_energy_hub',
+    #                             'energyprofile(kwh).csv')
+    # demand_df = pd.read_csv(demand_input)
+    # commercial_heat = demand_df['commercial heat'].astype('float64').values
+    # resident_heat = demand_df['residential heat'].astype('float64').values
+    # total_heat = commercial_heat + resident_heat
+    # total_elec = demand_df['total electricity'].astype('float64').values
+    #
+    # # plot_all(opt_output)
+    # plot_short_time(start_time=0, time_step=24, csv_file=opt_output,
+    #                 demand_heat=total_heat, demand_elec=total_elec)
 
-    demand_input = os.path.join(base_path, 'data', 'denmark_energy_hub',
-                                'energyprofile(kwh).csv')
-    demand_df = pd.read_csv(demand_input)
-    commercial_heat = demand_df['commercial heat'].astype('float64').values
-    resident_heat = demand_df['residential heat'].astype('float64').values
-    total_heat = commercial_heat + resident_heat
-    total_elec = demand_df['total electricity'].astype('float64').values
-
-    # plot_all(opt_output)
-    plot_short_time(start_time=0, time_step=24, csv_file=opt_output,
-                    demand_heat=total_heat, demand_elec=total_elec)
+    # no_loss_result_file = os.path.join(base_path, 'data', 'opt_output',
+    #                                    'project_28_no_loss_result.csv')
+    # with_loss_result_file = os.path.join(base_path, 'data', 'opt_output',
+    #                                      'project_28_with_loss_result.csv')
+    # print('The size of project without loss:')
+    # find_size(no_loss_result_file)
+    # print('The size of porject with loss:')
+    # find_size(with_loss_result_file)
+    #
+    # print('#################')
+    #
+    # print('The total input energy in battery without loss:')
+    # sum_flow(no_loss_result_file, 'input_elec_bat')
+    # print('The total output energy in battery without loss:')
+    # sum_flow(no_loss_result_file, 'output_elec_bat')
+    # print('The total input energy in battery with loss:')
+    # sum_flow(with_loss_result_file, 'input_elec_bat')
+    # print('The total output energy in battery with loss:')
+    # sum_flow(with_loss_result_file, 'output_elec_bat')

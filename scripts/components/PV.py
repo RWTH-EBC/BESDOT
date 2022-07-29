@@ -39,14 +39,25 @@ class PV(Component):
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for NOCT")
 
-    def _constraint_solar(self, model):
+    def _constraint_area(self, model):
+        """
+        This constraint indicates the relationship between pv panel area in
+        square meter and pv size in kWp. The nominal power is calculated
+        according to the sunlight intensity of 1 kW/m².
+        """
+        area = model.find_component('solar_area_' + self.name)
+        size = model.find_component('size_' + self.name)
+        model.cons.add(size == area * 1 * self.efficiency['elec'])  # The 1 in
+        # equation means the standard sunlight intensity of 1 kW/m²
+
+    def _constraint_input(self, model):
+        """
+        This constraint indicates the relationship between panel area and the
+        acceptable input energy.
+        """
         input_powers = model.find_component('input_' + self.inputs[0] + '_' +
                                             self.name)
         area = model.find_component('solar_area_' + self.name)
-        size = model.find_component('size_' + self.name)
-        # todo: change it with component efficiency?
-        model.cons.add(size * 1000 / 450 * 2 == area)
-
         for t in model.time_step:
             model.cons.add(input_powers[t] == area / 1000 * self.irr_profile[
                 t - 1])
@@ -54,15 +65,12 @@ class PV(Component):
 
     def add_cons(self, model):
         super().add_cons(model)
-        self._constraint_solar(model)
+
+        self._constraint_area(model)
+        self._constraint_input(model)
 
     def add_vars(self, model):
         super().add_vars(model)
 
         area = pyo.Var(bounds=(0, None))
         model.add_component('solar_area_' + self.name, area)
-
-
-if __name__ == '__main__':
-    pv = PV(comp_name='test_pv', irr_profile=[100, 200, 300], comp_type="PV",
-            comp_model='PV1')
