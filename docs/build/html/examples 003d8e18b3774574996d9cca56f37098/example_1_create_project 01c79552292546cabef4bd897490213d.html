@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>example_1_create_project &mdash; Besdot 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Besdot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">example_1_create_project</a></li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Besdot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>example_1_create_project</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/examples 003d8e18b3774574996d9cca56f37098/example_1_create_project 01c79552292546cabef4bd897490213d.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="example-1-create-project">
+<h1>example_1_create_project<a class="headerlink" href="#example-1-create-project" title="Permalink to this heading">¶</a></h1>
+<p>这个实例是为了测试能量流优化模型，在模型中使用单纯的能量流</p>
+<p>案例介绍：</p>
+<p>建筑为办公楼，面积为200平米，电需求曲线和热需求曲线由默认方法生成，热总需求：22460 kWh；电总需求：6390 kWh；热峰值：25.43 kW；电峰值：2.97 kW</p>
+<p>计算步长为8760小时。可选择的设备有</p>
+<p>![Untitled](example_1_create_project 01c79552292546cabef4bd897490213d/Untitled.png)</p>
+<ul>
+<li><p>求解时发现模型为非凸模型，计算时间很长，查找非凸来源</p>
+<p>来源是17520个二次方限制条件（刚好是8760的两倍，但是只找到一个方程中含有二次方限制条件），新的heatpump模型里面cop被定义为变量，（实际是按照气温出来的定值）</p>
+<p>cop修正为Parameter之后为LP问题，计算时间很快</p>
+</li>
+<li><p>结果分析</p>
+<p>设备边界条件：</p>
+<p>heatpump: 1-100 kW， cop：2.3-4.3</p>
+<p>water_tes: 40 kWh，最大放热功率80 kW</p>
+<p>therm_cns: 1000 kW</p>
+<p>其他设备: 0-100</p>
+<p>pv：价格1000，效率0.18，</p>
+<p>battery: loss每小时10%损耗，充放效率都为0.99，价格1000， init soc等于0.5</p>
+<p>优化结果：</p>
+<p>The size of size_solar_coll is 100.0，显示input功率最大大概为2kW，output功率最大约为0.35，这里符合效率18%的设备信息，问题来源是cost设置为0，导致选型结果为100.
+The size of size_gas_grid is 100.0
+The size of size_bat is 0.0
+The size of size_e_boi is 4.823266204691196
+The size of size_heat_pump is 1.0
+The size of size_e_grid is 100.0
+The size of size_water_tes is 40.0，原来的计算方式以及单位都是kWh，新版本更改为2000升，等效于139 kWh，价格更改为1800欧每立方米，数值需要后期修改
+The size of size_boi is 18.804377639765587
+The size of size_pv is 4.5 kwp，最大输出约为3.4kW，20平米</p>
+<p>annual cost为5001.58</p>
+<p>Optimal objective  4.934473912e+03
+The size of project without loss:
+The size of porject with loss:
+The size of size_gas_grid is 100.0
+The size of size_e_grid is 100.0
+The size of size_pv is 3.6
+The size of size_water_tes is 40.0
+The size of size_e_boi is 4.85096662648934
+The size of size_solar_coll is 0.0
+The size of size_heat_pump is 1.0
+The size of size_boi is 18.812951434896746
+The size of size_bat is 0.0</p>
+</li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Yi Nie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

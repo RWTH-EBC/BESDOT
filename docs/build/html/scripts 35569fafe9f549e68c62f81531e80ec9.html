@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Python Module Index &mdash; Besdot 0.0.1 documentation</title>
+  <title>scripts &mdash; Besdot 0.0.1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -17,10 +18,7 @@
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
- 
-
-
+    <link rel="search" title="Search" href="search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -38,16 +36,18 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="data%20559f383cc12048c785449542b92639ea.html">data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples%20003d8e18b3774574996d9cca56f37098.html">examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="scripts%2035569fafe9f549e68c62f81531e80ec9.html">scripts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tools%20512c515ec0e54ce993b8f1d9c2aa0be7.html">tools</a></li>
-<li class="toctree-l1"><a class="reference internal" href="%E5%BA%94%E7%94%A8%E6%B5%8B%E8%AF%95%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90%20ea34d99a49514faab7e7dc08551aea06.html">应用测试案例分析</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Besdot%E7%BD%91%E9%A1%B5%E5%B7%A5%E5%85%B7%E5%BC%80%E5%8F%91%20814f3999af3744a0b66ad8d767229269.html">Besdot网页工具开发</a></li>
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">scripts</a><ul>
+<li><a class="reference internal" href="#project-py">Project.py</a></li>
+<li><a class="reference internal" href="#building-py">Building.py</a></li>
+<li><a class="reference internal" href="#environment-py">Environment.py</a></li>
+<li><a class="reference internal" href="#component-py">Component.py</a></li>
+<li><a class="reference internal" href="#fluidcomponent-py">FluidComponent.py</a></li>
 </ul>
-
+</li>
+</ul>
+</div>
         </div>
       </div>
     </nav>
@@ -62,8 +62,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Python Module Index</li>
+      <li>scripts</li>
       <li class="wy-breadcrumbs-aside">
+            <a href="_sources/scripts 35569fafe9f549e68c62f81531e80ec9.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -71,29 +72,34 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-
-   <h1>Python Module Index</h1>
-
-   <div class="modindex-jumpbox">
-   <a href="#cap-s"><strong>s</strong></a>
-   </div>
-
-   <table class="indextable modindextable">
-     <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
-     <tr class="cap" id="cap-s"><td></td><td>
-       <strong>s</strong></td><td></td></tr>
-     <tr>
-       <td><img src="_static/minus.png" class="toggler"
-              id="toggle-1" style="display: none" alt="-" /></td>
-       <td>
-       <code class="xref">scripts</code></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="index.html#module-scripts.Building"><code class="xref">scripts.Building</code></a></td><td>
-       <em></em></td></tr>
-   </table>
+  <section id="scripts">
+<h1>scripts<a class="headerlink" href="#scripts" title="Permalink to this heading">¶</a></h1>
+<p>这个文件夹中保存所有的python模型以及内嵌的数学模型，整体框架如下</p>
+<p>[此处添加一张图会比较好看，UML或者类似图]</p>
+<section id="project-py">
+<h2>Project.py<a class="headerlink" href="#project-py" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="building-py">
+<h2>Building.py<a class="headerlink" href="#building-py" title="Permalink to this heading">¶</a></h2>
+<p>建筑模型</p>
+<ul class="simple">
+<li><p>_constraint_energy_balance：按照topology汇总所有能量流，各个组件component在topology中的流入之和等于这个组件的总流入；对于总流出是一样的</p></li>
+<li><p>_constraint_solar_area：太阳光伏和光热的总面积不能超过建筑提供的安装面积</p></li>
+<li><p>_constraint_mass_balance：根据topology确定组件间水流必须相等，也就是说从组件1流向组件2的水流必须和组件2流向组件1的相等；如果在topology的表格中给出了流量，那么流量变量必须等于给出的值。</p></li>
+</ul>
+</section>
+<section id="environment-py">
+<h2>Environment.py<a class="headerlink" href="#environment-py" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="component-py">
+<h2>Component.py<a class="headerlink" href="#component-py" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="fluidcomponent-py">
+<h2>FluidComponent.py<a class="headerlink" href="#fluidcomponent-py" title="Permalink to this heading">¶</a></h2>
+<p>下面的子页中包含的是所有被开发出来的具体component模型</p>
+<p><span class="xref myst">components</span></p>
+</section>
+</section>
 
 
            </div>

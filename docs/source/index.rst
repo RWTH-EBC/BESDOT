@@ -8,13 +8,19 @@ Welcome to Besdot's documentation!
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
-.. automodule:: Building
-   :members:
+   data 559f383cc12048c785449542b92639ea.md
+   examples 003d8e18b3774574996d9cca56f37098.md
+   scripts 35569fafe9f549e68c62f81531e80ec9.md
 
+   tools 512c515ec0e54ce993b8f1d9c2aa0be7.md
+   应用测试案例分析 ea34d99a49514faab7e7dc08551aea06.md
+   Besdot网页工具开发 814f3999af3744a0b66ad8d767229269.md
 
+.. include:: scripts 35569fafe9f549e68c62f81531e80ec9.md
+   :parser: myst_parser.sphinx_
 
 Indices and tables
 ==================
