@@ -22,4 +22,4 @@
 
 下面的子页中包含的是所有被开发出来的具体component模型
 
-[components](../build/html/scripts%2035569fafe9f549e68c62f81531e80ec9/components%207a924a6c161e436ca56edfeecb9d0234.md)
+[components](scripts%2035569fafe9f549e68c62f81531e80ec9/components%207a924a6c161e436ca56edfeecb9d0234.md)

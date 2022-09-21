@@ -8,7 +8,7 @@
 
 计算步长为8760小时。可选择的设备有
 
-![Untitled](example_1_create_project 01c79552292546cabef4bd897490213d/Untitled.png)
+![Untitled](example_1_create_project%2001c79552292546cabef4bd897490213d/Untitled.png)
 
 - 求解时发现模型为非凸模型，计算时间很长，查找非凸来源
     
