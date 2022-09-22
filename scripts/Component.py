@@ -333,21 +333,21 @@ class Component(object):
         annual_cost = pyo.Var(bounds=(0, None))
         model.add_component('annual_cost_' + self.name, annual_cost)
 
-        invest = pyo.Var(bounds=(0, 100000))
+        invest = pyo.Var(bounds=(0, None))
         model.add_component('invest_' + self.name, invest)
 
         if self.inputs is not None:
             for energy_type in self.inputs:
-                input_energy = pyo.Var(model.time_step, bounds=(0, 10 ** 8))
+                input_energy = pyo.Var(model.time_step, bounds=(0, 10**10))
                 model.add_component('input_' + energy_type + '_' + self.name,
                                     input_energy)
 
         if self.outputs is not None:
             for energy_type in self.outputs:
-                output_energy = pyo.Var(model.time_step, bounds=(0, 10 ** 8))
+                output_energy = pyo.Var(model.time_step, bounds=(0, 10**10))
                 model.add_component('output_' + energy_type + '_' + self.name,
                                     output_energy)
 
         if self.other_op_cost:
-            other_op_cost = pyo.Var(bounds=(0, 10 ** 8))
+            other_op_cost = pyo.Var(bounds=(0, 10**10))
             model.add_component('other_op_cost_' + self.name, other_op_cost)
