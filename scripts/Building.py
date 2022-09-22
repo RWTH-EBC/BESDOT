@@ -416,7 +416,7 @@ class Building(object):
         for energy in self.energy_flows.keys():
             for flow in self.energy_flows[energy]:
                 self.energy_flows[energy][flow] = pyo.Var(
-                    model.time_step, bounds=(0, None))
+                    model.time_step, bounds=(0, 10 ** 8))
                 model.add_component(energy + '_' + flow[0] + '_' + flow[1],
                                     self.energy_flows[energy][flow])
 
@@ -431,28 +431,28 @@ class Building(object):
                             # mass flow from component 'input_comp' to
                             # component 'index'.
                             self.heat_flows[flow]['mass'] = \
-                                pyo.Var(model.time_step, bounds=(0, None))
+                                pyo.Var(model.time_step, bounds=(0, 10 ** 8))
                             model.add_component(flow[0] + '_' + flow[1] + '_'
                                                 + 'mass', self.heat_flows[flow][
                                                     'mass'])
                             # mass flow from component 'index' to
                             # component 'index'.
                             self.heat_flows[(flow[1], flow[0])]['mass'] = \
-                                pyo.Var(model.time_step, bounds=(0, None))
+                                pyo.Var(model.time_step, bounds=(0, 10 ** 8))
                             model.add_component(flow[1] + '_' + flow[0] +
                                                 '_' + 'mass', self.heat_flows[(
                                 flow[1], flow[0])]['mass'])
                             # temperature of heat flow from component
                             # 'input_comp' to component 'index'.
                             self.heat_flows[flow]['temp'] = \
-                                pyo.Var(model.time_step, bounds=(0, None))
+                                pyo.Var(model.time_step, bounds=(0, 10 ** 8))
                             model.add_component(flow[0] + '_' + flow[1] +
                                                 '_' + 'temp', self.heat_flows[
                                                     flow]['temp'])
                             # temperature of heat flow from component
                             # 'index' to component 'input_comp'.
                             self.heat_flows[(flow[1], flow[0])]['temp'] = \
-                                pyo.Var(model.time_step, bounds=(0, None))
+                                pyo.Var(model.time_step, bounds=(0, 10 ** 8))
                             model.add_component(flow[1] + '_' + flow[0] +
                                                 '_' + 'temp', self.heat_flows[(
                                 flow[1], flow[0])]['temp'])
