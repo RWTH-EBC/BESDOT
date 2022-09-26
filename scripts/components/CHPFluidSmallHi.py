@@ -22,7 +22,6 @@ class CHPFluidSmallHi(CHP, FluidComponent):
                          max_size=max_size,
                          current_size=current_size)
 
-        # todo (qli): start_price
         self.start_price = 5  # €/start
         self.heat_flows_in = None
         self.heat_flows_out = []
@@ -35,10 +34,12 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         else:
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for outlet temperature.")
+            # EC_POWER_DE_Technisches_Datenblatt
             self.outlet_temp = 80
 
     # Pel = elektrische Nennleistung = comp_size
     # Qth = thermische Nennleistung
+    # Qth = f(Pel)
     def _constraint_Pel(self, model):
         Pel = model.find_component('size_' + self.name)
         Qth = model.find_component('therm_size_' + self.name)
@@ -49,21 +50,19 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         therm_eff = model.find_component('therm_eff_' + self.name)
         model.cons.add(therm_eff == -0.0000355 * Qth + 0.498)
 
+    # verbinden die Parameter der einzelnen Anlage mit den Parametern zwischen
+    # zwei Anlagen (simp_matrix).
     def _constraint_temp(self, model):
         inlet_temp = model.find_component('inlet_temp_' + self.name)
-        #for t in model.time_step:
-            # todo
-            # model.cons.add(outlet_temp[t] - inlet_temp[t] <= 25)
-            #model.cons.add(inlet_temp[t] <= 70)
         for heat_output in self.heat_flows_out:
             t_in = model.find_component(heat_output[1] + '_' + heat_output[0] + '_' + 'temp')
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] + '_' + 'temp')
             for t in model.time_step:
-                # todo
-                # model.cons.add(outlet_temp[t] == t_out[t])
                 model.cons.add(self.outlet_temp == t_out[t])
                 model.cons.add(inlet_temp[t] == t_in[t])
 
+    # status_chp ----- zur Beschreibung der taktenden Betrieb
+    # input * η = output
     def _constraint_conver(self, model):
         Pel = model.find_component('size_' + self.name)
         Qth = model.find_component('therm_size_' + self.name)
@@ -78,47 +77,6 @@ class CHPFluidSmallHi(CHP, FluidComponent):
             model.cons.add(Qth * status[t + 1] == output_heat[t])
             model.cons.add(Pel * status[t + 1] == output_elec[t])
 
-    def add_cons(self, model):
-        self._constraint_therm_eff(model)
-        self._constraint_temp(model)
-        self._constraint_conver(model)
-        self._constraint_heat_outputs(model)
-        self._constraint_start_stop_ratio_gdp(model)
-        # self._constraint_start_cost(model)
-        # todo(qli)
-        # self._constraint_mass_flow(model)
-        self._constraint_Pel(model)
-        self._constraint_vdi2067_chp(model)
-        '''
-        # todo: fix cost
-        self._constraint_vdi2067_chp_gdp(model)
-        '''
-        self._constraint_status(model)
-
-    def add_vars(self, model):
-        super().add_vars(model)
-
-        Qth = pyo.Var(bounds=(6.8, 94))
-        model.add_component('therm_size_' + self.name, Qth)
-
-        therm_eff = pyo.Var(bounds=(0, 1))
-        model.add_component('therm_eff_' + self.name, therm_eff)
-
-        # todo
-        # outlet_temp = pyo.Var(model.time_step, bounds=(12, 95))
-        # model.add_component('outlet_temp_' + self.name, outlet_temp)
-
-        inlet_temp = pyo.Var(model.time_step, bounds=(40, 80))
-        model.add_component('inlet_temp_' + self.name, inlet_temp)
-
-        status = pyo.Var(range(1, len(model.time_step) + 6), domain=pyo.Binary)
-        model.add_component('status_' + self.name, status)
-
-        # start_cost = pyo.Var(bounds=(0, None))
-        # model.add_component('start_cost_' + self.name, start_cost)
-
-        # start = pyo.Var(model.time_step, domain=pyo.Binary)
-        # model.add_component('start_' + self.name, start)
 
     def _constraint_vdi2067_chp(self, model):
         size = model.find_component('size_' + self.name)
@@ -134,7 +92,6 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         invest = model.find_component('invest_' + self.name)
         Pel = model.find_component('size_' + self.name)
         Qth = model.find_component('therm_size_' + self.name)
-        # status = model.find_component('status_' + self.name)
 
         if self.min_size == 0:
             min_size = small_num
@@ -178,16 +135,6 @@ class CHPFluidSmallHi(CHP, FluidComponent):
                 model.cons.add(status[len(model.time_step) + 2] == 0)
                 model.cons.add(status[len(model.time_step) + 1] == 0)
 
-        '''
-        for t in model.time_step:
-            if status[t + 1] == 1 and status[t] == 0:
-                 model.cons.add(status[t + 2] == 1)
-                 model.cons.add(status[t + 3] == 1)
-                 model.cons.add(status[t + 4] == 1)
-                 model.cons.add(status[t + 5] == 1)
-                 model.cons.add(status[t + 6] == 1)
-                 model.cons.add(start[t + 1] == 1)
-        '''
         # len(model.time_step) >= 6
         for t in range(1, len(model.time_step)):
             d1 = Disjunct()
@@ -239,13 +186,7 @@ class CHPFluidSmallHi(CHP, FluidComponent):
             dj1 = Disjunction(expr=[d1, e1, y1, f1])
             model.add_component('dj1_dis_' + str(t), dj1)
 
-    def _constraint_start_cost(self, model):
-        start = model.find_component('start_' + self.name)
-        start_cost = model.find_component('start_cost_' + self.name)
-        other_op_cost = model.find_component('other_op_cost_' + self.name)
-        model.cons.add(start_cost == self.start_price * sum(start[t] for t in model.time_step))
-        model.cons.add(other_op_cost == start_cost)
-
+    # konstanter Massenstrom
     def _constraint_mass_flow(self, model):
         for heat_output in self.heat_flows_out:
             m_in = model.find_component(heat_output[1] + '_' + heat_output[0] +
@@ -256,10 +197,54 @@ class CHPFluidSmallHi(CHP, FluidComponent):
                 model.cons.add(m_in[t + 1] == m_out[t + 1])
                 model.cons.add(m_in[t + 2] == m_in[t + 1])
 
+    def _constraint_start_cost(self, model):
+        start = model.find_component('start_' + self.name)
+        start_cost = model.find_component('start_cost_' + self.name)
+        other_op_cost = model.find_component('other_op_cost_' + self.name)
+        model.cons.add(start_cost == self.start_price * sum(start[t] for t in model.time_step))
+        model.cons.add(other_op_cost == start_cost)
+
     def _constraint_status(self, model):
         period_length = 24
         status = model.find_component('status_' + self.name)
 
-        for t in model.time_step:
+        for t in range(2, len(model.time_step) + 6):
             if t % period_length == 0:
                 model.cons.add(status[t] == 0)
+
+    def add_cons(self, model):
+        self._constraint_therm_eff(model)
+        self._constraint_temp(model)
+        self._constraint_conver(model)
+        self._constraint_heat_outputs(model)
+        self._constraint_start_stop_ratio_gdp(model)
+        self._constraint_Pel(model)
+        self._constraint_vdi2067_chp(model)
+        self._constraint_status(model)
+        # self._constraint_mass_flow(model)
+        # self._constraint_vdi2067_chp_gdp(model)
+        # self._constraint_start_cost(model)
+
+    def add_vars(self, model):
+        super().add_vars(model)
+
+        Qth = pyo.Var(bounds=(6.8, 94))
+        model.add_component('therm_size_' + self.name, Qth)
+
+        therm_eff = pyo.Var(bounds=(0, 1))
+        model.add_component('therm_eff_' + self.name, therm_eff)
+
+        inlet_temp = pyo.Var(model.time_step, bounds=(12, 80))
+        model.add_component('inlet_temp_' + self.name, inlet_temp)
+
+        status = pyo.Var(range(1, len(model.time_step) + 6), domain=pyo.Binary)
+        model.add_component('status_' + self.name, status)
+
+        # outlet_temp = pyo.Var(model.time_step, bounds=(12, 95))
+        # model.add_component('outlet_temp_' + self.name, outlet_temp)
+
+        # start_cost = pyo.Var(bounds=(0, None))
+        # model.add_component('start_cost_' + self.name, start_cost)
+
+        # start = pyo.Var(model.time_step, domain=pyo.Binary)
+        # model.add_component('start_' + self.name, start)

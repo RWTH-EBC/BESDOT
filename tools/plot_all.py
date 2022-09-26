@@ -9,8 +9,10 @@ def plot_all(nr='_1', proNr=25, a=120, comp='s_hi', bld='wg'):
                                       'project_' + str(proNr) + '_result' + nr + '.csv')
 
     post_pro.print_size(result_output_path)
+    post_pro.step_plot_heat_demand_color(result_output_path, a, bld=bld, proNr=proNr)
     if comp == '':
         post_pro.step_plot_elec_ein_aus(result_output_path, a, bld=bld)
+
         #todo: Wer hat Versorgungsvorhang Netz oder BAT
         #post_pro.step_plot_two_lines(result_output_path, a, 'input_elec_bat',
                                      #'output_elec_e_grid', 'BAT Input', 'Netz Output',
@@ -42,7 +44,7 @@ def plot_all(nr='_1', proNr=25, a=120, comp='s_hi', bld='wg'):
 
         post_pro.step_plot_status(result_output_path, 1, a + 1, bld=bld, name=comp)
 
-        post_pro.step_plot_heat_demand_color(result_output_path, a, bld=bld, name=comp)
+        post_pro.step_plot_heat_demand_color_11(result_output_path, a, bld=bld)
         post_pro.step_plot_two_lines(result_output_path, a, 'input_elec_e_grid',
                                      'output_elec_e_grid', 'Input', 'Output',
                                      'Energieaustausch des Stromgrids',
@@ -55,7 +57,7 @@ def plot_all(nr='_1', proNr=25, a=120, comp='s_hi', bld='wg'):
                                       'Wärme aus Kessel', 'Warmwasserbedarf',
                                       'Wärmebedarf',
                                       'Energieerzeugung', r'Leistung (kW)', bld=bld, n=1.5)
-
+        
         post_pro.step_plot_chp_water_tes_color(result_output_path, a, bld=bld, name=comp)
 
         post_pro.step_plot_heat_speicher(result_output_path, a, bld=bld, name=comp)
@@ -74,6 +76,6 @@ def plot_all(nr='_1', proNr=25, a=120, comp='s_hi', bld='wg'):
             post_pro.step_plot_one_line(result_output_path, a, 'therm_eff_chp',
                                         'Thermische Effizienz', r'Effizienz', bld=bld,
                                         n=1.02)
-#plot_all(nr='_3', proNr=26, a=192, comp='b', bld='nwg')
-plot_all(nr='', proNr=25, a=120, comp='')
+plot_all(nr='_7', proNr=26, a=192, comp='_s_hi', bld='nwg')
+#plot_all(nr='', proNr=25, a=120, comp='')
 # - check

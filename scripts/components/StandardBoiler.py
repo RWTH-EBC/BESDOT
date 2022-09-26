@@ -138,7 +138,7 @@ class StandardBoiler(FluidComponent, GasBoiler):
         self._constraint_vdi2067(model)
         self._constraint_mass_flow(model)
         self._constraint_heat_outputs(model)
-        #self._constraint_mod(model)
+        self._constraint_mod(model)
 
     def add_vars(self, model):
         super().add_vars(model)

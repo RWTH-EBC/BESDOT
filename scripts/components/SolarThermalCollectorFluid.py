@@ -28,7 +28,6 @@ class SolarThermalCollectorFluid(FluidComponent):
         self.outputs = ['heat']
         self.temp_profile = temp_profile
         self.irr_profile = irr_profile
-        # todo: (qli) solar_liquid_heat_cap korrigieren
         self.solar_liquid_heat_cap = 3690  # J/kgK
         self.max_temp = 135
         self.mass_flow = None  # kg/h
@@ -76,13 +75,6 @@ class SolarThermalCollectorFluid(FluidComponent):
                     (inlet_temp[t] + outlet_temp[t]) / 2 -
                     self.temp_profile[t - 1]) / 1000)
 
-    # Test
-    def _constraint_efficiency_con(self, model):
-        eff = model.find_component('eff_' + self.name)
-        for t in model.time_step:
-            model.cons.add(eff[t] == 0.55)
-
-
     # 'size' bezieht sich auf die Fläche der Solarthermie.
     def _constraint_conver(self, model):
         eff = model.find_component('eff_' + self.name)
@@ -106,7 +98,7 @@ class SolarThermalCollectorFluid(FluidComponent):
             for t in model.time_step:
                 # todo:Beim Stagnationszustand gilt output_energy< input_energy
                 # aber das Ergebnis ist komisch
-                model.cons.add(output_energy[t] == input_energy[t])
+                model.cons.add(output_energy[t] <= input_energy[t])
                 model.cons.add(
                     output_energy[t] == self.solar_liquid_heat_cap * (
                             m_out[t] * t_out[t] - m_in[t] * t_in[t]) /
@@ -114,18 +106,16 @@ class SolarThermalCollectorFluid(FluidComponent):
 
     def _constraint_output_permit_gdp(self, model, off_delta_temp=4,
                                   on_delta_temp=8, init_status='on'):
-
-        # todo: Regelung (GDP)
         '''
         for t in model.time_step:
             if status_var[t] = 1
-                if outlet_temp[t+1] - inlet_temp[t+1] <= 4:
+                if outlet_temp[t+1] - inlet_temp[t+1] <= off_delta_temp:
                     status[t+1] = 0
                     energy[t+1] = 0
                 else:
                     status[t+1] = 1
             else:
-                if outlet_temp[t+1] - inlet_temp[t+1] >= 8:
+                if outlet_temp[t+1] - inlet_temp[t+1] >= on_delta_temp:
                     status[t+1] = 1
                 else:
                     status[t+1] = 0
@@ -197,40 +187,6 @@ class SolarThermalCollectorFluid(FluidComponent):
             model.add_component('p_4_' + str(t), p_4)
             model.add_component('p_5_' + str(t), p_5)
 
-    def add_cons(self, model, heat_cap_type='con', test='off'):
-        self._constraint_vdi2067(model)
-        self._constraint_temp(model)
-        if test == 'on':
-            self._constraint_efficiency_con(model)
-        if test == 'off':
-            self._constraint_efficiency(model)
-        self._constraint_output_permit_gdp(model)
-        if heat_cap_type =='con':
-            # todo(qli): Wirkungsgrad = Konst
-            self._constraint_conver(model)
-        if heat_cap_type == 'var':
-            # todo(qli): Wirkungsgrad = Var
-            self._constraint_heat_cap_var(model)
-            self._constraint_mass_con(model, mass_flow=200)  # kg/h
-            self._constraint_conver_mass_con(model)
-
-    def add_vars(self, model):
-        super().add_vars(model)
-
-        inlet_temp = pyo.Var(model.time_step, bounds=(0, 95))
-        model.add_component('inlet_temp_' + self.name, inlet_temp)
-
-        outlet_temp = pyo.Var(model.time_step, bounds=(0, 135))
-        model.add_component('outlet_temp_' + self.name, outlet_temp)
-
-        eff = pyo.Var(model.time_step, bounds=(0, 1))
-        model.add_component('eff_' + self.name, eff)
-
-        # todo(qli):
-        heat_cap = pyo.Var(model.time_step, bounds=(0, None))
-        model.add_component('solar_fluid_heat_cap', heat_cap)
-
-
     def _constraint_heat_cap_var(self, model):
         outlet_temp = model.find_component('outlet_temp_' + self.name)
         inlet_temp = model.find_component('inlet_temp_' + self.name)
@@ -239,7 +195,7 @@ class SolarThermalCollectorFluid(FluidComponent):
             model.cons.add(heat_cap[t] == 3400 + 4 * (inlet_temp[t] +
                                                       outlet_temp[
                                                           t]) / 2)  # J/(kg*K)
-
+    # konstanter Massenstrom
     def _constraint_mass_con(self, model, mass_flow):
         self.mass_flow = mass_flow
         for heat_output in self.heat_flows_out:
@@ -253,7 +209,7 @@ class SolarThermalCollectorFluid(FluidComponent):
                 model.cons.add(m_in[t] == self.mass_flow)
                 model.cons.add(m_out[t] == self.mass_flow)
 
-    # 'size' bezieht sich auf die Fläche der Solarthermie.
+    # Energieerhaltung beim variierten Massenstrom
     def _constraint_conver_mass_con(self, model):
         heat_cap = model.find_component('solar_fluid_heat_cap')
         eff = model.find_component('eff_' + self.name)
@@ -271,11 +227,34 @@ class SolarThermalCollectorFluid(FluidComponent):
             t_out = model.find_component(heat_output[0] + '_' + heat_output[1] +
                                          '_' + 'temp')
             for t in model.time_step:
-                # todo:Beim Stagnationszustand gilt output_energy< input_energy
-                # aber das Ergebnis ist komisch
                 model.cons.add(output_energy[t] == input_energy[t])
-                # model.cons.add(0 <= input_energy[t])
-                # model.cons.add(0 <= output_energy[t])
                 model.cons.add(
                     output_energy[t] == heat_cap[t] * self.mass_flow * (
                                 t_out[t] - t_in[t]) / unit_switch_J)
+
+    def add_cons(self, model, heat_cap_type='con'):
+        self._constraint_vdi2067(model)
+        self._constraint_temp(model)
+        self._constraint_efficiency(model)
+        self._constraint_output_permit_gdp(model)
+        if heat_cap_type =='con':
+            self._constraint_conver(model)
+        if heat_cap_type == 'var':
+            self._constraint_heat_cap_var(model)
+            self._constraint_mass_con(model, mass_flow=200)  # kg/h
+            self._constraint_conver_mass_con(model)
+
+    def add_vars(self, model):
+        super().add_vars(model)
+
+        inlet_temp = pyo.Var(model.time_step, bounds=(0, 95))
+        model.add_component('inlet_temp_' + self.name, inlet_temp)
+
+        outlet_temp = pyo.Var(model.time_step, bounds=(0, 135))
+        model.add_component('outlet_temp_' + self.name, outlet_temp)
+
+        eff = pyo.Var(model.time_step, bounds=(0, 1))
+        model.add_component('eff_' + self.name, eff)
+
+        heat_cap = pyo.Var(model.time_step, bounds=(0, None))
+        model.add_component('solar_fluid_heat_cap', heat_cap)

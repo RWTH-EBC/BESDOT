@@ -117,12 +117,12 @@ def calc_annuity(t_n, invest, f_inst, f_w, f_op):
     returns:
     a_n: annuity (one year) for the technical building installation
     """
-    t = 1  # year
+    t = 20  # year
     # todo: the observation year should be considered in the environment
     #  object, which is usually 20 years. But this doesn't matter much. so
     #  just leave it.
 
-    q = 1.007
+    q = 1.07
 
     ann = annuity_factor(t, q)
     a_0 = invest
@@ -143,7 +143,7 @@ def calc_annuity(t_n, invest, f_inst, f_w, f_op):
 
     return a_n
 
-
+'''
 if __name__ == "__main__":
     # validation for optimisation results
 
@@ -156,3 +156,4 @@ if __name__ == "__main__":
     f_op = 20
     a_n = run(time_steps, t_n, invest, cap, f_inst, f_w, f_op)
     print(a_n)
+'''
