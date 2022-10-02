@@ -220,6 +220,12 @@ class Project(object):
         # Save model in lp file, this only works with linear model. That is
         # not necessary.
         if save_lp:
+            if not os.path.exists(os.path.join(base_path, 'data',
+                                               'opt_output')):
+                os.mkdir(os.path.join(base_path, 'data', 'opt_output'))
+            else:
+                pass
+
             model_output_path = os.path.join(base_path, 'data', 'opt_output',
                                              self.name + '_model.lp')
             self.model.write(model_output_path,
@@ -227,6 +233,12 @@ class Project(object):
 
         # Save results in csv file.
         if save_result:
+            if not os.path.exists(os.path.join(base_path, 'data',
+                                               'opt_output')):
+                os.mkdir(os.path.join(base_path, 'data', 'opt_output'))
+            else:
+                pass
+
             result_output_path = os.path.join(base_path, 'data', 'opt_output',
                                               self.name + '_result.csv')
 

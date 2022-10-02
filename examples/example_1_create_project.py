@@ -1,6 +1,8 @@
 """
 This script is an example for the class project, which shows the process for
 building an optimization model.
+In This example the energy components are modeled with energy flow
+relationship, which is provided by most other optimization tools.
 """
 
 import os
@@ -8,7 +10,7 @@ from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
 from tools.pandas_area_plot import plot_area
-from tools.post_processing import plot_short_time
+import tools.post_processing as pp
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -46,7 +48,9 @@ test_project.add_building(test_bld_1)
 test_project.build_model()
 test_project.run_optimization('gurobi', save_lp=True, save_result=True)
 
-# save model
+# save model. If only the optimization model is wanted, could use the
+# following codes to save the model file. Other model formate like gms,
+# mps are also allowed.
 # lp_model_path = os.path.join(base_path, 'data', 'opt_output',
 #                              test_project.name + '_model.lp')
 # test_project.model.write(lp_model_path,
@@ -55,6 +59,6 @@ test_project.run_optimization('gurobi', save_lp=True, save_result=True)
 ################################################################################
 #                                  Post-processing
 ################################################################################
-# result_file = os.path.join(base_path, 'data', 'opt_output',
-#                            'project_1_result.csv')
-
+result_file = os.path.join(base_path, 'data', 'opt_output',
+                           'project_1_result.csv')
+pp.find_size(result_file)
