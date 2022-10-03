@@ -60,5 +60,9 @@ test_project.run_optimization('gurobi', save_lp=True, save_result=True)
 #                                  Post-processing
 ################################################################################
 result_file = os.path.join(base_path, 'data', 'opt_output',
-                           'project_1_result.csv')
-pp.find_size(result_file)
+                           'project_1', 'result.csv')
+# pp.find_size(result_file)
+# pp.plot_all(result_file, [0, 8760])
+pp.plot_all(result_file, [624, 672],
+            save_path=os.path.join(base_path, 'data', 'opt_output',
+                                   'project_1'))
