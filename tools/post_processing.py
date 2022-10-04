@@ -82,6 +82,28 @@ def find_max_timestep(csv_file, profile_name):
     return max_value, index_max
 
 
+def save_timeseries(csv_file):
+    """Take the time series from output file and save them as an individual
+    csv file, to reduce the analysis time cost."""
+    output_df = pd.read_csv(csv_file)
+    elements_dict = find_element(output_df)
+    new_df = pd.DataFrame()
+
+    for item in elements_dict.keys():
+        if len(elements_dict[item]) > 1:
+            new_df = pd.DataFrame(index=range(len(elements_dict[item])))
+            break
+
+    for item in elements_dict.keys():
+        if len(elements_dict[item]) > 1:
+            new_df[item] = elements_dict[item]
+
+    # print(new_df)
+    output_path = os.path.split(csv_file)
+    timeseries_path = os.path.join(output_path[0], 'timeseries.csv')
+    new_df.to_csv(timeseries_path)
+
+
 def plot_all(csv_file, time_interval, save_path=None):
     """
 
@@ -445,15 +467,17 @@ if __name__ == '__main__':
 
     # find_max_timestep(opt_output, 'input_heat_therm_cns')
 
+    save_timeseries(opt_output)
+
     #############################################################
     # Plots
     #############################################################
-    if os.path.exists(os.path.join(opt_output_path, 'project_1')):
-        pass
-    else:
-        os.mkdir(os.path.join(opt_output_path, 'project_1'))
-    plot_all(opt_output, [624, 672],
-             save_path=os.path.join(opt_output_path, 'project_1'))
+    # if os.path.exists(os.path.join(opt_output_path, 'project_1')):
+    #     pass
+    # else:
+    #     os.mkdir(os.path.join(opt_output_path, 'project_1'))
+    # plot_all(opt_output, [624, 672],
+    #          save_path=os.path.join(opt_output_path, 'project_1'))
 
     # plot_output = os.path.join(opt_output_path, 'plot')
     #

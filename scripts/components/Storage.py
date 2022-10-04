@@ -112,7 +112,7 @@ class Storage(Component):
         if 'loss' in properties.columns:
             self.loss = float(properties['loss'])
         else:
-            self.loss = 0.001
+            self.loss = 0.01
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for loss.")
 
