@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>应用测试案例分析 &mdash; Besdot 0.0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Besdot网页工具开发" href="Besdot%E7%BD%91%E9%A1%B5%E5%B7%A5%E5%85%B7%E5%BC%80%E5%8F%91%20814f3999af3744a0b66ad8d767229269.html" />
+    <link rel="prev" title="tools" href="tools%20512c515ec0e54ce993b8f1d9c2aa0be7.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> Besdot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Overview%20016ab50ab1a74feeac10258a23c745fb.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data%20559f383cc12048c785449542b92639ea.html">data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples%20003d8e18b3774574996d9cca56f37098.html">examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scripts%2035569fafe9f549e68c62f81531e80ec9.html">scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools%20512c515ec0e54ce993b8f1d9c2aa0be7.html">tools</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">应用测试案例分析</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#fix-costspecific-cost">fix cost和specific cost结果的差距</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">离散选项和连续价格曲线关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">纯能量流与添加温度变量之间的关系</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#homostrat">Homo和Strat之间的比较</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">整体系统的考虑</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">居住建筑和非居住建筑的对比</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">舒适度的影响</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id7">控制系统的影响</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#batteryverlust">Battery电池verlust影响</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Besdot%E7%BD%91%E9%A1%B5%E5%B7%A5%E5%85%B7%E5%BC%80%E5%8F%91%20814f3999af3744a0b66ad8d767229269.html">Besdot网页工具开发</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Besdot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>应用测试案例分析</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/应用测试案例分析 ea34d99a49514faab7e7dc08551aea06.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>应用测试案例分析<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h1>
+<section id="fix-costspecific-cost">
+<h2>fix cost和specific cost结果的差距<a class="headerlink" href="#fix-costspecific-cost" title="Permalink to this heading">¶</a></h2>
+<p>specific cost和fix cost的差别在于specific cost是没有考虑初始价格，这样会导致结果可能选择特别小的设备，这样于实际有差别。这个问题最好和min size一起考虑，因为这两者都是使用一个判断标准，设备有没有被选择，共同考虑可以减少模型中二元变量的数量，加快速度</p>
+</section>
+<section id="id2">
+<h2>离散选项和连续价格曲线关系<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<p>使用连续价格曲线实际上是对离散问题的松弛化，考虑这种松弛方法的影响，结果准确性和时间成本</p>
+</section>
+<section id="id3">
+<h2>纯能量流与添加温度变量之间的关系<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="homostrat">
+<h2>Homo和Strat之间的比较<a class="headerlink" href="#homostrat" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="id4">
+<h2>整体系统的考虑<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="id5">
+<h2>居住建筑和非居住建筑的对比<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="id6">
+<h2>舒适度的影响<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="id7">
+<h2>控制系统的影响<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="batteryverlust">
+<h2>Battery电池verlust影响<a class="headerlink" href="#batteryverlust" title="Permalink to this heading">¶</a></h2>
+<p>原有的电池没有verlust，造成结果与实际由出入：在电价不变的情况下，电池将电网的电量储存起来。</p>
+<p>模型中电池step1和step8760的能量要相等</p>
+<p>在电价设置为50cent/kWh，上网电价设置为2cent/kWh</p>
+<p>结果显示有verlust情况下选择的bat要更小，无verlust的情况下选择的bat更大</p>
+<p>结果中的输入和输出不相等，原因是输入和输出的效率不都是100%而是99%，仅验算无误</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tools%20512c515ec0e54ce993b8f1d9c2aa0be7.html" class="btn btn-neutral float-left" title="tools" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Besdot%E7%BD%91%E9%A1%B5%E5%B7%A5%E5%85%B7%E5%BC%80%E5%8F%91%20814f3999af3744a0b66ad8d767229269.html" class="btn btn-neutral float-right" title="Besdot网页工具开发" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Yi Nie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
