@@ -1,0 +1,35 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, Yi Nie
+# This file is distributed under the same license as the Besdot package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Besdot \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-06 13:47+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/examples 003d8e18b3774574996d9cca56f37098.md:1
+#: cc8597447e7b49db888ed31e57b3151d
+msgid "examples"
+msgstr ""
+
+#: ../../source/examples 003d8e18b3774574996d9cca56f37098.md:3
+#: b7321b902056474282ba587a2051d233
+msgid "这个文件夹用于存放可重复实现的例子"
+msgstr ""
+
+#: ../../source/examples 003d8e18b3774574996d9cca56f37098.md:5
+#: d12dddc40ace404cbcb6e2d1ac0cc443
+#, python-format
+msgid "[example_1_create_project](examples%20003d8e18b3774574996d9cca56f37098/example_1_create_project%2001c79552292546cabef4bd897490213d.md)"
+msgstr ""
+
