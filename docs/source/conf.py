@@ -22,8 +22,7 @@ release = '0.0.1'
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 model_path = os.path.join(base_path, 'scripts')
 tool_path = os.path.join(base_path, 'tools')
-md_path = os.path.join(base_path, 'docs',
-                       'Besdot 4b30fb98d32f4d768dbf30690bf2740e')
+#md_path = os.path.join(base_path, 'docs','Besdot 4b30fb98d32f4d768dbf30690bf2740e')
 
 sys.path.insert(0, base_path)
 # sys.path.insert(0, model_path)
@@ -39,6 +38,12 @@ source_suffix = {
     '.txt': 'markdown',
     '.md': 'markdown',
 }
+
+# multi-language docs
+language = 'en'
+locale_dirs = ['../locales/']   # path is example but recommended.
+gettext_compact = False  # optional.
+gettext_uuid = True  # optional.
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

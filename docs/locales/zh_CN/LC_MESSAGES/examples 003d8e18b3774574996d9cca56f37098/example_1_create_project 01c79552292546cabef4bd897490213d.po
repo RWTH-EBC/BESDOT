@@ -1,0 +1,167 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, Yi Nie
+# This file is distributed under the same license as the Besdot package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Besdot \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-06 13:47+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/examples
+#: 003d8e18b3774574996d9cca56f37098/example_1_create_project
+#: 01c79552292546cabef4bd897490213d.md:1 a5521887ebad425588d27abd42273d22
+msgid "example_1_create_project"
+msgstr ""
+
+#: ../../source/examples
+#: 003d8e18b3774574996d9cca56f37098/example_1_create_project
+#: 01c79552292546cabef4bd897490213d.md:3 7fbc2420eb5d4b9c82a3cf7f5180ab42
+msgid "这个实例是为了测试能量流优化模型，在模型中使用单纯的能量流"
+msgstr ""
+
+#: ../../source/examples
+#: 003d8e18b3774574996d9cca56f37098/example_1_create_project
+#: 01c79552292546cabef4bd897490213d.md:5 445a10c7546846f19dd44e058ad72460
+msgid "案例介绍："
+msgstr ""
+
+#: ../../source/examples
+#: 003d8e18b3774574996d9cca56f37098/example_1_create_project
+#: 01c79552292546cabef4bd897490213d.md:7 d26ddd054a8845b6b8d1cf1f74cb25d6
+msgid ""
+"建筑为办公楼，面积为200平米，电需求曲线和热需求曲线由默认方法生成，热总需求：22460 kWh；电总需求：6390 kWh；热峰值：25.43"
+" kW；电峰值：2.97 kW"
+msgstr ""
+
+#: ../../source/examples
+#: 003d8e18b3774574996d9cca56f37098/example_1_create_project
+#: 01c79552292546cabef4bd897490213d.md:9 6947740dd5044af29ceca5f4b3188cfd
+msgid "计算步长为8760小时。可选择的设备有"
+msgstr ""
+
+#: ../../source/examples
+#: 003d8e18b3774574996d9cca56f37098/example_1_create_project
+#: 01c79552292546cabef4bd897490213d.md:11 6e954f61dd48456592690ec7befc2aaa
+msgid "![Untitled](img/Untitled.png)"
+msgstr ""
+
+#: ../../source/examples
+#: 003d8e18b3774574996d9cca56f37098/example_1_create_project
+#: 01c79552292546cabef4bd897490213d.md:11 dfa07d0c048c481b918e3ff4c4479741
+msgid "Untitled"
+msgstr ""
+
+#: ../../source/examples
+#: 003d8e18b3774574996d9cca56f37098/example_1_create_project
+#: 01c79552292546cabef4bd897490213d.md:13 c4ac216dade341c0bb20961968c49626
+msgid "求解时发现模型为非凸模型，计算时间很长，查找非凸来源"
+msgstr ""
+
+#: ../../source/examples
+#: 003d8e18b3774574996d9cca56f37098/example_1_create_project
+#: 01c79552292546cabef4bd897490213d.md:15 6cfee801a5c4465ab08bb5f5ec16f1bc
+msgid "来源是17520个二次方限制条件（刚好是8760的两倍，但是只找到一个方程中含有二次方限制条件），img新的heatpump模型里面cop被定义为变量，（实际是按照气温出来的定值）"
+msgstr ""
+
+#: ../../source/examples
+#: 003d8e18b3774574996d9cca56f37098/example_1_create_project
+#: 01c79552292546cabef4bd897490213d.md:17 b7c3736c31e94d89a9e13650b72a90df
+msgid "cop修正为Parameter之后为LP问题，计算时间很快"
+msgstr ""
+
+#: ../../source/examples
+#: 003d8e18b3774574996d9cca56f37098/example_1_create_project
+#: 01c79552292546cabef4bd897490213d.md:19 e9657f8ab3984a2b8fab430ae969ac24
+msgid "结果分析"
+msgstr ""
+
+#: ../../source/examples
+#: 003d8e18b3774574996d9cca56f37098/example_1_create_project
+#: 01c79552292546cabef4bd897490213d.md:21 edaefe3e48624f3fb455fb7959dfda92
+msgid "设备边界条件："
+msgstr ""
+
+#: ../../source/examples
+#: 003d8e18b3774574996d9cca56f37098/example_1_create_project
+#: 01c79552292546cabef4bd897490213d.md:23 11b2d8321c7a48b6992d20e6730fc2a7
+msgid "heatpump: 1-100 kW， cop：2.3-4.3"
+msgstr ""
+
+#: ../../source/examples
+#: 003d8e18b3774574996d9cca56f37098/example_1_create_project
+#: 01c79552292546cabef4bd897490213d.md:25 4618042d451249b8b86a4969b3798d1a
+msgid "water_tes: 40 kWh，最大放热功率80 kW"
+msgstr ""
+
+#: ../../source/examples
+#: 003d8e18b3774574996d9cca56f37098/example_1_create_project
+#: 01c79552292546cabef4bd897490213d.md:27 d6523d7485464aafa266be3d23635198
+msgid "therm_cns: 1000 kW"
+msgstr ""
+
+#: ../../source/examples
+#: 003d8e18b3774574996d9cca56f37098/example_1_create_project
+#: 01c79552292546cabef4bd897490213d.md:29 0ce34e54a40442b8936033d4069c91d8
+msgid "其他设备: 0-100"
+msgstr ""
+
+#: ../../source/examples
+#: 003d8e18b3774574996d9cca56f37098/example_1_create_project
+#: 01c79552292546cabef4bd897490213d.md:31 189d4534dd5d4bd0b693edddf7996790
+msgid "pv：价格1000，效率0.18，"
+msgstr ""
+
+#: ../../source/examples
+#: 003d8e18b3774574996d9cca56f37098/example_1_create_project
+#: 01c79552292546cabef4bd897490213d.md:33 99fe7adb8a744d438c57a56e35014b5b
+msgid "battery: loss每小时10%损耗，充放效率都为0.99，价格1000， init soc等于0.5"
+msgstr ""
+
+#: ../../source/examples
+#: 003d8e18b3774574996d9cca56f37098/example_1_create_project
+#: 01c79552292546cabef4bd897490213d.md:35 bfba4ec7cfef49ee9e8dc56bc56a84ed
+msgid "优化结果："
+msgstr ""
+
+#: ../../source/examples
+#: 003d8e18b3774574996d9cca56f37098/example_1_create_project
+#: 01c79552292546cabef4bd897490213d.md:37 e32c1cf355be48e8b6b33ed8dc67f24c
+msgid ""
+"The size of size_solar_coll is "
+"100.0，显示input功率最大大概为2kW，output功率最大约为0.35，这里符合效率18%的设备信息，问题来源是cost设置为0，导致选型结果为100."
+"   The size of size_gas_grid is 100.0   The size of size_bat is 0.0   The"
+" size of size_e_boi is 4.823266204691196   The size of size_heat_pump is "
+"1.0   The size of size_e_grid is 100.0   The size of size_water_tes is "
+"40.0，原来的计算方式以及单位都是kWh，新版本更改为2000升，等效于139 kWh，价格更改为1800欧每立方米，数值需要后期修改   "
+"The size of size_boi is 18.804377639765587   The size of size_pv is 4.5 "
+"kwp，最大输出约为3.4kW，20平米"
+msgstr ""
+
+#: ../../source/examples
+#: 003d8e18b3774574996d9cca56f37098/example_1_create_project
+#: 01c79552292546cabef4bd897490213d.md:47 2d25bf3267424147ab607f07f78837bd
+msgid "annual cost为5001.58"
+msgstr ""
+
+#: ../../source/examples
+#: 003d8e18b3774574996d9cca56f37098/example_1_create_project
+#: 01c79552292546cabef4bd897490213d.md:49 3ffd7719f1f1495080b2bd98ea0dc73b
+msgid ""
+"Optimal objective  4.934473912e+03   The size of project without loss:   "
+"The size of porject with loss:   The size of size_gas_grid is 100.0   The"
+" size of size_e_grid is 100.0   The size of size_pv is 3.6   The size of "
+"size_water_tes is 40.0   The size of size_e_boi is 4.85096662648934   The"
+" size of size_solar_coll is 0.0   The size of size_heat_pump is 1.0   The"
+" size of size_boi is 18.812951434896746   The size of size_bat is 0.0"
+msgstr ""
+

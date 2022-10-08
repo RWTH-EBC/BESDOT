@@ -14,3 +14,6 @@ gurobi.log
 # files for Mac OS
 .DS_Store
 */.DS_Store
+
+../venv
+../../docs_test

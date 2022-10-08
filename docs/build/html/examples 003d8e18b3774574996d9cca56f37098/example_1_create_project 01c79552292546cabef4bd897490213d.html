@@ -16,6 +16,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -77,10 +78,10 @@
 <p>案例介绍：</p>
 <p>建筑为办公楼，面积为200平米，电需求曲线和热需求曲线由默认方法生成，热总需求：22460 kWh；电总需求：6390 kWh；热峰值：25.43 kW；电峰值：2.97 kW</p>
 <p>计算步长为8760小时。可选择的设备有</p>
-<p><img alt="Untitled" src="examples 003d8e18b3774574996d9cca56f37098/example_1_create_project%2001c79552292546cabef4bd897490213d/Untitled.png" /></p>
+<p><img alt="Untitled" src="../_images/Untitled.png" /></p>
 <ul>
 <li><p>求解时发现模型为非凸模型，计算时间很长，查找非凸来源</p>
-<p>来源是17520个二次方限制条件（刚好是8760的两倍，但是只找到一个方程中含有二次方限制条件），新的heatpump模型里面cop被定义为变量，（实际是按照气温出来的定值）</p>
+<p>来源是17520个二次方限制条件（刚好是8760的两倍，但是只找到一个方程中含有二次方限制条件），img新的heatpump模型里面cop被定义为变量，（实际是按照气温出来的定值）</p>
 <p>cop修正为Parameter之后为LP问题，计算时间很快</p>
 </li>
 <li><p>结果分析</p>

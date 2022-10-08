@@ -1,0 +1,44 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, Yi Nie
+# This file is distributed under the same license as the Besdot package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Besdot \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-06 13:47+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/Overview 016ab50ab1a74feeac10258a23c745fb.md:1
+#: b0d718340d9942249992f268a2a4c143
+msgid "Overview"
+msgstr ""
+
+#: ../../source/Overview 016ab50ab1a74feeac10258a23c745fb.md:3
+#: b1cd80b2091342ea9589babd12db168a
+msgid "这个项目的目的"
+msgstr ""
+
+#: ../../source/Overview 016ab50ab1a74feeac10258a23c745fb.md:5
+#: 7f642467172643fca0606dc0581681a5
+msgid "其他模型的gap"
+msgstr ""
+
+#: ../../source/Overview 016ab50ab1a74feeac10258a23c745fb.md:7
+#: c207a3b55d3c496caf11c82e5f97510a
+msgid "这个项目的特点"
+msgstr ""
+
+#: ../../source/Overview 016ab50ab1a74feeac10258a23c745fb.md:9
+#: d58cc58c91384688bb693457f1cfd372
+msgid "使用的代码风格，如果后续想要对这个贡献的话，请保持统一的风格，docstring是google style"
+msgstr ""
+

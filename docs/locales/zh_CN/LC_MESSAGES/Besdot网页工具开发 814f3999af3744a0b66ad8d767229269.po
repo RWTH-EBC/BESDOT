@@ -1,0 +1,29 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, Yi Nie
+# This file is distributed under the same license as the Besdot package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Besdot \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-06 13:47+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/Besdot网页工具开发 45adb9e416b345ebb3579762fa4a5838
+#: 814f3999af3744a0b66ad8d767229269.md:1
+msgid "Besdot网页工具开发"
+msgstr ""
+
+#: ../../source/Besdot网页工具开发 3d0d084aa7574dd89082d9321e6fc997
+#: 814f3999af3744a0b66ad8d767229269.md:3
+msgid "使用Django框架开发"
+msgstr ""
+

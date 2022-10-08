@@ -19,8 +19,6 @@ Welcome to Besdot's documentation!
    应用测试案例分析 ea34d99a49514faab7e7dc08551aea06.md
    Besdot网页工具开发 814f3999af3744a0b66ad8d767229269.md
 
-.. include:: scripts 35569fafe9f549e68c62f81531e80ec9.md
-   :parser: myst_parser.sphinx_
 
 Indices and tables
 ==================
