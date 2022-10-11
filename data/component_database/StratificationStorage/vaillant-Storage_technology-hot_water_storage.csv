@@ -1,0 +1,2 @@
+,Unnamed: 0,fixed-unit-price,fixed-price,only-unit-price,data-pair,input efficiency,output efficiency,self discharge efficiency,max soc,min soc,max temperature,min temperature,max e2p input,max e2p output,service life,cost,factor repair effort,factor servicing effort,servicing effort hours,upper temp,lower temp
+0,96,2.354,720.985,3.57,117.0;867.9/144.0;915.9/150.0;1809.0/184.0;1015.0/294.0;1145.0/398.0;1545.0/490.0;1865.0/744.0;2409.0/970.0;3135.0,0.9,0.9,0.99,1,0,95,60,1,1,20,10,0.01,0.015,20,60,30

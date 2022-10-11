@@ -1,0 +1,2 @@
+,Unnamed: 0,fixed-unit-price,fixed-price,only-unit-price,data-pair,input efficiency,output efficiency,self discharge efficiency,max soc,min soc,max input,max output,service life,cost_type,cost,factor repair effort,factor servicing effort,servicing effort hours,e2p in,e2p out,init soc
+0,50,0.431,272.569,0.663,120.0;362.9/199.0;407.9/291.0;425.9/493.0;463.9/597.0;521.9/810.0;529.8/951.0;586.9/1098.0;758.9/1484.0;972.9/1908.0;1125.0,1,1,0.98,1,0,1000,1,20,constant,15,0.01,0.015,20,1,1,0
