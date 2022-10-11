@@ -1,0 +1,203 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, Yi Nie
+# This file is distributed under the same license as the Besdot package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Besdot \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-06 13:47+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 44e4f78f3a8449208af05a4abb26aebe 7a924a6c161e436ca56edfeecb9d0234.md:1
+msgid "components"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:3 c3919cb3cd6b48ee830c51ba5a00edb3
+msgid "这个文件夹中储存的是细化的各个能源设备模型"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:5 ede3cac3c4e44221867ecf1497cab41d
+msgid "UnderfloorHeat.py"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:7 889e93990259400e82901a71b3b39f6b
+msgid "这个类用于生成地暖模型，可以考虑是否添加用户舒适度模型"
+msgstr ""
+
+#: ../../source/scripts 1d0321ccae5247c5afc58f41ef5fb0e1
+#: 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:9 7a924a6c161e436ca56edfeecb9d0234.md:45
+#: 8c2395e12cab49dbac0112ff803cb840
+msgid "**限制条件**"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:11 b537178b367c48b59f79e2c23ee34cda
+msgid ""
+"_constraint_conver: energy conversion equation. 能量转化方程 "
+"作为终端设备看作效率为1，输入能量等于输出能量。"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:13 a725485e218348d38334eb18ee8d13e2
+msgid ""
+"_constraint_temp：进水水温的限制条件 只有在外界气温低于规定的开启温度时才会开启，否则在无热需求的时候添加了限制条件，是无意义的；"
+" 可以是进水水温是恒定的模型，默认情况是恒定； 也可以是进水水温有上下限的模型。"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 49c8a79083c64fb395daac25a95851d3 7a924a6c161e436ca56edfeecb9d0234.md:17
+msgid "_constraint_return_temp:回水水温的限制条件 无限制条件，确认后可删"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:19 d3a034670c014ddc998633bc6739b543
+msgid "_constraint_floor_temp："
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:20 ff8774fff67a4673b844bf72eac5b75a
+msgid "_constraint_pmv"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:21 b8f4832730164b2da5255c01f9b9a7a9
+msgid "_constraint_heat_water_return_temp"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 3dc71ee2870446679b80f994f8774b0e 7a924a6c161e436ca56edfeecb9d0234.md:22
+msgid "_constraint_heat_inputs：继承FluidComponent的方法，将输入能量与流入的水流的温度和流量关联起来"
+msgstr ""
+
+#: ../../source/scripts 13b7dc6317d1433cb27b56b51f104f27
+#: 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:23
+msgid "_constraint_vdi2067：继承Component的方法，计算年化成本的方法"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 62b947b1601c4f29bffc0e872bd9e01a 7a924a6c161e436ca56edfeecb9d0234.md:25
+msgid "Storage"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 5f83f588726840cda57ef9ea0366fdeb 7a924a6c161e436ca56edfeecb9d0234.md:27
+msgid "这个类作为所有储能设备的父类，考虑了能量的储存和释放效率，每小时的自耗，最大的充放功率。"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:29 bae47da0b3a14e4f929b3bf3025d40db
+msgid "还有两个特殊的假定条件："
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:31 a05dccc21fd14bedaa12c12e96b4c3fa
+msgid "在整个模拟前后的能量保持不变，一方面可以减少优化结果初期装满能量，结束时能量耗尽，这样情况不利于现实情况的分析；另一方面放置在选型中选择过大的储能装置，这个假定条件一直都会是被添加状态"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:32 cae9b1135fec46578ead3edcd6847d84
+msgid "在cluster之后的典型周期内能量保持不变，一般是24小时，这个假定条件一般是不开启状态，需要分析cluster带来的影响后再决定"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:34 b705c1884bbb4ee89c3a97505662bbcf
+msgid "**属性**"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:36 bc14b9de70c248a7921c32eb5d5d6a70
+msgid "input_efficiency， 默认为1"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 5f95398d1db3446d9b193f4b4e04be2e 7a924a6c161e436ca56edfeecb9d0234.md:37
+msgid "output_efficiency， 默认为1"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:38 ab7615a94fe94335bef779b24745f354
+msgid "max_soc， 默认为1"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:39 d5f84b13e0e842a99ea83f2067d74d20
+msgid "min_soc， 默认为0"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:40 fb26cad30ab94fb2addef00543fad0e9
+msgid "init_soc， 默认为0.5"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:41 a0af2fa8f7774ca4acd95ccbb34acfc9
+msgid "e2p_in， 默认为0.5"
+msgstr ""
+
+#: ../../source/scripts 224674b53c6f496c8a95c90bc15aefd4
+#: 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:42
+msgid "e2p_out， 默认为0.5"
+msgstr ""
+
+#: ../../source/scripts 0214071073754fe58232ea9d6850c795
+#: 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:43
+msgid "loss， 默认为0.01"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:47 e53ec7c321ce41af865bbea445ba0b8e
+msgid "_constraint_conver：能量转换方程，考虑了充放效率和每个步长的能量损失"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:48 fa7e907ef5124551adf90450e8445be0
+msgid "_constraint_init_energy：初始状态对应限制条件，hard code为不添加，可以改为添加的版本"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 3cd93d3a343a492b98560d1d1978fd6c 7a924a6c161e436ca56edfeecb9d0234.md:49
+msgid "_constraint_maxpower：最大充放速度限制条件"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 5d68ec279a2047d0bc7f8fb947042550 7a924a6c161e436ca56edfeecb9d0234.md:50
+msgid "_constraint_maxcap：最大和最小容量限制条件，一般限制为最大"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:51 cbd4f79eb8444d94baa934fcb0bd9eb8
+msgid "_constraint_conserve：对应假定条件(2)"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 7a924a6c161e436ca56edfeecb9d0234.md:52 9f84305ed66946dda1f27159685ba239
+msgid "_constriant_unchange：对应假定条件(1)"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 61620ec437654636b2f562999772b4d1 7a924a6c161e436ca56edfeecb9d0234.md:54
+msgid "HotWaterStorage"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9/components
+#: 49b20d8ed09a452791d968a8c304a502 7a924a6c161e436ca56edfeecb9d0234.md:56
+msgid "Topology中Storage中的size变量是能量，单位是kWh，而HotWaterStorage是m³，这一点需要注意。结果中size仍是kwh为单位，体积的变量是volume"
+msgstr ""
+

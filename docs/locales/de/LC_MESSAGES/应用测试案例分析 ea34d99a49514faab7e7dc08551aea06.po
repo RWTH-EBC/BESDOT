@@ -1,0 +1,107 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, Yi Nie
+# This file is distributed under the same license as the Besdot package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Besdot \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-06 13:47+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/应用测试案例分析 0512a4171b7a4c5dbf8dc163c63a43cb
+#: ea34d99a49514faab7e7dc08551aea06.md:1
+msgid "应用测试案例分析"
+msgstr ""
+
+#: ../../source/应用测试案例分析 ea34d99a49514faab7e7dc08551aea06.md:3
+#: fac125c0125441449430d3cc35411859
+msgid "fix cost和specific cost结果的差距"
+msgstr ""
+
+#: ../../source/应用测试案例分析 27cfc2b4c6a9403da1f9224962522463
+#: ea34d99a49514faab7e7dc08551aea06.md:5
+msgid ""
+"specific cost和fix cost的差别在于specific "
+"cost是没有考虑初始价格，这样会导致结果可能选择特别小的设备，这样于实际有差别。这个问题最好和min "
+"size一起考虑，因为这两者都是使用一个判断标准，设备有没有被选择，共同考虑可以减少模型中二元变量的数量，加快速度"
+msgstr ""
+
+#: ../../source/应用测试案例分析 51cc4e851a4047f3ad7e6770c6e30cf3
+#: ea34d99a49514faab7e7dc08551aea06.md:7
+msgid "离散选项和连续价格曲线关系"
+msgstr ""
+
+#: ../../source/应用测试案例分析 0b607e47ca4e48b384f63094f3886b73
+#: ea34d99a49514faab7e7dc08551aea06.md:9
+msgid "使用连续价格曲线实际上是对离散问题的松弛化，考虑这种松弛方法的影响，结果准确性和时间成本"
+msgstr ""
+
+#: ../../source/应用测试案例分析 670a8eef21844b188e8e122c351c54f9
+#: ea34d99a49514faab7e7dc08551aea06.md:11
+msgid "纯能量流与添加温度变量之间的关系"
+msgstr ""
+
+#: ../../source/应用测试案例分析 d3c2c6758fc64187bbaccf5c21798f0c
+#: ea34d99a49514faab7e7dc08551aea06.md:13
+msgid "Homo和Strat之间的比较"
+msgstr ""
+
+#: ../../source/应用测试案例分析 2f6133be82764586b4934dfca623d030
+#: ea34d99a49514faab7e7dc08551aea06.md:15
+msgid "整体系统的考虑"
+msgstr ""
+
+#: ../../source/应用测试案例分析 ea34d99a49514faab7e7dc08551aea06.md:17
+#: f5b756d6f31b442d8ede31228e9dc089
+msgid "居住建筑和非居住建筑的对比"
+msgstr ""
+
+#: ../../source/应用测试案例分析 7a11098f3f604ca2afe639b654ac76b5
+#: ea34d99a49514faab7e7dc08551aea06.md:19
+msgid "舒适度的影响"
+msgstr ""
+
+#: ../../source/应用测试案例分析 63efb8935c04416fbffab34182d95665
+#: ea34d99a49514faab7e7dc08551aea06.md:21
+msgid "控制系统的影响"
+msgstr ""
+
+#: ../../source/应用测试案例分析 ea34d99a49514faab7e7dc08551aea06.md:23
+#: ebe279ecf8e34e3f8e73eff77ebfa142
+msgid "Battery电池verlust影响"
+msgstr ""
+
+#: ../../source/应用测试案例分析 60081b098ac642508cf0490ef8d41333
+#: ea34d99a49514faab7e7dc08551aea06.md:25
+msgid "原有的电池没有verlust，造成结果与实际由出入：在电价不变的情况下，电池将电网的电量储存起来。"
+msgstr ""
+
+#: ../../source/应用测试案例分析 63f5eae685ae466f8b4ba5a063064d3e
+#: ea34d99a49514faab7e7dc08551aea06.md:27
+msgid "模型中电池step1和step8760的能量要相等"
+msgstr ""
+
+#: ../../source/应用测试案例分析 3ce4ed1a3f434e0895e92d6d3a1081b9
+#: ea34d99a49514faab7e7dc08551aea06.md:29
+msgid "在电价设置为50cent/kWh，上网电价设置为2cent/kWh"
+msgstr ""
+
+#: ../../source/应用测试案例分析 736d31a1cab5495bb42e63d38b9c2032
+#: ea34d99a49514faab7e7dc08551aea06.md:31
+msgid "结果显示有verlust情况下选择的bat要更小，无verlust的情况下选择的bat更大"
+msgstr ""
+
+#: ../../source/应用测试案例分析 99337ae06c1c4417b1c53b12294db8ba
+#: ea34d99a49514faab7e7dc08551aea06.md:33
+msgid "结果中的输入和输出不相等，原因是输入和输出的效率不都是100%而是99%，仅验算无误"
+msgstr ""
+

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>components &mdash; Besdot 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Besdot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Overview%20016ab50ab1a74feeac10258a23c745fb.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../data%20559f383cc12048c785449542b92639ea.html">data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples%20003d8e18b3774574996d9cca56f37098.html">examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts%2035569fafe9f549e68c62f81531e80ec9.html">scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools%20512c515ec0e54ce993b8f1d9c2aa0be7.html">tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../%E5%BA%94%E7%94%A8%E6%B5%8B%E8%AF%95%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90%20ea34d99a49514faab7e7dc08551aea06.html">应用测试案例分析</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Besdot%E7%BD%91%E9%A1%B5%E5%B7%A5%E5%85%B7%E5%BC%80%E5%8F%91%20814f3999af3744a0b66ad8d767229269.html">Besdot网页工具开发</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Besdot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>components</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/scripts 35569fafe9f549e68c62f81531e80ec9/components 7a924a6c161e436ca56edfeecb9d0234.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="components">
+<h1>components<a class="headerlink" href="#components" title="Permalink to this heading">¶</a></h1>
+<p>这个文件夹中储存的是细化的各个能源设备模型</p>
+<section id="underfloorheat-py">
+<h2>UnderfloorHeat.py<a class="headerlink" href="#underfloorheat-py" title="Permalink to this heading">¶</a></h2>
+<p>这个类用于生成地暖模型，可以考虑是否添加用户舒适度模型</p>
+<p><strong>限制条件</strong></p>
+<ul class="simple">
+<li><p>_constraint_conver: energy conversion equation. 能量转化方程
+作为终端设备看作效率为1，输入能量等于输出能量。</p></li>
+<li><p>_constraint_temp：进水水温的限制条件
+只有在外界气温低于规定的开启温度时才会开启，否则在无热需求的时候添加了限制条件，是无意义的；
+可以是进水水温是恒定的模型，默认情况是恒定；
+也可以是进水水温有上下限的模型。</p></li>
+<li><p>_constraint_return_temp:回水水温的限制条件
+无限制条件，确认后可删</p></li>
+<li><p>_constraint_floor_temp：</p></li>
+<li><p>_constraint_pmv</p></li>
+<li><p>_constraint_heat_water_return_temp</p></li>
+<li><p>_constraint_heat_inputs：继承FluidComponent的方法，将输入能量与流入的水流的温度和流量关联起来</p></li>
+<li><p>_constraint_vdi2067：继承Component的方法，计算年化成本的方法</p></li>
+</ul>
+</section>
+<section id="storage">
+<h2>Storage<a class="headerlink" href="#storage" title="Permalink to this heading">¶</a></h2>
+<p>这个类作为所有储能设备的父类，考虑了能量的储存和释放效率，每小时的自耗，最大的充放功率。</p>
+<p>还有两个特殊的假定条件：</p>
+<ol class="arabic simple">
+<li><p>在整个模拟前后的能量保持不变，一方面可以减少优化结果初期装满能量，结束时能量耗尽，这样情况不利于现实情况的分析；另一方面放置在选型中选择过大的储能装置，这个假定条件一直都会是被添加状态</p></li>
+<li><p>在cluster之后的典型周期内能量保持不变，一般是24小时，这个假定条件一般是不开启状态，需要分析cluster带来的影响后再决定</p></li>
+</ol>
+<p><strong>属性</strong></p>
+<ul class="simple">
+<li><p>input_efficiency， 默认为1</p></li>
+<li><p>output_efficiency， 默认为1</p></li>
+<li><p>max_soc， 默认为1</p></li>
+<li><p>min_soc， 默认为0</p></li>
+<li><p>init_soc， 默认为0.5</p></li>
+<li><p>e2p_in， 默认为0.5</p></li>
+<li><p>e2p_out， 默认为0.5</p></li>
+<li><p>loss， 默认为0.01</p></li>
+</ul>
+<p><strong>限制条件</strong></p>
+<ul class="simple">
+<li><p>_constraint_conver：能量转换方程，考虑了充放效率和每个步长的能量损失</p></li>
+<li><p>_constraint_init_energy：初始状态对应限制条件，hard code为不添加，可以改为添加的版本</p></li>
+<li><p>_constraint_maxpower：最大充放速度限制条件</p></li>
+<li><p>_constraint_maxcap：最大和最小容量限制条件，一般限制为最大</p></li>
+<li><p>_constraint_conserve：对应假定条件(2)</p></li>
+<li><p>_constriant_unchange：对应假定条件(1)</p></li>
+</ul>
+</section>
+<section id="hotwaterstorage">
+<h2>HotWaterStorage<a class="headerlink" href="#hotwaterstorage" title="Permalink to this heading">¶</a></h2>
+<p>Topology中Storage中的size变量是能量，单位是kWh，而HotWaterStorage是m³，这一点需要注意。结果中size仍是kwh为单位，体积的变量是volume</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Yi Nie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

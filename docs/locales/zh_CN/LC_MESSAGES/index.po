@@ -1,0 +1,43 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, Yi Nie
+# This file is distributed under the same license as the Besdot package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Besdot \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-06 13:47+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/index.rst:10 912b1b7c75be4374ae218b87aa001346
+msgid "Contents:"
+msgstr ""
+
+#: ../../source/index.rst:7 de7096070fd24c11ad8bfc43b9a674b3
+msgid "Welcome to Besdot's documentation!"
+msgstr ""
+
+#: ../../source/index.rst:24 ca3c38d8015e44418652ae976012a9fb
+msgid "Indices and tables"
+msgstr ""
+
+#: ../../source/index.rst:26 61436394896f4c83bb6b821fe4f2f3ec
+msgid ":ref:`genindex`"
+msgstr ""
+
+#: ../../source/index.rst:27 588337ad99c14af6ac99fc272e70b0df
+msgid ":ref:`modindex`"
+msgstr ""
+
+#: ../../source/index.rst:28 d99404fbd2434f91b574317d7e3ae29f
+msgid ":ref:`search`"
+msgstr ""
+

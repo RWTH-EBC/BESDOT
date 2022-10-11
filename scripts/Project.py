@@ -220,15 +220,41 @@ class Project(object):
         # Save model in lp file, this only works with linear model. That is
         # not necessary.
         if save_lp:
+            if not os.path.exists(os.path.join(base_path, 'data',
+                                               'opt_output')):
+                os.mkdir(os.path.join(base_path, 'data', 'opt_output'))
+            else:
+                pass
+
+            if not os.path.exists(os.path.join(base_path, 'data',
+                                               'opt_output', self.name)):
+                os.mkdir(os.path.join(base_path, 'data', 'opt_output',
+                                      self.name))
+            else:
+                pass
+
             model_output_path = os.path.join(base_path, 'data', 'opt_output',
-                                             self.name + '_model.lp')
+                                             self.name, 'model.lp')
             self.model.write(model_output_path,
                              io_options={'symbolic_solver_labels': True})
 
         # Save results in csv file.
         if save_result:
+            if not os.path.exists(os.path.join(base_path, 'data',
+                                               'opt_output')):
+                os.mkdir(os.path.join(base_path, 'data', 'opt_output'))
+            else:
+                pass
+
+            if not os.path.exists(os.path.join(base_path, 'data',
+                                               'opt_output', self.name)):
+                os.mkdir(os.path.join(base_path, 'data', 'opt_output',
+                                      self.name))
+            else:
+                pass
+
             result_output_path = os.path.join(base_path, 'data', 'opt_output',
-                                              self.name + '_result.csv')
+                                              self.name, 'result.csv')
 
             # Get results for all variable.
             var_list = []

@@ -20,8 +20,24 @@ elec_sink_tuple = ('heat_pump', 'bat', 'e_grid', 'e_boi')
 heat_sink_tuple = 'water_tes'
 #plt.rcParams['axes.unicode_minus']=False
 
-base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-opt_output_path = os.path.join(base_path, 'data', 'opt_output')
+# base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# opt_output_path = os.path.join(base_path, 'data', 'opt_output')
+
+
+def find_element(output_df):
+    """find all elements in dataframe, the variables with same name but
+    different time step would be stored in a list"""
+    output_df['var_pre'] = output_df['var'].map(lambda x: x.split('[')[0])
+    all_elements = output_df['var_pre'].tolist()
+    element_list = list(set(all_elements))  # delete duplicate elements
+
+    elements_dict = {}
+    for element in element_list:
+        element_df = output_df.loc[output_df['var_pre'] == element]
+        values = element_df['value'].tolist()
+        elements_dict[element] = values
+
+    return elements_dict
 
 
 def find_size(csv_file):
@@ -52,7 +68,43 @@ def sum_flow(csv_file, flow_name):
     print(sum(flow_list))
 
 
-def plot_all(csv_file, time_interval):
+def find_max_timestep(csv_file, profile_name):
+    """Search the maximal value of a profile and return the timestep of the
+    maximal value. This function could be used to analysis the situation,
+    how the peak demand is filled.
+    Using find_element().keys() to find the name of the wanted profile"""
+    output_df = pd.read_csv(csv_file)
+    elements_dict = find_element(output_df)
+    profile = elements_dict[profile_name]
+    max_value = max(profile)
+    index_max = profile.index(max(profile))
+
+    return max_value, index_max
+
+
+def save_timeseries(csv_file):
+    """Take the time series from output file and save them as an individual
+    csv file, to reduce the analysis time cost."""
+    output_df = pd.read_csv(csv_file)
+    elements_dict = find_element(output_df)
+    new_df = pd.DataFrame()
+
+    for item in elements_dict.keys():
+        if len(elements_dict[item]) > 1:
+            new_df = pd.DataFrame(index=range(len(elements_dict[item])))
+            break
+
+    for item in elements_dict.keys():
+        if len(elements_dict[item]) > 1:
+            new_df[item] = elements_dict[item]
+
+    # print(new_df)
+    output_path = os.path.split(csv_file)
+    timeseries_path = os.path.join(output_path[0], 'timeseries.csv')
+    new_df.to_csv(timeseries_path)
+
+
+def plot_all(csv_file, time_interval, save_path=None):
     """
 
     Args:
@@ -71,38 +123,32 @@ def plot_all(csv_file, time_interval):
         else:
             if sum(elements_dict[element]) > 0.001 or sum(elements_dict[
                                                               element]) < 0.001:
-                plot_single(element, elements_dict[element][time_interval[0]:
-                                                            time_interval[1]])
-
-        #    fig, ax = plt.figure()
-        #    ax = fig.add_subplot(111)
-        #    ax1 = plot_single(element, elements_dict[element][time_interval[0]:
-        #                                                      time_interval[1]])
-        #    ax2 = ax1.twinx()
-        #    ax2 = plot_single(element, elements_dict[element][time_interval[0]:
-        #                                                      time_interval[1]])
+                plot_single(element,
+                            elements_dict[element][time_interval[0]:
+                                                   time_interval[1]],
+                            save_path)
 
 
-            # print(element)
-            # if element == 'heat_pump_water_tes':
-            # plot_single(element, elements_dict[element])
-
-
-def plot_single(name, profile):
-    plot_output = os.path.join(opt_output_path, 'plot', 'Profile of ' + name)
+def plot_single(name, profile, plot_path=None):
+    """
+    name: the name for a variable in optimization model and results.
+    profile: already taken fom the result dictionary and the time steps are
+    taken into account as well.
+    plot_path: the folder address for all plots, it should be the same folder
+    for model and optimization results.
+    """
     fig, ax = plt.subplots(figsize=(6.5, 5.5))
-    #ax = fig.add_subplot(111)
     ax.plot(profile, linewidth=2, color='r', linestyle='-')
     ax.set_title('Profile of ' + name)
     ax.set_xlabel('Hours [h]')
     if 'mass' in name:
-        ax.set_ylabel('mass [KG/H]', fontsize=12)
+        ax.set_ylabel('Mass [KG/H]', fontsize=12)
     elif 'temp' in name:
-        ax.set_ylabel('temperature [°]', fontsize=12)
+        ax.set_ylabel('Temperature [°C]', fontsize=12)
     elif 'pmv' in name:
-        ax.set_ylabel(' ', fontsize=12)
+        ax.set_ylabel('PMV', fontsize=12)
     else:
-        ax.set_ylabel('power [KW]', fontsize=12)
+        ax.set_ylabel('Power [KW]', fontsize=12)
 
     if 'pmv' in name:
         ax.set_xlim(xmin=0)
@@ -112,8 +158,10 @@ def plot_single(name, profile):
         ax.set_ylim(ymin=0, ymax=max(profile) * 1.2)
     plt.grid()
 
-    plt.show()
-    # plt.savefig(plot_output)
+    if plot_path is not None:
+        plt.savefig(os.path.join(plot_path, name+'.png'))
+    else:
+        plt.show()
     plt.close()
 
 
@@ -405,27 +453,32 @@ def plot_temp(name, profile):
     plt.close()
 
 
-def find_element(output_df):
-    """find all elements in dataframe, the variables with same name but
-    different time step would be stored in a list"""
-    output_df['var_pre'] = output_df['var'].map(lambda x: x.split('[')[0])
-    all_elements = output_df['var_pre'].tolist()
-    element_list = list(set(all_elements))  # delete duplicate elements
-
-    elements_dict = {}
-    for element in element_list:
-        element_df = output_df.loc[output_df['var_pre'] == element]
-        values = element_df['value'].tolist()
-        elements_dict[element] = values
-
-    return elements_dict
-
-
 if __name__ == '__main__':
-    pass
-    # base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    # opt_output_path = os.path.join(base_path, 'data', 'opt_output')
-    # opt_output = os.path.join(opt_output_path, 'project_1_result.csv')
+    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    opt_output_path = os.path.join(base_path, 'data', 'opt_output')
+    opt_output = os.path.join(opt_output_path, 'project_1', 'result.csv')
+
+    #############################################################
+    # Search and get values
+    #############################################################
+    # output_df = pd.read_csv(opt_output)
+    # all_elements = find_element(output_df)
+    # print(all_elements)
+
+    # find_max_timestep(opt_output, 'input_heat_therm_cns')
+
+    save_timeseries(opt_output)
+
+    #############################################################
+    # Plots
+    #############################################################
+    # if os.path.exists(os.path.join(opt_output_path, 'project_1')):
+    #     pass
+    # else:
+    #     os.mkdir(os.path.join(opt_output_path, 'project_1'))
+    # plot_all(opt_output, [624, 672],
+    #          save_path=os.path.join(opt_output_path, 'project_1'))
+
     # plot_output = os.path.join(opt_output_path, 'plot')
     #
     # demand_input = os.path.join(base_path, 'data', 'denmark_energy_hub',

@@ -1,0 +1,90 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, Yi Nie
+# This file is distributed under the same license as the Besdot package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Besdot \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-06 13:47+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/scripts 0c7353091afe4836af01dd1343150a95
+#: 35569fafe9f549e68c62f81531e80ec9.md:1
+msgid "scripts"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9.md:3
+#: dcb0754d7e1b4504b31cd1c99f9db095
+msgid "这个文件夹中保存所有的python模型以及内嵌的数学模型，整体框架如下"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9.md:5
+#: 8ef0ddea72fc42b1b4bdb9b9096dbea5
+msgid "[此处添加一张图会比较好看，UML或者类似图]"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9.md:7
+#: 8e72aa947478415595acf09015419d23
+msgid "Project.py"
+msgstr ""
+
+#: ../../source/scripts 197b936bb0184f0e9f7b611a36e3b133
+#: 35569fafe9f549e68c62f81531e80ec9.md:9
+msgid "Building.py"
+msgstr ""
+
+#: ../../source/scripts 1dad3bf20d004639898c5316b34b014e
+#: 35569fafe9f549e68c62f81531e80ec9.md:11
+msgid "建筑模型"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9.md:13
+#: 5fc8f06049ae4f88965ee2e7014d6755
+msgid "_constraint_energy_balance：按照topology汇总所有能量流，各个组件component在topology中的流入之和等于这个组件的总流入；对于总流出是一样的"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9.md:14
+#: 956f9e316e0d4e8d830d875b231b20bd
+msgid "_constraint_solar_area：太阳光伏和光热的总面积不能超过建筑提供的安装面积"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9.md:15
+#: cda03071a9234f57883afd0c76d448d9
+msgid "_constraint_mass_balance：根据topology确定组件间水流必须相等，也就是说从组件1流向组件2的水流必须和组件2流向组件1的相等；如果在topology的表格中给出了流量，那么流量变量必须等于给出的值。"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9.md:17
+#: bde4af5d1cea4237acf28fae66fded42
+msgid "Environment.py"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9.md:19
+#: fa26ce0b68db47b8a5e91b0896dfa5d3
+msgid "Component.py"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9.md:21
+#: bff389982fef4b65bb4ba346f589e035
+msgid "FluidComponent.py"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9.md:23
+#: b211f63cd24c4e519a8d948170c8e480
+msgid "下面的子页中包含的是所有被开发出来的具体component模型"
+msgstr ""
+
+#: ../../source/scripts 35569fafe9f549e68c62f81531e80ec9.md:25
+#: d12d909ef5d446b28dc8a8dca0d6c8e8
+#, python-format
+msgid "[components](scripts%2035569fafe9f549e68c62f81531e80ec9/components%207a924a6c161e436ca56edfeecb9d0234.md)"
+msgstr ""
+
