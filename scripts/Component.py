@@ -38,6 +38,7 @@ class Component(object):
         """
         self.name = comp_name
         self.component_type = comp_type
+        self.comp_model = comp_model
 
         # The 'inputs' and 'outputs' are usually defined for each specific
         # component.
@@ -72,7 +73,9 @@ class Component(object):
                        ' is given for the component ' + self.name
             warnings.warn(warn_msg)
             self.cost_model = 0
-        # self.fixed_cost = None
+        self.unit_cost = None
+        self.fixed_cost = None
+        self.cost_pair = None
 
         self.energy_flows = {'input': {},
                              'output': {}}
@@ -103,7 +106,8 @@ class Component(object):
         # todo (yni): modify the function formate and database formate
         if self.outputs is not None:
             if 'efficiency' in properties.columns:
-                self.efficiency[self.outputs[0]] = float(properties['efficiency'])
+                self.efficiency[self.outputs[0]] = float(
+                    properties['efficiency'])
             else:
                 if self.component_type not in ['Storage', 'Inverter',
                                                'Battery', 'HotWaterStorage',
@@ -142,12 +146,9 @@ class Component(object):
         if self.cost_model == 0:
             if 'only-unit-price' in properties.columns:
                 self.unit_cost = float(properties['only-unit-price'])
-                self.fixed_cost = None
             else:
                 warnings.warn("In the model database for " + self.name +
                               " lack of column for unit cost.")
-                # self.unit_cost = None
-                # self.fixed_cost = None
         elif self.cost_model == 1:
             if 'fixed-unit-price' in properties.columns and \
                     'fixed-price' in properties.columns:
@@ -156,8 +157,6 @@ class Component(object):
             elif 'fixed-unit-price' not in properties.columns:
                 warnings.warn("In the model database for " + self.name +
                               " lack of column for unit cost.")
-                # self.unit_cost = None
-                # self.fixed_cost = None
             elif 'fixed-price' not in properties.columns:
                 warnings.warn("In the model database for " + self.name +
                               " lack of column for fixed price.")
@@ -166,6 +165,7 @@ class Component(object):
                               " lack of column for unit cost and fixed price.")
         elif self.cost_model == 2:
             self.cost_pair = properties['data-pair'].values[0].split('/')
+            # print(self.cost_pair)
 
     def update_profile(self, **kwargs):
         for arg in kwargs:
@@ -183,6 +183,30 @@ class Component(object):
         else:
             warnings.warn("io of the function add_energy_flow only allowed "
                           "for 'input' or 'output'.")
+
+    def show_cost_model(self):
+        """To analyze the cost model the cost model type of component could
+        be printed in log."""
+        print("The cost model for model " + self.name + " is " +
+              str(self.cost_model))
+
+    def change_cost_model(self, new_cost_model):
+        """Change cost model and reset the unit cost and fixed cost in self"""
+        if new_cost_model in [0, 1, 2]:
+            self.cost_model = new_cost_model
+        else:
+            warn_msg = 'Unexpected cost model ' + str(new_cost_model) + \
+                       ' for change_cost_model() of ' + self.name
+            warnings.warn(warn_msg)
+            self.cost_model = 0
+
+        self.unit_cost = None
+        self.fixed_cost = None
+        self.cost_pair = None
+
+        if self.comp_model is not None:
+            properties = self.get_properties(self.comp_model)
+            self._read_properties(properties)
 
     def _constraint_conver(self, model):
         """
@@ -263,7 +287,9 @@ class Component(object):
         else:
             min_size = self.min_size
 
-        if self.fixed_cost is not None:
+        if self.cost_model == 0:
+            model.cons.add(size * self.unit_cost == invest)
+        elif self.cost_model == 1:
             dis_not_select = Disjunct()
             not_select_size = pyo.Constraint(expr=size == 0)
             not_select_inv = pyo.Constraint(expr=invest == 0)
@@ -285,8 +311,35 @@ class Component(object):
 
             dj_size = Disjunction(expr=[dis_not_select, dis_select])
             model.add_component('disjunction_size' + self.name, dj_size)
-        else:
-            model.cons.add(size * self.unit_cost == invest)
+        elif self.cost_model == 2:
+            pair_nr = len(self.cost_pair)
+            pair = Disjunct(pyo.RangeSet(pair_nr + 1))
+            model.add_component(self.name + '_cost_pair', pair)
+            pair_list = []
+            for i in range(pair_nr):
+                size_data = float(self.cost_pair[i].split(';')[0])
+                price_data = float(self.cost_pair[i].split(';')[1])
+
+                select_size = pyo.Constraint(expr=size == size_data)
+                select_inv = pyo.Constraint(expr=invest == price_data)
+                pair[i + 1].add_component(
+                    self.name + 'select_size_' + str(i + 1),
+                    select_size)
+                pair[i + 1].add_component(
+                    self.name + 'select_inv_' + str(i + 1),
+                    select_inv)
+                pair_list.append(pair[i + 1])
+
+            select_size = pyo.Constraint(expr=size == 0)
+            select_inv = pyo.Constraint(expr=invest == 0)
+            pair[pair_nr + 1].add_component(self.name + 'select_size_' + str(0),
+                                            select_size)
+            pair[pair_nr + 1].add_component(self.name + 'select_inv_' + str(0),
+                                            select_inv)
+            pair_list.append(pair[pair_nr + 1])
+
+            disj_size = Disjunction(expr=pair_list)
+            model.add_component('disj_size_' + self.name, disj_size)
 
         annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w,
                                self.f_op)
@@ -379,10 +432,10 @@ class Component(object):
         comp_size = pyo.Var(bounds=(self.min_size, self.max_size))
         model.add_component('size_' + self.name, comp_size)
 
-        annual_cost = pyo.Var(bounds=(0, None))
+        annual_cost = pyo.Var(bounds=(0, 10 ** 10))
         model.add_component('annual_cost_' + self.name, annual_cost)
 
-        invest = pyo.Var(bounds=(0, None))
+        invest = pyo.Var(bounds=(0, 10 ** 10))
         model.add_component('invest_' + self.name, invest)
 
         if self.inputs is not None:
