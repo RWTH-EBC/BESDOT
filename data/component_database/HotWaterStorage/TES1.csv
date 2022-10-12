@@ -1,2 +1,2 @@
-input efficiency,output efficiency,self discharge efficiency,max soc,min soc,max input,max output,service life,cost_type,cost,factor repair effort,factor servicing effort,servicing effort hours,e2p in,e2p out,init soc
+input efficiency,output efficiency,self discharge efficiency,max soc,min soc,max input,max output,service life,cost_type,only-unit-price,factor repair effort,factor servicing effort,servicing effort hours,e2p in,e2p out,init soc
 0.9,0.9,0.99,1,0,1000,1,20,constant,1800,0.01,0.015,20,1,1,0.5
