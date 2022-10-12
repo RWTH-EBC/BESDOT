@@ -44,7 +44,7 @@ class HotWaterStorage(Storage):
         annual_cost = model.find_component('annual_cost_' + self.name)
         invest = model.find_component('invest_' + self.name)
 
-        model.cons.add(volume * self.cost == invest)
+        model.cons.add(volume * self.unit_cost == invest)
 
         annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w,
                                self.f_op)

@@ -9,7 +9,6 @@ import os
 from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
-from tools.pandas_area_plot import plot_area
 import tools.post_processing as pp
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
