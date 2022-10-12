@@ -1,0 +1,2 @@
+min_elec_size,max_elec_size,cost_type,cost,factor repair effort,factor servicing effort,servicing effort hours,fix_cost_factor,service life,max temperature,min temperature
+50,450,constant,1100,0.06,0.02,20,0.025,15,95,30

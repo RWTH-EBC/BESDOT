@@ -1,2 +1,2 @@
-efficiency,temperature hot,cost,fix_cost_factor,service life,factor repair effort,factor servicing effort,servicing effort hours
+efficiency,temperature hot,only-unit-price,fix_cost_factor,service life,factor repair effort,factor servicing effort,servicing effort hours
 4.5,55,3773.7,0.02,20,0.01,0.015,20

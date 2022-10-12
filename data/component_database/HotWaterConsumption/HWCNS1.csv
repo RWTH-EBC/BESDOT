@@ -1,2 +1,2 @@
-efficiency,service life,cost_type,cost,factor repair effort,factor servicing effort,servicing effort hours
+efficiency,service life,cost_type,only-unit-price,factor repair effort,factor servicing effort,servicing effort hours
 1,100,constant,0,0.01,0.015,20

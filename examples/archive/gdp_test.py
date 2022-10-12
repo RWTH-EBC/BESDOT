@@ -125,75 +125,108 @@ m = pyo.ConcreteModel('gdp_test')
 # pyo.Reference(m.d[:].indicator_var).display()
 
 #######
-# a test
+# a test for complex logical constraints
 #######
-time_steps = 24
+# time_steps = 24
+#
+# m.t = pyo.RangeSet(time_steps)
+# m.temp = pyo.Var(m.t, bounds=(20,70))
+# m.energy = pyo.Var(m.t, bounds=(0,15))
+#
+# m.init = pyo.BooleanVar()
+# m.p_init = pyo.LogicalConstraint(expr=m.init.equivalent_to(True))
+#
+# m.o = pyo.Objective(expr=pyo.quicksum(m.energy[time] for time in m.t))
+# m.temp_con = pyo.Constraint(expr=m.temp[1]==20)
+# m.temp_con_2 = pyo.Constraint(expr=m.temp[2]==25)
+#
+# for time_step in m.t:
+#     a = Disjunct()
+#     c_1 = pyo.Constraint(expr=m.temp[time_step]>=60)
+#     c_2 = pyo.Constraint(expr=m.energy[time_step]==0)
+#     m.add_component('a_dis_'+str(time_step), a)
+#     a.add_component('a_1_'+str(time_step), c_1)
+#     a.add_component('a_2_' + str(time_step), c_2)
+#
+#     b = Disjunct()
+#     c_7 = pyo.Constraint(expr=m.temp[time_step] <= 60-small_num)
+#     c_8 = pyo.Constraint(expr=m.energy[time_step] >= 10)
+#     m.add_component('b_dis_'+str(time_step), b)
+#     b.add_component('b_1_' + str(time_step), c_7)
+#     b.add_component('b_2_' + str(time_step), c_8)
+#
+#     c = Disjunct()
+#     c_3 = pyo.Constraint(expr=m.temp[time_step]<=30)
+#     c_5 = pyo.Constraint(expr=m.energy[time_step]>=6)
+#     m.add_component('c_dis_'+str(time_step), c)
+#     c.add_component('c_' + str(time_step), c_3)
+#     c.add_component('c_2_' + str(time_step), c_5)
+#
+#     d = Disjunct()
+#     c_4 = pyo.Constraint(expr=m.energy[time_step]==0)
+#     c_6 = pyo.Constraint(expr=m.temp[time_step] >= 30+small_num)
+#     m.add_component('d_dis_'+str(time_step), d)
+#     d.add_component('d_' + str(time_step), c_4)
+#     d.add_component('d_2_' + str(time_step), c_6)
+#
+#     dj = Disjunction(pyo.RangeSet(2))
+#     m.add_component('dj_dis_' + str(time_step), dj)
+#     # dj[1] = [a, b]
+#     # dj[2] = [c, d]
+#     dj[1] = [a, b, c, d]
+#     if time_step == 1:
+#         # p_3 = pyo.LogicalConstraint(expr=pyo.xor(m.init, b.indicator_var))
+#         # p_4 = pyo.LogicalConstraint(expr=pyo.lor(a.indicator_var, b.indicator_var).implies(m.init))
+#         p_4 = pyo.LogicalConstraint(
+#             expr=m.init.equivalent_to(pyo.lor(a.indicator_var, b.indicator_var)))
+#         p_5 = pyo.LogicalConstraint(
+#             expr=~m.init.equivalent_to(pyo.lor(c.indicator_var, d.indicator_var)))
+#     else:
+#         last_status = m.find_component('b_dis_'+str(time_step-1))
+#         # p_3 = pyo.LogicalConstraint(expr=pyo.xor(last_status.indicator_var, b.indicator_var))
+#         p_4 = pyo.LogicalConstraint(
+#             expr=pyo.lor(a.indicator_var, b.indicator_var).equivalent_to(last_status.indicator_var))
+#         # p_4 = pyo.LogicalConstraint(
+#         #     expr=last_status.indicator_var.implies(pyo.lor(a.indicator_var, b.indicator_var)))
+#         p_5 = pyo.LogicalConstraint(
+#             expr=~last_status.indicator_var.equivalent_to(pyo.lor(c.indicator_var, d.indicator_var)))
+#     # m.add_component('p_3_' + str(time_step), p_3)
+#     m.add_component('p_4_' + str(time_step), p_4)
+#     m.add_component('p_5_' + str(time_step), p_5)
 
-m.t = pyo.RangeSet(time_steps)
-m.temp = pyo.Var(m.t, bounds=(20,70))
-m.energy = pyo.Var(m.t, bounds=(0,15))
+#######
+# test for exactly(), which could be used for choosing product.
+#######
+m.size = pyo.Var(bounds=(0, 70))
+m.cost = pyo.Var(bounds=(0, 100))
+m.profit = pyo.Objective(expr=3*m.size - m.cost, sense=pyo.maximize)
 
-m.init = pyo.BooleanVar()
-m.p_init = pyo.LogicalConstraint(expr=m.init.equivalent_to(True))
+cons_list = []
+a = Disjunct(pyo.RangeSet(3))
+c_1 = pyo.Constraint(expr=m.size==0)
+c_2 = pyo.Constraint(expr=m.cost==0)
+m.add_component('a', a)
+a[1].add_component('a_1_', c_1)
+a[1].add_component('a_2_', c_2)
+cons_list.append(a[1])
 
-m.o = pyo.Objective(expr=pyo.quicksum(m.energy[time] for time in m.t))
-m.temp_con = pyo.Constraint(expr=m.temp[1]==20)
-m.temp_con_2 = pyo.Constraint(expr=m.temp[2]==25)
+# b = Disjunct()
+c_3 = pyo.Constraint(expr=m.size==10)
+c_4 = pyo.Constraint(expr=m.cost==20)
+# m.add_component('b', a[2])
+a[2].add_component('b_1_', c_3)
+a[2].add_component('b_2_', c_4)
+cons_list.append(a[2])
 
-for time_step in m.t:
-    a = Disjunct()
-    c_1 = pyo.Constraint(expr=m.temp[time_step]>=60)
-    c_2 = pyo.Constraint(expr=m.energy[time_step]==0)
-    m.add_component('a_dis_'+str(time_step), a)
-    a.add_component('a_1_'+str(time_step), c_1)
-    a.add_component('a_2_' + str(time_step), c_2)
+# c = Disjunct()
+c_5 = pyo.Constraint(expr=m.size==20)
+c_6 = pyo.Constraint(expr=m.cost==35)
+# m.add_component('c', a[3])
+a[3].add_component('c_1_', c_5)
+a[3].add_component('c_2_', c_6)
+cons_list.append(a[3])
 
-    b = Disjunct()
-    c_7 = pyo.Constraint(expr=m.temp[time_step] <= 60-small_num)
-    c_8 = pyo.Constraint(expr=m.energy[time_step] >= 10)
-    m.add_component('b_dis_'+str(time_step), b)
-    b.add_component('b_1_' + str(time_step), c_7)
-    b.add_component('b_2_' + str(time_step), c_8)
-
-    c = Disjunct()
-    c_3 = pyo.Constraint(expr=m.temp[time_step]<=30)
-    c_5 = pyo.Constraint(expr=m.energy[time_step]>=6)
-    m.add_component('c_dis_'+str(time_step), c)
-    c.add_component('c_' + str(time_step), c_3)
-    c.add_component('c_2_' + str(time_step), c_5)
-
-    d = Disjunct()
-    c_4 = pyo.Constraint(expr=m.energy[time_step]==0)
-    c_6 = pyo.Constraint(expr=m.temp[time_step] >= 30+small_num)
-    m.add_component('d_dis_'+str(time_step), d)
-    d.add_component('d_' + str(time_step), c_4)
-    d.add_component('d_2_' + str(time_step), c_6)
-
-    dj = Disjunction(pyo.RangeSet(2))
-    m.add_component('dj_dis_' + str(time_step), dj)
-    # dj[1] = [a, b]
-    # dj[2] = [c, d]
-    dj[1] = [a, b, c, d]
-    if time_step == 1:
-        # p_3 = pyo.LogicalConstraint(expr=pyo.xor(m.init, b.indicator_var))
-        # p_4 = pyo.LogicalConstraint(expr=pyo.lor(a.indicator_var, b.indicator_var).implies(m.init))
-        p_4 = pyo.LogicalConstraint(
-            expr=m.init.equivalent_to(pyo.lor(a.indicator_var, b.indicator_var)))
-        p_5 = pyo.LogicalConstraint(
-            expr=~m.init.equivalent_to(pyo.lor(c.indicator_var, d.indicator_var)))
-    else:
-        last_status = m.find_component('b_dis_'+str(time_step-1))
-        # p_3 = pyo.LogicalConstraint(expr=pyo.xor(last_status.indicator_var, b.indicator_var))
-        p_4 = pyo.LogicalConstraint(
-            expr=pyo.lor(a.indicator_var, b.indicator_var).equivalent_to(last_status.indicator_var))
-        # p_4 = pyo.LogicalConstraint(
-        #     expr=last_status.indicator_var.implies(pyo.lor(a.indicator_var, b.indicator_var)))
-        p_5 = pyo.LogicalConstraint(
-            expr=~last_status.indicator_var.equivalent_to(pyo.lor(c.indicator_var, d.indicator_var)))
-    # m.add_component('p_3_' + str(time_step), p_3)
-    m.add_component('p_4_' + str(time_step), p_4)
-    m.add_component('p_5_' + str(time_step), p_5)
-
+m.d = Disjunction(expr=cons_list)
 pyo.TransformationFactory('gdp.bigm').apply_to(m)
 
 # Before solve, Boolean vars have no value

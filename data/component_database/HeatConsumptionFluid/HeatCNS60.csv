@@ -1,2 +1,2 @@
-service life,inlet temperature,outlet temperature,cost_type,cost,factor repair effort,factor servicing effort,servicing effort hours
+service life,inlet temperature,outlet temperature,cost_type,only-unit-price,factor repair effort,factor servicing effort,servicing effort hours
 100,60,45,constant,0,0.01,0.015,20

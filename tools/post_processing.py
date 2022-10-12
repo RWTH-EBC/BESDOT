@@ -456,18 +456,26 @@ def plot_temp(name, profile):
 if __name__ == '__main__':
     base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     opt_output_path = os.path.join(base_path, 'data', 'opt_output')
-    opt_output = os.path.join(opt_output_path, 'project_1', 'result.csv')
+    opt_output_0 = os.path.join(opt_output_path, 'project_3_0', 'result.csv')
+    opt_output_1 = os.path.join(opt_output_path, 'project_3_1', 'result.csv')
+    opt_output_2 = os.path.join(opt_output_path, 'project_3_3', 'result.csv')
 
     #############################################################
     # Search and get values
     #############################################################
-    # output_df = pd.read_csv(opt_output)
-    # all_elements = find_element(output_df)
+    # output_df_0 = pd.read_csv(opt_output_0)
+    # all_elements_0 = find_element(output_df_0)
+    # opt_output_1 = pd.read_csv(opt_output_0)
+    # opt_output_1 = find_element(opt_output_1)
     # print(all_elements)
+
+    find_size(opt_output_0)
+    print("====")
+    find_size(opt_output_2)
 
     # find_max_timestep(opt_output, 'input_heat_therm_cns')
 
-    save_timeseries(opt_output)
+    # save_timeseries(opt_output)
 
     #############################################################
     # Plots

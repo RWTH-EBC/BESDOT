@@ -9,7 +9,6 @@ import os
 from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
-from tools.pandas_area_plot import plot_area
 import tools.post_processing as pp
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -63,6 +62,6 @@ result_file = os.path.join(base_path, 'data', 'opt_output',
                            'project_1', 'result.csv')
 # pp.find_size(result_file)
 # pp.plot_all(result_file, [0, 8760])
-pp.plot_all(result_file, [624, 672],
-            save_path=os.path.join(base_path, 'data', 'opt_output',
-                                   'project_1'))
+# pp.plot_all(result_file, [624, 672],
+#             save_path=os.path.join(base_path, 'data', 'opt_output',
+#                                    'project_1'))

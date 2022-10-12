@@ -33,11 +33,15 @@ class Component(object):
     """
 
     def __init__(self, comp_name, comp_type="Component", comp_model=None,
-                 min_size=0, max_size=1000, current_size=0):
+                 min_size=0, max_size=1000, current_size=0, cost_model=0):
         """
         """
         self.name = comp_name
         self.component_type = comp_type
+        self.comp_model = comp_model
+
+        # The 'inputs' and 'outputs' are usually defined for each specific
+        # component.
         if not hasattr(self, 'inputs'):
             self.inputs = []
         if not hasattr(self, 'outputs'):
@@ -45,22 +49,50 @@ class Component(object):
         self.efficiency = {'elec': None,
                            'heat': None,
                            'cool': None}
-        if comp_model is not None:
-            properties = self.get_properties(comp_model)
-            self._read_properties(properties)
+
         self.min_size = min_size
         self.max_size = max_size
         self.current_size = current_size
 
-        # other_op_cost is an indicator, which shows if other operation cost
-        # should be considered for the component. The attribute could be set
-        # into False or True. False means no other operation cost should be
-        # taken into account.
-        self.other_op_cost = False
-        self.socket_cost = None
+        # Cost model can be choose from 0, 1, 2.
+        # The model 0 means no fixed cost is considered, the relationship
+        # between total price and installed size is: y=m*x. y represents the
+        # total price, x represents the installed size, and m represents the
+        # unit cost from database.
+        # The model 1 means fixed cost is considered, the relationship is
+        # y=m*x+n. n represents the fixed cost. Model 1 usually has much better
+        # fitting result than model 0. But it cause the increase of number of
+        # binare variable.
+        # The model 2 means the price pairs, each product is seen as an
+        # individual point for optimization model, which would bring large
+        # calculation cost. But this model is the most consistent with reality.
+        if cost_model in [0, 1, 2]:
+            self.cost_model = cost_model
+        else:
+            warn_msg = 'Unexpected cost model ' + str(cost_model) + \
+                       ' is given for the component ' + self.name
+            warnings.warn(warn_msg)
+            self.cost_model = 0
+        self.unit_cost = None
+        self.fixed_cost = None
+        self.cost_pair = None
 
         self.energy_flows = {'input': {},
                              'output': {}}
+
+        # Read the data from database
+        if comp_model is not None:
+            properties = self.get_properties(comp_model)
+            self._read_properties(properties)
+
+        # other_op_cost is an indicator, which shows if other operation cost
+        # should be considered for the component, except the operation cost in
+        # database csv file, which comes from the standard as a fiexed
+        # percentage of investment. The attribute could be set into False or
+        # True. False means no other operation cost should be taken into
+        # account. This attribute is not important, just for special use in
+        # development.
+        self.other_op_cost = False
 
     def get_properties(self, model):
         model_property_file = os.path.join(base_path, 'data',
@@ -74,8 +106,8 @@ class Component(object):
         # todo (yni): modify the function formate and database formate
         if self.outputs is not None:
             if 'efficiency' in properties.columns:
-                self.efficiency[self.outputs[0]] = float(properties[
-                                                             'efficiency'])
+                self.efficiency[self.outputs[0]] = float(
+                    properties['efficiency'])
             else:
                 if self.component_type not in ['Storage', 'Inverter',
                                                'Battery', 'HotWaterStorage',
@@ -89,11 +121,6 @@ class Component(object):
         else:
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for service life.")
-        if 'cost' in properties.columns:
-            self.cost = float(properties['cost'])
-        else:
-            warnings.warn("In the model database for " + self.component_type +
-                          " lack of column for cost.")
         if 'factor repair effort' in properties.columns:
             self.f_inst = float(properties['factor repair effort'])
         elif 'factor_repair_effort' in properties.columns:
@@ -115,8 +142,30 @@ class Component(object):
         else:
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for servicing effort hours.")
-        if 'socket cost' in properties.columns:
-            self.socket_cost = float(properties['socket cost'])
+
+        if self.cost_model == 0:
+            if 'only-unit-price' in properties.columns:
+                self.unit_cost = float(properties['only-unit-price'])
+            else:
+                warnings.warn("In the model database for " + self.name +
+                              " lack of column for unit cost.")
+        elif self.cost_model == 1:
+            if 'fixed-unit-price' in properties.columns and \
+                    'fixed-price' in properties.columns:
+                self.unit_cost = float(properties['fixed-unit-price'])
+                self.fixed_cost = float(properties['fixed-price'])
+            elif 'fixed-unit-price' not in properties.columns:
+                warnings.warn("In the model database for " + self.name +
+                              " lack of column for unit cost.")
+            elif 'fixed-price' not in properties.columns:
+                warnings.warn("In the model database for " + self.name +
+                              " lack of column for fixed price.")
+            else:
+                warnings.warn("In the model database for " + self.name +
+                              " lack of column for unit cost and fixed price.")
+        elif self.cost_model == 2:
+            self.cost_pair = properties['data-pair'].values[0].split('/')
+            # print(self.cost_pair)
 
     def update_profile(self, **kwargs):
         for arg in kwargs:
@@ -134,6 +183,30 @@ class Component(object):
         else:
             warnings.warn("io of the function add_energy_flow only allowed "
                           "for 'input' or 'output'.")
+
+    def show_cost_model(self):
+        """To analyze the cost model the cost model type of component could
+        be printed in log."""
+        print("The cost model for model " + self.name + " is " +
+              str(self.cost_model))
+
+    def change_cost_model(self, new_cost_model):
+        """Change cost model and reset the unit cost and fixed cost in self"""
+        if new_cost_model in [0, 1, 2]:
+            self.cost_model = new_cost_model
+        else:
+            warn_msg = 'Unexpected cost model ' + str(new_cost_model) + \
+                       ' for change_cost_model() of ' + self.name
+            warnings.warn(warn_msg)
+            self.cost_model = 0
+
+        self.unit_cost = None
+        self.fixed_cost = None
+        self.cost_pair = None
+
+        if self.comp_model is not None:
+            properties = self.get_properties(self.comp_model)
+            self._read_properties(properties)
 
     def _constraint_conver(self, model):
         """
@@ -200,10 +273,10 @@ class Component(object):
         annual_cost = model.find_component('annual_cost_' + self.name)
         invest = model.find_component('invest_' + self.name)
 
-        # Take the socket cost for investment into account and use dgp model to
+        # Take the fixed cost for investment into account and use dgp model to
         # indicate that, if component size is equal to zero, the investment
         # equal to zero as well. If component size is lager than zero,
-        # the socket cost should be considered.
+        # the fixed cost should be considered.
         # The small number is given because "larger" is not allowed for
         # optimization language, so use "larger equal to" replace "larger"
         # with a small number. If min size is given from the model database,
@@ -214,7 +287,9 @@ class Component(object):
         else:
             min_size = self.min_size
 
-        if self.socket_cost is not None:
+        if self.cost_model == 0:
+            model.cons.add(size * self.unit_cost == invest)
+        elif self.cost_model == 1:
             dis_not_select = Disjunct()
             not_select_size = pyo.Constraint(expr=size == 0)
             not_select_inv = pyo.Constraint(expr=invest == 0)
@@ -226,8 +301,8 @@ class Component(object):
 
             dis_select = Disjunct()
             select_size = pyo.Constraint(expr=size >= min_size)
-            select_inv = pyo.Constraint(expr=invest == size * self.cost +
-                                                       self.socket_cost)
+            select_inv = pyo.Constraint(expr=invest == size * self.unit_cost +
+                                             self.fixed_cost)
             model.add_component('dis_select_' + self.name, dis_select)
             dis_not_select.add_component('select_size_' + self.name,
                                          select_size)
@@ -236,8 +311,35 @@ class Component(object):
 
             dj_size = Disjunction(expr=[dis_not_select, dis_select])
             model.add_component('disjunction_size' + self.name, dj_size)
-        else:
-            model.cons.add(size * self.cost == invest)
+        elif self.cost_model == 2:
+            pair_nr = len(self.cost_pair)
+            pair = Disjunct(pyo.RangeSet(pair_nr + 1))
+            model.add_component(self.name + '_cost_pair', pair)
+            pair_list = []
+            for i in range(pair_nr):
+                size_data = float(self.cost_pair[i].split(';')[0])
+                price_data = float(self.cost_pair[i].split(';')[1])
+
+                select_size = pyo.Constraint(expr=size == size_data)
+                select_inv = pyo.Constraint(expr=invest == price_data)
+                pair[i + 1].add_component(
+                    self.name + 'select_size_' + str(i + 1),
+                    select_size)
+                pair[i + 1].add_component(
+                    self.name + 'select_inv_' + str(i + 1),
+                    select_inv)
+                pair_list.append(pair[i + 1])
+
+            select_size = pyo.Constraint(expr=size == 0)
+            select_inv = pyo.Constraint(expr=invest == 0)
+            pair[pair_nr + 1].add_component(self.name + 'select_size_' + str(0),
+                                            select_size)
+            pair[pair_nr + 1].add_component(self.name + 'select_inv_' + str(0),
+                                            select_inv)
+            pair_list.append(pair[pair_nr + 1])
+
+            disj_size = Disjunction(expr=pair_list)
+            model.add_component('disj_size_' + self.name, disj_size)
 
         annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w,
                                self.f_op)
@@ -330,24 +432,24 @@ class Component(object):
         comp_size = pyo.Var(bounds=(self.min_size, self.max_size))
         model.add_component('size_' + self.name, comp_size)
 
-        annual_cost = pyo.Var(bounds=(0, None))
+        annual_cost = pyo.Var(bounds=(0, 10 ** 10))
         model.add_component('annual_cost_' + self.name, annual_cost)
 
-        invest = pyo.Var(bounds=(0, None))
+        invest = pyo.Var(bounds=(0, 10 ** 10))
         model.add_component('invest_' + self.name, invest)
 
         if self.inputs is not None:
             for energy_type in self.inputs:
-                input_energy = pyo.Var(model.time_step, bounds=(0, 10**10))
+                input_energy = pyo.Var(model.time_step, bounds=(0, 10 ** 10))
                 model.add_component('input_' + energy_type + '_' + self.name,
                                     input_energy)
 
         if self.outputs is not None:
             for energy_type in self.outputs:
-                output_energy = pyo.Var(model.time_step, bounds=(0, 10**10))
+                output_energy = pyo.Var(model.time_step, bounds=(0, 10 ** 10))
                 model.add_component('output_' + energy_type + '_' + self.name,
                                     output_energy)
 
         if self.other_op_cost:
-            other_op_cost = pyo.Var(bounds=(0, 10**10))
+            other_op_cost = pyo.Var(bounds=(0, 10 ** 10))
             model.add_component('other_op_cost_' + self.name, other_op_cost)
