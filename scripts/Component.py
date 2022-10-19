@@ -148,7 +148,8 @@ class Component(object):
                 self.unit_cost = float(properties['only-unit-price'])
             else:
                 warnings.warn("In the model database for " + self.name +
-                              " lack of column for unit cost.")
+                              "lack of column for unit cost. Its cost model "
+                              "was changed to 0")
         elif self.cost_model == 1:
             if 'fixed-unit-price' in properties.columns and \
                     'fixed-price' in properties.columns:
@@ -156,15 +157,27 @@ class Component(object):
                 self.fixed_cost = float(properties['fixed-price'])
             elif 'fixed-unit-price' not in properties.columns:
                 warnings.warn("In the model database for " + self.name +
-                              " lack of column for unit cost.")
+                              " lack of column for unit cost. Its cost model "
+                              "was changed to 0")
+                self.change_cost_model(0)
             elif 'fixed-price' not in properties.columns:
                 warnings.warn("In the model database for " + self.name +
-                              " lack of column for fixed price.")
+                              " lack of column for fixed price. Its cost "
+                              "model was changed to 0")
+                self.change_cost_model(0)
             else:
                 warnings.warn("In the model database for " + self.name +
-                              " lack of column for unit cost and fixed price.")
+                              " lack of column for unit cost and fixed price. "
+                              "Its cost model was changed to 0")
+                self.change_cost_model(0)
         elif self.cost_model == 2:
-            self.cost_pair = properties['data-pair'].values[0].split('/')
+            if 'data-pair' in properties.columns:
+                self.cost_pair = properties['data-pair'].values[0].split('/')
+            else:
+                warnings.warn("In the model database for " + self.name +
+                              " lack of column for data pair and fixed price. "
+                              "Its cost model was changed to 0")
+                self.change_cost_model(0)
             # print(self.cost_pair)
 
     def update_profile(self, **kwargs):

@@ -49,6 +49,7 @@ class SolarThermalCollector(Component):
         Compared to Component, the annual cost of solar thermal colleactor
         should be calculated with its area instead of the energy size in kWh.
         """
+        # todo: change it into cost model 0,1,2
         area = model.find_component('solar_area_' + self.name)
         annual_cost = model.find_component('annual_cost_' + self.name)
         invest = model.find_component('invest_' + self.name)

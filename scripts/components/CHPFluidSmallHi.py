@@ -79,6 +79,7 @@ class CHPFluidSmallHi(CHP, FluidComponent):
 
 
     def _constraint_vdi2067_chp(self, model):
+        # todo: change it into cost model 0,1,2
         size = model.find_component('size_' + self.name)
         annual_cost = model.find_component('annual_cost_' + self.name)
         invest = model.find_component('invest_' + self.name)
@@ -88,6 +89,7 @@ class CHPFluidSmallHi(CHP, FluidComponent):
         model.cons.add(annuity == annual_cost)
 
     def _constraint_vdi2067_chp_gdp(self, model):
+        # todo: change it into cost model 0,1,2
         annual_cost = model.find_component('annual_cost_' + self.name)
         invest = model.find_component('invest_' + self.name)
         Pel = model.find_component('size_' + self.name)

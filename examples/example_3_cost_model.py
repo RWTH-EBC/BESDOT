@@ -110,8 +110,8 @@ project_3.add_building(test_bld_3)
 # of component need to be found at first. The command in last block show the
 # recommended way to get the component name.
 test_bld_3.components['heat_pump'].change_cost_model(new_cost_model=2)
-# test_bld_2.components['water_tes'].change_cost_model(new_cost_model=1)
-# test_bld_2.components['boi'].change_cost_model(new_cost_model=1)
+test_bld_3.components['water_tes'].change_cost_model(new_cost_model=2)
+test_bld_3.components['boi'].change_cost_model(new_cost_model=2)
 
 # Show the cost model for each component.
 for comp in test_bld_3.components.values():

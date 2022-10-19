@@ -85,6 +85,7 @@ class CHPFluidBig(CHP, FluidComponent):
             model.cons.add(Pel * status[t + 1] == output_elec[t])
 
     def _constraint_vdi2067_chp(self, model):
+        # todo: change it into cost model 0,1,2
         size = model.find_component('size_' + self.name)
         annual_cost = model.find_component('annual_cost_' + self.name)
         invest = model.find_component('invest_' + self.name)
@@ -94,6 +95,7 @@ class CHPFluidBig(CHP, FluidComponent):
         model.cons.add(annuity == annual_cost)
 
     def _constraint_vdi2067_chp_gdp(self, model):
+        # todo: change it into cost model 0,1,2
         annual_cost = model.find_component('annual_cost_' + self.name)
         invest = model.find_component('invest_' + self.name)
         Pel = model.find_component('size_' + self.name)
@@ -112,6 +114,8 @@ class CHPFluidBig(CHP, FluidComponent):
         dis_select = Disjunct()
         select_size = pyo.Constraint(expr=Pel >= 50)
         select_inv = pyo.Constraint(expr=invest == Pel * 458 + 57433)
+        # Todo: the following code should not be included in vdi2067,
+        #  other chp model should check the same constraints as well.
         select_therm_size = pyo.Constraint(expr=Pel == 0.8148 * Qth - 16.89)
         model.add_component('dis_select_' + self.name, dis_select)
         dis_select.add_component('select_size_' + self.name, select_size)
