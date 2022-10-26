@@ -158,11 +158,6 @@ class CHPFluid(CHP, FluidComponent):
                 select_small_size = pyo.Constraint(expr=power_el <= 50)
                 select_small.add_component('select_small_size_' + self.name,
                                            select_small_size)
-            #todo 将constraint储存在python list当中而不是constraintlist中，然后添加到disjunct里面
-            select_small_relation = \
-                pyo.Constraint(expr=power_th == 2.1178 * power_el + 2.5991)
-            select_small.add_component('select_small_relation_' + self.name,
-                                       select_small_relation)
 
             if model.find_component('select_large_' + self.name):
                 select_large = model.find_component('select_large_' + self.name)
@@ -175,24 +170,31 @@ class CHPFluid(CHP, FluidComponent):
                 select_large.add_component('select_large_size_' + self.name,
                                            select_large_size)
 
-            select_large_relation = \
-                pyo.Constraint(expr=power_el == 0.8148 * power_th - 16.89)
-            select_large.add_component('select_large_relation_' + self.name,
-                                       select_large_relation)
+            small_cons_list = []
+            for t in model.time_step:
+                small_cons_list.append(pyo.Constraint(
+                    expr=therm_eff[t] == - 0.0000355 * therm_size + 0.498))
+                select_small.add_component(
+                    'small_eff_con_'+self.name+'_'+str(t), small_cons_list[t])
+
+            large_cons_list = []
+            for t in model.time_step:
+                large_cons_list.append(pyo.Constraint(
+                    expr=therm_eff[t] == 0.496 - 0.0001 * (therm_size - 267) -
+                         0.002 * (inlet_temp[t] - 47) - 0.0017 *
+                         (self.outlet_temp - 67)))
+                select_large.add_component(
+                    'select_large_con_'+self.name+'_'+str(t),
+                    large_cons_list[t])
 
             if not model.find_component('select_large_' + self.name):
                 dj_power = Disjunction(expr=[select_small, select_large])
                 model.add_component('disjunction_power_' + self.name, dj_power)
 
-        for t in model.time_step:
-            model.cons.add(
-                therm_eff[t] == 0.496 - 0.0001 * (therm_size - 267) - 0.002 * (
-                            inlet_temp[t] - 47) - 0.0017 * (self.outlet_temp
-                                                            - 67))
-
-    # verbinden die Parameter der einzelnen Anlage mit den Parametern zwischen
-    # zwei Anlagen (simp_matrix).
     def _constraint_temp(self, model):
+        """verbinden die Parameter der einzelnen Anlage mit den Parametern
+        zwischen zwei Anlagen (simp_matrix).
+        todo check if we really need this method?"""
         inlet_temp = model.find_component('inlet_temp_' + self.name)
         for heat_output in self.heat_flows_out:
             t_in = model.find_component(
@@ -206,11 +208,13 @@ class CHPFluid(CHP, FluidComponent):
                 # 70 Grad überschreiten.
                 model.cons.add(inlet_temp[t] <= 70)
 
-    # status_chp ----- zur Beschreibung der taktenden Betrieb
-    # input * η = output
     def _constraint_conver(self, model):
-        Pel = model.find_component('size_' + self.name)
-        Qth = model.find_component('therm_size_' + self.name)
+        """
+        status_chp ----- zur Beschreibung der taktenden Betrieb
+        input * η = output
+        """
+        size = model.find_component('size_' + self.name)
+        therm_size = model.find_component('therm_size_' + self.name)
         therm_eff = model.find_component('therm_eff_' + self.name)
         input_energy = model.find_component(
             'input_' + self.inputs[0] + '_' + self.name)
@@ -222,60 +226,118 @@ class CHPFluid(CHP, FluidComponent):
 
         for t in model.time_step:
             model.cons.add(input_energy[t] * therm_eff[t] == output_heat[t])
-            model.cons.add(Qth * status[t + 1] == output_heat[t])
-            model.cons.add(Pel * status[t + 1] == output_elec[t])
+            model.cons.add(therm_size * status[t + 1] == output_heat[t])
+            model.cons.add(size * status[t + 1] == output_elec[t])
 
-    def _constraint_vdi2067_chp(self, model):
-        # todo: change it into cost model 0,1,2
+    def _constraint_vdi2067(self, model):
+        """The price information does not come from the crawler, but the
+        report of ASUE, which provides the curve from regression. The exact
+        price of each device was not given. So the data could not be updated
+        and using linearization to get the cost model 0 and 1. The cost model 2
+        could not generated from the curve."""
         size = model.find_component('size_' + self.name)
         annual_cost = model.find_component('annual_cost_' + self.name)
         invest = model.find_component('invest_' + self.name)
 
-        model.cons.add(size * 458 + 57433 == invest)
+        if self.min_size == 0:
+            min_size = small_num
+        else:
+            min_size = self.min_size
+
+        if self.cost_model == 0:
+            if self.sub_model == "small":
+                self.unit_cost = 1568  # €/el kW
+            elif self.sub_model == "condensing":
+                self.unit_cost = 1568 + 76  # €/el kW
+            elif self.sub_model == "large":
+                self.unit_cost = 647.18  # €/el kW
+            model.cons.add(size * self.unit_cost == invest)
+        elif self.cost_model == 1:
+            if self.sub_model == "small":
+                self.unit_cost = 1131.2  # €/el kW
+                self.fixed_cost = 14490  # €
+            elif self.sub_model == "condensing":
+                self.unit_cost = 1568 + 76  # €/el kW
+                self.fixed_cost = 14490  # €
+
+            if self.sub_model == "small" or self.sub_model == "condensing":
+                dis_not_select = Disjunct()
+                not_select_size = pyo.Constraint(expr=size == 0)
+                not_select_inv = pyo.Constraint(expr=invest == 0)
+                model.add_component('dis_not_select_' + self.name,
+                                    dis_not_select)
+                dis_not_select.add_component('not_select_size_' + self.name,
+                                             not_select_size)
+                dis_not_select.add_component('not_select_inv_' + self.name,
+                                             not_select_inv)
+
+                dis_select = Disjunct()
+                select_size = pyo.Constraint(expr=size >= min_size)
+                select_inv = pyo.Constraint(expr=invest == size *
+                                                 self.unit_cost +
+                                                 self.fixed_cost)
+                model.add_component('dis_select_' + self.name, dis_select)
+                dis_not_select.add_component('select_size_' + self.name,
+                                             select_size)
+                dis_not_select.add_component('select_inv_' + self.name,
+                                             select_inv)
+
+                dj_size = Disjunction(expr=[dis_not_select, dis_select])
+                model.add_component('disjunction_vdi_' + self.name, dj_size)
+
+            if self.sub_model == "large":
+                dis_not_select = Disjunct()
+                not_select_size = pyo.Constraint(expr=size == 0)
+                not_select_inv = pyo.Constraint(expr=invest == 0)
+                model.add_component('dis_not_select_' + self.name,
+                                    dis_not_select)
+                dis_not_select.add_component('not_select_size_' + self.name,
+                                             not_select_size)
+                dis_not_select.add_component('not_select_inv_' + self.name,
+                                             not_select_inv)
+
+                dis_select_small = Disjunct()
+                select_small_size_lower = pyo.Constraint(expr=size >= min_size)
+                select_small_size_upper = pyo.Constraint(expr=size <= 50)
+                select_small_inv = pyo.Constraint(expr=invest == size *
+                                                       1131.2 + 14490)
+                model.add_component('dis_select_small_' + self.name,
+                                    dis_select_small)
+                dis_select_small.add_component(
+                    'select_small_size_lower_' + self.name,
+                    select_small_size_lower)
+                dis_select_small.add_component(
+                    'select_small_size_upper_' + self.name,
+                    select_small_size_upper)
+                dis_select_small.add_component('select_small_inv_' +
+                                               self.name, select_small_inv)
+
+                dis_select_large = Disjunct()
+                select_large_size_lower = pyo.Constraint(expr=size >= 50
+                                                              + small_num)
+                select_large_inv = pyo.Constraint(expr=invest == size * 458 +
+                                                       57433)
+                model.add_component('dis_select_large_' + self.name,
+                                    dis_select_large)
+                dis_select_large.add_component(
+                    'dis_select_large_lower_' + self.name,
+                    select_large_size_lower)
+                dis_select_large.add_component('select_large_inv_' +
+                                               self.name, select_large_inv)
+
+                dj_size = Disjunction(expr=[dis_not_select, dis_select_small,
+                                            dis_select_large])
+                model.add_component('disjunction_vdi_' + self.name, dj_size)
+        elif self.cost_model == 2:
+            warnings.warn(self.name + " is CHP, which has no data pair for "
+                                      "price, the cost model 2 is not allowed.")
+
+        # model.cons.add(size * 458 + 57433 == invest)
         annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w,
                                self.f_op)
         model.cons.add(annuity == annual_cost)
 
-    def _constraint_vdi2067_chp_gdp(self, model):
-        # todo: change it into cost model 0,1,2
-        annual_cost = model.find_component('annual_cost_' + self.name)
-        invest = model.find_component('invest_' + self.name)
-        Pel = model.find_component('size_' + self.name)
-        Qth = model.find_component('therm_size_' + self.name)
-        # status = model.find_component('status_' + self.name)
-
-        dis_not_select = Disjunct()
-        not_select_size = pyo.Constraint(expr=Pel == 0)
-        not_select_inv = pyo.Constraint(expr=invest == 0)
-        not_select_therm_size = pyo.Constraint(expr=Qth == 0)
-        model.add_component('dis_not_select_' + self.name, dis_not_select)
-        dis_not_select.add_component('not_select_size_' + self.name,
-                                     not_select_size)
-        dis_not_select.add_component('not_select_inv_' + self.name,
-                                     not_select_inv)
-        dis_not_select.add_component('not_select_therm_size_' + self.name,
-                                     not_select_therm_size)
-
-        dis_select = Disjunct()
-        select_size = pyo.Constraint(expr=Pel >= 50)
-        select_inv = pyo.Constraint(expr=invest == Pel * 458 + 57433)
-        # Todo: the following code should not be included in vdi2067,
-        #  other chp model should check the same constraints as well.
-        select_therm_size = pyo.Constraint(expr=Pel == 0.8148 * Qth - 16.89)
-        model.add_component('dis_select_' + self.name, dis_select)
-        dis_select.add_component('select_size_' + self.name, select_size)
-        dis_select.add_component('select_inv_' + self.name, select_inv)
-        dis_select.add_component('select_therm_size_' + self.name,
-                                 select_therm_size)
-
-        dj_size = Disjunction(expr=[dis_not_select, dis_select])
-        model.add_component('disjunction_size' + self.name, dj_size)
-
-        annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w,
-                               self.f_op)
-        model.cons.add(annuity == annual_cost)
-
-    def _constraint_start_stop_ratio_gdp(self, model):
+    def _constraint_start_stop_ratio(self, model):
         status = model.find_component('status_' + self.name)
         inlet_temp = model.find_component('inlet_temp_' + self.name)
         # start = model.find_component('start_' + self.name)
@@ -356,6 +418,9 @@ class CHPFluid(CHP, FluidComponent):
         model.cons.add(other_op_cost == start_cost)
 
     def _constraint_status(self, model):
+        """
+        The status is set to 0 every 24 hours.
+        """
         period_length = 24
         status = model.find_component('status_' + self.name)
 
@@ -368,7 +433,7 @@ class CHPFluid(CHP, FluidComponent):
         self._constraint_temp(model)
         self._constraint_conver(model)
         self._constraint_heat_outputs(model)
-        self._constraint_start_stop_ratio_gdp(model)
+        self._constraint_start_stop_ratio(model)
         self._constraint_Pel(model)
         self._constraint_vdi2067_chp(model)
         self._constraint_status(model)

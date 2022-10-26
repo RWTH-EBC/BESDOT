@@ -317,10 +317,8 @@ class Component(object):
             select_inv = pyo.Constraint(expr=invest == size * self.unit_cost +
                                              self.fixed_cost)
             model.add_component('dis_select_' + self.name, dis_select)
-            dis_not_select.add_component('select_size_' + self.name,
-                                         select_size)
-            dis_not_select.add_component('select_inv_' + self.name,
-                                         select_inv)
+            dis_select.add_component('select_size_' + self.name, select_size)
+            dis_select.add_component('select_inv_' + self.name, select_inv)
 
             dj_size = Disjunction(expr=[dis_not_select, dis_select])
             model.add_component('disjunction_size' + self.name, dj_size)

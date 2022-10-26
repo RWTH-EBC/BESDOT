@@ -203,37 +203,43 @@ m.profit = pyo.Objective(expr=3*m.size - m.cost, sense=pyo.maximize)
 
 cons_list = []
 a = Disjunct(pyo.RangeSet(3))
-c_1 = pyo.Constraint(expr=m.size==0)
-
 m.add_component('a', a)
+
+c_1 = pyo.Constraint(expr=m.size==0)
+c_2 = pyo.Constraint(expr=m.cost==0)
 a[1].add_component('a_1_', c_1)
+a[1].add_component('a_2_', c_2)
+
+# c_1_list = []
+# c_1_list.append(pyo.Constraint(expr=m.size==0))
+# c_1_list.append(pyo.Constraint(expr=m.cost==0))
+# a[1].add_component('a_2_', c_1_list)
 
 cons_list.append(a[1])
 
 # b = Disjunct()
-c_list = pyo.ConstraintList()
-c_list.add(m.size==10)
-c_list.add(m.cost==20)
-# c_4 = pyo.Constraint(expr=m.cost==20)
+# c_list = pyo.ConstraintList()
+# c_list.add(m.size==10)
+# c_list.add(m.cost==20)
+c_3 = pyo.Constraint(expr=m.size==10)
+c_4 = pyo.Constraint(expr=m.cost==20)
 # m.add_component('b', a[2])
-# a[2].add_component('b_1_', c_3)
-a[2].add_component('b_2_', c_list)
+a[2].add_component('b_1_', c_3)
+a[2].add_component('b_2_', c_4)
+# a[2].add_component('b_2_', c_list)
 cons_list.append(a[2])
 
 # c = Disjunct()
 c_5 = pyo.Constraint(expr=m.size==20)
+c_6 = pyo.Constraint(expr=m.cost==35)
 
-# m.add_component('c', a[3])
 a[3].add_component('c_1_', c_5)
+a[3].add_component('c_2_', c_6)
 
 cons_list.append(a[3])
 
 m.d = Disjunction(expr=cons_list)
 
-c_2 = pyo.Constraint(expr=m.cost==0)
-a[1].add_component('a_2_', c_2)
-c_6 = pyo.Constraint(expr=m.cost==35)
-a[3].add_component('c_2_', c_6)
 
 pyo.TransformationFactory('gdp.bigm').apply_to(m)
 
