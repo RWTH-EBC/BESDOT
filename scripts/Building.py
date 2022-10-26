@@ -5,10 +5,12 @@ Simplified Modell for internal use.
 import warnings
 import pyomo.environ as pyo
 import numpy as np
+
+from scripts.components.Storage import Storage
+from scripts.subsidies.EEG import EEG
 from tools.gen_heat_profile import *
 from tools.gen_elec_profile import gen_elec_profile
 from tools import get_all_class
-from scripts.components.Storage import Storage
 from tools.gen_hot_water_profile import gen_hot_water_profile
 
 module_dict = get_all_class.run()
@@ -85,6 +87,7 @@ class Building(object):
                              "cool": {},
                              "gas": {}}
         self.heat_flows = {}
+        self.subsidy_list = []
 
     def add_annual_demand(self, energy_sector):
         """Calculate the annual heat demand according to the TEK provided
@@ -243,9 +246,9 @@ class Building(object):
                 self.components[comp_name].update_profile(
                     consum_profile=cluster_profile)
             if self.topology['comp_type'][item] in ['ElectricalConsumption']:
-                    cluster_profile = cluster['elec_demand'].tolist()
-                    self.components[comp_name].update_profile(
-                        consum_profile=cluster_profile)
+                cluster_profile = cluster['elec_demand'].tolist()
+                self.components[comp_name].update_profile(
+                    consum_profile=cluster_profile)
             if self.topology['comp_type'][item] in ['HotWaterConsumption',
                                                     'HotWaterConsumptionFluid'
                                                     ]:
@@ -338,6 +341,19 @@ class Building(object):
                             'output', 'gas', (input_comp, index))
                         self.components[index].add_energy_flows(
                             'input', 'gas', (input_comp, index))
+
+    def add_subsidy(self, subsidy):
+        if subsidy == 'all':
+            # todo: need to be updated, after two subsidies are modeled.
+            # generate the object at first.
+            pass
+            # self.subsidy_list.append()
+        elif isinstance(subsidy, EEG):
+            self.subsidy_list.append(subsidy)
+            subsidy.analyze_topo(self)
+        else:
+            warn("The subsidy " + subsidy + "was not modeled, check again, "
+                                            "if something goes wrong.")
 
     def add_vars(self, model):
         """Add Pyomo variables into the ConcreteModel, which is defined in
@@ -460,14 +476,22 @@ class Building(object):
         total_annual_cost = pyo.Var(bounds=(0, None))
         total_operation_cost = pyo.Var(bounds=(0, None))
         total_other_op_cost = pyo.Var(bounds=(0, None))
+        total_pur_subsidy = pyo.Var(bounds=(0, None))
+        total_op_subsidy = pyo.Var(bounds=(0, None))
         # Attention. The building name should be unique, not same as the comp
         # or project or other buildings.
         model.add_component('annual_cost_' + self.name, total_annual_cost)
         model.add_component('operation_cost_' + self.name, total_operation_cost)
         model.add_component('other_op_cost_' + self.name, total_other_op_cost)
+        model.add_component('total_pur_subsidy_' + self.name, total_pur_subsidy)
+        model.add_component('total_op_subsidy_' + self.name, total_op_subsidy)
 
         for comp in self.components:
             self.components[comp].add_vars(model)
+
+        if len(self.subsidy_list) >= 1:
+            for subsidy in self.subsidy_list:
+                subsidy.add_vars(model)
 
     def add_cons(self, model, env, cluster=None):
         self._constraint_energy_balance(model)
@@ -476,9 +500,14 @@ class Building(object):
         #  comment constrain for solar area. This should be done automated.
         # self._constraint_solar_area(model)
 
-        self._constraint_total_cost(model, env)
+        self._constraint_total_cost(model)
         self._constraint_operation_cost(model, env, cluster)
         self._constraint_other_op_cost(model)
+
+        if len(self.subsidy_list) >= 1:
+            self._constraint_subsidies(model)
+            for subsidy in self.subsidy_list:
+                subsidy.add_cons(model)
 
         for comp in self.components:
             if hasattr(self.components[comp], 'heat_flows_in'):
@@ -590,7 +619,7 @@ class Building(object):
                         # print(flow_1[t])
                         # print(flow_2[t])
 
-    def _constraint_total_cost(self, model, env):
+    def _constraint_total_cost(self, model):
         """Calculate the total annual cost for the building energy system."""
         bld_annual_cost = model.find_component('annual_cost_' + self.name)
         bld_operation_cost = model.find_component('operation_cost_' + self.name)
@@ -665,6 +694,8 @@ class Building(object):
                 bld_other_op_cost)
 
     def _constraint_other_op_cost(self, model):
+        """Other operation costs includes the costs except the fuel cost. One
+        of the most common form ist the start up cost for CHPs."""
         # todo (qli&yni): the other operation cost should be tested with
         #  cluster methods
         bld_other_op_cost = model.find_component('other_op_cost_' + self.name)
@@ -678,3 +709,43 @@ class Building(object):
 
         model.cons.add(bld_other_op_cost == sum(comp_op for comp_op
                                                 in other_op_comp_list))
+
+    def _constraint_subsidies(self, model):
+        """The subsidies in one building are added up to the total subsidy
+        and could be used in the objective of the optimization for minimal
+        cost for building holder."""
+        # In this model no building subsidies are considered for the building
+        # elements like wall or windows. The subsidies for each energy device
+        # in building are considered.
+        total_pur_subsidy = model.find_component('total_pur_subsidy_' +
+                                                 self.name)
+        total_op_subsidy = model.find_component('total_op_subsidy_' + self.name)
+
+        pur_subsidy_list = []
+        op_subsidy_list = []
+        for subsidy in self.subsidy_list:
+            subsidy_var = None
+            if len(subsidy.components) == 1:
+                subsidy_var = model.find_component('subsidy_' + subsidy.name +
+                                                   '_' + subsidy.components[0])
+            else:
+                warn(subsidy.name + " has multiple subsidies for components")
+
+            if subsidy.type == 'purchase':
+                pur_subsidy_list.append(subsidy_var)
+            elif subsidy.type == 'operate':
+                op_subsidy_list.append(subsidy_var)
+
+        if len(pur_subsidy_list) > 0:
+            model.cons.add(total_pur_subsidy ==
+                           sum(pur_subsidy_list[i] for i in range(len(
+                               pur_subsidy_list))))
+        else:
+            model.cons.add(total_pur_subsidy == 0)
+
+        if len(pur_subsidy_list) > 0:
+            model.cons.add(total_op_subsidy ==
+                           sum(op_subsidy_list[i] for i in range(len(
+                               op_subsidy_list))))
+        else:
+            model.cons.add(total_op_subsidy == 0)

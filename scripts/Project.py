@@ -9,6 +9,7 @@ import pyomo.environ as pyo
 import pandas as pd
 import numpy as np
 import tsam.timeseriesaggregation as tsam
+
 from tools.k_medoids import cluster
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -120,7 +121,8 @@ class Project(object):
                                            clusterMethod='hierarchical',
                                            extremePeriodMethod='new_cluster_center',
                                            addPeakMin=['temp'],
-                                           addPeakMax=['heat_demand']) #hierarchical k_medoids
+                                           addPeakMax=[
+                                               'heat_demand'])  # hierarchical k_medoids
             typ_periods = aggregation.createTypicalPeriods()
             period_occurs = aggregation.clusterPeriodNoOccur
             typ_periods = typ_periods.reset_index()
@@ -207,14 +209,14 @@ class Project(object):
         glpk(bad for milp), cbc(good for milp), gurobi: linear, ipopt: nonlinear
         """
         pyo.TransformationFactory('gdp.bigm').apply_to(self.model)
-        #pyo.TransformationFactory('gdp.chull').apply_to(self.model)
+        # pyo.TransformationFactory('gdp.chull').apply_to(self.model)
         solver = pyo.SolverFactory(solver_name)
         # Attention! The option was set for the dimension optimization for
         # HomoStorage
         solver.options['NonConvex'] = 2
         solver.options['MIPGap'] = 0.001
         solver.options['TimeLimit'] = 30000
-        #solver.options['Heuristics'] = 0.05
+        # solver.options['Heuristics'] = 0.05
         solver.solve(self.model, tee=True)
 
         # Save model in lp file, this only works with linear model. That is
