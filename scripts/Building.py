@@ -5,6 +5,7 @@ Simplified Modell for internal use.
 import warnings
 import pyomo.environ as pyo
 import numpy as np
+import pandas as pd
 
 from scripts.components.Storage import Storage
 from scripts.subsidies.EEG import EEG
@@ -144,6 +145,26 @@ class Building(object):
         self.demand_profile["hot_water_demand"] = hot_water_demand_profile[
                                                   env.start_time:
                                                   env.start_time + env.time_step]
+
+    def export_demand_profile(self, dir_path):
+        """export demand profiles into csv file, the path of target folder
+        need to be given."""
+        csv_path = os.path.join(dir_path, self.name + '.csv')
+
+        steps = max(len(self.demand_profile['elec_demand']),
+                    len(self.demand_profile['heat_demand']),
+                    len(self.demand_profile['cool_demand']),
+                    len(self.demand_profile['hot_water_demand']),
+                    len(self.demand_profile['gas_demand']))
+        for k, v in self.demand_profile.items():
+            if len(v) != steps and len(v) != 0:
+                warn('The ' + k + 'has different time steps')
+            elif len(v) == 0:
+                self.demand_profile[k] = [0] * steps
+
+        demand_df = pd.DataFrame.from_dict(self.demand_profile)
+        # print(demand_df)
+        demand_df.to_csv(csv_path, index=False, header=True)
 
     def add_topology(self, topology):
         topo_matrix = pd.read_csv(topology)
