@@ -8,7 +8,8 @@ from scripts.Building import Building
 import tools.post_solar_chp as post_pro
 import tools.plot_cluster as plot_cls
 
-base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
+    __file__))))
 days = 4
 
 ################################################################################
