@@ -90,6 +90,8 @@ class Building(object):
         self.heat_flows = {}
         self.subsidy_list = []
 
+        self.bilevel = False
+
     def add_annual_demand(self, energy_sector):
         """Calculate the annual heat demand according to the TEK provided
         data, the temperature profile should be given in Project"""
@@ -683,9 +685,14 @@ class Building(object):
             elif isinstance(self.components[comp], module_dict['HeatGrid']):
                 buy_heat = model.find_component('output_heat_' + comp)
 
+        if self.bilevel:
+            elec_price = model.elec_price
+        else:
+            elec_price = env.elec_price
+
         if cluster is None:
             model.cons.add(
-                bld_operation_cost == sum(buy_elec[t] * env.elec_price +
+                bld_operation_cost == sum(buy_elec[t] * elec_price +
                                           buy_gas[t] * env.gas_price +
                                           buy_heat[t] *
                                           env.heat_price - sell_elec[
@@ -704,7 +711,7 @@ class Building(object):
             nr_hour_occur = cluster['Occur']
 
             model.cons.add(
-                bld_operation_cost == sum(buy_elec[t] * env.elec_price *
+                bld_operation_cost == sum(buy_elec[t] * elec_price *
                                           nr_hour_occur[t - 1] + buy_gas[t] *
                                           env.gas_price * nr_hour_occur[t - 1] +
                                           buy_heat[t] * env.heat_price *

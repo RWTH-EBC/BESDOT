@@ -50,6 +50,8 @@ class Project(object):
         Args:
             building: the Building object, which is defined by Building.py
         """
+        if self.typ == 'bilevel':
+            building.bilevel = True
         self.building_list.append(building)
 
     def add_district(self, district):
@@ -191,11 +193,62 @@ class Project(object):
             else:
                 warn('The obj_typ is not allowed. The allowed typ is '
                      'annual_cost or operation_cost')
+        elif self.typ == 'bilevel':
+            # Initialisation of AbstractModel, which could generate some
+            # similar ConcreteModel with different parameters. In the test
+            # phase only electricity price is seen as a determined parameter
+            # for bilevel model.
+            self.model = pyo.AbstractModel(self.name)
+            self.model.cons = pyo.ConstraintList()
+
+            self.model.elec_price = pyo.Param(within=pyo.PositiveReals)
+
+            if self.cluster is None:
+                self.model.time_step = pyo.RangeSet(self.environment.time_step)
+            else:
+                # The reduced data are stored in self.cluster as dataframe.
+                print(len(self.cluster.index))
+                self.model.time_step = pyo.RangeSet(len(self.cluster.index))
+
+            # Assign pyomo variables
+            bld = self.building_list[0]
+            bld.add_vars(self.model)
+
+            # Add pyomo objective
+            bld_annual_cost = self.model.find_component('annual_cost_' +
+                                                        bld.name)
+            bld_operation_cost = self.model.find_component(
+                'operation_cost_' + bld.name)
+
+            # If objective is annual cost, the components size should be
+            # given in range, so that the dimensioning could be made. If
+            # objective is operation cost, the components size should be
+            # given with the same size of maximal and minimal size.
+
+            if obj_typ == 'annual_cost':
+                self.model.obj = pyo.Objective(expr=bld_annual_cost,
+                                               sense=pyo.minimize)
+            elif obj_typ == 'operation_cost':
+                self.model.obj = pyo.Objective(expr=bld_operation_cost,
+                                               sense=pyo.minimize)
+            else:
+                warn('The obj_typ is not allowed. The allowed typ is '
+                     'annual_cost or operation_cost')
+
+            # generate instance from AbstractModel, since AbstractModel is
+            # not allowed to add ConstraintList. A ConcreteModel should be
+            # generated before add constraints into ConstraintList.
+            # This step is supposed to be done in Bilevel Model.
+
+            # Add pyomo constraints to model, since self.model is an
+            # AbstractModel in this scenario. The constraints should be added
+            # into the instance instead of the AbstractModel.
+            # bld.add_cons(self.model, self.environment, self.cluster)
         else:
             print("Other project application scenario haven't been developed")
 
     def run_optimization(self, solver_name='gurobi', save_lp=False,
-                         save_result=False):
+                         save_result=False, instance=None):
         """
         solver.options['Heuristics'] = 0.05
         solver.options['MIPGap'] = 0.01
@@ -208,8 +261,12 @@ class Project(object):
         solvers:
         glpk(bad for milp), cbc(good for milp), gurobi: linear, ipopt: nonlinear
         """
-        pyo.TransformationFactory('gdp.bigm').apply_to(self.model)
-        # pyo.TransformationFactory('gdp.chull').apply_to(self.model)
+        if not instance:
+            model = self.model
+        else:
+            model = instance
+        pyo.TransformationFactory('gdp.bigm').apply_to(model)
+        # pyo.TransformationFactory('gdp.chull').apply_to(model)
         solver = pyo.SolverFactory(solver_name)
         # Attention! The option was set for the dimension optimization for
         # HomoStorage
@@ -217,7 +274,8 @@ class Project(object):
         solver.options['MIPGap'] = 0.001
         solver.options['TimeLimit'] = 30000
         # solver.options['Heuristics'] = 0.05
-        solver.solve(self.model, tee=True)
+
+        solver.solve(model, tee=True)
 
         # Save model in lp file, this only works with linear model. That is
         # not necessary.
@@ -237,7 +295,7 @@ class Project(object):
 
             model_output_path = os.path.join(base_path, 'data', 'opt_output',
                                              self.name, 'model.lp')
-            self.model.write(model_output_path,
+            model.write(model_output_path,
                              io_options={'symbolic_solver_labels': True})
 
         # Save results in csv file.
@@ -261,7 +319,7 @@ class Project(object):
             # Get results for all variable.
             var_list = []
             value_list = []
-            for v in self.model.component_objects(pyo.Var, active=True):
+            for v in model.component_objects(pyo.Var, active=True):
                 var_list += [v.name + '[' + str(nr) + ']' for nr in list(v)]
                 value_list += list(v[:].value)
             result_df = pd.DataFrame(list(zip(var_list, value_list)),
