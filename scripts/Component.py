@@ -382,11 +382,13 @@ class Component(object):
         #         input_components))
         # input_flows = []
         input_flows = []
-        for flow in self.energy_flows['input']:
-            if flow[0] == energy_type:
-                input_flows.append(model.find_component(flow[0] + '_' +
-                                                        flow[1][0] + '_' +
-                                                        flow[1][1]))
+        for energy, flow in self.energy_flows['input'].items():
+            if energy == energy_type:
+                for item in flow:
+                    input_flows.append(model.find_component(energy + '_' +
+                                                            item[0] + '_' +
+                                                            item[1]))
+        print(input_flows)
         # for flow in energy_flows[energy_type]:
         #     if flow[1] == self.name:
         #         input_flows.append(flow)
@@ -447,13 +449,21 @@ class Component(object):
         # for flow in energy_flows[energy_type]:
         #     if flow[0] == self.name:
         #         output_flows.append(flow)
+        # output_flows = []
+        # for flow in self.energy_flows['output']:
+        #     if flow[0] == energy_type:
+        #         output_flows.append(model.find_component(flow[0] + '_' +
+        #                                                 flow[1][
+        #                                                     0] + '_' +
+        #                                                 flow[1][1]))
+
         output_flows = []
-        for flow in self.energy_flows['output']:
-            if flow[0] == energy_type:
-                output_flows.append(model.find_component(flow[0] + '_' +
-                                                        flow[1][
-                                                            0] + '_' +
-                                                        flow[1][1]))
+        for energy, flow in self.energy_flows['output'].items():
+            if energy == energy_type:
+                for item in flow:
+                    output_flows.append(model.find_component(energy + '_' +
+                                                            item[0] + '_' +
+                                                            item[1]))
         output_energy = model.find_component('output_' + energy_type + '_' +
                                              self.name)
 
