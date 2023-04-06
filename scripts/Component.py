@@ -356,7 +356,7 @@ class Component(object):
                                self.f_op)
         model.cons.add(annuity == annual_cost)
 
-    def constraint_sum_inputs(self, model, energy_type, energy_flows):
+    def constraint_sum_inputs(self, model, energy_type):
         """
         This function used to be in class Building. Some spacial components have
         more than 1 input type, which could not be seen as input. The function
@@ -370,17 +370,6 @@ class Component(object):
                 spacial components, dict
         Returns: None
         """
-        # Search connected component from other_comp
-        # input_components = other_comp[other_comp > 0].index.tolist() + \
-        #                    other_comp[other_comp.isnull()].index.tolist()
-        # input_energy = model.find_component('input_' + energy_type + '_' +
-        #                                     self.name)
-        # # Sum up all the inputs
-        # for t in model.time_step:
-        #     model.cons.add(input_energy[t] == sum(
-        #         energy_flow[(input_comp, self.name)][t] for input_comp in
-        #         input_components))
-        # input_flows = []
         input_flows = []
         for energy, flow in self.energy_flows['input'].items():
             if energy == energy_type:
@@ -388,45 +377,15 @@ class Component(object):
                     input_flows.append(model.find_component(energy + '_' +
                                                             item[0] + '_' +
                                                             item[1]))
-        print(input_flows)
-        # for flow in energy_flows[energy_type]:
-        #     if flow[1] == self.name:
-        #         input_flows.append(flow)
-        # print(input_flows)
         input_energy = model.find_component('input_' + energy_type + '_' +
                                             self.name)
 
         # Sum up all the inputs
         for t in model.time_step:
-            model.cons.add(input_energy[t] == sum(
-                input_flow[t] for input_flow in
-                input_flows))
+            model.cons.add(input_energy[t] == sum(input_flow[t] for
+                                                  input_flow in input_flows))
 
-        # model.total_input_flows = pyo.Expression(model.time_step)
-        # total_input_flows = pyo.Expression(model.time_step)
-
-        # model.add_component('total_input_flows_' + self.name, total_input_flows)
-        # total_input_flows = model.find_component('total_input_flows_' +
-        #                                          self.name)
-
-        # def total_input_flows_rule(model, t):
-        #     return sum(energy_flows[energy_type][input_flow][t] for
-        #                input_flow in input_flows)
-
-        # model.total_input_flows.rule = total_input_flows_rule
-        # total_input_flows.rule = total_input_flows_rule
-        # total_input_flows.rule = pyo.Constraint(model.time_step,
-        #                                          rule=total_input_flows_rule)
-        # for t in model.time_step:
-        #     model.cons.add(total_input_flows_rule(model, t) == input_energy[t])
-        # model.add_component('total_input_flows_' + self.name, total_input_flows)
-        # total_input_flows = model.find_component('total_input_flows_' +
-        #                                          self.name)
-        # for t in model.time_step:
-        # model.cons.add(input_energy[t] == total_input_flows[t])
-        # model.cons.add(input_energy[t] == model.total_input_flows[t])
-
-    def constraint_sum_outputs(self, model, energy_type, energy_flows):
+    def constraint_sum_outputs(self, model, energy_type):
         """
         Almost same as constraint_energy_inputs.
         Args:
@@ -436,83 +395,20 @@ class Component(object):
             energy_flows: the energy flows from building object, dict
         Returns: None
         """
-        # output_components = other_comp[other_comp > 0].index.tolist() + \
-        #                     other_comp[other_comp.isnull()].index.tolist()
-        # output_energy = model.find_component('output_' + energy_type + '_' +
-        #                                      self.name)
-        # for t in model.time_step:
-        #     model.cons.add(output_energy[t] == sum(
-        #         energy_flow[(self.name, output_comp)][t] for
-        #         output_comp in output_components))
-
-        # output_flows = []
-        # for flow in energy_flows[energy_type]:
-        #     if flow[0] == self.name:
-        #         output_flows.append(flow)
-        # output_flows = []
-        # for flow in self.energy_flows['output']:
-        #     if flow[0] == energy_type:
-        #         output_flows.append(model.find_component(flow[0] + '_' +
-        #                                                 flow[1][
-        #                                                     0] + '_' +
-        #                                                 flow[1][1]))
-
         output_flows = []
         for energy, flow in self.energy_flows['output'].items():
             if energy == energy_type:
                 for item in flow:
                     output_flows.append(model.find_component(energy + '_' +
-                                                            item[0] + '_' +
-                                                            item[1]))
+                                                             item[0] + '_' +
+                                                             item[1]))
         output_energy = model.find_component('output_' + energy_type + '_' +
                                              self.name)
 
         # Sum up all the inputs
         for t in model.time_step:
-            model.cons.add(output_energy[t] == sum(
-                output_flow[t] for output_flow in
-                output_flows))
-        # model.total_output_flows = pyo.Expression(model.time_step)
-        # total_output_flows = pyo.Expression(model.time_step)
-        # model.add_component('total_output_flows_' + self.name,
-        #                     total_output_flows)
-        # total_output_flows = model.find_component('total_output_flows_' +
-        #                                           self.name)
-
-        # def total_output_flows_rule(model, t):
-        #     return sum(energy_flows[energy_type][output_flow][t] for
-        #                output_flow in output_flows) == output_energy[t]
-
-        # model.total_output_flows.rule = total_output_flows_rule
-        # total_output_flows.rule = total_output_flows_rule
-        # total_output_flows.rule = pyo.Constraint(model.time_step,
-        #                                          rule=total_output_flows_rule)
-        # model.add_component('total_output_flows_' + self.name,
-        #                     total_output_flows)
-        # total_output_flows = model.find_component('total_output_flows_' +
-        #                                           self.name)
-        # model.cons.add(total_output_flows_rule(model))
-        # for t in model.time_step:
-        #     model.cons.add(total_output_flows_rule(model, t))
-        # Access the indexed component
-        # total_output_flows_index = total_output_flows[1]
-        # for t in model.time_step:
-        #     model.cons.add(output_energy[t] == total_output_flows[t])
-        # model.cons.add(output_energy[t] == model.total_output_flows[t])
-
-        # # 定义一个新的Expression对象来计算所有设备的总能量流量
-        # model.total_energy_flows = pyo.Expression(model.time_step)
-        #
-        # # 定义计算表达式
-        # def total_energy_flows_rule(model, t):
-        #     return sum(self.energy_flows[energy][flow][t] for energy in energies for flow in flows)
-        #
-        # # 将计算表达式与新的Expression对象关联
-        # model.total_energy_flows.rule = total_energy_flows_rule
-        #
-        # # 对于每个设备，添加一个约束将其能量流量与总能量流量相等
-        # for device in devices:
-        #     model.cons.add(input_energy[device][t] == model.total_energy_flows[t])
+            model.cons.add(output_energy[t] == sum(output_flow[t] for
+                                                   output_flow in output_flows))
 
     def add_cons(self, model):
         self._constraint_conver(model)

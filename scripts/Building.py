@@ -568,8 +568,7 @@ class Building(object):
                     if len(row[row > 0].index.tolist() +
                            row[row.isnull()].index.tolist()) > 0:
                         self.components[index].constraint_sum_inputs(
-                            model=model, energy_type=energy_type,
-                            energy_flows=self.energy_flows)
+                            model=model, energy_type=energy_type)
                         # input_components = row[row > 0].index.tolist() + \
                         #                    row[row.isnull()].index.tolist()
                         # input_energy = model.find_component('input_' +
@@ -588,8 +587,7 @@ class Building(object):
                            row[row.isnull()].index.tolist()) > 0:
                         self.components[index].constraint_sum_outputs(
                             model=model,
-                            energy_type=energy_type,
-                            energy_flows=self.energy_flows)
+                            energy_type=energy_type)
                         # output_components = row[row > 0].index.tolist() + \
                         #                     row[row.isnull()].index.tolist()
                         # output_energy = model.find_component('output_' +
