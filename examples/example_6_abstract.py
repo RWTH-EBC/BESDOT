@@ -48,7 +48,7 @@ test_project.add_building(test_bld_1)
 test_project.build_model()
 # in test project, the built model is an AbstractModel and constraints are
 # not added into the model.
-data = {None: OrderedDict([('elec_price', {None: 0.32})])}
+data = {None: OrderedDict([('elec_price', {None: 0.59})])}
 instance = test_project.model.create_instance(data=data)
 test_bld_1.add_cons(instance, test_project.environment, test_project.cluster)
 

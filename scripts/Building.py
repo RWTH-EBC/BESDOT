@@ -501,6 +501,7 @@ class Building(object):
         total_other_op_cost = pyo.Var(bounds=(0, None))
         total_pur_subsidy = pyo.Var(bounds=(0, None))
         total_op_subsidy = pyo.Var(bounds=(0, None))
+        total_elec_pur = pyo.Var(bounds=(0, None))
         # Attention. The building name should be unique, not same as the comp
         # or project or other buildings.
         model.add_component('annual_cost_' + self.name, total_annual_cost)
@@ -508,6 +509,7 @@ class Building(object):
         model.add_component('other_op_cost_' + self.name, total_other_op_cost)
         model.add_component('total_pur_subsidy_' + self.name, total_pur_subsidy)
         model.add_component('total_op_subsidy_' + self.name, total_op_subsidy)
+        model.add_component('total_elec_pur_' + self.name, total_elec_pur)
 
         for comp in self.components:
             self.components[comp].add_vars(model)
@@ -526,6 +528,7 @@ class Building(object):
         self._constraint_total_cost(model)
         self._constraint_operation_cost(model, env, cluster)
         self._constraint_other_op_cost(model)
+        self._constraint_elec_pur(model)
 
         if len(self.subsidy_list) >= 1:
             self._constraint_subsidies(model)
@@ -775,3 +778,16 @@ class Building(object):
                                op_subsidy_list))))
         else:
             model.cons.add(total_op_subsidy == 0)
+
+    def _constraint_elec_pur(self, model):
+        """The electricity purchase constraint is added to the model. The
+        constraint is added to the model if the electricity is purchased
+        from the grid."""
+        elec_pur = model.find_component('total_elec_pur_' + self.name)
+        for comp in self.components:
+            if isinstance(self.components[comp],
+                          module_dict['ElectricityGrid']):
+                if 'elec' in self.components[comp].energy_flows['output'].keys():
+                    buy_elec = model.find_component('output_elec_' + comp)
+
+        model.cons.add(elec_pur == sum(buy_elec[t] for t in model.time_step))
