@@ -8,7 +8,7 @@ from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
 from scripts.components.ElectricBoiler import ElectricBoiler
-import tools.post_processing as post_pro
+import utils.post_processing as post_pro
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

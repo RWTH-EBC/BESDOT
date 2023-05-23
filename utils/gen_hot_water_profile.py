@@ -8,8 +8,8 @@ from warnings import warn
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from tools.gen_heat_profile import calc_bld_demand
-from functools import reduce
+from utils.gen_heat_profile import calc_bld_demand
+# from funcutils import reduce
 
 # ==============================================================================
 #                       Path for inputs and outputs

@@ -8,7 +8,7 @@ import pyomo.environ as pyo
 import pandas as pd
 import numpy as np
 import tsam.timeseriesaggregation as tsam
-from tools.k_medoids import cluster
+from utils.k_medoids import cluster
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 output_path = os.path.join(base_path, "data", "weather_data",

@@ -2,7 +2,7 @@ import warnings
 import pyomo.environ as pyo
 from pyomo.gdp import Disjunct, Disjunction
 from scripts.Component import Component
-from tools.calc_annuity_vdi2067 import calc_annuity
+from utils.calc_annuity_vdi2067 import calc_annuity
 
 small_num = 0.0001
 

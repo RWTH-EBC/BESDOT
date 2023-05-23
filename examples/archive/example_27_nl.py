@@ -7,8 +7,8 @@ import os
 from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
-from tools.pandas_area_plot import plot_area
-from tools.post_processing import plot_short_time
+from utils.pandas_area_plot import plot_area
+from utils.post_processing import plot_short_time
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

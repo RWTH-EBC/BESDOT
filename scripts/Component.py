@@ -9,7 +9,7 @@ import warnings
 import pandas as pd
 import pyomo.environ as pyo
 from pyomo.gdp import Disjunct, Disjunction
-from tools.calc_annuity_vdi2067 import calc_annuity
+from utils.calc_annuity_vdi2067 import calc_annuity
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 small_num = 0.0001

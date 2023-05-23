@@ -10,7 +10,7 @@ import pandas as pd
 import numpy as np
 import tsam.timeseriesaggregation as tsam
 
-from tools.k_medoids import cluster
+# from utils.k_medoids import cluster
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -23,7 +23,6 @@ class Project(object):
         # The following attributs should be replaced or added with related
         # object before generating pyomo model.
         self.environment = None
-        self.district_list = []
         self.building_list = []
 
         # The pyomo model

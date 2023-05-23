@@ -9,10 +9,10 @@ import pandas as pd
 
 from scripts.components.Storage import Storage
 from scripts.subsidies.EEG import EEG
-from tools.gen_heat_profile import *
-from tools.gen_elec_profile import gen_elec_profile
-from tools import get_all_class
-from tools.gen_hot_water_profile import gen_hot_water_profile
+from utils.gen_heat_profile import *
+from utils.gen_elec_profile import gen_elec_profile
+from utils import get_all_class
+from utils.gen_hot_water_profile import gen_hot_water_profile
 
 module_dict = get_all_class.run()
 
@@ -42,7 +42,7 @@ class Building(object):
         #  For residential building should get the data from the project TABULA.
 
         # Calculate the annual energy demand for heating, hot water and
-        # electricity. Using TEK Tools from IWU.
+        # electricity. Using TEK utils from IWU.
         self.annual_demand = {"elec_demand": 0,
                               "heat_demand": 0,
                               "cool_demand": 0,

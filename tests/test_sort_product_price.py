@@ -1,5 +1,5 @@
 """ test module sort_product_price.py"""
-import tools.sort_product_price as spp
+import utils.sort_product_price as spp
 
 
 def test_read_table_without_name():
