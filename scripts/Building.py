@@ -688,12 +688,17 @@ class Building(object):
         else:
             elec_price = env.elec_price
 
+        if model.find_component('heat_price'):
+            heat_price = model.heat_price
+        else:
+            heat_price = env.heat_price
+
         if cluster is None:
             model.cons.add(
                 bld_operation_cost == sum(buy_elec[t] * elec_price +
                                           buy_gas[t] * env.gas_price +
                                           buy_heat[t] *
-                                          env.heat_price - sell_elec[
+                                          heat_price - sell_elec[
                                               t] * env.elec_feed_price
                                           for t in model.time_step) +
                 bld_other_op_cost)
@@ -712,7 +717,7 @@ class Building(object):
                 bld_operation_cost == sum(buy_elec[t] * elec_price *
                                           nr_hour_occur[t - 1] + buy_gas[t] *
                                           env.gas_price * nr_hour_occur[t - 1] +
-                                          buy_heat[t] * env.heat_price *
+                                          buy_heat[t] * heat_price *
                                           nr_hour_occur[t - 1] - sell_elec[t] *
                                           env.elec_feed_price *
                                           nr_hour_occur[t - 1]
