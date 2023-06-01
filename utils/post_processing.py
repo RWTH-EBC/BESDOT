@@ -82,7 +82,7 @@ def find_max_timestep(csv_file, profile_name):
     return max_value, index_max
 
 
-def save_timeseries(csv_file):
+def save_timeseries(csv_file, name=''):
     """Take the time series from output file and save them as an individual
     csv file, to reduce the analysis time cost."""
     output_df = pd.read_csv(csv_file)
@@ -100,8 +100,28 @@ def save_timeseries(csv_file):
 
     # print(new_df)
     output_path = os.path.split(csv_file)
-    timeseries_path = os.path.join(output_path[0], 'timeseries.csv')
-    new_df.to_csv(timeseries_path)
+    timeseries_path = os.path.join(output_path[0], name + '_timeseries.xlsx')
+    new_df.to_excel(timeseries_path)
+
+
+def save_non_time_series(csv_file, name=''):
+    """Take the non time series from output file and save them as an individual
+    csv file, to reduce the analysis time cost."""
+    output_df = pd.read_csv(csv_file)
+    elements_dict = find_element(output_df)
+    new_df = pd.DataFrame()
+
+    for item in elements_dict.keys():
+        if len(elements_dict[item]) == 1:
+            new_df[item] = elements_dict[item]
+
+    new_df = new_df.T
+
+    # print(new_df)
+    output_path = os.path.split(csv_file)
+    non_timeseries_path = os.path.join(output_path[0],
+                                       name + '_non_timeseries.xlsx')
+    new_df.to_excel(non_timeseries_path)
 
 
 def plot_all(csv_file, time_interval, save_path=None):
@@ -451,6 +471,115 @@ def plot_temp(name, profile):
     #plt.show()
     plt.savefig(plot_output)
     plt.close()
+
+
+def create_stacked_bar_chart(x, stacked_data1, label1, stacked_data2,
+                             label2,  x_label, y_label, title=None,
+                             start_index=None,
+                             end_index=None):
+    """
+    Create a chart with stacked bar plots
+
+    Args:
+    x (ndarray): x-axis data
+    stacked_data1 (ndarray): First set of stacked data
+    stacked_data2 (ndarray): Second set of stacked data
+    """
+    # Apply slicing to data1 and data2 if start_index and end_index are specified
+    if start_index is not None and end_index is not None:
+        stacked_data1 = stacked_data1[start_index:end_index]
+        stacked_data2 = stacked_data2[start_index:end_index]
+        x = x[start_index:end_index]
+
+    # Create stacked bar plot
+    plt.bar(x, stacked_data1, label=label1)
+    plt.bar(x, stacked_data2, bottom=stacked_data1, label=label2)
+
+    # Add legend
+    plt.legend()
+
+    # Add axis labels
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+
+    # Show the chart
+    plt.show()
+
+
+def create_stacked_bar_line_chart(x, stacked_data, stacked_label, line_data,
+                                  line_label, x_label, y_label, title=None,
+                                  start_index=None, end_index=None):
+    """
+    Create a chart with stacked bar and line plots
+
+    Args:
+    x (ndarray): x-axis data
+    stacked_data (list of ndarrays): List of stacked data, each array represents
+     a column of data line_data (ndarray): Line plot data, representing the
+     sum of stacked data
+    """
+    num_stacked = len(stacked_data)  # Number of stacked data
+
+    # Apply slicing to data1 and data2 if start_index and end_index are specified
+    if start_index is not None and end_index is not None:
+        stacked_data = [data[start_index:end_index] for data in stacked_data]
+        line_data = line_data[start_index:end_index]
+        x = x[start_index:end_index]
+
+    # Create stacked bar plot
+    bottoms = np.zeros(len(x))  # Initial bottom heights
+    for i in range(num_stacked):
+        if sum(stacked_data[i]) > 0.001:
+            plt.bar(x, stacked_data[i], bottom=bottoms, label=stacked_label[i])
+            bottoms += stacked_data[i]
+
+    # Create line plot
+    plt.plot(x, line_data, color='red', linestyle='-', label=line_label)
+
+    # Add legend
+    plt.legend()
+
+    # Add axis labels
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.title(title)
+
+    # Show the chart
+    plt.show()
+
+
+def plot_multiple_lines(df, x_column, y_columns):
+    """
+    Plot multiple lines from DataFrame on the same chart
+
+    Args:
+    df (DataFrame): Input DataFrame
+    x_column (str): Name of the column for x-axis data
+    y_columns (list of str): List of column names for y-axis data
+    """
+    # Set a color scheme for the lines
+    color_scheme = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red',
+                    'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray',
+                    'tab:olive', 'tab:cyan']
+
+    # Create the chart
+    fig, ax = plt.subplots()
+
+    for i, col in enumerate(y_columns):
+        x = df[x_column].values
+        y = df[col].values
+
+        ax.plot(x, y, color=color_scheme[i % len(color_scheme)], label=col)
+
+    # Add legend
+    ax.legend()
+
+    # Add axis labels
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+
+    # Show the chart
+    plt.show()
 
 
 if __name__ == '__main__':

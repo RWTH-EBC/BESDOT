@@ -498,6 +498,7 @@ class Building(object):
 
         total_annual_cost = pyo.Var(bounds=(0, None))
         total_operation_cost = pyo.Var(bounds=(0, None))
+        total_annual_revenue = pyo.Var(bounds=(0, None))
         total_other_op_cost = pyo.Var(bounds=(0, None))
         total_pur_subsidy = pyo.Var(bounds=(0, None))
         total_op_subsidy = pyo.Var(bounds=(0, None))
@@ -505,6 +506,8 @@ class Building(object):
         # or project or other buildings.
         model.add_component('annual_cost_' + self.name, total_annual_cost)
         model.add_component('operation_cost_' + self.name, total_operation_cost)
+        model.add_component('total_annual_revenue_' + self.name,
+                            total_annual_revenue)
         model.add_component('other_op_cost_' + self.name, total_other_op_cost)
         model.add_component('total_pur_subsidy_' + self.name, total_pur_subsidy)
         model.add_component('total_op_subsidy_' + self.name, total_op_subsidy)
@@ -525,6 +528,7 @@ class Building(object):
 
         self._constraint_total_cost(model)
         self._constraint_operation_cost(model, env, cluster)
+        self._constraint_total_revenue(model, env)
         self._constraint_other_op_cost(model)
 
         if len(self.subsidy_list) >= 1:
@@ -644,6 +648,7 @@ class Building(object):
         """Calculate the total annual cost for the building energy system."""
         bld_annual_cost = model.find_component('annual_cost_' + self.name)
         bld_operation_cost = model.find_component('operation_cost_' + self.name)
+        bld_revenue = model.find_component('total_annual_revenue_' + self.name)
         bld_other_op_cost = model.find_component('other_op_cost_' + self.name)
 
         comp_cost_list = []
@@ -652,7 +657,7 @@ class Building(object):
 
         model.cons.add(bld_annual_cost == sum(item for item in
                                               comp_cost_list) +
-                       bld_operation_cost + bld_other_op_cost)
+                       bld_operation_cost + bld_other_op_cost - bld_revenue)
 
     def _constraint_operation_cost(self, model, env, cluster=None):
         """Calculate the total operation cost for the building energy system."""
@@ -723,6 +728,48 @@ class Building(object):
                                           nr_hour_occur[t - 1]
                                           for t in model.time_step) +
                 bld_other_op_cost)
+
+    def _constraint_total_revenue(self, model, env, cluster=None):
+        """The total revenue of the building is the sum of the revenue of
+        supplied electricity."""
+        bld_revenue = model.find_component('total_annual_revenue_' + self.name)
+
+        # The following elements (buy_elec, ...) are the energy purchase and
+        # sale volume in time series and used to avoid that the constraint
+        # added is not executed properly if there is a None. The reason for
+        # 8761 steps is the different index of python list and pyomo.
+        sell_elec = [0] * (env.time_step + 1)
+
+        # comp_cost_list = []
+        for comp in self.components:
+            # comp_cost_list.append(model.find_component('annual_cost_' + comp))
+            if isinstance(self.components[comp],
+                          module_dict['ElectricityGrid']):
+                if 'elec' in self.components[comp].energy_flows['input'].keys():
+                    sell_elec = model.find_component('input_elec_' + comp)
+
+        if model.find_component('elec_feed_price'):
+            elec_feed_price = model.elec_feed_price
+        else:
+            elec_feed_price = env.elec_feed_price
+
+        if cluster is None:
+            model.cons.add(bld_revenue == sum(sell_elec[t] * elec_feed_price
+                                              for t in model.time_step))
+        else:
+            # Attention! The period only for 24 hours is developed,
+            # other segments are not considered.
+            # period_length = 24
+            #
+            # nr_day_occur = pd.Series(cluster.clusterPeriodNoOccur).tolist()
+            # nr_hour_occur = []
+            # for nr_occur in nr_day_occur:
+            #     nr_hour_occur += [nr_occur] * 24
+            nr_hour_occur = cluster['Occur']
+
+            model.cons.add(bld_revenue == sum(sell_elec[t] * elec_feed_price *
+                                              nr_hour_occur[t - 1] for t in
+                                              model.time_step))
 
     def _constraint_other_op_cost(self, model):
         """Other operation costs includes the costs except the fuel cost. One
