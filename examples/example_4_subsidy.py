@@ -7,7 +7,7 @@ from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
 from scripts.subsidies.EEG import EEG
-import tools.post_processing as pp
+import utils.post_processing as pp
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

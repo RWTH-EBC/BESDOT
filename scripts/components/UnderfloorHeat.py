@@ -1,6 +1,6 @@
 import warnings
 from scripts.components.HeatExchangerFluid import HeatExchangerFluid
-from tools.pmv import *
+from utils.pmv import *
 
 # Common parameters
 water_heat_cap = 4.18 * 10 ** 3  # Unit J/kgK
@@ -53,7 +53,7 @@ class UnderfloorHeat(HeatExchangerFluid):
         # The floor heating will only be turned on when the outdoor
         # temperature drops below this temperature. The hard coded value 15
         # grad comes from recommended value for germany building, this is
-        # also used in tools/generate_heat_profile.
+        # also used in utils/generate_heat_profile.
         self.start_temp = 15
 
         self.constant_inlet_temp = True

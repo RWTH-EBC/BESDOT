@@ -5,8 +5,8 @@ import os
 from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
-import tools.plot_cluster as plot_cls
-import tools.post_solar_chp as post_pro
+import utils.plot_cluster as plot_cls
+import utils.post_solar_chp as post_pro
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 days = 6
