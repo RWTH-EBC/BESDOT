@@ -2,7 +2,7 @@
 This script is an example for the class project, which shows the process for
 building an optimization model.
 In This example the energy components are modeled with energy flow
-relationship, which is provided by most other optimization tools.
+relationship, which is provided by most other optimization utils.
 """
 
 import os
@@ -10,7 +10,7 @@ from collections import OrderedDict
 from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
-import tools.post_processing as pp
+import utils.post_processing as pp
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

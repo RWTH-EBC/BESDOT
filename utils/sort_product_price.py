@@ -11,7 +11,7 @@ import os
 import warnings
 import shutil
 import pandas as pd
-import tools.get_all_class as gac
+import utils.get_all_class as gac
 
 base_path = os.path.dirname(os.path.dirname(__file__))
 component_path = os.path.join(base_path, "data", "component_database")
@@ -209,7 +209,7 @@ def sort_table():
         else:
             warn_msg = 'Find a new component ' + component + \
                        ', which is not considered in ' \
-                       'tools.sort_product_price. Please update ' \
+                       'utils.sort_product_price. Please update ' \
                        'the method again.'
             warnings.warn(warn_msg)
 
@@ -244,7 +244,7 @@ def enrich_table():
                 else:
                     warn_msg = 'Find a new component ' + component + \
                                ', which is not considered in ' \
-                               'tools.sort_product_price. Please update ' \
+                               'utils.sort_product_price. Please update ' \
                                'the method again.'
                     warnings.warn(warn_msg)
         else:

@@ -1,6 +1,6 @@
 import pyomo.environ as pyo
 from scripts.Component import Component
-from tools.calc_annuity_vdi2067 import calc_annuity
+from utils.calc_annuity_vdi2067 import calc_annuity
 
 
 class SolarThermalCollector(Component):

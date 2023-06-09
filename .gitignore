@@ -7,8 +7,8 @@
 /data/opt_output/
 /data/cls_file/
 /data/denmark_energy_hub/
-/tools/analysis_lp_new.txt
-/tools/analysis_lp_temp.txt
+/utils/analysis_lp_new.txt
+/utils/analysis_lp_temp.txt
 gurobi.log
 
 # files for Mac OS

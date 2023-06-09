@@ -4,7 +4,7 @@ from pyomo.gdp import Disjunct
 
 from scripts.components.GasBoiler import GasBoiler
 import warnings
-from tools.calc_exhaust_gas_loss import calc_exhaust_gas_loss
+from utils.calc_exhaust_gas_loss import calc_exhaust_gas_loss
 import pandas as pd
 from scripts.FluidComponent import FluidComponent
 

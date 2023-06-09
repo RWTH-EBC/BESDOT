@@ -7,7 +7,7 @@ import os
 from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
-from tools.post_processing import find_size, sum_flow
+from utils.post_processing import find_size, sum_flow
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

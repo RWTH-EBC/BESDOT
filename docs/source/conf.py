@@ -21,7 +21,7 @@ release = '0.0.1'
 
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 model_path = os.path.join(base_path, 'scripts')
-tool_path = os.path.join(base_path, 'tools')
+tool_path = os.path.join(base_path, 'utils')
 #md_path = os.path.join(base_path, 'docs','Besdot 4b30fb98d32f4d768dbf30690bf2740e')
 
 sys.path.insert(0, base_path)

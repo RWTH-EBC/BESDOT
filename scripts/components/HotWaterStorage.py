@@ -1,7 +1,7 @@
 import pyomo.environ as pyo
 from pyomo.gdp import Disjunct, Disjunction
 from scripts.components.Storage import Storage
-from tools.calc_annuity_vdi2067 import calc_annuity
+from utils.calc_annuity_vdi2067 import calc_annuity
 
 water_heat_cap = 4.18 * 10 ** 3  # Unit J/kgK
 water_density = 1  # kg/Liter

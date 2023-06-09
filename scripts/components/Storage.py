@@ -123,7 +123,7 @@ class Storage(Component):
         Attention: It is not easy to define the stored energy at each time
         step. Other energy flows happen in the time step (1 hour), but stored
         energy is a state, which varies before and after the time step. In
-        this tools, we consider the stored energy is before the time step.
+        this utils, we consider the stored energy is before the time step.
         """
         input_energy = model.find_component('input_' + self.inputs[0] +
                                             '_' + self.name)
