@@ -1,6 +1,9 @@
 import pyomo.environ as pyo
+from pyomo.gdp import Disjunct, Disjunction
 from scripts.Component import Component
 from tools.calc_annuity_vdi2067 import calc_annuity
+
+small_num = 0.0001
 
 
 class SolarThermalCollector(Component):
@@ -53,8 +56,66 @@ class SolarThermalCollector(Component):
         area = model.find_component('solar_area_' + self.name)
         annual_cost = model.find_component('annual_cost_' + self.name)
         invest = model.find_component('invest_' + self.name)
+        size = model.find_component('size_' + self.name)
 
-        model.cons.add(area * self.unit_cost == invest)
+        if self.min_size == 0:
+            min_size = small_num
+        else:
+            min_size = self.min_size
+
+        if self.cost_model == 0:
+            model.cons.add(area * self.unit_cost == invest)
+        elif self.cost_model == 1:
+            dis_not_select = Disjunct()
+            # area and size are connected by the function _constraint_area,
+            # so the following constraint could be written in size or area.
+            not_select_size = pyo.Constraint(expr=size == 0)
+            not_select_inv = pyo.Constraint(expr=invest == 0)
+            model.add_component('dis_not_select_' + self.name, dis_not_select)
+            dis_not_select.add_component('not_select_size_' + self.name,
+                                         not_select_size)
+            dis_not_select.add_component('not_select_inv_' + self.name,
+                                         not_select_inv)
+
+            dis_select = Disjunct()
+            select_size = pyo.Constraint(expr=size >= min_size)
+            select_inv = pyo.Constraint(expr=invest == area * self.unit_cost +
+                                             self.fixed_cost)
+            model.add_component('dis_select_' + self.name, dis_select)
+            dis_select.add_component('select_size_' + self.name, select_size)
+            dis_select.add_component('select_inv_' + self.name, select_inv)
+
+            dj_size = Disjunction(expr=[dis_not_select, dis_select])
+            model.add_component('disjunction_size' + self.name, dj_size)
+        elif self.cost_model == 2:
+            pair_nr = len(self.cost_pair)
+            pair = Disjunct(pyo.RangeSet(pair_nr + 1))
+            model.add_component(self.name + '_cost_pair', pair)
+            pair_list = []
+            for i in range(pair_nr):
+                area_data = float(self.cost_pair[i].split(';')[0])
+                price_data = float(self.cost_pair[i].split(';')[1])
+
+                select_area = pyo.Constraint(expr=area == area_data)
+                select_inv = pyo.Constraint(expr=invest == price_data)
+                pair[i + 1].add_component(
+                    self.name + 'select_area_' + str(i + 1),
+                    select_area)
+                pair[i + 1].add_component(
+                    self.name + 'select_inv_' + str(i + 1),
+                    select_inv)
+                pair_list.append(pair[i + 1])
+
+            select_area = pyo.Constraint(expr=size == 0)
+            select_inv = pyo.Constraint(expr=invest == 0)
+            pair[pair_nr + 1].add_component(self.name + 'select_area_' + str(0),
+                                            select_area)
+            pair[pair_nr + 1].add_component(self.name + 'select_inv_' + str(0),
+                                            select_inv)
+            pair_list.append(pair[pair_nr + 1])
+
+            disj_size = Disjunction(expr=pair_list)
+            model.add_component('disj_size_' + self.name, disj_size)
 
         annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w,
                                self.f_op)
