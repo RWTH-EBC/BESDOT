@@ -539,6 +539,12 @@ def create_stacked_bar_line_chart(x, stacked_data, stacked_label, line_data,
     # Add legend
     plt.legend()
 
+    # Calculate y-axis limits
+    y_min = min(0, min(bottoms), min(line_data))
+    y_max = max(max(bottoms), max(line_data)*1.1)
+
+    plt.ylim(y_min, y_max)
+
     # Add axis labels
     plt.xlabel(x_label)
     plt.ylabel(y_label)
@@ -573,6 +579,12 @@ def plot_multiple_lines(df, x_column, y_columns):
 
     # Add legend
     ax.legend()
+
+    # Set y-axis limits based on the data range
+    y_min = df[y_columns].min().min()  # Minimum value from all y-columns
+    y_max = df[y_columns].max().max()  # Maximum value from all y-columns
+
+    ax.set_ylim(y_min, y_max)
 
     # Add axis labels
     ax.set_xlabel('X')
