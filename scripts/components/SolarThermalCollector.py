@@ -69,7 +69,7 @@ class SolarThermalCollector(Component):
             dis_not_select = Disjunct()
             # area and size are connected by the function _constraint_area,
             # so the following constraint could be written in size or area.
-            not_select_size = pyo.Constraint(expr=size == 0)
+            not_select_size = pyo.Constraint(expr=area == 0)
             not_select_inv = pyo.Constraint(expr=invest == 0)
             model.add_component('dis_not_select_' + self.name, dis_not_select)
             dis_not_select.add_component('not_select_size_' + self.name,
@@ -78,11 +78,16 @@ class SolarThermalCollector(Component):
                                          not_select_inv)
 
             dis_select = Disjunct()
-            select_size = pyo.Constraint(expr=size >= min_size)
+            select_size = pyo.Constraint(expr=area >= min_size /
+                                              self.efficiency['heat'])
+            # select_size_2 = pyo.Constraint(expr=area <= self.max_size /
+            #                                   self.efficiency['heat'])
             select_inv = pyo.Constraint(expr=invest == area * self.unit_cost +
                                              self.fixed_cost)
             model.add_component('dis_select_' + self.name, dis_select)
             dis_select.add_component('select_size_' + self.name, select_size)
+            # dis_select.add_component('select_size_2_' + self.name,
+            #                          select_size_2)
             dis_select.add_component('select_inv_' + self.name, select_inv)
 
             dj_size = Disjunction(expr=[dis_not_select, dis_select])
@@ -106,7 +111,7 @@ class SolarThermalCollector(Component):
                     select_inv)
                 pair_list.append(pair[i + 1])
 
-            select_area = pyo.Constraint(expr=size == 0)
+            select_area = pyo.Constraint(expr=area == 0)
             select_inv = pyo.Constraint(expr=invest == 0)
             pair[pair_nr + 1].add_component(self.name + 'select_area_' + str(0),
                                             select_area)
@@ -130,5 +135,8 @@ class SolarThermalCollector(Component):
     def add_vars(self, model):
         super().add_vars(model)
 
-        area = pyo.Var(bounds=(0, None))
+        min_area = self.min_size / 1 / self.efficiency['heat']
+        max_area = self.max_size / 1 / self.efficiency['heat']
+
+        area = pyo.Var(bounds=(min_area, max_area))
         model.add_component('solar_area_' + self.name, area)
