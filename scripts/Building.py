@@ -706,8 +706,7 @@ class Building(object):
                 bld_operation_cost == sum(buy_elec[t] * elec_price +
                                           buy_gas[t] * env.gas_price +
                                           buy_heat[t] *
-                                          heat_price - sell_elec[
-                                              t] * env.elec_feed_price
+                                          heat_price
                                           for t in model.time_step) +
                 bld_other_op_cost)
         else:
@@ -726,8 +725,6 @@ class Building(object):
                                           nr_hour_occur[t - 1] + buy_gas[t] *
                                           env.gas_price * nr_hour_occur[t - 1] +
                                           buy_heat[t] * heat_price *
-                                          nr_hour_occur[t - 1] - sell_elec[t] *
-                                          env.elec_feed_price *
                                           nr_hour_occur[t - 1]
                                           for t in model.time_step) +
                 bld_other_op_cost)
