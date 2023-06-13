@@ -693,11 +693,11 @@ class Building(object):
                 #  flow. the calculation of heat price take the amount of
                 #  input energy of heat grid as the denominator. This should
                 #  be discussed later. It depends on the business model of
-                #  district heating supplier. The reason for taking the input
-                #  energy, is that the energy loss of heat grid could be seen
-                #  as part of the heat exchanger, so it could reduce the
+                #  district heating supplier. The reason for taking the output
+                #  energy of energy, is that the energy loss of heat grid could
+                #  be seen as part of the heat exchanger, so it could reduce the
                 #  model complexity.
-                buy_heat = model.find_component('input_heat_' + comp)
+                buy_heat = model.find_component('output_heat_' + comp)
 
         if self.bilevel:
             elec_price = model.elec_price
