@@ -144,7 +144,8 @@ class Storage(Component):
         not defined.
         """
         stored_energy = model.find_component('energy_' + self.name)
-        model.cons.add(stored_energy[1] == self.init_soc)
+        size = model.find_component('size_' + self.name)
+        model.cons.add(stored_energy[1] == self.init_soc * size)
 
     def _constraint_maxpower(self, model):
         input_energy = model.find_component('input_' + self.inputs[0] +

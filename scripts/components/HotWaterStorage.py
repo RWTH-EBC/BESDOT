@@ -23,6 +23,7 @@ class HotWaterStorage(Storage):
                          current_size=current_size)
 
         self.temp_diff = 60 # K
+        self.set_init = True
 
     # Attention! The size for hot water storage should be cubic meter instead
     # of kWh, since the key parameter for each product are given with the
