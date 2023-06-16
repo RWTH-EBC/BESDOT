@@ -8,6 +8,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from PIL import ImageColor
+import matplotlib.patches as mpatches
 
 # Attention! The elec_list and heat_list use the name from topology
 # matrix, for different scenario the name for each component may change.
@@ -592,6 +594,126 @@ def plot_multiple_lines(df, x_column, y_columns):
 
     # Show the chart
     plt.show()
+
+
+# def plot_comparison(df, indices, labels=[]):
+#     fig, ax = plt.subplots()
+#
+#     width = 0.4
+#     group_width = len(indices) * 2 * width + 1
+#
+#     unique_indices = list(
+#         set([index for sublist in indices for subsublist in sublist for index in
+#              subsublist]))
+#     all_colors = sns.color_palette('deep', len(unique_indices))
+#     color_map = {index: all_colors[i] for i, index in enumerate(unique_indices)}
+#     legend_patches = []
+#
+#     for group_num, (stack_indices1, stack_indices2) in enumerate(indices):
+#         stack_data1 = df.loc[stack_indices1].values.flatten()
+#         stack_data2 = df.loc[stack_indices2].values.flatten()
+#
+#         x1 = np.array([group_num * group_width])
+#         x2 = np.array([group_num * group_width + width])
+#
+#         for x, stack_data, stack_indices in [(x1, stack_data1, stack_indices1),
+#                                              (x2, stack_data2, stack_indices2)]:
+#             bottom = 0
+#             for i, data in enumerate(stack_data):
+#                 data = round(data)
+#                 if data != 0:  # Ignore when data is equal to 0
+#                     color = color_map[stack_indices[i]]
+#                     ax.bar(x, data, bottom=bottom, width=width, color=color)
+#                     text_color = 'white' if ImageColor.getcolor(
+#                         f'rgb{tuple(int(255 * x) for x in color[:3])}', "RGB")[
+#                                                 0] < 128 else 'black'
+#                     ax.text(x, bottom + data / 2, str(data), ha='center',
+#                             va='center', color=text_color)
+#                     bottom += data
+#                     legend_patches.append(
+#                         mpatches.Patch(color=color, label=stack_indices[i]))
+#
+#         total1 = np.sum(stack_data1)
+#         total2 = np.sum(stack_data2)
+#         shorter = min(total1, total2)
+#         taller = max(total1, total2)
+#         relative_error = abs(total1 - total2) / shorter * 100
+#         if relative_error < -0.1:
+#             diff_bar = x1[0]
+#             diff_height = shorter + (taller - shorter) / 2
+#         elif relative_error > 0.1:
+#             diff_bar = x2[0]
+#             diff_height = shorter + (taller - shorter) / 2
+#         else:
+#             diff_bar = x1[0] + width / 2
+#             diff_height = shorter + 100
+#         ax.text(diff_bar, diff_height, f'Δ {relative_error:.1f}%', ha='center',
+#                 va='center')
+#
+#     ax.set_xticks(np.arange(len(indices)) * group_width + width / 2)
+#     ax.set_xticklabels(labels)
+#     ax.legend(handles=legend_patches)
+#
+#     plt.show()
+
+def plot_comparison(df, indices, labels=[]):
+    fig, ax = plt.subplots()
+
+    width = 0.4
+    group_width = len(indices) * 2 * width + 1
+
+    group_colors = sns.color_palette('hls', len(indices))  # 为每个组选择一个颜色
+    legend_patches = []
+
+    for group_num, (stack_indices1, stack_indices2) in enumerate(indices):
+        stack_data1 = df.loc[stack_indices1].values.flatten()
+        stack_data2 = df.loc[stack_indices2].values.flatten()
+
+        x1 = np.array([group_num * group_width])
+        x2 = np.array([group_num * group_width + width])
+
+        for x, stack_data, stack_indices in [(x1, stack_data1, stack_indices1),
+                                             (x2, stack_data2, stack_indices2)]:
+            bottom = 0
+            for i, data in enumerate(stack_data):
+                data = round(data)
+                if data != 0:
+                    color = sns.light_palette(group_colors[group_num], len(stack_data) + 2, reverse=True, input='rgb')[i + 1]
+                    color = sns.set_hls_values(color, l=(i + 1) / (len(stack_data) + 1))  # 调整亮度来增加颜色差别
+                    ax.bar(x, data, bottom=bottom, width=width, color=color)
+                    rgb_color = tuple(int(255 * x) for x in color[:3])
+                    grayscale = 0.2989 * rgb_color[0] + 0.5870 * rgb_color[1] + 0.1140 * rgb_color[2]  # 将颜色转换为灰度
+                    text_color = 'white' if grayscale < 128 else 'black'  # 基于灰度决定使用黑色还是白色文字
+                    ax.text(x, bottom + data / 2, str(data), ha='center',
+                            va='center', color=text_color)
+                    bottom += data
+                    legend_patches.append(mpatches.Patch(color=color,
+                                                         label=stack_indices[
+                                                             i]))
+
+        total1 = np.sum(stack_data1)
+        total2 = np.sum(stack_data2)
+        shorter = min(total1, total2)
+        taller = max(total1, total2)
+        relative_error = abs(total1 - total2) / shorter * 100
+        if relative_error < -0.1:
+            diff_bar = x1[0]
+            diff_height = shorter + (taller - shorter) / 2
+        elif relative_error > 0.1:
+            diff_bar = x2[0]
+            diff_height = shorter + (taller - shorter) / 2
+        else:
+            diff_bar = x1[0] + width / 2
+            diff_height = shorter + 100
+        ax.text(diff_bar, diff_height,
+                f'Δ {relative_error:.1f}%', ha='center', va='center')
+
+    ax.set_xticks(np.arange(len(indices)) * group_width + width/2)
+    ax.set_xticklabels(labels)
+    ax.legend(handles=legend_patches)
+
+    plt.show()
+
 
 
 if __name__ == '__main__':

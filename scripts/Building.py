@@ -507,7 +507,7 @@ class Building(object):
         # or project or other buildings.
         model.add_component('annual_cost_' + self.name, total_annual_cost)
         model.add_component('operation_cost_' + self.name, total_operation_cost)
-        model.add_component('total_annual_revenue_' + self.name,
+        model.add_component('total_revenue_' + self.name,
                             total_annual_revenue)
         model.add_component('other_op_cost_' + self.name, total_other_op_cost)
         model.add_component('total_pur_subsidy_' + self.name, total_pur_subsidy)
@@ -616,8 +616,12 @@ class Building(object):
                 solar_area_var_list.append(model.find_component('solar_area_' +
                                                                 component))
             elif isinstance(self.components[component],
+                            module_dict['SolarThermalCollector']):
+                solar_area_var_list.append(model.find_component('solar_area_' +
+                                                                component))
+            elif isinstance(self.components[component],
                             module_dict['SolarThermalCollectorFluid']):
-                solar_area_var_list.append(model.find_component('size_' +
+                solar_area_var_list.append(model.find_component('solar_area_' +
                                                                 component))
         model.cons.add(sum(item for item in solar_area_var_list) <=
                        self.solar_area)
@@ -651,7 +655,7 @@ class Building(object):
         """Calculate the total annual cost for the building energy system."""
         bld_annual_cost = model.find_component('annual_cost_' + self.name)
         bld_operation_cost = model.find_component('operation_cost_' + self.name)
-        bld_revenue = model.find_component('total_annual_revenue_' + self.name)
+        bld_revenue = model.find_component('total_revenue_' + self.name)
         bld_other_op_cost = model.find_component('other_op_cost_' + self.name)
 
         comp_cost_list = []
@@ -740,7 +744,7 @@ class Building(object):
     def _constraint_total_revenue(self, model, env, cluster=None):
         """The total revenue of the building is the sum of the revenue of
         supplied electricity."""
-        bld_revenue = model.find_component('total_annual_revenue_' + self.name)
+        bld_revenue = model.find_component('total_revenue_' + self.name)
 
         # The following elements (buy_elec, ...) are the energy purchase and
         # sale volume in time series and used to avoid that the constraint
