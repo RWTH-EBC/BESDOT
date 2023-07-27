@@ -247,7 +247,7 @@ class Project(object):
             print("Other project application scenario haven't been developed")
 
     def run_optimization(self, solver_name='gurobi', save_lp=False,
-                         save_result=False, instance=None):
+                         save_result=False, instance=None, save_folder=None):
         """
         solver.options['Heuristics'] = 0.05
         solver.options['MIPGap'] = 0.01
@@ -270,14 +270,15 @@ class Project(object):
         # Attention! The option was set for the dimension optimization for
         # HomoStorage
         solver.options['NonConvex'] = 2
-        solver.options['MIPGap'] = 0.001
+        solver.options['MIPGap'] = 0.00001
         solver.options['TimeLimit'] = 30000
-        # solver.options['Heuristics'] = 0.05
+        solver.options['Heuristics'] = 0.001
 
         solver.solve(model, tee=True)
 
         # Save model in lp file, this only works with linear model. That is
         # not necessary.
+        """
         if save_lp:
             if not os.path.exists(os.path.join(base_path, 'data',
                                                'opt_output')):
@@ -295,7 +296,7 @@ class Project(object):
             model_output_path = os.path.join(base_path, 'data', 'opt_output',
                                              self.name, 'model.lp')
             model.write(model_output_path,
-                             io_options={'symbolic_solver_labels': True})
+                        io_options={'symbolic_solver_labels': True})
 
         # Save results in csv file.
         if save_result:
@@ -314,6 +315,23 @@ class Project(object):
 
             result_output_path = os.path.join(base_path, 'data', 'opt_output',
                                               self.name, 'result.csv')
+            """
+
+        if save_lp:
+            save_lp_path = os.path.join(base_path, 'data', 'opt_output', save_folder, self.name)
+            if not os.path.exists(save_lp_path):
+                os.makedirs(save_lp_path)
+
+            model_output_path = os.path.join(save_lp_path, 'model.lp')
+            model.write(model_output_path, io_options={'symbolic_solver_labels': True})
+
+        # Save results in csv file.
+        if save_result:
+            save_result_path = os.path.join(base_path, 'data', 'opt_output', save_folder, self.name)
+            if not os.path.exists(save_result_path):
+                os.makedirs(save_result_path)
+
+            result_output_path = os.path.join(save_result_path, 'result.csv')
 
             # Get results for all variable.
             var_list = []
