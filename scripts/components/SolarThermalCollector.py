@@ -127,7 +127,9 @@ class SolarThermalCollector(Component):
         model.cons.add(annuity == annual_cost)
 
     def add_cons(self, model):
-        super().add_cons(model)
+        # super().add_cons(model)
+        self._constraint_vdi2067(model)
+        self._constraint_conver(model)
 
         self._constraint_area(model)
         self._constraint_input(model)

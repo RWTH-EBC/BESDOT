@@ -616,8 +616,12 @@ class Building(object):
                 solar_area_var_list.append(model.find_component('solar_area_' +
                                                                 component))
             elif isinstance(self.components[component],
+                            module_dict['SolarThermalCollector']):
+                solar_area_var_list.append(model.find_component('solar_area_' +
+                                                                component))
+            elif isinstance(self.components[component],
                             module_dict['SolarThermalCollectorFluid']):
-                solar_area_var_list.append(model.find_component('size_' +
+                solar_area_var_list.append(model.find_component('solar_area_' +
                                                                 component))
         model.cons.add(sum(item for item in solar_area_var_list) <=
                        self.solar_area)

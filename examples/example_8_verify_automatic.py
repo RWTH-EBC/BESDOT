@@ -7,19 +7,19 @@ from scripts.Environment import Environment
 from scripts.Building import Building
 
 for i in range(1, 13):
-    for j in ['d']:
+    for j in ['a']:
         base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-        test_env = Environment(time_step=8760, city='Lindenberg')
+        test_env = Environment(time_step=8760)
 
-        topo_file_1 = os.path.join(base_path, 'data', 'topology', 'basic_modi_dpm_1',
-                                   f'{j}_basic_project_{i}_0_dpm_1.csv')
-        topo_file_2 = os.path.join(base_path, 'data', 'topology', 'basic_modi_dpm_1',
-                                   f'{j}_basic_project_{i}_1_dpm_1.csv')
-        topo_file_3 = os.path.join(base_path, 'data', 'topology', 'basic_modi_dpm_1',
-                                   f'{j}_basic_project_{i}_2_dpm_1.csv')
+        topo_file_1 = os.path.join(base_path, 'data', 'topology', 'basic_modi_dpm_2',
+                                   f'{j}_basic_project_{i}_0_dpm_2.csv')
+        topo_file_2 = os.path.join(base_path, 'data', 'topology', 'basic_modi_dpm_2',
+                                   f'{j}_basic_project_{i}_1_dpm_2.csv')
+        topo_file_3 = os.path.join(base_path, 'data', 'topology', 'basic_modi_dpm_2',
+                                   f'{j}_basic_project_{i}_2_dpm_2.csv')
 
-        results_file_path = os.path.join(base_path, 'data', 'opt_output', 'results_dpm_1', f'{j}_results_{i}.csv')
+        results_file_path = os.path.join(base_path, 'data', 'opt_output', 'results_dpm_2', f'{j}_results_{i}.csv')
 
         # Read the data from the source file
         df = pd.read_csv(results_file_path)
@@ -39,7 +39,7 @@ for i in range(1, 13):
                 writer_1.writerow([project_name, total_cost, time_taken] + list(component_sizes.values()))
 
         # Cost model 0: only with unit cost
-        project_1 = Project(name=f'{j}_project_{i}_0_dpm_1', typ='building')
+        project_1 = Project(name=f'{j}_project_{i}_0_dpm_2', typ='building')
         project_1.add_environment(test_env)
 
         test_bld_1 = Building(name='bld_1', area=200, bld_typ='Verwaltungsgebäude')
@@ -70,7 +70,7 @@ for i in range(1, 13):
             print(f"{comp_name}: size = {size}")
             component_sizes_project_1[comp_name] = size
 
-        write_to_csv(f'{j}_project_{i}_0_dpm_1', total_cost_project_1, time_taken_project_1,
+        write_to_csv(f'{j}_project_{i}_0_dpm_2', total_cost_project_1, time_taken_project_1,
                      component_sizes_project_1)
 
         print("===========================================")
@@ -78,7 +78,7 @@ for i in range(1, 13):
         ################################################################################
         #                   Cost model 1: some components has fixed cost
         ################################################################################
-        project_2 = Project(name=f'{j}_project_{i}_1_dpm_1', typ='building')
+        project_2 = Project(name=f'{j}_project_{i}_1_dpm_2', typ='building')
         project_2.add_environment(test_env)
 
         test_bld_2 = Building(name='bld_2', area=200, bld_typ='Verwaltungsgebäude')
@@ -111,7 +111,7 @@ for i in range(1, 13):
             print(f"{comp_name}: size = {size}")
             component_sizes_project_2[comp_name] = size
 
-        write_to_csv(f'{j}_project_{i}_1_dpm_1', total_cost_project_2, time_taken_project_2,
+        write_to_csv(f'{j}_project_{i}_1_dpm_2', total_cost_project_2, time_taken_project_2,
                      component_sizes_project_2)
 
         print("===========================================")
@@ -119,7 +119,7 @@ for i in range(1, 13):
         ################################################################################
         #                 Cost model 2: some components has price pairs
         ################################################################################
-        project_3 = Project(name=f'{j}_project_{i}_2_dpm_1', typ='building')
+        project_3 = Project(name=f'{j}_project_{i}_2_dpm_2', typ='building')
         project_3.add_environment(test_env)
 
         test_bld_3 = Building(name='bld_3', area=200, bld_typ='Verwaltungsgebäude')
@@ -152,7 +152,7 @@ for i in range(1, 13):
             print(f"{comp_name}: size = {size}")
             component_sizes_project_3[comp_name] = size
 
-        write_to_csv(f'{j}_project_{i}_2_dpm_1', total_cost_project_3, time_taken_project_3,
+        write_to_csv(f'{j}_project_{i}_2_dpm_2', total_cost_project_3, time_taken_project_3,
                      component_sizes_project_3)
 
         print("===============================")
@@ -191,17 +191,17 @@ for i in range(1, 13):
         base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
         # 读取原始结果文件
-        results_file_path = os.path.join(base_path, 'data', 'opt_output', 'results_dpm_1', f'{j}_results_{i}.csv')
+        results_file_path = os.path.join(base_path, 'data', 'opt_output', 'results_dpm_2', f'{j}_results_{i}.csv')
         df_results = pd.read_csv(results_file_path)
 
         # 按指定顺序重新排列数据
-        project_order = [f'{j}_project_{i}_0', f'{j}_project_{i}_0_dpm_1',
-                         f'{j}_project_{i}_1', f'{j}_project_{i}_1_dpm_1',
-                         f'{j}_project_{i}_2', f'{j}_project_{i}_2_dpm_1']
+        project_order = [f'{j}_project_{i}_0', f'{j}_project_{i}_0_dpm_2',
+                         f'{j}_project_{i}_1', f'{j}_project_{i}_1_dpm_2',
+                         f'{j}_project_{i}_2', f'{j}_project_{i}_2_dpm_2']
         df_results_sorted = df_results.sort_values(by=['project_name'],
                                                    key=lambda x: x.map({p: k for k, p in enumerate(project_order)}))
 
         # 将重新排列后的结果保存到新的文件
-        results_reordered_file_path = os.path.join(base_path, 'data', 'opt_output', 'results_dpm_1',
+        results_reordered_file_path = os.path.join(base_path, 'data', 'opt_output', 'results_dpm_2',
                                                    f'{j}_results_{i}_sorted.csv')
         df_results_sorted.to_csv(results_reordered_file_path, index=False)
