@@ -790,8 +790,12 @@ def plot_comparison(df, indices, labels=[]):
 def plot_size(non_timeseries_path):
     non_timeseries_df = pd.read_excel(non_timeseries_path, header=0,
                                       names=['Variable', 'Value'])
-    size_df = non_timeseries_df[
-        non_timeseries_df['Variable'].str.contains('size')]
+
+    # 过滤带有"grid"的变量
+    non_grid_df = non_timeseries_df[
+        ~non_timeseries_df['Variable'].str.contains('grid')]
+
+    size_df = non_grid_df[non_grid_df['Variable'].str.contains('size')]
 
     # 过滤没有数据或值为零的项
     size_df = size_df[size_df['Value'].notna() & (size_df['Value'] != 0)]

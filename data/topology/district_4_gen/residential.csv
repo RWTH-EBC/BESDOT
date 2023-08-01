@@ -7,4 +7,4 @@ bat,Battery,BAT1,8,8,0,1,0,0,0,0,1,1,0,0
 e_grid,ElectricityGrid,GRD1,0,100,0,1,0,0,0,1,0,1,0,0
 e_cns,ElectricalConsumption,CNS1,0,100,0,0,0,0,0,0,0,0,0,0
 heat_grid,HeatGrid,HG1,0,100,0,0,0,0,0,0,0,0,0,1
-heat_ex,HeatExchanger,HE1,0,100,0,0,1,1,0,0,0,0,0,0
+heat_ex,HeatExchanger,HE2,0,100,0,0,1,1,0,0,0,0,0,0

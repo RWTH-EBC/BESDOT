@@ -188,6 +188,25 @@ class Component(object):
                 warnings.warn("Can't update the profile for component" +
                               self.name)
 
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "component_type": self.component_type,
+            "comp_model": self.comp_model,
+            "inputs": self.inputs,
+            "outputs": self.outputs,
+            "efficiency": self.efficiency,
+            "min_size": int(self.min_size),
+            "max_size": int(self.max_size),
+            "current_size": int(self.current_size),
+            "cost_model": self.cost_model,
+            "unit_cost": self.unit_cost,
+            "fixed_cost": self.fixed_cost,
+            "cost_pair": self.cost_pair,
+            "energy_flows": self.energy_flows,
+            "other_op_cost": self.other_op_cost
+        }
+
     def add_energy_flows(self, io, energy_type, energy_flow):
         if io in ['input', 'output']:
             if energy_type not in self.energy_flows[io].keys():

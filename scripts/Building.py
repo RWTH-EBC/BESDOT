@@ -168,6 +168,25 @@ class Building(object):
         # print(demand_df)
         demand_df.to_csv(csv_path, index=False, header=True)
 
+    def to_dict(self):
+        building_dict = {
+            "name": self.name,
+            "area": self.area,
+            "solar_area": self.solar_area,
+            "building_typ": self.building_typ,
+            "annual_demand": self.annual_demand,
+            # "demand_profile": self.demand_profile,
+            "components": [],
+            "subsidy_list": self.subsidy_list,
+            "bilevel": self.bilevel
+        }
+
+        for component in self.components.values():
+            component_dict = component.to_dict()
+            building_dict["components"].append(component_dict)
+
+        return building_dict
+
     def add_topology(self, topology):
         topo_matrix = pd.read_csv(topology)
         self.topology = topo_matrix
