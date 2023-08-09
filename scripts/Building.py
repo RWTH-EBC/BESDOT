@@ -168,6 +168,25 @@ class Building(object):
         # print(demand_df)
         demand_df.to_csv(csv_path, index=False, header=True)
 
+    def to_dict(self):
+        building_dict = {
+            "name": self.name,
+            "area": self.area,
+            "solar_area": self.solar_area,
+            "building_typ": self.building_typ,
+            "annual_demand": self.annual_demand,
+            # "demand_profile": self.demand_profile,
+            "components": [],
+            "subsidy_list": self.subsidy_list,
+            "bilevel": self.bilevel
+        }
+
+        for component in self.components.values():
+            component_dict = component.to_dict()
+            building_dict["components"].append(component_dict)
+
+        return building_dict
+
     def add_topology(self, topology):
         topo_matrix = pd.read_csv(topology)
         self.topology = topo_matrix
@@ -507,7 +526,7 @@ class Building(object):
         # or project or other buildings.
         model.add_component('annual_cost_' + self.name, total_annual_cost)
         model.add_component('operation_cost_' + self.name, total_operation_cost)
-        model.add_component('total_annual_revenue_' + self.name,
+        model.add_component('total_revenue_' + self.name,
                             total_annual_revenue)
         model.add_component('other_op_cost_' + self.name, total_other_op_cost)
         model.add_component('total_pur_subsidy_' + self.name, total_pur_subsidy)
@@ -655,7 +674,7 @@ class Building(object):
         """Calculate the total annual cost for the building energy system."""
         bld_annual_cost = model.find_component('annual_cost_' + self.name)
         bld_operation_cost = model.find_component('operation_cost_' + self.name)
-        bld_revenue = model.find_component('total_annual_revenue_' + self.name)
+        bld_revenue = model.find_component('total_revenue_' + self.name)
         bld_other_op_cost = model.find_component('other_op_cost_' + self.name)
 
         comp_cost_list = []
@@ -693,6 +712,14 @@ class Building(object):
             elif isinstance(self.components[comp], module_dict['GasGrid']):
                 buy_gas = model.find_component('output_gas_' + comp)
             elif isinstance(self.components[comp], module_dict['HeatGrid']):
+                # todo (yni): take care of the situation for variable mass
+                #  flow. the calculation of heat price take the amount of
+                #  input energy of heat grid as the denominator. This should
+                #  be discussed later. It depends on the business model of
+                #  district heating supplier. The reason for taking the output
+                #  energy of energy, is that the energy loss of heat grid could
+                #  be seen as part of the heat exchanger, so it could reduce the
+                #  model complexity.
                 buy_heat = model.find_component('output_heat_' + comp)
 
         if self.bilevel:
@@ -710,8 +737,7 @@ class Building(object):
                 bld_operation_cost == sum(buy_elec[t] * elec_price +
                                           buy_gas[t] * env.gas_price +
                                           buy_heat[t] *
-                                          heat_price - sell_elec[
-                                              t] * env.elec_feed_price
+                                          heat_price
                                           for t in model.time_step) +
                 bld_other_op_cost)
         else:
@@ -730,8 +756,6 @@ class Building(object):
                                           nr_hour_occur[t - 1] + buy_gas[t] *
                                           env.gas_price * nr_hour_occur[t - 1] +
                                           buy_heat[t] * heat_price *
-                                          nr_hour_occur[t - 1] - sell_elec[t] *
-                                          env.elec_feed_price *
                                           nr_hour_occur[t - 1]
                                           for t in model.time_step) +
                 bld_other_op_cost)
@@ -739,7 +763,7 @@ class Building(object):
     def _constraint_total_revenue(self, model, env, cluster=None):
         """The total revenue of the building is the sum of the revenue of
         supplied electricity."""
-        bld_revenue = model.find_component('total_annual_revenue_' + self.name)
+        bld_revenue = model.find_component('total_revenue_' + self.name)
 
         # The following elements (buy_elec, ...) are the energy purchase and
         # sale volume in time series and used to avoid that the constraint

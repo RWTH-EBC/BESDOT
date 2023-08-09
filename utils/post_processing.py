@@ -8,6 +8,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from PIL import ImageColor
+import matplotlib.patches as mpatches
 
 # Attention! The elec_list and heat_list use the name from topology
 # matrix, for different scenario the name for each component may change.
@@ -506,9 +508,56 @@ def create_stacked_bar_chart(x, stacked_data1, label1, stacked_data2,
     plt.show()
 
 
+# def create_stacked_bar_line_chart(x, stacked_data, stacked_label, line_data,
+#                                   line_label, x_label, y_label, title=None,
+#                                   start_index=None, end_index=None):
+#     """
+#     Create a chart with stacked bar and line plots
+#
+#     Args:
+#     x (ndarray): x-axis data
+#     stacked_data (list of ndarrays): List of stacked data, each array represents
+#      a column of data line_data (ndarray): Line plot data, representing the
+#      sum of stacked data
+#     """
+#     num_stacked = len(stacked_data)  # Number of stacked data
+#
+#     # Apply slicing to data1 and data2 if start_index and end_index are specified
+#     if start_index is not None and end_index is not None:
+#         stacked_data = [data[start_index:end_index] for data in stacked_data]
+#         line_data = line_data[start_index:end_index]
+#         x = x[start_index:end_index]
+#
+#     # Create stacked bar plot
+#     bottoms = np.zeros(len(x))  # Initial bottom heights
+#     for i in range(num_stacked):
+#         if sum(stacked_data[i]) > 0.001:
+#             plt.bar(x, stacked_data[i], bottom=bottoms, label=stacked_label[i])
+#             bottoms += stacked_data[i]
+#
+#     # Create line plot
+#     plt.plot(x, line_data, color='red', linestyle='-', label=line_label)
+#
+#     # Add legend
+#     plt.legend()
+#
+#     # Calculate y-axis limits
+#     y_min = min(0, min(bottoms), min(line_data))
+#     y_max = max(max(bottoms), max(line_data)*1.1)
+#
+#     plt.ylim(y_min, y_max)
+#
+#     # Add axis labels
+#     plt.xlabel(x_label)
+#     plt.ylabel(y_label)
+#     plt.title(title)
+#
+#     # Show the chart
+#     plt.show()
+
 def create_stacked_bar_line_chart(x, stacked_data, stacked_label, line_data,
                                   line_label, x_label, y_label, title=None,
-                                  start_index=None, end_index=None):
+                                  start_index=None, end_index=None, step_length=1):
     """
     Create a chart with stacked bar and line plots
 
@@ -526,11 +575,27 @@ def create_stacked_bar_line_chart(x, stacked_data, stacked_label, line_data,
         line_data = line_data[start_index:end_index]
         x = x[start_index:end_index]
 
+    assert len(x) % step_length == 0
+    assert len(line_data) % step_length == 0
+    assert all(len(arr) % step_length == 0 for arr in stacked_data)
+
+    # x = np.array(x).reshape(-1, step_length).tolist()
+    x = np.array(x).reshape(-1, step_length).min(axis=1).tolist()
+    line_data = np.array(line_data).reshape(-1, step_length).sum(
+        axis=1).tolist()
+
+    for i in range(len(stacked_data)):
+        stacked_data[i] = np.array(stacked_data[i]).reshape(-1,
+                                                            step_length).sum(
+            axis=1).tolist()
+
     # Create stacked bar plot
+    bar_width = (max(x) - min(x)) / len(x)  # Calculate the width of the bar
     bottoms = np.zeros(len(x))  # Initial bottom heights
     for i in range(num_stacked):
         if sum(stacked_data[i]) > 0.001:
-            plt.bar(x, stacked_data[i], bottom=bottoms, label=stacked_label[i])
+            plt.bar(x, stacked_data[i], bottom=bottoms, label=stacked_label[i],
+                    width=bar_width)  # set the width parameter
             bottoms += stacked_data[i]
 
     # Create line plot
@@ -552,6 +617,73 @@ def create_stacked_bar_line_chart(x, stacked_data, stacked_label, line_data,
 
     # Show the chart
     plt.show()
+
+# def create_stacked_bar_line_chart(x, stacked_data, stacked_label, line_data,
+#                                   line_label, x_label, y_label, title=None,
+#                                   start_index=None, end_index=None,
+#                                   step_length=1):
+#     """
+#     Create a chart with stacked bar and line plots
+#
+#     Args:
+#     x (ndarray): x-axis data
+#     stacked_data (list of ndarrays): List of stacked data, each array represents
+#      a column of data line_data (ndarray): Line plot data, representing the
+#      sum of stacked data
+#     step_length (int): The length of each step after merging the original data
+#     """
+#     print('x', x)
+#     print('stacked_data', stacked_data)
+#     print('line_data', line_data)
+#     num_stacked = len(stacked_data)  # Number of stacked data
+#
+#     # Apply slicing to data1 and data2 if start_index and end_index are specified
+#     if start_index is not None and end_index is not None:
+#         stacked_data = [data[start_index:end_index] for data in stacked_data]
+#         line_data = line_data[start_index:end_index]
+#         x = x[start_index:end_index]
+#
+#     # Merge data based on step_length
+#     merged_stacked_data = []
+#     merged_line_data = []
+#     merged_x = []
+#     for i in range(0, len(x), step_length):
+#         merged_x.append(x[i])
+#         merged_stacked_data.append(
+#             [np.sum(data[i:i + step_length]) for data in stacked_data])
+#         merged_line_data.append(np.sum(line_data[i:i + step_length]))
+#
+#     merged_x = merged_x[:len(merged_stacked_data)]
+#     print('merged_x', merged_x)
+#     print('merged_stacked_data', merged_stacked_data)
+#     print('merged_line_data', merged_line_data)
+#
+#     # Create stacked bar plot
+#     bottoms = np.zeros(len(merged_x))  # Initial bottom heights
+#     for i in range(num_stacked):
+#         if sum(merged_stacked_data[i]) > 0.001:
+#             plt.bar(merged_x, merged_stacked_data[i], bottom=bottoms, label=stacked_label[i])
+#             bottoms += merged_stacked_data[i]
+#
+#     # Create line plot
+#     plt.plot(merged_x, merged_line_data, color='red', linestyle='-', label=line_label)
+#
+#     # Add legend
+#     plt.legend()
+#
+#     # Calculate y-axis limits
+#     y_min = min(0, min(bottoms), min(merged_line_data))
+#     y_max = max(max(bottoms), max(merged_line_data)*1.1)
+#
+#     plt.ylim(y_min, y_max)
+#
+#     # Add axis labels
+#     plt.xlabel(x_label)
+#     plt.ylabel(y_label)
+#     plt.title(title)
+#
+#     # Show the chart
+#     plt.show()
 
 
 def plot_multiple_lines(df, x_column, y_columns):
@@ -594,70 +726,114 @@ def plot_multiple_lines(df, x_column, y_columns):
     plt.show()
 
 
+def plot_comparison(df, indices, labels=[]):
+    fig, ax = plt.subplots()
+
+    width = 0.4
+    group_width = len(indices) * 2 * width + 1
+
+    group_colors = sns.color_palette('hls', len(indices))  # 为每个组选择一个颜色
+    legend_patches = []
+
+    for group_num, (stack_indices1, stack_indices2) in enumerate(indices):
+        stack_data1 = df.loc[stack_indices1].values.flatten()
+        stack_data1 = np.nan_to_num(stack_data1, nan=0)  # 将NaN替换为0
+        stack_data2 = df.loc[stack_indices2].values.flatten()
+        stack_data2 = np.nan_to_num(stack_data2, nan=0)  # 将NaN替换为0
+
+        x1 = np.array([group_num * group_width])
+        x2 = np.array([group_num * group_width + width])
+
+        for x, stack_data, stack_indices in [(x1, stack_data1, stack_indices1),
+                                             (x2, stack_data2, stack_indices2)]:
+            bottom = 0
+            for i, data in enumerate(stack_data):
+                data = round(data)
+                if data != 0:
+                    color = sns.light_palette(group_colors[group_num], len(stack_data) + 2, reverse=True, input='rgb')[i + 1]
+                    color = sns.set_hls_values(color, l=(i + 1) / (len(stack_data) + 1))  # 调整亮度来增加颜色差别
+                    ax.bar(x, data, bottom=bottom, width=width, color=color)
+                    rgb_color = tuple(int(255 * x) for x in color[:3])
+                    grayscale = 0.2989 * rgb_color[0] + 0.5870 * rgb_color[1] + 0.1140 * rgb_color[2]  # 将颜色转换为灰度
+                    text_color = 'white' if grayscale < 128 else 'black'  # 基于灰度决定使用黑色还是白色文字
+                    ax.text(x, bottom + data / 2, str(data), ha='center',
+                            va='center', color=text_color)
+                    bottom += data
+                    legend_patches.append(mpatches.Patch(color=color,
+                                                         label=stack_indices[
+                                                             i]))
+
+        total1 = np.sum(stack_data1)
+        total2 = np.sum(stack_data2)
+        shorter = min(total1, total2)
+        taller = max(total1, total2)
+        relative_error = abs(total1 - total2) / shorter * 100
+        if relative_error < -0.1:
+            diff_bar = x1[0]
+            diff_height = shorter + (taller - shorter) / 2
+        elif relative_error > 0.1:
+            diff_bar = x2[0]
+            diff_height = shorter + (taller - shorter) / 2
+        else:
+            diff_bar = x1[0] + width / 2
+            diff_height = shorter + 100
+        ax.text(diff_bar, diff_height,
+                f'Δ {relative_error:.1f}%', ha='center', va='center')
+
+    ax.set_xticks(np.arange(len(indices)) * group_width + width/2)
+    ax.set_xticklabels(labels)
+    ax.legend(handles=legend_patches)
+
+    plt.show()
+
+
+def plot_size(non_timeseries_path):
+    non_timeseries_df = pd.read_excel(non_timeseries_path, header=0,
+                                      names=['Variable', 'Value'])
+
+    # 过滤带有"grid"的变量
+    non_grid_df = non_timeseries_df[
+        ~non_timeseries_df['Variable'].str.contains('grid')]
+
+    size_df = non_grid_df[non_grid_df['Variable'].str.contains('size')]
+
+    # 过滤没有数据或值为零的项
+    size_df = size_df[size_df['Value'].notna() & (size_df['Value'] != 0)]
+
+    plt.bar(size_df['Variable'], size_df['Value'], label='size')
+    plt.legend()
+
+    # 在柱子上显示数值（保留小数点后一位）
+    for i, value in enumerate(size_df['Value']):
+        plt.text(i, value, f"{value:.1f}", ha='center', va='bottom')
+
+    plt.show()
+
+
 if __name__ == '__main__':
-    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    opt_output_path = os.path.join(base_path, 'data', 'opt_output')
-    opt_output_0 = os.path.join(opt_output_path, 'project_3_0', 'result.csv')
-    opt_output_1 = os.path.join(opt_output_path, 'project_3_1', 'result.csv')
-    opt_output_2 = os.path.join(opt_output_path, 'project_3_3', 'result.csv')
 
-    #############################################################
-    # Search and get values
-    #############################################################
-    # output_df_0 = pd.read_csv(opt_output_0)
-    # all_elements_0 = find_element(output_df_0)
-    # opt_output_1 = pd.read_csv(opt_output_0)
-    # opt_output_1 = find_element(opt_output_1)
-    # print(all_elements)
 
-    find_size(opt_output_0)
-    print("====")
-    find_size(opt_output_2)
+    # 例子中的数据，实际情况中可以替换成你的数据
+    line_data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+    stacked_data = [np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]),
+                    np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14])]
 
-    # find_max_timestep(opt_output, 'input_heat_therm_cns')
+    # 设置步长
+    step_length = 7
 
-    # save_timeseries(opt_output)
+    # 确保数据长度可以被步长整除，如果不能整除，你可能需要裁剪或填充数据
+    assert len(line_data) % step_length == 0
+    assert all(len(arr) % step_length == 0 for arr in stacked_data)
 
-    #############################################################
-    # Plots
-    #############################################################
-    # if os.path.exists(os.path.join(opt_output_path, 'project_1')):
-    #     pass
-    # else:
-    #     os.mkdir(os.path.join(opt_output_path, 'project_1'))
-    # plot_all(opt_output, [624, 672],
-    #          save_path=os.path.join(opt_output_path, 'project_1'))
+    line_data = np.array(line_data).reshape(-1, step_length).sum(
+        axis=1).tolist()
 
-    # plot_output = os.path.join(opt_output_path, 'plot')
-    #
-    # demand_input = os.path.join(base_path, 'data', 'denmark_energy_hub',
-    #                             'energyprofile(kwh).csv')
-    # demand_df = pd.read_csv(demand_input)
-    # commercial_heat = demand_df['commercial heat'].astype('float64').values
-    # resident_heat = demand_df['residential heat'].astype('float64').values
-    # total_heat = commercial_heat + resident_heat
-    # total_elec = demand_df['total electricity'].astype('float64').values
-    #
-    # # plot_all(opt_output)
-    # plot_short_time(start_time=0, time_step=24, csv_file=opt_output,
-    #                 demand_heat=total_heat, demand_elec=total_elec)
+    for i in range(len(stacked_data)):
+        stacked_data[i] = np.array(stacked_data[i]).reshape(-1,
+                                                            step_length).sum(
+            axis=1).tolist()
 
-    # no_loss_result_file = os.path.join(base_path, 'data', 'opt_output',
-    #                                    'project_28_no_loss_result.csv')
-    # with_loss_result_file = os.path.join(base_path, 'data', 'opt_output',
-    #                                      'project_28_with_loss_result.csv')
-    # print('The size of project without loss:')
-    # find_size(no_loss_result_file)
-    # print('The size of porject with loss:')
-    # find_size(with_loss_result_file)
-    #
-    # print('#################')
-    #
-    # print('The total input energy in battery without loss:')
-    # sum_flow(no_loss_result_file, 'input_elec_bat')
-    # print('The total output energy in battery without loss:')
-    # sum_flow(no_loss_result_file, 'output_elec_bat')
-    # print('The total input energy in battery with loss:')
-    # sum_flow(with_loss_result_file, 'input_elec_bat')
-    # print('The total output energy in battery with loss:')
-    # sum_flow(with_loss_result_file, 'output_elec_bat')
+    # 输出处理后的数据
+    print("line_data:", line_data)
+    print("stacked_data:", stacked_data)
+

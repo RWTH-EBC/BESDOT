@@ -116,6 +116,24 @@ class Storage(Component):
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for loss.")
 
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "component_type": self.component_type,
+            "comp_model": self.comp_model,
+            "inputs": self.inputs,
+            "outputs": self.outputs,
+            "min_size": int(self.min_size),
+            "max_size": int(self.max_size),
+            "current_size": int(self.current_size),
+            "cost_model": self.cost_model,
+            "unit_cost": self.unit_cost,
+            "fixed_cost": self.fixed_cost,
+            "cost_pair": self.cost_pair,
+            "energy_flows": self.energy_flows,
+            "other_op_cost": self.other_op_cost
+        }
+
     def _constraint_conver(self, model):
         """Energy conservation equation for storage, in storage could only
         a kind of energy could be stored. so self.inputs and self.outputs
@@ -144,7 +162,8 @@ class Storage(Component):
         not defined.
         """
         stored_energy = model.find_component('energy_' + self.name)
-        model.cons.add(stored_energy[1] == self.init_soc)
+        size = model.find_component('size_' + self.name)
+        model.cons.add(stored_energy[1] == self.init_soc * size)
 
     def _constraint_maxpower(self, model):
         input_energy = model.find_component('input_' + self.inputs[0] +
