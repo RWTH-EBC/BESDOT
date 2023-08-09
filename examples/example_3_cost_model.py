@@ -1,28 +1,33 @@
 """
 In this example, the different cost model are compared. As in class Component
 introduced, the cost model could be set into 0, 1 or 2.
-Cost model can be choose from 0, 1, 2.
+Cost model can be chosen from 0, 1, 2.
 The model 0 means no fixed cost is considered, the relationship between total
 price and installed size is: y=m*x. y represents the total price,
 x represents the installed size, and m represents the unit cost from
 database. The model 1 means fixed cost is considered, the relationship is
 y=m*x+n. n represents the fixed cost. Model 1 usually has much better fitting
-result than model 0. But it cause the increase of number of binare variable.
+result than model 0. But it causes the increase of number of binare variable.
 The model 2 means the price pairs, each product is seen as an individual
 point for optimization model, which would bring large calculation cost. But
 this model is the most consistent with reality.
 """
 
 import os
+import numpy as np
 from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
-import utils.post_processing as pp
+# import utils.post_processing as pp
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-test_env = Environment(time_step=8760)
+test_env = Environment(time_step=8760, city='Langenau')
+print(max(test_env.temp_profile_whole))
+print(min(test_env.temp_profile_whole))
+mean_value = np.mean(test_env.temp_profile_whole)
+print(mean_value)
 
 ################################################################################
 #                         Cost model 0: only with unit cost
