@@ -4,9 +4,8 @@ Simplified Modell for internal use.
 
 import warnings
 import pyomo.environ as pyo
-import numpy as np
-import pandas as pd
-
+# import numpy as np
+# import pandas as pd
 from scripts.components.Storage import Storage
 from scripts.subsidies.EEG import EEG
 from utils.gen_heat_profile import *
@@ -68,7 +67,7 @@ class Building(object):
 
         # The gas_demand is for natural gas, the demand of hydrogen is still not
         # considered in building. The profile of heat and cool demand depends
-        # on the air temperature, which is define in the Environment object.
+        # on the air temperature, which is defined in the Environment object.
         # So the method for generate profiles should be called in project
         # rather than in building object.
         self.demand_profile = {"elec_demand": [],
@@ -79,7 +78,7 @@ class Building(object):
 
         # The topology of the building energy system and all available
         # components in the system, which doesn't mean the components would
-        # have to be choose by optimizer.
+        # have to be chosen by optimizer.
         self.topology = None
         self.components = {}
         self.simp_matrix = None
@@ -108,7 +107,7 @@ class Building(object):
     def add_thermal_profile(self, energy_sector, env):
         """The heat and cool demand profile could be calculated with
         temperature profile according to degree day method.
-        Attention!!! The temperature profile could only provided in project
+        Attention!!! The temperature profile could only be provided in project
         object, so this method cannot be called in the initialization of
         building object."""
         # todo (yni): the current version is only for heat, the method could be
@@ -208,16 +207,14 @@ class Building(object):
                                  'HeatPumpQli', 'HeatPumpFluidQli',
                                  'AirHeatPumpFluid', 'UnderfloorHeat']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
-                                                      temp_profile=
-                                                      env.temp_profile,
+                                                      temp_profile=env.temp_profile,
                                                       comp_model=comp_model,
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
                 elif comp_type in ['GroundHeatPumpFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
-                                                      temp_profile=
-                                                      env.soil_temperature_profile,
+                                                      temp_profile=env.soil_temperature_profile,
                                                       comp_model=comp_model,
                                                       min_size=min_size,
                                                       max_size=max_size,
@@ -225,28 +222,22 @@ class Building(object):
                 elif comp_type in ['PV', 'SolarThermalCollector',
                                    'SolarThermalCollectorFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
-                                                      temp_profile=
-                                                      env.temp_profile,
-                                                      irr_profile=
-                                                      env.irr_profile,
+                                                      temp_profile=env.temp_profile,
+                                                      irr_profile=env.irr_profile,
                                                       comp_model=comp_model,
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
                 elif comp_type in ['HeatConsumption', 'HeatConsumptionFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
-                                                      consum_profile=
-                                                      self.demand_profile[
-                                                          'heat_demand'],
+                                                      consum_profile=self.demand_profile['heat_demand'],
                                                       comp_model=comp_model,
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
                 elif comp_type == 'ElectricalConsumption':
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
-                                                      consum_profile=
-                                                      self.demand_profile[
-                                                          'elec_demand'],
+                                                      consum_profile=self.demand_profile['elec_demand'],
                                                       comp_model=comp_model,
                                                       min_size=min_size,
                                                       max_size=max_size,
@@ -254,9 +245,7 @@ class Building(object):
                 elif comp_type in ['HotWaterConsumption',
                                    'HotWaterConsumptionFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
-                                                      consum_profile=
-                                                      self.demand_profile[
-                                                          'hot_water_demand'],
+                                                      consum_profile=self.demand_profile['hot_water_demand'],
                                                       comp_model=comp_model,
                                                       min_size=min_size,
                                                       max_size=max_size,
@@ -402,7 +391,7 @@ class Building(object):
         project object. So the model should be given in project object
         build_model.
         The following variable should be assigned:
-            Energy flow from a component to another [t]: this should be define
+            Energy flow from a component to another [t]: this should be defined
             according to the component inputs and outputs possibility and the
             building topology. For each time step.
             Total Energy input and output of each component [t]: this should be
@@ -498,8 +487,7 @@ class Building(object):
                             self.heat_flows[(flow[1], flow[0])]['mass'] = \
                                 pyo.Var(model.time_step, bounds=(0, 10 ** 8))
                             model.add_component(flow[1] + '_' + flow[0] +
-                                                '_' + 'mass', self.heat_flows[(
-                                flow[1], flow[0])]['mass'])
+                                                '_' + 'mass', self.heat_flows[(flow[1], flow[0])]['mass'])
                             # temperature of heat flow from component
                             # 'input_comp' to component 'index'.
                             self.heat_flows[flow]['temp'] = \
@@ -512,8 +500,7 @@ class Building(object):
                             self.heat_flows[(flow[1], flow[0])]['temp'] = \
                                 pyo.Var(model.time_step, bounds=(0, 10 ** 8))
                             model.add_component(flow[1] + '_' + flow[0] +
-                                                '_' + 'temp', self.heat_flows[(
-                                flow[1], flow[0])]['temp'])
+                                                '_' + 'temp', self.heat_flows[(flow[1], flow[0])]['temp'])
 
         total_annual_cost = pyo.Var(bounds=(0, None))
         total_operation_cost = pyo.Var(bounds=(0, None))
@@ -599,7 +586,7 @@ class Building(object):
                         #                    row[row.isnull()].index.tolist()
                         # input_energy = model.find_component('input_' +
                         #                                     energy_type + '_' +
-                        #                                     index)
+                        #                                     index
                         # for t in model.time_step:
                         #     model.cons.add(input_energy[t] == sum(
                         #         self.energy_flow[(input_comp, index)][t] for
@@ -618,7 +605,7 @@ class Building(object):
                         #                     row[row.isnull()].index.tolist()
                         # output_energy = model.find_component('output_' +
                         #                                      energy_type + '_' +
-                        #                                      index)
+                        #                                      index
                         # for t in model.time_step:
                         #     model.cons.add(output_energy[t] == sum(
                         #         self.energy_flow[(index, output_comp)][t] for
@@ -676,14 +663,37 @@ class Building(object):
         bld_operation_cost = model.find_component('operation_cost_' + self.name)
         bld_revenue = model.find_component('total_revenue_' + self.name)
         bld_other_op_cost = model.find_component('other_op_cost_' + self.name)
+        bld_op_subsidy = model.find_component('total_op_subsidy_' + self.name)
+        bld_pur_subsidy = model.find_component('total_pur_subsidy_' + self.name)
 
         comp_cost_list = []
         for comp in self.components:
             comp_cost_list.append(model.find_component('annual_cost_' + comp))
 
-        model.cons.add(bld_annual_cost == sum(item for item in
-                                              comp_cost_list) +
-                       bld_operation_cost + bld_other_op_cost - bld_revenue)
+        pur_subsidy_list = []
+        op_subsidy_list = []
+        for subsidy in self.subsidy_list:
+            subsidy_var = None
+            if len(subsidy.components) == 1:
+                subsidy_var = model.find_component('subsidy_' + subsidy.name +
+                                                   '_' + subsidy.components[0])
+            else:
+                warn(subsidy.name + " has multiple subsidies for components")
+
+            if subsidy.type == 'purchase':
+                pur_subsidy_list.append(subsidy_var)
+            elif subsidy.type == 'operate':
+                op_subsidy_list.append(subsidy_var)
+
+        if len(op_subsidy_list) > 0:
+            model.cons.add(bld_annual_cost == sum(item for item in comp_cost_list) +
+                           bld_operation_cost + bld_other_op_cost - bld_op_subsidy)
+        elif len(pur_subsidy_list) > 0:
+            model.cons.add(bld_annual_cost == sum(item for item in comp_cost_list) +
+                           bld_operation_cost + bld_other_op_cost - bld_pur_subsidy)
+        else:
+            model.cons.add(bld_annual_cost == sum(item for item in comp_cost_list) +
+                           bld_operation_cost + bld_other_op_cost - bld_revenue)
 
     def _constraint_operation_cost(self, model, env, cluster=None):
         """Calculate the total operation cost for the building energy system."""
@@ -694,7 +704,6 @@ class Building(object):
         # added is not executed properly if there is a None. The reason for
         # 8761 steps is the different index of python list and pyomo.
         buy_elec = [0] * (env.time_step + 1)  # unmatched index for python and
-        # pyomo
         sell_elec = [0] * (env.time_step + 1)
         buy_gas = [0] * (env.time_step + 1)
         buy_heat = [0] * (env.time_step + 1)
@@ -707,7 +716,7 @@ class Building(object):
                 if 'elec' in self.components[comp].energy_flows['input'].keys():
                     sell_elec = model.find_component('input_elec_' + comp)
                 if 'elec' in self.components[comp].energy_flows[
-                    'output'].keys():
+                     'output'].keys():
                     buy_elec = model.find_component('output_elec_' + comp)
             elif isinstance(self.components[comp], module_dict['GasGrid']):
                 buy_gas = model.find_component('output_gas_' + comp)
@@ -788,14 +797,6 @@ class Building(object):
             model.cons.add(bld_revenue == sum(sell_elec[t] * elec_feed_price
                                               for t in model.time_step))
         else:
-            # Attention! The period only for 24 hours is developed,
-            # other segments are not considered.
-            # period_length = 24
-            #
-            # nr_day_occur = pd.Series(cluster.clusterPeriodNoOccur).tolist()
-            # nr_hour_occur = []
-            # for nr_occur in nr_day_occur:
-            #     nr_hour_occur += [nr_occur] * 24
             nr_hour_occur = cluster['Occur']
 
             model.cons.add(bld_revenue == sum(sell_elec[t] * elec_feed_price *
@@ -804,7 +805,7 @@ class Building(object):
 
     def _constraint_other_op_cost(self, model):
         """Other operation costs includes the costs except the fuel cost. One
-        of the most common form ist the start up cost for CHPs."""
+        of the most common form ist the start-up cost for CHPs."""
         # todo (qli&yni): the other operation cost should be tested with
         #  cluster methods
         bld_other_op_cost = model.find_component('other_op_cost_' + self.name)
@@ -832,6 +833,7 @@ class Building(object):
 
         pur_subsidy_list = []
         op_subsidy_list = []
+
         for subsidy in self.subsidy_list:
             subsidy_var = None
             if len(subsidy.components) == 1:
@@ -852,7 +854,7 @@ class Building(object):
         else:
             model.cons.add(total_pur_subsidy == 0)
 
-        if len(pur_subsidy_list) > 0:
+        if len(op_subsidy_list) > 0:
             model.cons.add(total_op_subsidy ==
                            sum(op_subsidy_list[i] for i in range(len(
                                op_subsidy_list))))

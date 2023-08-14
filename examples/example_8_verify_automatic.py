@@ -24,7 +24,7 @@ for i in range(1, 13):
         # Read the data from the source file
         df = pd.read_csv(results_file_path)
 
-        # 写入CSV文件的标题行（只在第一次时写入）
+        # The header line to be written to the CSV file (only on the first occurrence)
         if not os.path.isfile(results_file_path):
             with open(results_file_path, 'w', newline='') as csvfile:
                 writer = csv.writer(csvfile)
@@ -190,18 +190,18 @@ for i in range(1, 13):
 
         base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-        # 读取原始结果文件
+        # Read the raw result file.
         results_file_path = os.path.join(base_path, 'data', 'opt_output', 'results_dpm_2', f'{j}_results_{i}.csv')
         df_results = pd.read_csv(results_file_path)
 
-        # 按指定顺序重新排列数据
+        # Reorder data according to the specified sequence.
         project_order = [f'{j}_project_{i}_0', f'{j}_project_{i}_0_dpm_2',
                          f'{j}_project_{i}_1', f'{j}_project_{i}_1_dpm_2',
                          f'{j}_project_{i}_2', f'{j}_project_{i}_2_dpm_2']
         df_results_sorted = df_results.sort_values(by=['project_name'],
                                                    key=lambda x: x.map({p: k for k, p in enumerate(project_order)}))
 
-        # 将重新排列后的结果保存到新的文件
+        # Save the reordered results to a new file.
         results_reordered_file_path = os.path.join(base_path, 'data', 'opt_output', 'results_dpm_2',
                                                    f'{j}_results_{i}_sorted.csv')
         df_results_sorted.to_csv(results_reordered_file_path, index=False)
