@@ -296,7 +296,7 @@ class CHP(Component):
     def add_cons(self, model):
         super().add_cons(model)
 
-        self._constraint_start_stop_ratio(model)
+        # self._constraint_start_stop_ratio(model)
         self._constraint_power(model)
         # unnecessary methods, could be called by demand.
         # self._constraint_status(model)
