@@ -3,7 +3,6 @@ import pyomo.environ as pyo
 from pyomo.gdp import Disjunct, Disjunction
 from scripts.Subsidy import Subsidy
 
-
 small_nr = 0.00001
 
 

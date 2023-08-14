@@ -693,7 +693,7 @@ class Building(object):
                            bld_operation_cost + bld_other_op_cost - bld_pur_subsidy)
         else:
             model.cons.add(bld_annual_cost == sum(item for item in comp_cost_list) +
-                           bld_operation_cost + bld_other_op_cost - bld_revenue)
+                           bld_operation_cost + bld_other_op_cost)
 
     def _constraint_operation_cost(self, model, env, cluster=None):
         """Calculate the total operation cost for the building energy system."""
