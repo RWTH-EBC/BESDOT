@@ -98,7 +98,9 @@ def save_timeseries(csv_file, name=''):
 
     for item in elements_dict.keys():
         if len(elements_dict[item]) > 1:
-            new_df[item] = elements_dict[item]
+            if 'status' not in item:  # quick fix for status in chp, need to
+                # be fixed in the future
+                new_df[item] = elements_dict[item]
 
     # print(new_df)
     output_path = os.path.split(csv_file)
