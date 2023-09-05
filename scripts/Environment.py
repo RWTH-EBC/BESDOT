@@ -52,9 +52,10 @@ def _read_weather_file(weather_file=None, city='Dusseldorf', year=2021):
 
 class Environment(object):
 
-    def __init__(self, weather_file=None, city='Dusseldorf', year=2021,
+    def __init__(self, weather_file=None, city='Dusseldorf', staat='NRW', year=2021,
                  start_time=0, time_step=8760):
         self.city = city
+        self.staat = staat
         self.year = year
         # start_time: Start time of the optimization process to be
         # considered, in hours.
@@ -77,7 +78,7 @@ class Environment(object):
         # todo (yni): price could be set into series, array or list,
         #  for variable price
         # https://www.finanztip.de/stromvergleich/strompreis/
-        self.elec_price = 0.32  # €/kWh #0.3, 0.37
+        self.elec_price = 0.32  # €/kWh #0.3, 0.37, 0,32
         self.gas_price = 0.07  # €/kWh #0.1, 0.1377
         self.heat_price = 0.08  # €/kWh
         self.elec_feed_price = 0.08  # €/kWh #0.1, 0.05

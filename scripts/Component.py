@@ -10,38 +10,21 @@ import pandas as pd
 import pyomo.environ as pyo
 from pyomo.gdp import Disjunct, Disjunction
 from utils.calc_annuity_vdi2067 import calc_annuity
+from scripts.subsidies.city_subsidy_kurz import CitySubsidyComponent
+from scripts.subsidies.country_subsidy_BAFA_kurz import CountrySubsidyComponent
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 small_num = 0.0001
 
 
 class Component(object):
-    """
-    Attributes:
-    inputs: list, the energy carrier or energy sector for input
-    outputs: list, the energy carrier or energy sector for output
-    properties: dataframe, the properties of a component object,
-    the following items should be included.
-        efficiency: float, energy transfer efficiency
-        capacity: float or pyomo variable, for energy producing
-         components, this parameter means its maximum power in kW,
-         for energy storage components, this parameter means its maximum
-         storage capacity in kWh
-        life: int, service life of the component
-        cost: float, investment cost in EUR/kW, fixed value for each
-         component will be defined with a function later
-    """
-
     def __init__(self, comp_name, comp_type="Component", comp_model=None,
                  min_size=0, max_size=1000, current_size=0, cost_model=0):
-        """
-        """
         self.name = comp_name
         self.component_type = comp_type
         self.comp_model = comp_model
 
-        # The 'inputs' and 'outputs' are usually defined for each specific
-        # component.
         if not hasattr(self, 'inputs'):
             self.inputs = []
         if not hasattr(self, 'outputs'):
@@ -54,18 +37,6 @@ class Component(object):
         self.max_size = max_size
         self.current_size = current_size
 
-        # Cost model can be choose from 0, 1, 2.
-        # The model 0 means no fixed cost is considered, the relationship
-        # between total price and installed size is: y=m*x. y represents the
-        # total price, x represents the installed size, and m represents the
-        # unit cost from database.
-        # The model 1 means fixed cost is considered, the relationship is
-        # y=m*x+n. n represents the fixed cost. Model 1 usually has much better
-        # fitting result than model 0. But it cause the increase of number of
-        # binare variable.
-        # The model 2 means the price pairs, each product is seen as an
-        # individual point for optimization model, which would bring large
-        # calculation cost. But this model is the most consistent with reality.
         if cost_model in [0, 1, 2]:
             self.cost_model = cost_model
         else:
@@ -76,6 +47,8 @@ class Component(object):
         self.unit_cost = None
         self.fixed_cost = None
         self.cost_pair = None
+        self.components = {}
+        self.subsidy_list = []
 
         self.energy_flows = {'input': {},
                              'output': {}}
@@ -85,13 +58,6 @@ class Component(object):
             properties = self.get_properties(comp_model)
             self._read_properties(properties)
 
-        # other_op_cost is an indicator, which shows if other operation cost
-        # should be considered for the component, except the operation cost in
-        # database csv file, which comes from the standard as a fiexed
-        # percentage of investment. The attribute could be set into False or
-        # True. False means no other operation cost should be taken into
-        # account. This attribute is not important, just for special use in
-        # development.
         self.other_op_cost = False
 
     def get_properties(self, model):
@@ -204,7 +170,8 @@ class Component(object):
             "fixed_cost": self.fixed_cost,
             "cost_pair": self.cost_pair,
             "energy_flows": self.energy_flows,
-            "other_op_cost": self.other_op_cost
+            "other_op_cost": self.other_op_cost,
+            "subsidy": self.subsidy_list
         }
 
     def add_energy_flows(self, io, energy_type, energy_flow):
@@ -215,6 +182,20 @@ class Component(object):
         else:
             warnings.warn("io of the function add_energy_flow only allowed "
                           "for 'input' or 'output'.")
+
+    def add_subsidy(self, subsidy):
+        if subsidy == 'all':
+            for subsidy in self.subsidy_list:
+                subsidy.analyze_topo(self)
+        elif isinstance(subsidy, CitySubsidyComponent):
+            self.subsidy_list.append(subsidy)
+            subsidy.analyze_topo(self)
+        elif isinstance(subsidy, CountrySubsidyComponent):
+            self.subsidy_list.append(subsidy)
+            subsidy.analyze_topo(self)
+        else:
+            warnings.warn("The subsidy " + subsidy + "was not modeled, check again, "
+                          "if something goes wrong.")
 
     def show_cost_model(self):
         """To analyze the cost model the cost model type of component could
@@ -304,15 +285,8 @@ class Component(object):
         size = model.find_component('size_' + self.name)
         annual_cost = model.find_component('annual_cost_' + self.name)
         invest = model.find_component('invest_' + self.name)
-
-        # Take the fixed cost for investment into account and use dgp model to
-        # indicate that, if component size is equal to zero, the investment
-        # equal to zero as well. If component size is lager than zero,
-        # the fixed cost should be considered.
-        # The small number is given because "larger" is not allowed for
-        # optimization language, so use "larger equal to" replace "larger"
-        # with a small number. If min size is given from the model database,
-        # the small number is no more necessary.
+        subsidy = model.find_component('subsidy_' + self.name)
+        country_subsidy = model.find_component('country_subsidy_' + self.name)
 
         if self.min_size == 0:
             min_size = small_num
@@ -320,7 +294,7 @@ class Component(object):
             min_size = self.min_size
 
         if self.cost_model == 0:
-            model.cons.add(size * self.unit_cost == invest)
+            model.cons.add(invest == size * self.unit_cost)
         elif self.cost_model == 1:
             dis_not_select = Disjunct()
             not_select_size = pyo.Constraint(expr=size == 0)
@@ -334,7 +308,7 @@ class Component(object):
             dis_select = Disjunct()
             select_size = pyo.Constraint(expr=size >= min_size)
             select_inv = pyo.Constraint(expr=invest == size * self.unit_cost +
-                                             self.fixed_cost)
+                                        self.fixed_cost)
             model.add_component('dis_select_' + self.name, dis_select)
             dis_select.add_component('select_size_' + self.name, select_size)
             dis_select.add_component('select_inv_' + self.name, select_inv)
@@ -371,24 +345,32 @@ class Component(object):
             disj_size = Disjunction(expr=pair_list)
             model.add_component('disj_size_' + self.name, disj_size)
 
-        annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w,
+        annuity = calc_annuity(self.life, invest - subsidy - country_subsidy, self.f_inst, self.f_w,
                                self.f_op)
         model.cons.add(annuity == annual_cost)
 
+    def _constraint_subsidies(self, model):
+        for component in self.components:
+            pur_subsidy = model.find_component('pur_subsidy_' + component.name)
+
+            pur_subsidy_list = []
+            for subsidy in self.subsidy_list:
+                subsidy_var = None
+                if len(subsidy.components) == 1:
+                    subsidy_var = model.find_component('subsidy_' + subsidy.name +
+                                                       '_' + subsidy.components[0])
+                else:
+                    warnings.warn(subsidy.name + " has multiple subsidies for components")
+
+                if subsidy.type == 'purchase':
+                    pur_subsidy_list.append(subsidy_var)
+
+            if len(pur_subsidy_list) > 0:
+                model.cons.add(pur_subsidy == pur_subsidy)
+            else:
+                model.cons.add(pur_subsidy == 0)
+
     def constraint_sum_inputs(self, model, energy_type):
-        """
-        This function used to be in class Building. Some spacial components have
-        more than 1 input type, which could not be seen as input. The function
-        should be rewritten in those spacial components.
-        Args:
-            model: pyomo model object
-            other_comp: pandas Series, taken from building topology
-            energy_type: modeled energy type in case of more than 1 input type
-            energy_flows: the energy flows from building object, dict
-            comp_obj: the component objects in building, might be used by the
-                spacial components, dict
-        Returns: None
-        """
         input_flows = []
         for energy, flow in self.energy_flows['input'].items():
             if energy == energy_type:
@@ -405,15 +387,6 @@ class Component(object):
                                                   input_flow in input_flows))
 
     def constraint_sum_outputs(self, model, energy_type):
-        """
-        Almost same as constraint_energy_inputs.
-        Args:
-            model: pyomo model object
-            other_comp: pandas Series, taken from building topology
-            energy_type: modeled energy type in case of more than 1 input type
-            energy_flows: the energy flows from building object, dict
-        Returns: None
-        """
         output_flows = []
         for energy, flow in self.energy_flows['output'].items():
             if energy == energy_type:
@@ -434,17 +407,12 @@ class Component(object):
         self._constraint_maxpower(model)
         self._constraint_vdi2067(model)
 
-    def add_vars(self, model):
-        """
-        Add Pyomo variables into the ConcreteModel
-        The following variable should be assigned:
-            Component size: should be assigned in component object, for once.
-            Annual cost: for once
-            Investigation: for once
-            Total Energy input and output of each component [t]: this should be
-            assigned in each component object. For each time step.
-        """
+        if len(self.subsidy_list) > 0:
+            self._constraint_subsidies(model)
+            for subsidy in self.subsidy_list:
+                subsidy.add_cons(model)
 
+    def add_vars(self, model):
         comp_size = pyo.Var(bounds=(self.min_size, self.max_size))
         model.add_component('size_' + self.name, comp_size)
 
@@ -453,6 +421,12 @@ class Component(object):
 
         invest = pyo.Var(bounds=(0, 10 ** 10))
         model.add_component('invest_' + self.name, invest)
+
+        subsidy = pyo.Var(bounds=(0, 10 ** 10))
+        model.add_component('subsidy_' + self.name, subsidy)
+
+        country_subsidy = pyo.Var(bounds=(0, 10 ** 10))
+        model.add_component('country_subsidy_' + self.name, country_subsidy)
 
         if self.inputs is not None:
             for energy_type in self.inputs:

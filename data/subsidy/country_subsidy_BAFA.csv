@@ -1,0 +1,15 @@
+Conditions,Country,Component,Subsidy Lower,Subsidy Upper,Coefficient
+Normal,Germany,HeatPump,0,inf,0.25
+Normal,Germany,SolarThermalCollector,0,inf,0.25
+Normal,Germany,Battery,0,inf,0
+Normal,Germany,GasBoiler,0,inf,0
+Normal,Germany,ElectricBoiler,0,inf,0
+Normal,Germany,HotWaterStorage,0,inf,0
+Normal,Germany,PV,0,inf,0
+Exchange premium for oil,Germany,HeatPump,0,inf,0.4
+Exchange premium for oil,Germany,SolarThermalCollector,0,inf,0.35
+Exchange premium for oil,Germany,Battery,0,inf,0
+Exchange premium for oil,Germany,GasBoiler,0,inf,0
+Exchange premium for oil,Germany,ElectricBoiler,0,inf,0
+Exchange premium for oil,Germany,HotWaterStorage,0,inf,0
+Exchange premium for oil,Germany,PV,0,inf,0

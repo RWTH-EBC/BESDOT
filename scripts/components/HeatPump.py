@@ -1,6 +1,10 @@
 import pyomo.environ as pyo
 from scripts.Component import Component
 import warnings
+# from pyomo.gdp import Disjunct, Disjunction
+# from utils.calc_annuity_vdi2067 import calc_annuity
+
+small_num = 0.0001
 
 
 class HeatPump(Component):
@@ -39,7 +43,7 @@ class HeatPump(Component):
         Calculate the COP value in each time step, with default set
         temperature of 60 degree and machine efficiency of 40%.
         Setting COP as Parameter instead of Variable could reduce the
-        complexity of mathematical model. Even from non convex model into
+        complexity of mathematical model. Even from non-convex model into
         convex model.
         """
         # The cop_list could only be defined with dict, list is not possible
@@ -80,4 +84,3 @@ class HeatPump(Component):
     #
     #     cop = pyo.Param(model.time_step, initialize=0)
     #     model.add_component('cop_' + self.name, cop)
-

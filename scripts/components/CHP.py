@@ -36,7 +36,7 @@ class CHP(Component):
         report of ASUE, which provides the curve from regression. The exact
         price of each device was not given. So the data could not be updated
         and using linearization to get the cost model 0 and 1. The cost model 2
-        could not generated from the curve."""
+        could not generate from the curve."""
         size = model.find_component('size_' + self.name)
         annual_cost = model.find_component('annual_cost_' + self.name)
         invest = model.find_component('invest_' + self.name)
@@ -76,8 +76,8 @@ class CHP(Component):
                 dis_select = Disjunct()
                 select_size = pyo.Constraint(expr=size >= min_size)
                 select_inv = pyo.Constraint(expr=invest == size *
-                                                 self.unit_cost +
-                                                 self.fixed_cost)
+                                            self.unit_cost +
+                                            self.fixed_cost)
                 model.add_component('dis_select_' + self.name, dis_select)
                 dis_not_select.add_component('select_size_' + self.name,
                                              select_size)
@@ -102,7 +102,7 @@ class CHP(Component):
                 select_small_size_lower = pyo.Constraint(expr=size >= min_size)
                 select_small_size_upper = pyo.Constraint(expr=size <= 50)
                 select_small_inv = pyo.Constraint(expr=invest == size *
-                                                       1131.2 + 14490)
+                                                  1131.2 + 14490)
                 model.add_component('dis_select_small_' + self.name,
                                     dis_select_small)
                 dis_select_small.add_component(
@@ -116,9 +116,9 @@ class CHP(Component):
 
                 dis_select_large = Disjunct()
                 select_large_size_lower = pyo.Constraint(expr=size >= 50
-                                                              + small_num)
+                                                         + small_num)
                 select_large_inv = pyo.Constraint(expr=invest == size * 458 +
-                                                       57433)
+                                                  57433)
                 model.add_component('dis_select_large_' + self.name,
                                     dis_select_large)
                 dis_select_large.add_component(
@@ -178,7 +178,7 @@ class CHP(Component):
                 select_large = Disjunct()
                 model.add_component('select_large_' + self.name, select_large)
                 select_large_size = pyo.Constraint(expr=power_el >= 50 +
-                                                        small_num)
+                                                   small_num)
                 select_large.add_component('select_large_size_' + self.name,
                                            select_large_size)
 

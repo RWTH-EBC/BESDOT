@@ -3,9 +3,9 @@ vdi2067 provide a detailed process to calculate annuity for investigation and
 operation cost. This tool helps to calculate the annuity from the total
 investigation.
 """
-from datetime import timedelta
+# from datetime import timedelta
+# import pandas as pd
 import numpy as np
-import pandas as pd
 
 
 def annuity_factor(t, q=1.007):
@@ -42,7 +42,7 @@ def calc_capital_cost(t, t_n, q, ann, a_0):
 
     n: number of replacements
     r_w: residual value
-    r: price change factor, may varies according to different equipment
+    r: price change factor, may vary according to different equipment
     """
     r = 1.02
     n = np.ceil(t / t_n) - 1
@@ -79,10 +79,9 @@ def calc_operation_cost(t, q, ann, a_0, f_inst, f_w, f_op):
     r_in = 1.03
     b_b = dynamic_cash_value(t, q, r_b)
     b_in = dynamic_cash_value(t, q, r_in)
-    price_op = 55.6
 
     # disable a_b1 first for this cost doesn't exist when cap is 0!
-    # The value of this is little for large system and two much for small system!
+    # The value of this is little for large system and too much for small system!
     # a_b1 = f_op * price_op
     a_b1 = 0
     a_in = a_0 * (f_inst + f_w)
@@ -91,7 +90,7 @@ def calc_operation_cost(t, q, ann, a_0, f_inst, f_w, f_op):
     return a_n_b
 
 
-def calc_annuity(t_n, invest, f_inst, f_w, f_op):
+def calc_annuity(t_n, invest_neu, f_inst, f_w, f_op):
     """
     This function calculates the annuity of technical building installations
     according to VDI 2067.
@@ -125,7 +124,7 @@ def calc_annuity(t_n, invest, f_inst, f_w, f_op):
     q = 1.07
 
     ann = annuity_factor(t, q)
-    a_0 = invest
+    a_0 = invest_neu
 
     # The revenue and demand related cost are set in the energy management
     # system class. Because the cost are related to the model variables.
@@ -143,7 +142,8 @@ def calc_annuity(t_n, invest, f_inst, f_w, f_op):
 
     return a_n
 
-'''
+
+"""
 if __name__ == "__main__":
     # validation for optimisation results
 
@@ -156,4 +156,16 @@ if __name__ == "__main__":
     f_op = 20
     a_n = run(time_steps, t_n, invest, cap, f_inst, f_w, f_op)
     print(a_n)
-'''
+"""
+
+"""
+invest = 3600
+subsidy = 2160
+t_n = 20
+f_inst = 0.01
+f_w = 0.015
+f_op = 20
+
+annuity = calc_annuity(t_n, invest - subsidy, f_inst, f_w, f_op)
+print("Annuity for the PV component: {:.8f} EUR/year".format(annuity))
+"""
