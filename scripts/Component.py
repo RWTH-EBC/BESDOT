@@ -1,9 +1,3 @@
-"""
-The parent class for all energy components.
-In this class except the basic attributes will be defined, the methods for
-building pyomo model are also developed.
-"""
-
 import os
 import warnings
 import pandas as pd
@@ -144,7 +138,6 @@ class Component(object):
                               " lack of column for data pair and fixed price. "
                               "Its cost model was changed to 0")
                 self.change_cost_model(0)
-            # print(self.cost_pair)
 
     def update_profile(self, **kwargs):
         for arg in kwargs:
@@ -185,8 +178,19 @@ class Component(object):
 
     def add_subsidy(self, subsidy):
         if subsidy == 'all':
-            for subsidy in self.subsidy_list:
-                subsidy.analyze_topo(self)
+            city_subsidy = None
+            country_subsidy = None
+            for subsidy_comp in self.subsidy_list:
+                if isinstance(subsidy_comp, CitySubsidyComponent):
+                    city_subsidy = subsidy_comp
+                elif isinstance(subsidy_comp, CountrySubsidyComponent):
+                    country_subsidy = subsidy_comp
+
+            if city_subsidy is not None:
+                city_subsidy.analyze_topo(self)
+            if country_subsidy is not None:
+                country_subsidy.analyze_topo(self)
+
         elif isinstance(subsidy, CitySubsidyComponent):
             self.subsidy_list.append(subsidy)
             subsidy.analyze_topo(self)
@@ -198,13 +202,10 @@ class Component(object):
                           "if something goes wrong.")
 
     def show_cost_model(self):
-        """To analyze the cost model the cost model type of component could
-        be printed in log."""
         print("The cost model for model " + self.name + " is " +
               str(self.cost_model))
 
     def change_cost_model(self, new_cost_model):
-        """Change cost model and reset the unit cost and fixed cost in self"""
         if new_cost_model in [0, 1, 2]:
             self.cost_model = new_cost_model
         else:
@@ -222,9 +223,6 @@ class Component(object):
             self._read_properties(properties)
 
     def _constraint_conver(self, model):
-        """
-        This constraint shows the energy conversion of the component.
-        """
         # todo: the component with more than 1 inputs is not developed,
         #  because of the easily confused efficiency. If meet component in
         #  this type, develop the method further. (By mixing of natural gas
@@ -248,13 +246,6 @@ class Component(object):
                                self.efficiency[output])
 
     def _constraint_maxpower(self, model):
-        """
-        The energy flow at each time step cannot be greater than its capacity.
-        Here output energy is used.
-        todo(yni): capacity of some device are defined with input power,
-         some are defined with output power. need to check later. In first
-         version is only input power considered. Check it for heat pump and CHP!
-        """
         if self.outputs is not None:
             size = model.find_component('size_' + self.name)
             if len(self.outputs) == 1:
@@ -263,8 +254,6 @@ class Component(object):
                                                      self.name)
             else:
                 if 'elec' in self.outputs:
-                    # The size of CHP and fuel cell are define with electric
-                    # capacity
                     output_powers = model.find_component('output_elec_' +
                                                          self.name)
                 else:
@@ -276,12 +265,6 @@ class Component(object):
                 model.cons.add(output_powers[t] <= size)
 
     def _constraint_vdi2067(self, model):
-        """
-        t: observation period in years
-        r: price change factor (not really relevant since we have n=0)
-        q: interest factor
-        n: number of replacements
-        """
         size = model.find_component('size_' + self.name)
         annual_cost = model.find_component('annual_cost_' + self.name)
         invest = model.find_component('invest_' + self.name)
@@ -345,8 +328,7 @@ class Component(object):
             disj_size = Disjunction(expr=pair_list)
             model.add_component('disj_size_' + self.name, disj_size)
 
-        annuity = calc_annuity(self.life, invest - subsidy - country_subsidy, self.f_inst, self.f_w,
-                               self.f_op)
+        annuity = calc_annuity(self.life, invest - subsidy - country_subsidy, self.f_inst, self.f_w, self.f_op)
         model.cons.add(annuity == annual_cost)
 
     def _constraint_subsidies(self, model):

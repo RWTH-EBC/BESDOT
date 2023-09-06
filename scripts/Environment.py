@@ -8,6 +8,7 @@ import warnings
 import pandas as pd
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+city_info_file = os.path.join(base_path, "data", "city_state_country_info.csv")
 weather_data_path = os.path.join(base_path, "data", "weather_data")
 Soil_temperature_path = os.path.join(base_path, "data", "weather_data",
                                      "Dusseldorf", "soil_temp.csv")
@@ -29,6 +30,8 @@ def _read_weather_file(weather_file=None, city='Dusseldorf', year=2021):
         # higher priority than DWD file.
         pass
 
+    soil_data = None
+
     if year < 2025:
         weather_profile = pd.read_table(weather_file, skiprows=33, sep='\t')
         soil_data = pd.read_csv(Soil_temperature_path)
@@ -47,16 +50,25 @@ def _read_weather_file(weather_file=None, city='Dusseldorf', year=2021):
     soil_temperature_profile = soil_data.loc[:, 'temperature'].values.tolist()
 
     return temperature_profile, wind_profile, total_solar_profile, \
-           soil_temperature_profile
+        soil_temperature_profile
 
 
 class Environment(object):
 
-    def __init__(self, weather_file=None, city='Dusseldorf', staat='NRW', year=2021,
+    def __init__(self, weather_file=None, city='Dusseldorf', year=2021,
                  start_time=0, time_step=8760):
-        self.city = city
-        self.staat = staat
-        self.year = year
+
+        city_info = pd.read_csv(city_info_file)
+        city_row = city_info[city_info['City'] == city]
+        if not city_row.empty:
+            self.city = city_row.iloc[0]['City']
+            self.state = city_row.iloc[0]['State']
+            self.country = city_row.iloc[0]['Country']
+        else:
+            warnings.warn(f"City {city} not found in city_info.csv. Using default values.")
+            self.city = 'Dusseldorf'
+            self.state = 'NRW'
+            self.country = 'Germany'
         # start_time: Start time of the optimization process to be
         # considered, in hours.
         # time_step: The number of steps to be considered in the optimization
@@ -64,6 +76,7 @@ class Environment(object):
         # should be from 1 to 8759, start_time
         # should be from 0 to 8759, and the sum of both should be from 1 to
         # 8760.
+        self.year = year
         self.start_time = start_time
         self.time_step = time_step
         if start_time + time_step <= 0:

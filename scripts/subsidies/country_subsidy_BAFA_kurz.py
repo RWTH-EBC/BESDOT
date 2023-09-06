@@ -52,6 +52,8 @@ class CountrySubsidyComponent(CountrySubsidyBAFA):
         invest = model.find_component('invest_' + comp_name)
         country_subsidy = model.find_component('country_subsidy_' + comp_name)
 
+        matching_subsidy_found = False
+
         for idx, row in self.subsidy_data.iterrows():
             if row['Country'] == self.country and row['Conditions'] == self.conditions \
                     and row['Component'] == self.component_name:
@@ -77,14 +79,23 @@ class CountrySubsidyComponent(CountrySubsidyBAFA):
                     tariff.add_component(tariff_name + '_subsidy_constraint_upper', subsidy_constraint_upper)
 
                 tariff.add_component(tariff_name + '_country_subsidy_constraint', country_subsidy_constraint)
+                matching_subsidy_found = True
+
+        if not matching_subsidy_found:
+            default_subsidy_constraint = pyo.Constraint(expr=country_subsidy == 0)
+            tariff_name = f'{self.name}_{self.energy_pair[0][0]}_default_tariff'
+            default_tariff = Disjunct()
+            default_tariff.add_component(tariff_name + '_subsidy_constraint', default_subsidy_constraint)
+            model.add_component(tariff_name, default_tariff)
 
         tariff_disjunction_expr = [model.find_component(f'{self.name}_{comp_name}_tariff_{idx}')
                                    for idx, row in self.subsidy_data.iterrows()
                                    if row['Country'] == self.country and row['Conditions'] == self.conditions
                                    and row['Component'] == self.component_name]
 
-        dj_subsidy = Disjunction(expr=tariff_disjunction_expr)
 
+
+        dj_subsidy = Disjunction(expr=tariff_disjunction_expr)
         model.add_component(f'disjunction_{self.name}_{self.country}_'
                             f'{self.conditions}_{comp_name}', dj_subsidy)
 

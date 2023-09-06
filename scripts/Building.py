@@ -309,17 +309,24 @@ class Building(object):
 
     def add_subsidy(self, subsidy):
         if subsidy == 'all':
-            for comp_name, comp_type in self.components.items():
-                for subsidy_obj in self.subsidy_list:
-                    comp_type.add_subsidy(subsidy_obj)
-        elif subsidy == 'purchase':
-            for comp_name, comp_type in self.components.items():
-                if hasattr(comp_type, 'add_purchase_subsidy'):
-                    comp_type.add_purchase_subsidy()
-        elif subsidy == 'operate':
-            for comp_name, comp_type in self.components.items():
-                if hasattr(comp_type, 'add_operate_subsidy'):
-                    comp_type.add_operate_subsidy()
+            city_subsidy = None
+            country_subsidy = None
+            eeg_subsidy = None
+            for subsidy_comp in self.subsidy_list:
+                if isinstance(subsidy_comp, CitySubsidyComponent):
+                    city_subsidy = subsidy_comp
+                elif isinstance(subsidy_comp, CountrySubsidyComponent):
+                    country_subsidy = subsidy_comp
+                elif isinstance(subsidy_comp, EEG):
+                    eeg_subsidy = subsidy_comp
+
+            if city_subsidy is not None:
+                city_subsidy.analyze_topo(self)
+            if country_subsidy is not None:
+                country_subsidy.analyze_topo(self)
+            if eeg_subsidy is not None:
+                eeg_subsidy.analyze_topo(self)
+
         elif isinstance(subsidy, CitySubsidyComponent):
             self.subsidy_list.append(subsidy)
             subsidy.analyze_topo(self)

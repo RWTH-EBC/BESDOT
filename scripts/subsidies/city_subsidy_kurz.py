@@ -56,6 +56,8 @@ class CitySubsidyComponent(CitySubsidy):
         component_size = model.find_component('size_' + comp_name)
         subsidy = model.find_component('subsidy_' + comp_name)
 
+        matching_subsidy_found = False
+
         for idx, row in self.subsidy_data.iterrows():
             if row['State'] == self.state and row['City'] == self.city and row['User'] == self.user and\
                     row['Building Type'] == self.bld_typ and row['Component'] == self.component_name:
@@ -87,6 +89,14 @@ class CitySubsidyComponent(CitySubsidy):
                     tariff.add_component(tariff_name + '_size_constraint_upper', size_constraint_upper)
 
                 tariff.add_component(tariff_name + '_subsidy_constraint', subsidy_constraint)
+                matching_subsidy_found = True
+
+        if not matching_subsidy_found:
+            default_subsidy_constraint = pyo.Constraint(expr=subsidy == 0)
+            tariff_name = f'{self.name}_{self.energy_pair[0][0]}_default_tariff'
+            default_tariff = Disjunct()
+            default_tariff.add_component(tariff_name + '_subsidy_constraint', default_subsidy_constraint)
+            model.add_component(tariff_name, default_tariff)
 
         tariff_disjunction_expr = [model.find_component(f'{self.name}_{comp_name}_tariff_{idx}')
                                    for idx, row in self.subsidy_data.iterrows()
@@ -94,8 +104,10 @@ class CitySubsidyComponent(CitySubsidy):
                                    row['User'] == self.user and row['Building Type'] == self.bld_typ and
                                    row['Component'] == self.component_name]
 
-        dj_subsidy = Disjunction(expr=tariff_disjunction_expr)
+        if not matching_subsidy_found:
+            tariff_disjunction_expr.append(model.find_component(f'{self.name}_{comp_name}_default_tariff'))
 
+        dj_subsidy = Disjunction(expr=tariff_disjunction_expr)
         model.add_component(f'disjunction_{self.name}_{self.state}_{self.city}_{self.user}_'
                             f'{self.bld_typ}_{comp_name}', dj_subsidy)
 
