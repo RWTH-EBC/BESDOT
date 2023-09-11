@@ -20,7 +20,7 @@ class HeatOutlet(Component):
                          max_size=max_size,
                          current_size=current_size)
 
-        self.heat_profile = []
+        # self.heat_profile = []
 
     def _read_properties(self, properties):
         """
@@ -30,8 +30,8 @@ class HeatOutlet(Component):
         if not hasattr(self, 'efficiency'):
             self.efficiency = 1
 
-    def update_profile(self, demand_profile):
-        self.heat_profile = demand_profile
+    # def update_profile(self, demand_profile):
+    #     self.heat_profile = demand_profile
 
     def _constraint_vdi2067(self, model):
         """
@@ -50,12 +50,13 @@ class HeatOutlet(Component):
     def _constraint_conver(self, model):
         """The input energy for Consumption should equal to the demand
         profile."""
-        input_energy = model.find_component('input_' + self.inputs[0] + '_' +
-                                            self.name)
-        for t in model.time_step:
-            # ATTENTION!!! The time_step in pyomo is from 1 to 8760 and
-            # python list is from 0 to 8759, so the index should be modified.
-            model.cons.add(input_energy[t] == self.heat_profile[t-1])
+        # input_energy = model.find_component('input_' + self.inputs[0] + '_' +
+        #                                     self.name)
+        # for t in model.time_step:
+        #     # ATTENTION!!! The time_step in pyomo is from 1 to 8760 and
+        #     # python list is from 0 to 8759, so the index should be modified.
+        #     model.cons.add(input_energy[t] == self.heat_profile[t-1])
+        pass
 
 
 
