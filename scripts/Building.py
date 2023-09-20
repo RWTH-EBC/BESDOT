@@ -728,7 +728,11 @@ class Building(object):
             elec_price = env.elec_price
 
         if model.find_component('heat_price'):
-            heat_price = model.heat_price
+            if len(model.heat_price.index_set()) == 1:
+                heat_price = model.heat_price[0]
+            else:
+                heat_price = None
+                warn('The dynamic heat price is not developed, please check')
         else:
             heat_price = env.heat_price
 
