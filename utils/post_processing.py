@@ -98,9 +98,28 @@ def save_timeseries(csv_file, name=''):
 
     for item in elements_dict.keys():
         if len(elements_dict[item]) > 1:
-            if 'status' not in item:  # quick fix for status in chp, need to
+            if 'status' in item:  # quick fix for status in chp, need to
                 # be fixed in the future
+                # new_df[item] = elements_dict[item]
+                pass
+            elif 'building_connect' in item:
+                # new_df[item] = elements_dict[item]
+                pass
+            elif 'energy_edge' in item:
+                # new_df[item] = elements_dict[item]
+                pass
+                # print('---')
+                # print(item)
+                # print(elements_dict[item])
+            elif 'energy_on_edges' in item:
+                # print('+++')
+                # print(item)
+                # print(elements_dict[item])
+                pass
+                # new_df[item] = elements_dict[item]
+            else:
                 new_df[item] = elements_dict[item]
+
 
     # print(new_df)
     output_path = os.path.split(csv_file)
@@ -126,6 +145,36 @@ def save_non_time_series(csv_file, name=''):
     non_timeseries_path = os.path.join(output_path[0],
                                        name + '_non_timeseries.xlsx')
     new_df.to_excel(non_timeseries_path)
+
+
+def save_all_data_network(input_csv, output_prefix):
+    # Load the data from the CSV file
+    data = pd.read_csv(input_csv)
+
+    # Extract the prefix of each state (excluding the time label)
+    data['prefix'] = data['var'].str.extract(r'(.*)\[')
+
+    # Count the occurrences of each prefix
+    prefix_counts = data['prefix'].value_counts()
+
+    # Filter data based on the count of states
+    data_24_states = data[data['prefix'].isin(prefix_counts[prefix_counts ==
+                                                            24].index)]
+    data_multi_states = data[data['prefix'].isin(
+        prefix_counts[(prefix_counts > 1) & (prefix_counts != 24)].index)]
+    data_single_state = data[data['prefix'].isin(prefix_counts[prefix_counts
+                                                               == 1].index)]
+
+    # Save data to Excel files
+    output_path = os.path.split(input_csv)
+    data_24_states.drop(columns='prefix').to_excel(os.path.join(output_path[0],
+        f"{output_prefix}_24_states.xlsx"), index=False)
+    data_multi_states.drop(columns='prefix').to_excel(os.path.join(
+        output_path[0], f"{output_prefix}_multi_states.xlsx"), index=False)
+    data_single_state.drop(columns='prefix').to_excel(os.path.join(
+        output_path[0], f"{output_prefix}_single_state.xlsx"), index=False)
+
+    print("Data processing completed and saved to Excel files.")
 
 
 def plot_all(csv_file, time_interval, save_path=None):
@@ -810,6 +859,112 @@ def plot_size(non_timeseries_path):
         plt.text(i, value, f"{value:.1f}", ha='center', va='bottom')
 
     plt.show()
+
+
+def plot_network_result(network_result, time="average"):
+
+    def parse_variables(row):
+        if 'energy_edges[' in row:
+            parts = row.strip('energy_edges[').strip(']').split(',')
+            source = 'energy_edges'
+        elif 'energy_on_edges[' in row:
+            parts = row.strip('energy_on_edges[').strip(']').split(',')
+            source = 'energy_on_edges'
+        else:
+            return None, None, None, None, None, None
+        lon_start, lat_start, lon_end, lat_end, time = map(float, parts)
+        return lon_start, lat_start, lon_end, lat_end, time, source
+
+    def plot_energy_on_edges(dataframe, source, time="average"):
+        source_data = dataframe[dataframe['source'] == source]
+
+        # 根据时刻筛选数据或计算平均值
+        if time == "average":
+            avg_data = source_data.groupby(
+                ['lon_start', 'lat_start', 'lon_end', 'lat_end'])[
+                'value'].mean().reset_index()
+            plot_data = avg_data
+        else:
+            plot_data = source_data[source_data['time'] == time]
+
+        # Calculate canvas size based on the data's longitude and latitude range
+        lon_range = plot_data[['lon_start', 'lon_end']].values.max() - \
+                    plot_data[['lon_start', 'lon_end']].values.min()
+        lat_range = plot_data[['lat_start', 'lat_end']].values.max() - \
+                    plot_data[['lat_start', 'lat_end']].values.min()
+
+        aspect_ratio = lat_range / lon_range
+        canvas_width = 12
+        canvas_height = canvas_width * aspect_ratio
+
+        fig, ax = plt.subplots(figsize=(canvas_width, canvas_height))
+
+        # 获取数据的最小和最大值以调整颜色映射
+        vmin = plot_data['value'].min()
+        vmax = plot_data['value'].max()
+        norm = plt.Normalize(vmin, vmax)
+
+        # 根据筛选后的数据绘制弧线和箭头
+        for index, row in plot_data.iterrows():
+            # Check if the opposite direction exists and its value
+            opposite_data = plot_data[
+                (plot_data['lon_start'] == row['lon_end']) &
+                (plot_data['lat_start'] == row['lat_end']) &
+                (plot_data['lon_end'] == row['lon_start']) &
+                (plot_data['lat_end'] == row['lat_start'])]
+
+            # If the opposite direction doesn't exist or its value is zero, continue drawing
+            if opposite_data.empty or opposite_data['value'].iloc[0] == 0:
+                # Calculate control points for bezier curve to give it a slight arc
+                midpoint = [(row['lon_start'] + row['lon_end']) / 2,
+                            (row['lat_start'] + row['lat_end']) / 2]
+                control_dx = (row['lat_end'] - row['lat_start']) * 0.02
+                control_dy = (row['lon_end'] - row['lon_start']) * 0.02
+                control_point = [midpoint[0] + control_dx,
+                                 midpoint[1] - control_dy]
+
+                # Create the bezier curve with the control point
+                path = mpatches.PathPatch(mpatches.Path(
+                    [(row['lon_start'], row['lat_start']), control_point,
+                     (row['lon_end'], row['lat_end'])],
+                    [mpatches.Path.MOVETO, mpatches.Path.CURVE3,
+                     mpatches.Path.LINETO]),
+                                          edgecolor=plt.cm.YlOrRd(
+                                              norm(row['value'])), lw=2,
+                                          facecolor='none')
+                ax.add_patch(path)
+
+        # Adjust the x and y axis limits based on the data's longitude and latitude range
+        ax.set_xlim(plot_data[['lon_start', 'lon_end']].values.min(),
+                    plot_data[['lon_start', 'lon_end']].values.max())
+        ax.set_ylim(plot_data[['lat_start', 'lat_end']].values.min(),
+                    plot_data[['lat_start', 'lat_end']].values.max())
+
+        # Adjust margins
+        plt.subplots_adjust(left=0.06, right=0.88, top=0.9, bottom=0.1)
+
+        cax = plt.axes([0.90, 0.1, 0.03, 0.8])
+        plt.colorbar(plt.cm.ScalarMappable(norm=norm, cmap='YlOrRd'),
+                     cax=cax, label='Energy Value')
+
+        ax.set_title(
+            f'Geographical Visualization of Energy Flow for {source} Data (Time: {time})')
+        ax.set_xlabel('Longitude')
+        ax.set_ylabel('Latitude')
+        # ax.grid(True)
+        plt.show()
+
+    # pd.set_option('display.max_columns', None)
+    data = pd.read_excel(network_result)
+    parsed_data_updated = data['var'].apply(parse_variables)
+    data[['lon_start', 'lat_start', 'lon_end', 'lat_end', 'time', 'source']] = \
+        pd.DataFrame(parsed_data_updated.tolist(), index=data.index)
+    data = data.drop(columns=['Unnamed: 0', 'var'])
+    data_cleaned = data.dropna(
+        subset=['lon_start', 'lat_start', 'lon_end', 'lat_end', 'time',
+                'source'])
+
+    plot_energy_on_edges(data_cleaned, source="energy_edges", time=time)
 
 
 if __name__ == '__main__':
