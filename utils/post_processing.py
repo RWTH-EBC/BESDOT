@@ -918,8 +918,10 @@ def plot_network_result(network_result, time="average"):
                 # Calculate control points for bezier curve to give it a slight arc
                 midpoint = [(row['lon_start'] + row['lon_end']) / 2,
                             (row['lat_start'] + row['lat_end']) / 2]
-                control_dx = (row['lat_end'] - row['lat_start']) * 0.02
-                control_dy = (row['lon_end'] - row['lon_start']) * 0.02
+                control_dx = (row['lat_end'] - row['lat_start']) * 0  # 0
+                # could be replaced with other value, 0 is straight line,
+                # others like 0.05 for a slight arc.
+                control_dy = (row['lon_end'] - row['lon_start']) * 0
                 control_point = [midpoint[0] + control_dx,
                                  midpoint[1] - control_dy]
 
