@@ -21,7 +21,7 @@ class CountrySubsidyBAFA(Subsidy):
 
 
 class CountrySubsidyComponent(CountrySubsidyBAFA):
-    def __init__(self, country, conditions, component_name):
+    def __init__(self, country, component_name, conditions='Normal'):
         super().__init__(name='country_subsidy', typ='purchase', components=[component_name])
         self.energy_pair = []
         self.country = country
@@ -92,8 +92,6 @@ class CountrySubsidyComponent(CountrySubsidyBAFA):
                                    for idx, row in self.subsidy_data.iterrows()
                                    if row['Country'] == self.country and row['Conditions'] == self.conditions
                                    and row['Component'] == self.component_name]
-
-
 
         dj_subsidy = Disjunction(expr=tariff_disjunction_expr)
         model.add_component(f'disjunction_{self.name}_{self.country}_'

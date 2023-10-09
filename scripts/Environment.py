@@ -56,7 +56,7 @@ def _read_weather_file(weather_file=None, city='Dusseldorf', year=2021):
 class Environment(object):
 
     def __init__(self, weather_file=None, city='Dusseldorf', year=2021,
-                 start_time=0, time_step=8760):
+                 start_time=0, time_step=8760, user=None, conditions=None):
 
         city_info = pd.read_csv(city_info_file)
         city_row = city_info[city_info['City'] == city]
@@ -79,6 +79,8 @@ class Environment(object):
         self.year = year
         self.start_time = start_time
         self.time_step = time_step
+        self.user = user
+        self.conditions = conditions
         if start_time + time_step <= 0:
             warnings.warn('The selected interval is too small or the start '
                           'time is negative')
@@ -95,6 +97,7 @@ class Environment(object):
         self.gas_price = 0.07  # €/kWh #0.1, 0.1377
         self.heat_price = 0.08  # €/kWh
         self.elec_feed_price = 0.08  # €/kWh #0.1, 0.05
+        self.elec_feed_price_chp = 0.09229  # €/kWh #0.1158, 0.09229
         self.elec_emission = 397  # g/kWh
         self.gas_emission = 202  # g/kWh
         self.co2_price = 35  # €/t

@@ -4,8 +4,9 @@ import pandas as pd
 import pyomo.environ as pyo
 from pyomo.gdp import Disjunct, Disjunction
 from utils.calc_annuity_vdi2067 import calc_annuity
-from scripts.subsidies.city_subsidy_kurz import CitySubsidyComponent
-from scripts.subsidies.country_subsidy_BAFA_kurz import CountrySubsidyComponent
+# from scripts.subsidies.city_subsidy_kurz import CitySubsidyComponent
+# from scripts.subsidies.state_subsidy_kurz import StateSubsidyComponent
+# from scripts.subsidies.country_subsidy_BAFA_kurz import CountrySubsidyComponent
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -176,30 +177,29 @@ class Component(object):
             warnings.warn("io of the function add_energy_flow only allowed "
                           "for 'input' or 'output'.")
 
+    """
     def add_subsidy(self, subsidy):
         if subsidy == 'all':
-            city_subsidy = None
-            country_subsidy = None
+            all_subsidies = []
+
             for subsidy_comp in self.subsidy_list:
                 if isinstance(subsidy_comp, CitySubsidyComponent):
-                    city_subsidy = subsidy_comp
+                    all_subsidies.append(subsidy_comp)
                 elif isinstance(subsidy_comp, CountrySubsidyComponent):
-                    country_subsidy = subsidy_comp
+                    all_subsidies.append(subsidy_comp)
 
-            if city_subsidy is not None:
-                city_subsidy.analyze_topo(self)
-            if country_subsidy is not None:
-                country_subsidy.analyze_topo(self)
+            for subsidy_comp in all_subsidies:
+                subsidy_comp.analyze_topo(self)
 
-        elif isinstance(subsidy, CitySubsidyComponent):
-            self.subsidy_list.append(subsidy)
-            subsidy.analyze_topo(self)
-        elif isinstance(subsidy, CountrySubsidyComponent):
+            self.subsidy_list.extend(all_subsidies)
+
+        elif isinstance(subsidy, (CitySubsidyComponent, CountrySubsidyComponent)):
             self.subsidy_list.append(subsidy)
             subsidy.analyze_topo(self)
         else:
-            warnings.warn("The subsidy " + subsidy + "was not modeled, check again, "
+            warnings.warn("The subsidy " + subsidy + " was not modeled, check again, "
                           "if something goes wrong.")
+    """
 
     def show_cost_model(self):
         print("The cost model for model " + self.name + " is " +
@@ -269,6 +269,7 @@ class Component(object):
         annual_cost = model.find_component('annual_cost_' + self.name)
         invest = model.find_component('invest_' + self.name)
         subsidy = model.find_component('subsidy_' + self.name)
+        state_subsidy = model.find_component('state_subsidy_' + self.name)
         country_subsidy = model.find_component('country_subsidy_' + self.name)
 
         if self.min_size == 0:
@@ -328,7 +329,8 @@ class Component(object):
             disj_size = Disjunction(expr=pair_list)
             model.add_component('disj_size_' + self.name, disj_size)
 
-        annuity = calc_annuity(self.life, invest - subsidy - country_subsidy, self.f_inst, self.f_w, self.f_op)
+        annuity = calc_annuity(self.life, invest - subsidy - state_subsidy - country_subsidy,
+                               self.f_inst, self.f_w, self.f_op)
         model.cons.add(annuity == annual_cost)
 
     def _constraint_subsidies(self, model):
@@ -406,6 +408,9 @@ class Component(object):
 
         subsidy = pyo.Var(bounds=(0, 10 ** 10))
         model.add_component('subsidy_' + self.name, subsidy)
+
+        state_subsidy = pyo.Var(bounds=(0, 10 ** 10))
+        model.add_component('state_subsidy_' + self.name, state_subsidy)
 
         country_subsidy = pyo.Var(bounds=(0, 10 ** 10))
         model.add_component('country_subsidy_' + self.name, country_subsidy)

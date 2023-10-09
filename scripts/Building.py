@@ -6,6 +6,7 @@ from scripts.components.Storage import Storage
 from scripts.subsidies.EEG_new import EEG
 from scripts.subsidies.city_subsidy_kurz import CitySubsidyComponent
 from scripts.subsidies.country_subsidy_BAFA_kurz import CountrySubsidyComponent
+from scripts.subsidies.state_subsidy_kurz import StateSubsidyComponent
 from utils.gen_heat_profile import *
 from utils.gen_elec_profile import gen_elec_profile
 from utils import get_all_class
@@ -26,7 +27,24 @@ class Building(object):
             self.solar_area = self.area * 0.1
         else:
             self.solar_area = solar_area
-        self.building_typ = bld_typ
+
+        # todo: What I want to do is to identify if the building is NWG or not,
+        #  for example, if my building is Verwaltungsgebäude, then it is in the
+        #  scope of NWG, so that I can directly select NWG in the selection of
+        #  the type of building for the subsidy later on.
+        nwg_typ = ["Verwaltungsgebäude", "Büro und Dienstleistungsgebäude",
+                   "Hochschule und Forschung", "Gesundheitswesen",
+                   "Bildungseinrichtungen", "Kultureinrichtungen",
+                   "Sporteinrichtungen", "Beherbergen und Verpflegen",
+                   "Gewerbliche und industrielle", "Verkaufsstätten",
+                   "Technikgebäude"]
+
+        if bld_typ in nwg_typ:
+            self.building_typ = 'Verwaltungsgebäude'
+        elif bld_typ == 'Wohngebäude':
+            self.building_typ = 'Wohngebaude'
+        else:
+            self.building_typ = bld_typ
 
         self.annual_demand = {"elec_demand": 0,
                               "heat_demand": 0,
@@ -270,6 +288,7 @@ class Building(object):
                    row[row.isnull()].index.tolist()) > 0:
                 for input_comp in row[row > 0].index.tolist() + \
                                   row[row.isnull()].index.tolist():
+                    print(f"Checking component: {input_comp} --> {index}")
                     if 'heat' in self.components[input_comp].outputs and \
                             'heat' in self.components[index].inputs or \
                             'heat' in self.components[input_comp].inputs and \
@@ -307,38 +326,109 @@ class Building(object):
                         self.components[index].add_energy_flows(
                             'input', 'gas', (input_comp, index))
 
-    def add_subsidy(self, subsidy):
+    def add_eeg_subsidy(self, feed_typ, tariff_rate):
+        eeg = EEG(feed_type=feed_typ, tariff_rate=tariff_rate)
+        self.subsidy_list.append(eeg)
+
+    def add_city_subsidies(self, state, city, component_names):
+        city_subsidies = [
+            CitySubsidyComponent(state=state, city=city, component_name=name)
+            for name in component_names
+        ]
+        self.subsidy_list.extend(city_subsidies)
+
+    def add_country_subsidies(self, country, component_names):
+        country_subsidies = [
+            CountrySubsidyComponent(country=country, component_name=name)
+            for name in component_names
+        ]
+        self.subsidy_list.extend(country_subsidies)
+
+    """
+    def add_subsidy(self, subsidy, feed_typ=None, tariff_rate=None,
+                    state=None, city=None, country=None):
         if subsidy == 'all':
-            city_subsidy = None
-            country_subsidy = None
-            eeg_subsidy = None
+            all_subsidies = []
+            component_names = ['HeatPump', 'PV', 'SolarThermalCollector', 'GasBoiler',
+                               'ElectricBoiler', 'Battery', 'HotWaterStorage']
+
             for subsidy_comp in self.subsidy_list:
+                if isinstance(subsidy_comp, EEG):
+                    self.add_eeg_subsidy(feed_typ, tariff_rate)
+                    all_subsidies.append(subsidy_comp)
+
                 if isinstance(subsidy_comp, CitySubsidyComponent):
-                    city_subsidy = subsidy_comp
-                elif isinstance(subsidy_comp, CountrySubsidyComponent):
-                    country_subsidy = subsidy_comp
-                elif isinstance(subsidy_comp, EEG):
-                    eeg_subsidy = subsidy_comp
+                    self.add_city_subsidies(state, city, component_names)
+                    all_subsidies.append(subsidy_comp)
 
-            if city_subsidy is not None:
-                city_subsidy.analyze_topo(self)
-            if country_subsidy is not None:
-                country_subsidy.analyze_topo(self)
-            if eeg_subsidy is not None:
-                eeg_subsidy.analyze_topo(self)
+                if isinstance(subsidy_comp, CountrySubsidyComponent):
+                    self.add_country_subsidies(country, component_names)
+                    all_subsidies.append(subsidy_comp)
 
-        elif isinstance(subsidy, CitySubsidyComponent):
-            self.subsidy_list.append(subsidy)
-            subsidy.analyze_topo(self)
-        elif isinstance(subsidy, CountrySubsidyComponent):
-            self.subsidy_list.append(subsidy)
-            subsidy.analyze_topo(self)
-        elif isinstance(subsidy, EEG):
+            for subsidy_comp in all_subsidies:
+                subsidy_comp.analyze_topo(self)
+
+            self.subsidy_list.extend(all_subsidies)
+        else:
+            warn("The subsidy " + subsidy + " was not modeled, check again, "
+                 "if something goes wrong.")
+    """
+
+    def add_subsidy(self, subsidy, feed_typ=None, tariff_rate=None,
+                    state=None, city=None, country=None):
+        if subsidy == 'all':
+            pass
+            """
+            all_subsidies = []
+            for subsidy_comp in self.subsidy_list:
+                component_names = []
+
+                if isinstance(subsidy_comp, EEG):
+                    self.add_eeg_subsidy(feed_typ, tariff_rate)
+
+                if isinstance(subsidy_comp, CitySubsidyComponent):
+                    self.add_city_subsidies(state, city, component_names)
+
+                if isinstance(subsidy_comp, CountrySubsidyComponent):
+                    self.add_country_subsidies(country, component_names)
+
+            for subsidy_comp in all_subsidies:
+                subsidy_comp.analyze_topo(self)
+
+            self.subsidy_list.extend(all_subsidies)
+            """
+
+        elif isinstance(subsidy, (CitySubsidyComponent, StateSubsidyComponent, CountrySubsidyComponent, EEG)):
             self.subsidy_list.append(subsidy)
             subsidy.analyze_topo(self)
         else:
             warn("The subsidy " + subsidy + "was not modeled, check again, "
                  "if something goes wrong.")
+
+    """
+    def add_subsidy(self, subsidy, feed_typ=None, tariff_rate=None,
+                    state=None, city=None, country=None):
+        if subsidy == 'all':
+            all_subsidies = []
+
+            for subsidy_comp in self.subsidy_list:
+                if isinstance(subsidy_comp, CitySubsidyComponent) \
+                        or isinstance(subsidy_comp, CountrySubsidyComponent)\
+                        or isinstance(subsidy_comp, EEG):
+                    all_subsidies.append(subsidy_comp)
+
+            for subsidy_comp in all_subsidies:
+                subsidy_comp.analyze_topo(self)
+
+            self.subsidy_list.extend(all_subsidies)
+
+        elif isinstance(subsidy, (CitySubsidyComponent, CountrySubsidyComponent, EEG)):
+            self.subsidy_list.append(subsidy)
+            subsidy.analyze_topo(self)
+        else:
+            warn("The subsidy " + subsidy + "was not modeled, check again, "
+                 "if something goes wrong.")
+        """
 
     def add_vars(self, model):
         for energy in self.energy_flows.keys():
@@ -553,6 +643,7 @@ class Building(object):
 
         sell_elec = [0] * (env.time_step + 1)
         sell_elec_pv = [0] * (env.time_step + 1)
+        sell_elec_chp = [0] * (env.time_step + 1)
 
         e_grid_name = None  # todo lji: Explain why this variable is needed.
 
@@ -567,19 +658,35 @@ class Building(object):
                 sell_elec_pv = model.find_component('elec_' + comp + '_' + e_grid_name)
                 # todo lji: Modify the name of the pv.
 
-        if model.find_component('elec_feed_price'):
+        for comp in self.components:
+            if isinstance(self.components[comp], module_dict['CHP']):
+                sell_elec_chp = model.find_component('elec_' + comp + '_' + e_grid_name)
+
+        if 'CHP' in [comp for comp in self.components]:
+            elec_feed_price = env.elec_feed_price_chp
+        elif model.find_component('elec_feed_price'):
             elec_feed_price = model.elec_feed_price
         else:
             elec_feed_price = env.elec_feed_price
 
         if not op_subsidy_exists:
             if cluster is None:
-                model.cons.add(bld_revenue == sum(sell_elec[t] * elec_feed_price
+                if any(isinstance(self.components[comp], module_dict['CHP']) for comp in self.components):
+                    elec_feed_price_to_use = env.elec_feed_price_chp
+                else:
+                    elec_feed_price_to_use = elec_feed_price
+
+                model.cons.add(bld_revenue == sum(sell_elec[t] * elec_feed_price_to_use
                                                   for t in model.time_step))
             else:
                 nr_hour_occur = cluster['Occur']
 
-                model.cons.add(bld_revenue == sum(sell_elec[t] * elec_feed_price *
+                if any(isinstance(self.components[comp], module_dict['CHP']) for comp in self.components):
+                    elec_feed_price_to_use = env.elec_feed_price_chp
+                else:
+                    elec_feed_price_to_use = elec_feed_price
+
+                model.cons.add(bld_revenue == sum(sell_elec[t] * elec_feed_price_to_use *
                                                   nr_hour_occur[t - 1] for t in
                                                   model.time_step))
 

@@ -21,7 +21,7 @@ class CitySubsidy(Subsidy):
 
 
 class CitySubsidyComponent(CitySubsidy):
-    def __init__(self, state, city, user, bld_typ, component_name):
+    def __init__(self, state, city, component_name, bld_typ='None', user='None'):
         super().__init__(name='city_subsidy', typ='purchase', components=[component_name])
         self.energy_pair = []
         self.state = state
@@ -53,6 +53,7 @@ class CitySubsidyComponent(CitySubsidy):
     def add_cons(self, model):
         comp_name = self.energy_pair[0][0]
 
+        component_area = model.find_component('area_' + comp_name)
         component_size = model.find_component('size_' + comp_name)
         subsidy = model.find_component('subsidy_' + comp_name)
 
@@ -61,6 +62,7 @@ class CitySubsidyComponent(CitySubsidy):
         for idx, row in self.subsidy_data.iterrows():
             if row['State'] == self.state and row['City'] == self.city and row['User'] == self.user and\
                     row['Building Type'] == self.bld_typ and row['Component'] == self.component_name:
+
                 lower_bound = row['Size Lower']
                 upper_bound = row['Size Upper']
                 coefficient = row['Coefficient']
@@ -74,7 +76,7 @@ class CitySubsidyComponent(CitySubsidy):
                     size_constraint = pyo.Constraint(expr=component_size >= lower_bound)
                 else:
                     size_constraint_lower = pyo.Constraint(expr=component_size >= lower_bound)
-                    size_constraint_upper = pyo.Constraint(expr=component_size <= upper_bound + small_nr)
+                    size_constraint_upper = pyo.Constraint(expr=component_size <= upper_bound - small_nr)
 
                 subsidy_constraint = pyo.Constraint(expr=subsidy == coefficient * component_size + constant)
 
@@ -89,6 +91,7 @@ class CitySubsidyComponent(CitySubsidy):
                     tariff.add_component(tariff_name + '_size_constraint_upper', size_constraint_upper)
 
                 tariff.add_component(tariff_name + '_subsidy_constraint', subsidy_constraint)
+
                 matching_subsidy_found = True
 
         if not matching_subsidy_found:

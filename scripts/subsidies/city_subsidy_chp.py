@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import pyomo.environ as pyo
 from pyomo.gdp import Disjunct, Disjunction
@@ -5,6 +6,9 @@ from scripts.Subsidy import Subsidy
 import warnings
 
 small_nr = 0.00001
+script_folder = os.path.dirname(os.path.abspath(__file__))
+csv_file_path = os.path.join(script_folder, '../..', 'data', 'subsidy', 'city_subsidy_policy.csv')
+subsidy_data = pd.read_csv(csv_file_path)
 
 
 class CitySubsidyCHP(Subsidy):
@@ -16,11 +20,6 @@ class CitySubsidyCHP(Subsidy):
         self.energy_pair = []
         self.state = state
         self.city = city
-        self.subsidy_data = self.load_subsidy_data()
-
-    def load_subsidy_data(self):
-        df = pd.read_csv('city_subsidy_policy_CHP.csv')
-        return df
 
     def analyze_topo(self, building):
         chp_name = None

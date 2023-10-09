@@ -58,6 +58,7 @@ class SolarThermalCollector(Component):
         invest = model.find_component('invest_' + self.name)
         size = model.find_component('size_' + self.name)
         subsidy = model.find_component('subsidy_' + self.name)
+        state_subsidy = model.find_component('state_subsidy_' + self.name)
         country_subsidy = model.find_component('country_subsidy_' + self.name)
 
         if self.min_size == 0:
@@ -124,7 +125,8 @@ class SolarThermalCollector(Component):
             disj_size = Disjunction(expr=pair_list)
             model.add_component('disj_size_' + self.name, disj_size)
 
-        annuity = calc_annuity(self.life, invest - subsidy - country_subsidy, self.f_inst, self.f_w, self.f_op)
+        annuity = calc_annuity(self.life, invest - subsidy - country_subsidy,
+                               self.f_inst, self.f_w, self.f_op)
         model.cons.add(annuity == annual_cost)
 
     def add_cons(self, model):

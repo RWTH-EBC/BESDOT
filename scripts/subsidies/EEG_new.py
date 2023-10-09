@@ -109,3 +109,4 @@ class EEG(Subsidy):
 
         total_energy = pyo.Var(bounds=(0, 10 ** 10))
         model.add_component(f'subsidy_{self.name}_PV_energy', total_energy)
+

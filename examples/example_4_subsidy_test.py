@@ -8,10 +8,28 @@ from scripts.subsidies.country_subsidy_BAFA_kurz import CountrySubsidyComponent
 # import utils.post_processing as pp
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-test_env = Environment(time_step=8760, city='Muenchen')
+
+
+##########################################################
+#                       Comment                          #
+##########################################################
+eeg_feed_typ = 'Ueberschusseinspeisung'  # Ueberschusseinspeisung und Volleinspeisung
+eeg_tariff_rate = 'Feste Verguetung'  # Feste Verguetung und Direkte Vermarktung
+user = 'None'  # None, basic und premium
+bld_typ = 'None'  # None, wg und nwg
+wg_typ = "Wohngebaeude"
+nwg_typ = ["Verwaltungsgebäude", "Büro und Dienstleistungsgebäude",
+           "Hochschule und Forschung", "Gesundheitswesen",
+           "Bildungseinrichtungen", "Kultureinrichtungen",
+           "Sporteinrichtungen", "Beherbergen und Verpflegen",
+           "Gewerbliche und industrielle", "Verkaufsstätten",
+           "Technikgebäude"]
+
+#########################################################
 
 # Generate project and environment object.
-project_4 = Project(name='project_4_city_subsidy_test_Muenchen', typ='building')
+project_4 = Project(name='project_4_city_subsidy_test_Stuttgart', typ='building')
+test_env = Environment(time_step=8760, city='Stuttgart')
 project_4.add_environment(test_env)
 
 # Generate building object and connect to project.
@@ -23,37 +41,36 @@ topo_file = os.path.join(base_path, 'data', 'topology', 'basic.csv')
 test_bld_4.add_topology(topo_file)
 test_bld_4.add_components(test_env)
 
+print(test_bld_4.components)
+
 # Generate subsidy object EEG for PV and connect to project.
-eeg = EEG(feed_type='USE', tariff_rate='Feste Verguetung')
+eeg = EEG(feed_type=eeg_feed_typ, tariff_rate=eeg_tariff_rate)
 test_bld_4.add_subsidy(eeg)
 
-component_names = ['HeatPump', 'PV', 'SolarThermalCollector',
-                   'GasBoiler', 'ElectricBoiler', 'Battery']
+component_names = ['HeatPump', 'PV', 'SolarThermalCollector', 'GasBoiler',
+                   'ElectricBoiler', 'Battery', 'HotWaterStorage']
 
 city_subsidies = []
 for name in component_names:
-    if name == 'PV':
-        subsidy = CitySubsidyComponent(state=test_env.state, city=test_env.city,
-                                       bld_typ='WG', user='None',
-                                       component_name=name)
-    else:
-        subsidy = CitySubsidyComponent(state=test_env.state, city=test_env.city,
-                                       bld_typ='None', user='None',
-                                       component_name=name)
+    subsidy = CitySubsidyComponent(state=test_env.state, city=test_env.city,
+                                   component_name=name)
+
     city_subsidies.append(subsidy)
 
 for subsidy in city_subsidies:
     test_bld_4.add_subsidy(subsidy)
 
-country_subsidies = [CountrySubsidyComponent(country=test_env.country, conditions='Normal', component_name=name)
+country_subsidies = [CountrySubsidyComponent(country=test_env.country, component_name=name)
                      for name in component_names]
 
 for subsidy in country_subsidies:
     test_bld_4.add_subsidy(subsidy)
 
+test_bld_4.add_subsidy('all')
+
 project_4.add_building(test_bld_4)
 
-components = ['heat_pump', 'water_tes', 'solar_coll', 'pv', 'bat', 'e_boi', 'boi']
+components = ['heat_pump', 'water_tes', 'solar_coll', 'pv', 'bat', 'boi', 'e_boi']
 for component in components:
     test_bld_4.components[component].change_cost_model(new_cost_model=0)
 

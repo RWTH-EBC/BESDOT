@@ -159,10 +159,10 @@ if __name__ == "__main__":
 """
 
 """
-invest = 3600
-subsidy = 2160
-t_n = 20
-f_inst = 0.01
+invest = 9302.0684
+subsidy = 6000
+t_n = 15
+f_inst = 0.05
 f_w = 0.015
 f_op = 20
 
