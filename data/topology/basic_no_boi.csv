@@ -1,0 +1,12 @@
+comp_name,comp_type,model,min_size,max_size,current_size,air_water_heat_pump,brine_water_heat_pump,therm_cns,water_tes,pv,flat_plate_solar_coll,tube_solar_coll,bat,e_grid,gas_grid,e_cns
+air_water_heat_pump,HeatPump,all_brands-Heat_pumps-air-water,0,100,0,0,0,0,1,0,0,0,0,0,0,0
+brine_water_heat_pump,HeatPump,all_brands-Heat_pumps-brine-water,0,100,0,0,0,0,1,0,0,0,0,0,0,0
+therm_cns,HeatConsumption,HeatCNS1,1000,1000,0,0,0,0,0,0,0,0,0,0,0,0
+water_tes,HotWaterStorage,all_brands-Storage_technology-buffer_storage-0_Heat_exchanger,0,2000,0,0,0,1,0,0,0,0,0,0,0,0
+pv,PV,PV1,0,100,0,1,1,0,0,0,0,0,1,1,0,1
+flat_plate_solar_coll,SolarThermalCollector,all_brands-Solar_technology-flat-plate_collectors,0,100,0,0,0,0,1,0,0,0,0,0,0,0
+tube_solar_coll,SolarThermalCollector,all_brands-Solar_technology-tube_collectors,0,100,0,0,0,0,1,0,0,0,0,0,0,0
+bat,Battery,BAT1,0,100,0,1,1,0,0,0,0,0,0,1,0,1
+e_grid,ElectricityGrid,GRD1,0,100,0,1,1,0,0,0,0,0,1,0,0,1
+gas_grid,GasGrid,GAS1,0,100,0,0,0,0,0,0,0,0,0,0,0,0
+e_cns,ElectricalConsumption,CNS1,0,100,0,0,0,0,0,0,0,0,0,0,0,0

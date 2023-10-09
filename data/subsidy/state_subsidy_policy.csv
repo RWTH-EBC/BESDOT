@@ -1,0 +1,17 @@
+State,Component,User,Component Type,Building Type,Size Lower,Size Upper,Coefficient,Constant
+Schleswig-Holstein,Battery,None,None,None,0,1.5,0.5,0
+Schleswig-Holstein,Battery,None,None,None,1.5,inf,0,750
+Schleswig-Holstein,HeatPump,None,air-water-heatpump,None,0,6,0.35,0
+Schleswig-Holstein,Heat Pump,None,air-water-heatpump,None,6,inf,0,2000
+Schleswig-Holstein,HeatPump,None,brine-water-heatpump,None,0,12,0.35,0
+Schleswig-Holstein,HeatPump,None,brine-water-heatpump,None,12,inf,0,2000
+Schleswig-Holstein,SolarThermalCollector,None,Flat-plate,None,0,8.4,0.35,0
+Schleswig-Holstein,SolarThermalCollector,None,Flat-plate,None,8.4,inf,0,900
+Schleswig-Holstein,SolarThermalCollector,None,Tube,None,0,5.9,0.35,0
+Schleswig-Holstein,SolarThermalCollector,None,Tube,None,5.9,inf,0,900
+Schleswig-Holstein,PV,None,None,None,0,0.25,0,0
+Schleswig-Holstein,PV,None,None,None,0.25,0.6,0,200
+Schleswig-Holstein,PV,None,None,None,0.6,inf,0,0
+Niedersachsen,HeatPump,None,air-water-heatpump,Neubau,0,inf,0,500
+Niedersachsen,HeatPump,None,brine-water-heatpump,Bestandbau,0,inf,0,7250
+Niedersachsen,HeatPump,None,brine-water-heatpump,Neubau,0,inf,0,5000
