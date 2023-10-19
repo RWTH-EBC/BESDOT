@@ -153,14 +153,14 @@ for subsidy in country_subsidies:
 
 project_4.add_building(test_bld_4)
 
-components = ['pv', 'water_tes', 'vat',
+components = ['pv', 'water_tes', 'bat',
               'solar_coll_flat_plate',
               'solar_coll_tube',
               'brine_water_heat_pump',
               'air_water_heat_pump']
 
 for component in components:
-    test_bld_4.components[component].change_cost_model(new_cost_model=2)
+    test_bld_4.components[component].change_cost_model(new_cost_model=0)
 
 for comp in test_bld_4.components.values():
     comp.show_cost_model()
