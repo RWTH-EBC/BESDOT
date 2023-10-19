@@ -4,9 +4,9 @@ import pandas as pd
 import pyomo.environ as pyo
 from pyomo.gdp import Disjunct, Disjunction
 from utils.calc_annuity_vdi2067 import calc_annuity
-# from scripts.subsidies.city_subsidy_kurz import CitySubsidyComponent
-# from scripts.subsidies.state_subsidy_kurz import StateSubsidyComponent
-# from scripts.subsidies.country_subsidy_BAFA_kurz import CountrySubsidyComponent
+# from scripts.subsidies.city_subsidy import CitySubsidyComponent
+# from scripts.subsidies.state_subsidy import StateSubsidyComponent
+# from scripts.subsidies.country_subsidy_BAFA import CountrySubsidyComponent
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -223,7 +223,7 @@ class Component(object):
             self._read_properties(properties)
 
     def _constraint_conver(self, model):
-        # todo: the component with more than 1 inputs is not developed,
+        # todo: the component with more than one input is not developed,
         #  because of the easily confused efficiency. If meet component in
         #  this type, develop the method further. (By mixing of natural gas
         #  and hydrogen, or special electrolyzer, which need heat and
@@ -266,9 +266,9 @@ class Component(object):
 
     def _constraint_vdi2067(self, model):
         size = model.find_component('size_' + self.name)
-        annual_cost = model.find_component('annual_cost_' + self.name)
         invest = model.find_component('invest_' + self.name)
-        subsidy = model.find_component('subsidy_' + self.name)
+        annual_cost = model.find_component('annual_cost_' + self.name)
+        city_subsidy = model.find_component('city_subsidy_' + self.name)
         state_subsidy = model.find_component('state_subsidy_' + self.name)
         country_subsidy = model.find_component('country_subsidy_' + self.name)
 
@@ -329,7 +329,7 @@ class Component(object):
             disj_size = Disjunction(expr=pair_list)
             model.add_component('disj_size_' + self.name, disj_size)
 
-        annuity = calc_annuity(self.life, invest - subsidy - state_subsidy - country_subsidy,
+        annuity = calc_annuity(self.life, invest - city_subsidy - state_subsidy - country_subsidy,
                                self.f_inst, self.f_w, self.f_op)
         model.cons.add(annuity == annual_cost)
 
@@ -406,8 +406,8 @@ class Component(object):
         invest = pyo.Var(bounds=(0, 10 ** 10))
         model.add_component('invest_' + self.name, invest)
 
-        subsidy = pyo.Var(bounds=(0, 10 ** 10))
-        model.add_component('subsidy_' + self.name, subsidy)
+        city_subsidy = pyo.Var(bounds=(0, 10 ** 10))
+        model.add_component('city_subsidy_' + self.name, city_subsidy)
 
         state_subsidy = pyo.Var(bounds=(0, 10 ** 10))
         model.add_component('state_subsidy_' + self.name, state_subsidy)

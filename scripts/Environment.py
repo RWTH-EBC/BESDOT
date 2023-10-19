@@ -8,7 +8,7 @@ import warnings
 import pandas as pd
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-city_info_file = os.path.join(base_path, "data", "city_state_country_info.csv")
+city_info_file = os.path.join(base_path, "data", "subsidy", "city_state_country_info.csv")
 weather_data_path = os.path.join(base_path, "data", "weather_data")
 Soil_temperature_path = os.path.join(base_path, "data", "weather_data",
                                      "Dusseldorf", "soil_temp.csv")

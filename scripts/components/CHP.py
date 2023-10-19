@@ -40,7 +40,8 @@ class CHP(Component):
         size = model.find_component('size_' + self.name)
         annual_cost = model.find_component('annual_cost_' + self.name)
         invest = model.find_component('invest_' + self.name)
-        subsidy = model.find_component('subsidy_' + self.name)
+        city_subsidy = model.find_component('city_subsidy_' + self.name)
+        state_subsidy = model.find_component('state_subsidy_' + self.name)
         country_subsidy = model.find_component('country_subsidy_' + self.name)
 
         if self.min_size == 0:
@@ -110,8 +111,8 @@ class CHP(Component):
                                       "price, the cost model 2 is not allowed.")
 
         # model.cons.add(size * 458 + 57433 == invest)
-        annuity = calc_annuity(self.life, invest - subsidy - country_subsidy, self.f_inst, self.f_w,
-                               self.f_op)
+        annuity = calc_annuity(self.life, invest - city_subsidy - state_subsidy - country_subsidy,
+                               self.f_inst, self.f_w, self.f_op)
         model.cons.add(annuity == annual_cost)
 
     def _constraint_power(self, model):

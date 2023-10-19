@@ -1,17 +1,25 @@
-Conditions,Country,Component,Subsidy Lower,Subsidy Upper,Coefficient
-Normal,Germany,HeatPump,0,inf,0.25
-Normal,Germany,SolarThermalCollector,0,inf,0.25
-Normal,Germany,Battery,0,inf,0
-Normal,Germany,GasBoiler,0,inf,0
-Normal,Germany,ElectricBoiler,0,inf,0
-Normal,Germany,HotWaterStorage,0,inf,0
-Normal,Germany,PV,0,inf,0
-Normal,Germany,CHP,0,inf,0
-Exchange premium for oil,Germany,HeatPump,0,inf,0.4
-Exchange premium for oil,Germany,SolarThermalCollector,0,inf,0.35
-Exchange premium for oil,Germany,Battery,0,inf,0
-Exchange premium for oil,Germany,GasBoiler,0,inf,0
-Exchange premium for oil,Germany,ElectricBoiler,0,inf,0
-Exchange premium for oil,Germany,HotWaterStorage,0,inf,0
-Exchange premium for oil,Germany,PV,0,inf,0
-Exchange premium for oil,Germany,CHP,0,inf,0
+Conditions,Country,Component,Building Type,Invest Lower,Invest Upper,Coefficient,Constant
+Normal,Germany,HeatPumpAirWater,Allgemein,0,2000,0,0
+Normal,Germany,HeatPumpAirWater,Allgemein,2000,inf,0.25,0
+Normal,Germany,HeatPumpBrineWater,Allgemein,0,2000,0,0
+Normal,Germany,HeatPumpBrineWater,Allgemein,2000,inf,0.3,0
+Normal,Germany,SolarThermalCollectorFlatPlate,Allgemein,0,2000,0,0
+Normal,Germany,SolarThermalCollectorFlatPlate,Allgemein,2000,inf,0.25,0
+Normal,Germany,SolarThermalCollectorTube,Allgemein,0,2000,0,0
+Normal,Germany,SolarThermalCollectorTube,Allgemein,2000,inf,0.25,0
+Normal,Germany,Biomasseheizungen,Allgemein,0,2000,0,0
+Normal,Germany,Biomasseheizungen,Allgemein,2000,inf,0.1,0
+Normal,Germany,Brennstoffzellenheizungen,Allgemein,0,2000,0,0
+Normal,Germany,Brennstoffzellenheizungen,Allgemein,2000,inf,0.25,0
+Exchange premium for oil,Germany,HeatPumpAirWater,Allgemein,0,2000,0,0
+Exchange premium for oil,Germany,HeatPumpAirWater,Allgemein,2000,inf,0.35,0
+Exchange premium for oil,Germany,HeatPumpBrineWater,Allgemein,0,2000,0,0
+Exchange premium for oil,Germany,HeatPumpBrineWater,Allgemein,2000,inf,0.4,0
+Exchange premium for oil,Germany,SolarThermalCollectorFlatPlate,Allgemein,0,2000,0,0
+Exchange premium for oil,Germany,SolarThermalCollectorFlatPlate,Allgemein,2000,inf,0.35,0
+Exchange premium for oil,Germany,SolarThermalCollectorTube,Allgemein,0,2000,0,0
+Exchange premium for oil,Germany,SolarThermalCollectorTube,Allgemein,2000,inf,0.35,0
+Exchange premium for oil,Germany,Biomasseheizungen,Allgemein,0,2000,0,0
+Exchange premium for oil,Germany,Biomasseheizungen,Allgemein,2000,inf,0.2,0
+Exchange premium for oil,Germany,Brennstoffzellenheizungen,Allgemein,0,2000,0,0
+Exchange premium for oil,Germany,Brennstoffzellenheizungen,Allgemein,2000,inf,0.35,0

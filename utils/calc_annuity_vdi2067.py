@@ -158,14 +158,16 @@ if __name__ == "__main__":
     print(a_n)
 """
 
-"""
-invest = 9302.0684
-subsidy = 6000
+
+invest = 5400
+city_subsidy = 810
+state_subsidy = 0
+country_subsidy = 0
 t_n = 15
-f_inst = 0.05
+f_inst = 0.01
 f_w = 0.015
 f_op = 20
 
-annuity = calc_annuity(t_n, invest - subsidy, f_inst, f_w, f_op)
+annuity = calc_annuity(t_n, invest - city_subsidy - state_subsidy - country_subsidy, f_inst, f_w, f_op)
 print("Annuity for the PV component: {:.8f} EUR/year".format(annuity))
-"""
+

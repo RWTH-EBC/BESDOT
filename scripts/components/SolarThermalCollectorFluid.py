@@ -13,6 +13,7 @@ unit_switch_W = 1000  # Wh/kWh
 unit_switch_J = 3600 * 1000  # J/kWh
 small_num = 0.00001
 
+
 class SolarThermalCollectorFluid(FluidComponent):
 
     def __init__(self, comp_name, temp_profile, irr_profile,

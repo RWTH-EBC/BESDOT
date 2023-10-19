@@ -8,7 +8,7 @@ import warnings
 small_nr = 0.00001
 
 script_folder = os.path.dirname(os.path.abspath(__file__))
-csv_file_path = os.path.join(script_folder, '../..', 'data', 'subsidy', 'state_subsidy_policy.csv')
+csv_file_path = os.path.join(script_folder, '../..', 'data', 'subsidy', 'state_subsidy.csv')
 subsidy_data = pd.read_csv(csv_file_path)
 
 
@@ -21,19 +21,20 @@ class StateSubsidy(Subsidy):
 
 
 class StateSubsidyComponent(StateSubsidy):
-    def __init__(self, state, component_name, comp_type='None', bld_typ='None', user='None'):
+    def __init__(self, state, component_name, bld_typ='Allgemein', user='None', conditions='Normal'):
         super().__init__(name='state_subsidy', typ='purchase', components=[component_name])
         self.energy_pair = []
         self.state = state
-        self.comp_type = comp_type
         self.user = user
         self.bld_typ = bld_typ
+        self.conditions = conditions
         self.subsidy_data = subsidy_data
         self.component_name = component_name
 
     def filter_subsidy_data(self):
         return subsidy_data[(subsidy_data['State'] == self.state) &
                             (subsidy_data['User'] == self.user) &
+                            (subsidy_data['Conditions'] == self.conditions) &
                             (subsidy_data['Building Type'] == self.bld_typ) &
                             (subsidy_data['Component'] == self.component_name)]
 
@@ -58,11 +59,13 @@ class StateSubsidyComponent(StateSubsidy):
         matching_subsidy_found = False
 
         for idx, row in self.subsidy_data.iterrows():
-            if row['State'] == self.state and row['Component Type'] == self.comp_type and row['User'] == self.user and\
-                    row['Building Type'] == self.bld_typ and row['Component'] == self.component_name:
+            if row['State'] == self.state and row['User'] == self.user \
+                    and row['Building Type'] == self.bld_typ \
+                    and row['Component'] == self.component_name\
+                    and row['Conditions'] == self.conditions:
 
-                lower_bound = row['Size Lower']
-                upper_bound = row['Size Upper']
+                lower_bound = row['Invest Lower']
+                upper_bound = row['Invest Upper']
                 coefficient = row['Coefficient']
                 constant = row['Constant']
 
@@ -74,7 +77,7 @@ class StateSubsidyComponent(StateSubsidy):
                     invest_constraint = pyo.Constraint(expr=invest >= lower_bound)
                 else:
                     invest_constraint_lower = pyo.Constraint(expr=invest >= lower_bound)
-                    invest_constraint_upper = pyo.Constraint(expr=invest <= upper_bound - small_nr)
+                    invest_constraint_upper = pyo.Constraint(expr=invest <= upper_bound)
 
                 state_subsidy_constraint = pyo.Constraint(expr=state_subsidy == coefficient * invest + constant)
 
@@ -104,16 +107,17 @@ class StateSubsidyComponent(StateSubsidy):
         tariff_disjunction_expr = [model.find_component(f'{self.name}_{comp_name}_tariff_{idx}')
                                    for idx, row in self.subsidy_data.iterrows()
                                    if row['State'] == self.state and row['User'] == self.user
-                                   and row['Component Type'] == self.comp_type and row['Building Type'] == self.bld_typ
-                                   and row['Component'] == self.component_name]
+                                   and row['Building Type'] == self.bld_typ
+                                   and row['Component'] == self.component_name
+                                   and row['Conditions'] == self.conditions]
 
         # Add the default tariff to the list if no matching subsidy was found
         if not matching_subsidy_found:
             tariff_disjunction_expr.append(model.find_component(f'{self.name}_{comp_name}_default_tariff'))
 
         dj_subsidy = Disjunction(expr=tariff_disjunction_expr)
-        model.add_component(f'disjunction_{self.name}_{self.state}_{self.comp_type}_{self.user}_'
-                            f'{self.bld_typ}_{comp_name}', dj_subsidy)
+        model.add_component(f'disjunction_{self.name}_{self.state}_{self.user}_'
+                            f'{self.bld_typ}_{self.conditions}_{comp_name}', dj_subsidy)
 
     def add_vars(self, model):
         pass

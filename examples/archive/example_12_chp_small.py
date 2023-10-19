@@ -2,9 +2,9 @@ import os
 from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
-from scripts.subsidies.EEG_new import EEG
+from scripts.subsidies.country_subsidy_EEG import EEG
 from scripts.subsidies.city_subsidy_kurz import CitySubsidyComponent
-from scripts.subsidies.country_subsidy_BAFA_kurz import CountrySubsidyComponent
+from scripts.subsidies.country_subsidy_BAFA import CountrySubsidyComponent
 # import utils.post_solar_chp as post_pro
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

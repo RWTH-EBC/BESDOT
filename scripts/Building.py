@@ -3,16 +3,27 @@ import pyomo.environ as pyo
 # import numpy as np
 # import pandas as pd
 from scripts.components.Storage import Storage
-from scripts.subsidies.EEG_new import EEG
-from scripts.subsidies.city_subsidy_kurz import CitySubsidyComponent
-from scripts.subsidies.country_subsidy_BAFA_kurz import CountrySubsidyComponent
-from scripts.subsidies.state_subsidy_kurz import StateSubsidyComponent
+from scripts.subsidies.country_subsidy_EEG import EEG
+from scripts.subsidies.country_subsidy_BAFA import CountrySubsidyComponent
+from scripts.subsidies.state_subsidy import StateSubsidyComponent
+from scripts.subsidies.city_subsidy import CitySubsidyComponent
 from utils.gen_heat_profile import *
 from utils.gen_elec_profile import gen_elec_profile
 from utils import get_all_class
 from utils.gen_hot_water_profile import gen_hot_water_profile
 
 module_dict = get_all_class.run()
+
+# todo: What I want to do is to identify if the building is NWG or WG,
+#  for example, if my building is Verwaltungsgebäude, then it is in the
+#  scope of NWG, so that I can directly select NWG in the selection of
+#  the type of building for the subsidy later on.
+building_typ = ["Verwaltungsgebäude", "Büro und Dienstleistungsgebäude",
+                "Hochschule und Forschung", "Gesundheitswesen",
+                "Bildungseinrichtungen", "Kultureinrichtungen",
+                "Sporteinrichtungen", "Beherbergen und Verpflegen",
+                "Gewerbliche und industrielle", "Verkaufsstätten",
+                "Technikgebäude", "Wohngebäude"]
 
 
 class Building(object):
@@ -27,25 +38,7 @@ class Building(object):
             self.solar_area = self.area * 0.1
         else:
             self.solar_area = solar_area
-
-        # todo: What I want to do is to identify if the building is NWG or not,
-        #  for example, if my building is Verwaltungsgebäude, then it is in the
-        #  scope of NWG, so that I can directly select NWG in the selection of
-        #  the type of building for the subsidy later on.
-        nwg_typ = ["Verwaltungsgebäude", "Büro und Dienstleistungsgebäude",
-                   "Hochschule und Forschung", "Gesundheitswesen",
-                   "Bildungseinrichtungen", "Kultureinrichtungen",
-                   "Sporteinrichtungen", "Beherbergen und Verpflegen",
-                   "Gewerbliche und industrielle", "Verkaufsstätten",
-                   "Technikgebäude"]
-
-        if bld_typ in nwg_typ:
-            self.building_typ = 'Verwaltungsgebäude'
-        elif bld_typ == 'Wohngebäude':
-            self.building_typ = 'Wohngebaude'
-        else:
-            self.building_typ = bld_typ
-
+        self.building_typ = bld_typ
         self.annual_demand = {"elec_demand": 0,
                               "heat_demand": 0,
                               "cool_demand": 0,
@@ -180,7 +173,8 @@ class Building(object):
                 min_size = self.topology['min_size'][item]
                 max_size = self.topology['max_size'][item]
                 current_size = self.topology['current_size'][item]
-                if comp_type in ['HeatPump', 'GasHeatPump', 'HeatPumpFluid',
+                if comp_type in ['HeatPump', 'HeatPumpAirWater', 'HeatPumpBrineWater',
+                                 'GasHeatPump', 'HeatPumpFluid',
                                  'HeatPumpQli', 'HeatPumpFluidQli',
                                  'AirHeatPumpFluid', 'UnderfloorHeat']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
@@ -197,6 +191,8 @@ class Building(object):
                                                       max_size=max_size,
                                                       current_size=current_size)
                 elif comp_type in ['PV', 'SolarThermalCollector',
+                                   'SolarThermalCollectorFlatPlate',
+                                   'SolarThermalCollectorTube',
                                    'SolarThermalCollectorFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       temp_profile=env.temp_profile,
@@ -256,15 +252,19 @@ class Building(object):
                 cluster_profile = cluster['hot_water_demand'].tolist()
                 self.components[comp_name].update_profile(
                     consum_profile=cluster_profile)
-            if self.topology['comp_type'][item] in ['HeatPump',
+            if self.topology['comp_type'][item] in ['HeatPump', 'HeatPumpAirWater', 'HeatPumpBrineWater',
                                                     'GasHeatPump', 'PV',
                                                     'SolarThermalCollector',
+                                                    'SolarThermalCollectorFlatPlate',
+                                                    'SolarThermalCollectorTube',
                                                     'SolarThermalCollectorFluid',
                                                     'UnderfloorHeat', ]:
                 cluster_profile = cluster['temp'].tolist()
                 self.components[comp_name].update_profile(
                     temp_profile=cluster_profile)
             if self.topology['comp_type'][item] in ['PV', 'SolarThermalCollector',
+                                                    'SolarThermalCollectorFlatPlate',
+                                                    'SolarThermalCollectorTube',
                                                     'SolarThermalCollectorFluid', ]:
                 cluster_profile = cluster['irr'].tolist()
                 self.components[comp_name].update_profile(
@@ -326,6 +326,7 @@ class Building(object):
                         self.components[index].add_energy_flows(
                             'input', 'gas', (input_comp, index))
 
+    """
     def add_eeg_subsidy(self, feed_typ, tariff_rate):
         eeg = EEG(feed_type=feed_typ, tariff_rate=tariff_rate)
         self.subsidy_list.append(eeg)
@@ -337,66 +338,24 @@ class Building(object):
         ]
         self.subsidy_list.extend(city_subsidies)
 
+    def add_state_subsidies(self, state, component_names):
+        state_subsidies = [
+            StateSubsidyComponent(state=state, component_name=name)
+            for name in component_names
+        ]
+        self.subsidy_list.extend(state_subsidies)
+
     def add_country_subsidies(self, country, component_names):
         country_subsidies = [
             CountrySubsidyComponent(country=country, component_name=name)
             for name in component_names
         ]
         self.subsidy_list.extend(country_subsidies)
-
-    """
-    def add_subsidy(self, subsidy, feed_typ=None, tariff_rate=None,
-                    state=None, city=None, country=None):
-        if subsidy == 'all':
-            all_subsidies = []
-            component_names = ['HeatPump', 'PV', 'SolarThermalCollector', 'GasBoiler',
-                               'ElectricBoiler', 'Battery', 'HotWaterStorage']
-
-            for subsidy_comp in self.subsidy_list:
-                if isinstance(subsidy_comp, EEG):
-                    self.add_eeg_subsidy(feed_typ, tariff_rate)
-                    all_subsidies.append(subsidy_comp)
-
-                if isinstance(subsidy_comp, CitySubsidyComponent):
-                    self.add_city_subsidies(state, city, component_names)
-                    all_subsidies.append(subsidy_comp)
-
-                if isinstance(subsidy_comp, CountrySubsidyComponent):
-                    self.add_country_subsidies(country, component_names)
-                    all_subsidies.append(subsidy_comp)
-
-            for subsidy_comp in all_subsidies:
-                subsidy_comp.analyze_topo(self)
-
-            self.subsidy_list.extend(all_subsidies)
-        else:
-            warn("The subsidy " + subsidy + " was not modeled, check again, "
-                 "if something goes wrong.")
     """
 
-    def add_subsidy(self, subsidy, feed_typ=None, tariff_rate=None,
-                    state=None, city=None, country=None):
+    def add_subsidy(self, subsidy):
         if subsidy == 'all':
             pass
-            """
-            all_subsidies = []
-            for subsidy_comp in self.subsidy_list:
-                component_names = []
-
-                if isinstance(subsidy_comp, EEG):
-                    self.add_eeg_subsidy(feed_typ, tariff_rate)
-
-                if isinstance(subsidy_comp, CitySubsidyComponent):
-                    self.add_city_subsidies(state, city, component_names)
-
-                if isinstance(subsidy_comp, CountrySubsidyComponent):
-                    self.add_country_subsidies(country, component_names)
-
-            for subsidy_comp in all_subsidies:
-                subsidy_comp.analyze_topo(self)
-
-            self.subsidy_list.extend(all_subsidies)
-            """
 
         elif isinstance(subsidy, (CitySubsidyComponent, StateSubsidyComponent, CountrySubsidyComponent, EEG)):
             self.subsidy_list.append(subsidy)
@@ -404,31 +363,6 @@ class Building(object):
         else:
             warn("The subsidy " + subsidy + "was not modeled, check again, "
                  "if something goes wrong.")
-
-    """
-    def add_subsidy(self, subsidy, feed_typ=None, tariff_rate=None,
-                    state=None, city=None, country=None):
-        if subsidy == 'all':
-            all_subsidies = []
-
-            for subsidy_comp in self.subsidy_list:
-                if isinstance(subsidy_comp, CitySubsidyComponent) \
-                        or isinstance(subsidy_comp, CountrySubsidyComponent)\
-                        or isinstance(subsidy_comp, EEG):
-                    all_subsidies.append(subsidy_comp)
-
-            for subsidy_comp in all_subsidies:
-                subsidy_comp.analyze_topo(self)
-
-            self.subsidy_list.extend(all_subsidies)
-
-        elif isinstance(subsidy, (CitySubsidyComponent, CountrySubsidyComponent, EEG)):
-            self.subsidy_list.append(subsidy)
-            subsidy.analyze_topo(self)
-        else:
-            warn("The subsidy " + subsidy + "was not modeled, check again, "
-                 "if something goes wrong.")
-        """
 
     def add_vars(self, model):
         for energy in self.energy_flows.keys():
@@ -548,6 +482,14 @@ class Building(object):
                                                                 component))
             elif isinstance(self.components[component],
                             module_dict['SolarThermalCollector']):
+                solar_area_var_list.append(model.find_component('solar_area_' +
+                                                                component))
+            elif isinstance(self.components[component],
+                            module_dict['SolarThermalCollectorFlatPlate']):
+                solar_area_var_list.append(model.find_component('solar_area_' +
+                                                                component))
+            elif isinstance(self.components[component],
+                            module_dict['SolarThermalCollectorTube']):
                 solar_area_var_list.append(model.find_component('solar_area_' +
                                                                 component))
             elif isinstance(self.components[component],

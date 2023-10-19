@@ -1,0 +1,22 @@
+State,Component,Conditions,User,Building Type,Invest Lower,Invest Upper,Coefficient,Constant
+Schleswig-Holstein,Battery,None,None,Allgemein,0,1500,0.5,0
+Schleswig-Holstein,Battery,None,None,Allgemein,1500,inf,0,750
+Schleswig-Holstein,HeatPumpAirWater,Normal,None,Allgemein,0,5714.285714,0.35,0
+Schleswig-Holstein,HeatPumpAirWater,Normal,None,Allgemein,5714.285714,inf,0,2000
+Schleswig-Holstein,HeatPumpBrineWater,Normal,None,Allgemein,0,6666.666667,0.3,0
+Schleswig-Holstein,HeatPumpBrineWater,Normal,None,Allgemein,6666.666667,inf,0,2000
+Schleswig-Holstein,HeatPumpAirWater,Exchange premium for oil,None,Allgemein,0,8000,0.25,0
+Schleswig-Holstein,HeatPumpAirWater,Exchange premium for oil,None,Allgemein,8000,inf,0,2000
+Schleswig-Holstein,HeatPumpBrineWater,Exchange premium for oil,None,Allgemein,0,10000,0.2,0
+Schleswig-Holstein,HeatPumpBrineWater,Exchange premium for oil,None,Allgemein,10000,inf,0,2000
+Schleswig-Holstein,SolarThermalCollectorFlatPlate,Normal,None,Allgemein,0,2571.428571,0.35,0
+Schleswig-Holstein,SolarThermalCollectorFlatPlate,Normal,None,Allgemein,2571.428571,inf,0,900
+Schleswig-Holstein,SolarThermalCollectorTube,Normal,None,Allgemein,0,2571.428571,0.35,0
+Schleswig-Holstein,SolarThermalCollectorTube,Normal,None,Allgemein,2571.428571,inf,0,900
+Schleswig-Holstein,SolarThermalCollectorFlatPlate,Exchange premium for oil,None,Allgemein,0,3600,0.25,0
+Schleswig-Holstein,SolarThermalCollectorFlatPlate,Exchange premium for oil,None,Allgemein,3600,inf,0,900
+Schleswig-Holstein,SolarThermalCollectorTube,Exchange premium for oil,None,Allgemein,0,3600,0.25,0
+Schleswig-Holstein,SolarThermalCollectorTube,Exchange premium for oil,None,Allgemein,3600,inf,0,900
+Niedersachsen,HeatPumpAirWater,None,None,Neubau,0,inf,0,500
+Niedersachsen,HeatPumpBrineWater,None,None,Bestandbau,0,inf,0,7250
+Niedersachsen,HeatPumpBrineWater,None,None,Neubau,0,inf,0,5000

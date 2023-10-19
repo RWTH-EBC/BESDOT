@@ -12,11 +12,15 @@ from .HeatExchangerFluid import HeatExchangerFluid
 from .HeatGrid import HeatGrid
 from .HeatGridFluid import HeatGridFluid
 from .HeatPump import HeatPump
+from .HeatPumpAirWater import HeatPumpAirWater
+from .HeatPumpBrineWater import HeatPumpBrineWater
 from .HotWaterConsumption import HotWaterConsumption
 from .HotWaterStorage import HotWaterStorage
 from .PV import PV
 from .Radiator import Radiator
 from .SolarThermalCollector import SolarThermalCollector
+from .SolarThermalCollectorFlatPlate import SolarThermalCollectorFlatPlate
+from .SolarThermalCollectorTube import SolarThermalCollectorTube
 from .GasGrid import GasGrid
 from .UnderfloorHeat import UnderfloorHeat
 from .StratificationStorage import StratificationStorage
