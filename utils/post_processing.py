@@ -3,6 +3,7 @@ Tool to analyse the output csv from optimization
 """
 
 import os
+import re
 import copy
 import pandas as pd
 import numpy as np
@@ -147,7 +148,7 @@ def save_non_time_series(csv_file, name=''):
     new_df.to_excel(non_timeseries_path)
 
 
-def save_all_data_network(input_csv, output_prefix):
+def save_all_data_network(input_csv, output_prefix, time_index):
     # Load the data from the CSV file
     data = pd.read_csv(input_csv)
 
@@ -158,23 +159,78 @@ def save_all_data_network(input_csv, output_prefix):
     prefix_counts = data['prefix'].value_counts()
 
     # Filter data based on the count of states
-    data_24_states = data[data['prefix'].isin(prefix_counts[prefix_counts ==
-                                                            24].index)]
-    data_multi_states = data[data['prefix'].isin(
-        prefix_counts[(prefix_counts > 1) & (prefix_counts != 24)].index)]
+    data_timestep_states = data[data['prefix'].isin(prefix_counts[
+                                                        prefix_counts ==
+                                                        time_index].index)]
     data_single_state = data[data['prefix'].isin(prefix_counts[prefix_counts
                                                                == 1].index)]
+    # data_multi_states = data[data['prefix'].isin(
+    #     prefix_counts[(prefix_counts > 1) & (prefix_counts != time_index)].index)]
+
+    connect_data = data[data['var'].str.contains('building_connect', na=False)]
+
+    edge_data = data[data['var'].str.contains('energy_edge', na=False)]
+    edge_data['time_index'] = edge_data['var'].str.extract(
+        r'.*\,(\d+)\]$').astype(int)
+    edge_data['new_var'] = edge_data.apply(
+        lambda row: re.sub(r',\d+\]$', ']', row['var']), axis=1)
+    edge_data = edge_data.pivot(index='new_var', columns='time_index', values='value')
+    edge_data = edge_data.groupby(edge_data.index).first()
+
+    on_edge_data = data[data['var'].str.contains('energy_on_edge', na=False)]
+    on_edge_data['time_index'] = on_edge_data['var'].str.extract(
+        r'.*\,(\d+)\]$').astype(int)
+    on_edge_data['new_var'] = on_edge_data.apply(
+        lambda row: re.sub(r',\d+\]$', ']', row['var']), axis=1)
+    on_edge_data = on_edge_data.pivot(index='new_var', columns='time_index',
+                                values='value')
+    on_edge_data = on_edge_data.groupby(on_edge_data.index).first()
 
     # Save data to Excel files
     output_path = os.path.split(input_csv)
-    data_24_states.drop(columns='prefix').to_excel(os.path.join(output_path[0],
-        f"{output_prefix}_24_states.xlsx"), index=False)
-    data_multi_states.drop(columns='prefix').to_excel(os.path.join(
-        output_path[0], f"{output_prefix}_multi_states.xlsx"), index=False)
+    data_timestep_states.drop(columns='prefix').to_excel(os.path.join(output_path[0],
+        f"{output_prefix}_timestep_states.xlsx"), index=False)
+    connect_data.drop(columns='prefix').to_excel(os.path.join(
+        output_path[0], f"{output_prefix}_connect_data.xlsx"), index=False)
+    edge_data.to_excel(os.path.join(
+        output_path[0], f"{output_prefix}_edge_data.xlsx"), index=True)
+    on_edge_data.to_excel(os.path.join(
+        output_path[0], f"{output_prefix}_on_edge_data.xlsx"), index=True)
     data_single_state.drop(columns='prefix').to_excel(os.path.join(
         output_path[0], f"{output_prefix}_single_state.xlsx"), index=False)
 
     print("Data processing completed and saved to Excel files.")
+
+
+# def save_all_data_network(input_csv, output_prefix, max_time_index):
+#     # Load the data from the CSV file
+#     data = pd.read_csv(input_csv)
+#
+#     # Extract the time index from the 'var' column
+#     data['time_index'] = data['var'].str.extract(r'.*\[(\d+)\]$')
+#     # Extract the prefix of each state (excluding the time label)
+#     data['prefix'] = data['var'].str.extract(r'(.*)\[')
+#
+#     # Drop rows with NaN in 'time_index' column
+#     data = data.dropna(subset=['time_index'])
+#
+#     # Convert 'time_index' column to integer
+#     data['time_index'] = data['time_index'].astype(int)
+#
+#     # Pivot the data to wide format
+#     wide_data = data.pivot(index='prefix', columns='time_index', values='value')
+#
+#     # Filter data based on the count of states
+#     data_24_states = wide_data[wide_data.count(axis=1) == max_time_index]
+#     data_multi_states = wide_data[(wide_data.count(axis=1) > 1) & (
+#                 wide_data.count(axis=1) != max_time_index)]
+#     data_single_state = wide_data[wide_data.count(axis=1) == 1]
+#
+#     # Save to Excel (or further processing)
+#     with pd.ExcelWriter(output_prefix + '_output.xlsx') as writer:
+#         data_24_states.to_excel(writer, sheet_name='24_states')
+#         data_multi_states.to_excel(writer, sheet_name='multi_states')
+#         data_single_state.to_excel(writer, sheet_name='single_state')
 
 
 def plot_all(csv_file, time_interval, save_path=None):
@@ -875,6 +931,18 @@ def plot_network_result(network_result, time="average"):
         lon_start, lat_start, lon_end, lat_end, time = map(float, parts)
         return lon_start, lat_start, lon_end, lat_end, time, source
 
+    def extract_data_from_pivot(row_name):
+        if 'energy_edges' in row_name:
+            source = 'energy_edges'
+        elif 'energy_on_edges' in row_name:
+            source = 'energy_on_edges'
+        else:
+            return None, None, None, None, None
+
+        parts = row_name.strip('energy_edges[').strip(']').split(',')
+        lon_start, lat_start, lon_end, lat_end = map(float, parts)
+        return lon_start, lat_start, lon_end, lat_end, source
+
     def plot_energy_on_edges(dataframe, source, time="average"):
         source_data = dataframe[dataframe['source'] == source]
 
@@ -957,14 +1025,29 @@ def plot_network_result(network_result, time="average"):
         plt.show()
 
     # pd.set_option('display.max_columns', None)
-    data = pd.read_excel(network_result)
-    parsed_data_updated = data['var'].apply(parse_variables)
-    data[['lon_start', 'lat_start', 'lon_end', 'lat_end', 'time', 'source']] = \
-        pd.DataFrame(parsed_data_updated.tolist(), index=data.index)
-    data = data.drop(columns=['Unnamed: 0', 'var'])
-    data_cleaned = data.dropna(
-        subset=['lon_start', 'lat_start', 'lon_end', 'lat_end', 'time',
-                'source'])
+    data = pd.read_excel(network_result, index_col=0)
+    # parsed_data_updated = data['var'].apply(parse_variables)
+    # data[['lon_start', 'lat_start', 'lon_end', 'lat_end', 'time', 'source']] = \
+    #     pd.DataFrame(parsed_data_updated.tolist(), index=data.index)
+    # data = data.drop(columns=['Unnamed: 0', 'var'])
+    # data_cleaned = data.dropna(
+    #     subset=['lon_start', 'lat_start', 'lon_end', 'lat_end', 'time',
+    #             'source'])
+    #
+    # plot_energy_on_edges(data_cleaned, source="energy_edges", time=time)
+    data_list = []
+    for index, row in data.iterrows():
+        lon_start, lat_start, lon_end, lat_end, source = extract_data_from_pivot(
+            index)
+        for col, value in row.iteritems():
+            if not np.isnan(value):
+                data_list.append(
+                    [lon_start, lat_start, lon_end, lat_end, col, source,
+                     value])
+
+    data_cleaned = pd.DataFrame(data_list,
+                                columns=['lon_start', 'lat_start', 'lon_end',
+                                         'lat_end', 'time', 'source', 'value'])
 
     plot_energy_on_edges(data_cleaned, source="energy_edges", time=time)
 
