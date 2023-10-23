@@ -5,6 +5,7 @@
 
 # output results or intermediate results
 /data/opt_output/
+/data/weather_data/
 /data/cls_file/
 /data/denmark_energy_hub/
 /utils/analysis_lp_new.txt
