@@ -54,7 +54,11 @@ class StateSubsidyComponent(StateSubsidy):
         comp_name = self.energy_pair[0][0]
 
         invest = model.find_component('invest_' + comp_name)
+        city_subsidy = model.find_component('city_subsidy_' + comp_name)
         state_subsidy = model.find_component('state_subsidy_' + comp_name)
+        country_subsidy = model.find_component('country_subsidy_' + comp_name)
+
+        model.cons.add(state_subsidy <= invest - city_subsidy - country_subsidy - small_nr)
 
         matching_subsidy_found = False
 
@@ -106,7 +110,8 @@ class StateSubsidyComponent(StateSubsidy):
         # Create a list of tariffs for the Disjunction
         tariff_disjunction_expr = [model.find_component(f'{self.name}_{comp_name}_tariff_{idx}')
                                    for idx, row in self.subsidy_data.iterrows()
-                                   if row['State'] == self.state and row['User'] == self.user
+                                   if row['State'] == self.state
+                                   and row['User'] == self.user
                                    and row['Building Type'] == self.bld_typ
                                    and row['Component'] == self.component_name
                                    and row['Conditions'] == self.conditions]

@@ -52,7 +52,11 @@ class CountrySubsidyComponent(CountrySubsidyBAFA):
         comp_name = self.energy_pair[0][0]
 
         invest = model.find_component('invest_' + comp_name)
+        city_subsidy = model.find_component('city_subsidy_' + comp_name)
+        state_subsidy = model.find_component('state_subsidy_' + comp_name)
         country_subsidy = model.find_component('country_subsidy_' + comp_name)
+
+        model.cons.add(country_subsidy <= invest - city_subsidy - state_subsidy - small_nr)
 
         matching_subsidy_found = False
 
@@ -64,12 +68,15 @@ class CountrySubsidyComponent(CountrySubsidyBAFA):
                 lower_bound = row['Invest Lower']
                 upper_bound = row['Invest Upper']
 
+                invest_constraint = None
                 invest_constraint_lower = None
                 invest_constraint_upper = None
 
                 if upper_bound == float('inf'):
-                    invest_constraint_lower = pyo.Constraint(expr=country_subsidy >= lower_bound)
-                    invest_constraint_upper = pyo.Constraint(expr=country_subsidy <= upper_bound - small_nr)
+                    invest_constraint = pyo.Constraint(expr=invest >= lower_bound)
+                else:
+                    invest_constraint_lower = pyo.Constraint(expr=invest >= lower_bound)
+                    invest_constraint_upper = pyo.Constraint(expr=invest <= upper_bound)
 
                 country_subsidy_constraint = pyo.Constraint(expr=country_subsidy == coefficient * invest + constant)
 
@@ -78,22 +85,26 @@ class CountrySubsidyComponent(CountrySubsidyBAFA):
                 model.add_component(tariff_name, tariff)
 
                 if upper_bound == float('inf'):
+                    tariff.add_component(tariff_name + '_invest_constraint', invest_constraint)
+                else:
                     tariff.add_component(tariff_name + '_invest_constraint_lower', invest_constraint_lower)
                     tariff.add_component(tariff_name + '_invest_constraint_upper', invest_constraint_upper)
 
                 tariff.add_component(tariff_name + '_country_subsidy_constraint', country_subsidy_constraint)
+
                 matching_subsidy_found = True
 
         if not matching_subsidy_found:
             default_subsidy_constraint = pyo.Constraint(expr=country_subsidy == 0)
             tariff_name = f'{self.name}_{self.energy_pair[0][0]}_default_tariff'
             tariff = Disjunct()
-            tariff.add_component(tariff_name + '_subsidy_constraint', default_subsidy_constraint)
+            tariff.add_component(tariff_name + '_country_subsidy_constraint', default_subsidy_constraint)
             model.add_component(tariff_name, tariff)
 
         tariff_disjunction_expr = [model.find_component(f'{self.name}_{comp_name}_tariff_{idx}')
                                    for idx, row in self.subsidy_data.iterrows()
-                                   if row['Country'] == self.country and row['Conditions'] == self.conditions
+                                   if row['Country'] == self.country
+                                   and row['Conditions'] == self.conditions
                                    and row['Component'] == self.component_name
                                    and row['Building Type'] == self.bld_typ]
 

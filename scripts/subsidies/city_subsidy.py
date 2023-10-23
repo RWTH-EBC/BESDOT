@@ -57,6 +57,10 @@ class CitySubsidyComponent(CitySubsidy):
         area = model.find_component('solar_area_' + comp_name)
         component_size = model.find_component('size_' + comp_name)
         city_subsidy = model.find_component('city_subsidy_' + comp_name)
+        state_subsidy = model.find_component('state_subsidy_' + comp_name)
+        country_subsidy = model.find_component('country_subsidy_' + comp_name)
+
+        model.cons.add(city_subsidy <= invest - state_subsidy - country_subsidy - small_nr)
 
         matching_subsidy_found = False
 
@@ -101,7 +105,7 @@ class CitySubsidyComponent(CitySubsidy):
 
                     else:
                         size_constraint_lower = pyo.Constraint(expr=component_size >= lower_bound_size)
-                        size_constraint_upper = pyo.Constraint(expr=component_size <= upper_bound_size - small_nr)
+                        size_constraint_upper = pyo.Constraint(expr=component_size <= upper_bound_size)
 
                     city_subsidy_constraint_size = pyo.Constraint(expr=city_subsidy ==
                                                                   coefficient_size * component_size + constant_size)
@@ -113,11 +117,11 @@ class CitySubsidyComponent(CitySubsidy):
 
                 if invest_based_subsidy:
                     if upper_bound_invest == float('inf'):
-                        invest_constraint = pyo.Constraint(expr=component_size >= lower_bound_invest)
+                        invest_constraint = pyo.Constraint(expr=invest >= lower_bound_invest)
 
                     else:
                         invest_constraint_lower = pyo.Constraint(expr=invest >= lower_bound_invest)
-                        invest_constraint_upper = pyo.Constraint(expr=invest <= upper_bound_invest - small_nr)
+                        invest_constraint_upper = pyo.Constraint(expr=invest <= upper_bound_invest)
 
                     city_subsidy_constraint_invest = pyo.Constraint(expr=city_subsidy ==
                                                                     coefficient_invest * invest + constant_invest)
@@ -129,14 +133,14 @@ class CitySubsidyComponent(CitySubsidy):
 
                 if area_based_subsidy:
                     if upper_bound_area == float('inf'):
-                        area_constraint = pyo.Constraint(expr=area >= lower_bound_area)
+                        area_constraint = pyo.Constraint(expr=area >= lower_bound_area + small_nr)
 
                     else:
-                        area_constraint_lower = pyo.Constraint(expr=area >= lower_bound_area)
-                        area_constraint_upper = pyo.Constraint(expr=area <= upper_bound_area - small_nr)
+                        area_constraint_lower = pyo.Constraint(expr=area >= lower_bound_area + small_nr)
+                        area_constraint_upper = pyo.Constraint(expr=area <= upper_bound_area)
 
-                    city_subsidy_constraint_area = pyo.Constraint(expr=city_subsidy ==
-                                                                  coefficient_area * area + constant_area)
+                    city_subsidy_constraint_area = pyo.Constraint(expr=(city_subsidy ==
+                                                                  coefficient_area * area + constant_area))
 
                 tariff_name = f'{self.name}_{comp_name}_tariff_{idx}'
                 tariff = Disjunct()

@@ -20,16 +20,16 @@ eeg_tariff_rate = 'Feste Verguetung'  # Feste Verguetung, Direkte Vermarktung
 # city_bld_typ = 'EFH;ZFH;MFH'  # Allgemein, Bestandbau, Neubau,
 # [EFH;ZFH;MFH], [EFH], [EFH;ZFH], [MFH], [NWG], [MFH;NWG]
 # state_bld_typ = 'Allgemein'  # Allgemein, Neubau, Bestandbau
-city_user = 'None'
+user = 'None'
 # Baden-Baden: SWBAD; Mannheim: basic, premium; Tuebingen: Stadtwerke Tuebingen;
 # Jena: basic, premium
+conditions = 'Normal'  # Normal, Exchange premium for oil
 
 ####################################################################################
 
 # Generate project and environment object.
-project_4 = Project(name='Subsidy_Langenau_KM2', typ='building')
-test_env = Environment(time_step=8760, city='Langenau', user=city_user, conditions='Normal')
-
+project_4 = Project(name='Subsidy_Dusseldorf_KM2', typ='building')
+test_env = Environment(time_step=8760, city='Dusseldorf', user=user, conditions=conditions)
 
 city_bld_type_options = find_city_bld_typ(test_env.city)
 print("Please select the Building Type for the city of size or "
@@ -50,7 +50,6 @@ except ValueError:
     print("Invalid input, using the default value.")
     city_bld_typ_choice = None
 
-
 state_bld_type_options = find_state_bld_typ(test_env.state)
 print("Please select the Building Type for the state or "
       "press any key if there are no options:")
@@ -69,7 +68,6 @@ try:
 except ValueError:
     print("Invalid input, using the default value.")
     state_bld_typ_choice = None
-
 
 country_bld_type_options = find_country_bld_typ(test_env.country)
 print("Please select the Building Type for the country or "
@@ -99,11 +97,11 @@ print(f"Building Types for {test_env.country}: {test_env.country_bld_typ}")
 
 ############################################################################
 
-topo_file = os.path.join(base_path, 'data', 'topology', 'basic_no_boi.csv')
+topo_file = os.path.join(base_path, 'data', 'topology', 'basic_new.csv')
 
 # Generate building object and connect to project.
 project_4.add_environment(test_env)
-test_bld_4 = Building(name='bld_4', area=300)
+test_bld_4 = Building(name='bld_4', area=300, bld_typ='Verwaltungsgebäude')
 test_bld_4.add_thermal_profile('heat', test_env)
 test_bld_4.add_elec_profile(test_env.year, test_env)
 test_bld_4.add_topology(topo_file)
@@ -111,10 +109,14 @@ test_bld_4.add_components(test_env)
 
 print(test_bld_4.components)
 
-component_names = ['HeatPumpAirWater', 'HeatPumpBrineWater',
+component_names = [
+                   'HeatPumpAirWater',
+                   'HeatPumpBrineWater',
                    'HotWaterStorage', 'PV', 'Battery',
+                   'SolarThermalCollectorTube',
                    'SolarThermalCollectorFlatPlate',
-                   'SolarThermalCollectorTube']
+                   'GasBoiler', 'ElectricBoiler'
+                   ]
 
 # Generate subsidy object EEG for PV and connect to project.
 eeg = EEG(feed_type=eeg_feed_typ, tariff_rate=eeg_tariff_rate)
@@ -124,6 +126,7 @@ city_subsidies = []
 for name in component_names:
     city_subsidy = CitySubsidyComponent(state=test_env.state,
                                         city=test_env.city,
+                                        user=test_env.user,
                                         component_name=name,
                                         bld_typ=test_env.city_bld_typ)
 
@@ -136,6 +139,8 @@ state_subsidies = []
 for name in component_names:
     state_subsidy = StateSubsidyComponent(state=test_env.state,
                                           component_name=name,
+                                          user=test_env.user,
+                                          conditions=test_env.conditions,
                                           bld_typ=test_env.state_bld_typ)
 
     state_subsidies.append(state_subsidy)
@@ -145,6 +150,7 @@ for state_subsidy in state_subsidies:
 
 country_subsidies = [CountrySubsidyComponent(country=test_env.country,
                                              component_name=name,
+                                             conditions=test_env.conditions,
                                              bld_typ=test_env.country_bld_typ)
                      for name in component_names]
 
@@ -153,14 +159,17 @@ for subsidy in country_subsidies:
 
 project_4.add_building(test_bld_4)
 
-components = ['pv', 'water_tes', 'bat',
+components = [
+              'pv', 'water_tes', 'bat',
               'solar_coll_flat_plate',
               'solar_coll_tube',
+              'air_water_heat_pump',
               'brine_water_heat_pump',
-              'air_water_heat_pump']
+              'boi', 'e_boi'
+              ]
 
 for component in components:
-    test_bld_4.components[component].change_cost_model(new_cost_model=0)
+    test_bld_4.components[component].change_cost_model(new_cost_model=2)
 
 for comp in test_bld_4.components.values():
     comp.show_cost_model()

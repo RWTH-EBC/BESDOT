@@ -18,12 +18,14 @@ module_dict = get_all_class.run()
 #  for example, if my building is Verwaltungsgebäude, then it is in the
 #  scope of NWG, so that I can directly select NWG in the selection of
 #  the type of building for the subsidy later on.
-building_typ = ["Verwaltungsgebäude", "Büro und Dienstleistungsgebäude",
-                "Hochschule und Forschung", "Gesundheitswesen",
-                "Bildungseinrichtungen", "Kultureinrichtungen",
-                "Sporteinrichtungen", "Beherbergen und Verpflegen",
-                "Gewerbliche und industrielle", "Verkaufsstätten",
-                "Technikgebäude", "Wohngebäude"]
+nwg_typ = ["Verwaltungsgebäude", "Büro und Dienstleistungsgebäude",
+           "Hochschule und Forschung", "Gesundheitswesen",
+           "Bildungseinrichtungen", "Kultureinrichtungen",
+           "Sporteinrichtungen", "Beherbergen und Verpflegen",
+           "Gewerbliche und industrielle", "Verkaufsstätten",
+           "Technikgebäude"]
+
+wg_typ = "Wohngebäude"
 
 
 class Building(object):
@@ -453,6 +455,8 @@ class Building(object):
         for item in self.topology.index:
             comp_type = self.topology['comp_type'][item]
             if comp_type in ['PV', 'SolarThermalCollector',
+                             'SolarThermalCollectorFlatPlate',
+                             'SolarThermalCollectorTube',
                              'SolarThermalCollectorFluid']:
                 self._constraint_solar_area(model)
 

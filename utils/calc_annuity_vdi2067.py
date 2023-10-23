@@ -159,11 +159,11 @@ if __name__ == "__main__":
 """
 
 """
-invest = 5400
-city_subsidy = 0
+invest = 15989
+city_subsidy = 3197.8
 state_subsidy = 0
-country_subsidy = 0
-t_n = 15
+country_subsidy = 4796.7
+t_n = 20
 f_inst = 0.01
 f_w = 0.015
 f_op = 20

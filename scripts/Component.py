@@ -333,6 +333,7 @@ class Component(object):
                                self.f_inst, self.f_w, self.f_op)
         model.cons.add(annuity == annual_cost)
 
+    """
     def _constraint_subsidies(self, model):
         for component in self.components:
             pur_subsidy = model.find_component('pur_subsidy_' + component.name)
@@ -353,6 +354,7 @@ class Component(object):
                 model.cons.add(pur_subsidy == pur_subsidy)
             else:
                 model.cons.add(pur_subsidy == 0)
+    """
 
     def constraint_sum_inputs(self, model, energy_type):
         input_flows = []
@@ -391,10 +393,10 @@ class Component(object):
         self._constraint_maxpower(model)
         self._constraint_vdi2067(model)
 
-        if len(self.subsidy_list) > 0:
-            self._constraint_subsidies(model)
-            for subsidy in self.subsidy_list:
-                subsidy.add_cons(model)
+        # if len(self.subsidy_list) > 0:
+        #    self._constraint_subsidies(model)
+        #    for subsidy in self.subsidy_list:
+        #        subsidy.add_cons(model)
 
     def add_vars(self, model):
         comp_size = pyo.Var(bounds=(self.min_size, self.max_size))

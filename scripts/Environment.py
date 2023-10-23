@@ -55,7 +55,7 @@ def _read_weather_file(weather_file=None, city='Dusseldorf', year=2021):
 
 class Environment(object):
 
-    def __init__(self, weather_file=None, city='Dusseldorf', year=2021,
+    def __init__(self, weather_file=None, city='Lindenberg', year=2021,
                  start_time=0, time_step=8760, user=None, conditions=None):
 
         city_info = pd.read_csv(city_info_file)
@@ -66,8 +66,8 @@ class Environment(object):
             self.country = city_row.iloc[0]['Country']
         else:
             warnings.warn(f"City {city} not found in city_info.csv. Using default values.")
-            self.city = 'Dusseldorf'
-            self.state = 'NRW'
+            self.city = 'Lindenberg'
+            self.state = 'Bayern'
             self.country = 'Germany'
         # start_time: Start time of the optimization process to be
         # considered, in hours.
