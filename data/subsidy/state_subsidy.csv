@@ -1,4 +1,4 @@
-State,Component,Conditions,User,Building Type,Invest Lower,Invest Upper,Coefficient,Constant
+State,Component,Conditions,User,Building Type,Invest Lower,Invest Upper,Invest Coefficient,Invest Constant
 Schleswig-Holstein,Battery,Normal,None,Allgemein,0,1500,0.5,0
 Schleswig-Holstein,Battery,Normal,None,Allgemein,1500,inf,0,750
 Schleswig-Holstein,HeatPumpAirWater,Normal,None,Allgemein,0,5714.285714,0.35,0

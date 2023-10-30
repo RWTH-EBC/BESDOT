@@ -90,7 +90,7 @@ def calc_operation_cost(t, q, ann, a_0, f_inst, f_w, f_op):
     return a_n_b
 
 
-def calc_annuity(t_n, invest_neu, f_inst, f_w, f_op):
+def calc_annuity(t_n, invest, f_inst, f_w, f_op):
     """
     This function calculates the annuity of technical building installations
     according to VDI 2067.
@@ -124,7 +124,7 @@ def calc_annuity(t_n, invest_neu, f_inst, f_w, f_op):
     q = 1.07
 
     ann = annuity_factor(t, q)
-    a_0 = invest_neu
+    a_0 = invest
 
     # The revenue and demand related cost are set in the energy management
     # system class. Because the cost are related to the model variables.
@@ -159,10 +159,10 @@ if __name__ == "__main__":
 """
 
 """
-invest = 15989
-city_subsidy = 3197.8
+invest = 3600
+city_subsidy = 1260
 state_subsidy = 0
-country_subsidy = 4796.7
+country_subsidy = 0
 t_n = 20
 f_inst = 0.01
 f_w = 0.015

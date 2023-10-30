@@ -1,8 +1,6 @@
-Conditions,Country,Component,Building Type,Invest Lower,Invest Upper,Coefficient,Constant
-Normal,Germany,HeatPumpAirWater,Allgemein,0,2000,0,0
-Normal,Germany,HeatPumpAirWater,Allgemein,2000,inf,0.25,0
-Normal,Germany,HeatPumpBrineWater,Allgemein,0,2000,0,0
-Normal,Germany,HeatPumpBrineWater,Allgemein,2000,inf,0.3,0
+Conditions,Country,Component,Building Type,Invest Lower,Invest Upper,Invest Coefficient,Invest Constant
+Normal,Germany,HeatPumpAirWater,Allgemein,0,inf,0.25,0
+Normal,Germany,HeatPumpBrineWater,Allgemein,0,inf,0.3,0
 Normal,Germany,SolarThermalCollectorFlatPlate,Allgemein,0,2000,0,0
 Normal,Germany,SolarThermalCollectorFlatPlate,Allgemein,2000,inf,0.25,0
 Normal,Germany,SolarThermalCollectorTube,Allgemein,0,2000,0,0

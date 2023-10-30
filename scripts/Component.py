@@ -278,7 +278,7 @@ class Component(object):
             min_size = self.min_size
 
         if self.cost_model == 0:
-            model.cons.add(invest == size * self.unit_cost)
+            model.cons.add(invest == size * self.unit_cost - city_subsidy - state_subsidy - country_subsidy)
         elif self.cost_model == 1:
             dis_not_select = Disjunct()
             not_select_size = pyo.Constraint(expr=size == 0)
@@ -292,7 +292,7 @@ class Component(object):
             dis_select = Disjunct()
             select_size = pyo.Constraint(expr=size >= min_size)
             select_inv = pyo.Constraint(expr=invest == size * self.unit_cost +
-                                        self.fixed_cost)
+                                        self.fixed_cost - city_subsidy - state_subsidy - country_subsidy)
             model.add_component('dis_select_' + self.name, dis_select)
             dis_select.add_component('select_size_' + self.name, select_size)
             dis_select.add_component('select_inv_' + self.name, select_inv)
@@ -309,7 +309,7 @@ class Component(object):
                 price_data = float(self.cost_pair[i].split(';')[1])
 
                 select_size = pyo.Constraint(expr=size == size_data)
-                select_inv = pyo.Constraint(expr=invest == price_data)
+                select_inv = pyo.Constraint(expr=invest == price_data - city_subsidy - state_subsidy - country_subsidy)
                 pair[i + 1].add_component(
                     self.name + 'select_size_' + str(i + 1),
                     select_size)
@@ -329,32 +329,8 @@ class Component(object):
             disj_size = Disjunction(expr=pair_list)
             model.add_component('disj_size_' + self.name, disj_size)
 
-        annuity = calc_annuity(self.life, invest - city_subsidy - state_subsidy - country_subsidy,
-                               self.f_inst, self.f_w, self.f_op)
+        annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w, self.f_op)
         model.cons.add(annuity == annual_cost)
-
-    """
-    def _constraint_subsidies(self, model):
-        for component in self.components:
-            pur_subsidy = model.find_component('pur_subsidy_' + component.name)
-
-            pur_subsidy_list = []
-            for subsidy in self.subsidy_list:
-                subsidy_var = None
-                if len(subsidy.components) == 1:
-                    subsidy_var = model.find_component('subsidy_' + subsidy.name +
-                                                       '_' + subsidy.components[0])
-                else:
-                    warnings.warn(subsidy.name + " has multiple subsidies for components")
-
-                if subsidy.type == 'purchase':
-                    pur_subsidy_list.append(subsidy_var)
-
-            if len(pur_subsidy_list) > 0:
-                model.cons.add(pur_subsidy == pur_subsidy)
-            else:
-                model.cons.add(pur_subsidy == 0)
-    """
 
     def constraint_sum_inputs(self, model, energy_type):
         input_flows = []

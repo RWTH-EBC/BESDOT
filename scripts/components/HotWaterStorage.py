@@ -94,10 +94,10 @@ class HotWaterStorage(Storage):
             model.add_component(self.name + '_cost_pair', pair)
             pair_list = []
             for i in range(pair_nr):
-                size_data = float(self.cost_pair[i].split(';')[0])
+                volume_data = float(self.cost_pair[i].split(';')[0])
                 price_data = float(self.cost_pair[i].split(';')[1])
 
-                select_size = pyo.Constraint(expr=volume == size_data)
+                select_size = pyo.Constraint(expr=volume == volume_data)
                 select_inv = pyo.Constraint(expr=invest == price_data)
                 pair[i + 1].add_component(
                     self.name + 'select_size_' + str(i + 1),

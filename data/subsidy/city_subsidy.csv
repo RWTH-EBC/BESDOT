@@ -304,7 +304,7 @@ Nordrhein-Westfalen,Koeln,CHP,None,Allgemein,6,12,300,8000,,,,,,,,
 Nordrhein-Westfalen,Koeln,CHP,None,Allgemein,12,25,150,9800,,,,,,,,
 Nordrhein-Westfalen,Koeln,CHP,None,Allgemein,25,50,75,11750,,,,,,,,
 Nordrhein-Westfalen,Koeln,CHP,None,Allgemein,50,inf,0,13625,,,,,,,,
-Nordrhein-Westfalen,Dusseldorf,PV,None,Bestandbau,0,0.6,0,600,,,,,,,,
+Nordrhein-Westfalen,Dusseldorf,PV,None,Bestandbau,0,0.6,0,0,,,,,,,,
 Nordrhein-Westfalen,Dusseldorf,PV,None,Bestandbau,0.6,10,300,0,,,,,,,,
 Nordrhein-Westfalen,Dusseldorf,PV,None,Bestandbau,10,45,200,3000,,,,,,,,
 Nordrhein-Westfalen,Dusseldorf,PV,None,Bestandbau,45,inf,0,10000,,,,,,,,
@@ -318,9 +318,6 @@ Nordrhein-Westfalen,Dusseldorf,HeatPumpAirWater,None,Bestandbau,50,inf,0,4500,,,
 Nordrhein-Westfalen,Dusseldorf,HeatPumpBrineWater,None,Bestandbau,0,25,0,3500,,,,,,,,
 Nordrhein-Westfalen,Dusseldorf,HeatPumpBrineWater,None,Bestandbau,25,50,0,4000,,,,,,,,
 Nordrhein-Westfalen,Dusseldorf,HeatPumpBrineWater,None,Bestandbau,50,inf,0,4500,,,,,,,,
-Nordrhein-Westfalen,Dusseldorf,SolarThermalCollector,None,Bestandbau,,,,,,,,,0,4,0,0
-Nordrhein-Westfalen,Dusseldorf,SolarThermalCollector,None,Bestandbau,,,,,,,,,4,20,200,0
-Nordrhein-Westfalen,Dusseldorf,SolarThermalCollector,None,Bestandbau,,,,,,,,,20,inf,120,0
 Nordrhein-Westfalen,Dusseldorf,SolarThermalCollectorFlatPlate,None,Bestandbau,,,,,,,,,0,4,0,0
 Nordrhein-Westfalen,Dusseldorf,SolarThermalCollectorFlatPlate,None,Bestandbau,,,,,,,,,4,20,200,0
 Nordrhein-Westfalen,Dusseldorf,SolarThermalCollectorFlatPlate,None,Bestandbau,,,,,,,,,20,inf,120,0
