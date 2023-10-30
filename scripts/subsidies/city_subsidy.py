@@ -60,6 +60,8 @@ class CitySubsidyComponent(CitySubsidy):
         size_pv = model.find_component('size_pv')
         size_bat = model.find_component('size_bat')
         city_subsidy = model.find_component('city_subsidy_' + comp_name)
+        state_subsidy = model.find_component('state_subsidy_' + comp_name)
+        country_subsidy = model.find_component('country_subsidy_' + comp_name)
 
         matching_subsidy_found = False
 
@@ -127,7 +129,10 @@ class CitySubsidyComponent(CitySubsidy):
                         city_subsidy_constraint_invest = pyo.Constraint(expr=city_subsidy == invest)
                     else:
                         city_subsidy_constraint_invest = pyo.Constraint(expr=city_subsidy ==
-                                                                        coefficient_invest * invest + constant_invest)
+                                                                        coefficient_invest * (invest + city_subsidy
+                                                                                              + state_subsidy
+                                                                                              + country_subsidy)
+                                                                        + constant_invest)
 
                 area_constraint_lower = None
                 area_constraint_upper = None
@@ -178,7 +183,7 @@ class CitySubsidyComponent(CitySubsidy):
                         tariff.add_component(tariff_name + '_city_subsidy_constraint_area',
                                              city_subsidy_constraint_area)
 
-                if self.component_name == 'PV':
+                if self.component_name == 'PV' and self.component_name == 'Battery':
                     dis_not_select = Disjunct()
                     not_select_size_pv = pyo.Constraint(expr=size_pv == 0)
                     not_select_size_bat = pyo.Constraint(expr=size_bat == 0)

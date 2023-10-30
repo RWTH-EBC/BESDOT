@@ -53,6 +53,8 @@ class CountrySubsidyComponent(CountrySubsidyBAFA):
         comp_name = self.energy_pair[0][0]
 
         invest = model.find_component('invest_' + comp_name)
+        city_subsidy = model.find_component('city_subsidy_' + comp_name)
+        state_subsidy = model.find_component('state_subsidy_' + comp_name)
         country_subsidy = model.find_component('country_subsidy_' + comp_name)
 
         matching_subsidy_found = False
@@ -79,7 +81,10 @@ class CountrySubsidyComponent(CountrySubsidyBAFA):
                     country_subsidy_constraint_invest = pyo.Constraint(expr=country_subsidy == invest)
                 else:
                     country_subsidy_constraint_invest = pyo.Constraint(expr=country_subsidy ==
-                                                                       coefficient_invest * invest + constant_invest)
+                                                                       coefficient_invest * (invest + city_subsidy
+                                                                                             + state_subsidy
+                                                                                             + country_subsidy)
+                                                                       + constant_invest)
 
                 tariff_name = f'{self.name}_{comp_name}_tariff_{idx}'
                 tariff = Disjunct()
