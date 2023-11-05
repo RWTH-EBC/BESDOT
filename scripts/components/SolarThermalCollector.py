@@ -67,7 +67,7 @@ class SolarThermalCollector(Component):
             min_size = self.min_size
 
         if self.cost_model == 0:
-            model.cons.add(area * self.unit_cost == invest)
+            model.cons.add(area * self.unit_cost == invest - city_subsidy - state_subsidy - country_subsidy)
         elif self.cost_model == 1:
             dis_not_select = Disjunct()
             # area and size are connected by the function _constraint_area,
@@ -86,7 +86,7 @@ class SolarThermalCollector(Component):
             # select_size_2 = pyo.Constraint(expr=area <= self.max_size /
             #                                   self.efficiency['heat'])
             select_inv = pyo.Constraint(expr=invest == area * self.unit_cost +
-                                        self.fixed_cost)
+                                        self.fixed_cost - city_subsidy - state_subsidy - country_subsidy)
             model.add_component('dis_select_' + self.name, dis_select)
             dis_select.add_component('select_size_' + self.name, select_size)
             # dis_select.add_component('select_size_2_' + self.name,
@@ -105,7 +105,7 @@ class SolarThermalCollector(Component):
                 price_data = float(self.cost_pair[i].split(';')[1])
 
                 select_area = pyo.Constraint(expr=area == area_data)
-                select_inv = pyo.Constraint(expr=invest == price_data)
+                select_inv = pyo.Constraint(expr=invest == price_data - city_subsidy - state_subsidy - country_subsidy)
                 pair[i + 1].add_component(
                     self.name + 'select_area_' + str(i + 1),
                     select_area)
@@ -125,8 +125,7 @@ class SolarThermalCollector(Component):
             disj_size = Disjunction(expr=pair_list)
             model.add_component('disj_size_' + self.name, disj_size)
 
-        annuity = calc_annuity(self.life, invest - city_subsidy - state_subsidy - country_subsidy,
-                               self.f_inst, self.f_w, self.f_op)
+        annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w, self.f_op)
         model.cons.add(annuity == annual_cost)
 
     def add_cons(self, model):

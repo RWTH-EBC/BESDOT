@@ -24,12 +24,13 @@ user = 'None'
 # Baden-Baden: SWBAD; Mannheim: basic, premium; Tuebingen: Stadtwerke Tuebingen;
 # Jena: basic, premium
 conditions = 'Normal'  # Normal, Exchange premium for oil
+city_name = 'Ulm'
 
 ####################################################################################
 
 # Generate project and environment object.
-project_4 = Project(name='Subsidy_stuttgart_KM2_600_b', typ='building')
-test_env = Environment(time_step=8760, city='Stuttgart', user=user, conditions=conditions)
+project_4 = Project(name=f'Subsidy_{city_name}_KM2_200_NWG', typ='building')
+test_env = Environment(time_step=8760, city=city_name, user=user, conditions=conditions)
 
 city_bld_type_options = find_city_bld_typ(test_env.city)
 print("Please select the Building Type for the city of size or "
@@ -97,11 +98,11 @@ print(f"Building Types for {test_env.country}: {test_env.country_bld_typ}")
 
 ############################################################################
 
-topo_file = os.path.join(base_path, 'data', 'topology', 'basic_new_bt.csv')
+topo_file = os.path.join(base_path, 'data', 'topology', 'basic_new.csv')
 
 # Generate building object and connect to project.
 project_4.add_environment(test_env)
-test_bld_4 = Building(name='bld_4', area=600, bld_typ='Verwaltungsgebäude')
+test_bld_4 = Building(name='bld_4', area=200, bld_typ='Verwaltungsgebäude')  # Wohngebäude , Verwaltungsgebäude
 test_bld_4.add_thermal_profile('heat', test_env)
 test_bld_4.add_elec_profile(test_env.year, test_env)
 test_bld_4.add_topology(topo_file)
@@ -110,14 +111,18 @@ test_bld_4.add_components(test_env)
 print(test_bld_4.components)
 
 component_names = [
-                   # 'HeatPump', 'SolarThermalCollector',
-                   # 'HeatPumpAirWater',
+                   # 'HeatPump',
+                   # 'SolarThermalCollector',
+                   'HeatPumpAirWater',
                    'HeatPumpBrineWater',
-                   'HotWaterStorage', 'PV', 'Battery',
+                   'HotWaterStorage',
+                   'PV',
+                   'Battery',
                    'SolarThermalCollectorTube',
-                   # 'SolarThermalCollectorFlatPlate',
+                   'SolarThermalCollectorFlatPlate',
                    'GasBoiler',
-                   'ElectricBoiler'
+                   'ElectricBoiler',
+                   # 'CHP'
                    ]
 
 # Generate subsidy object EEG for PV and connect to project.
@@ -162,14 +167,18 @@ for subsidy in country_subsidies:
 project_4.add_building(test_bld_4)
 
 components = [
-              'pv', 'water_tes', 'bat',
-              # 'heat_pump', 'solar_coll',
-              # 'solar_coll_flat_plate',
+              # 'heat_pump',
+              # 'solar_coll',
+              'pv',
+              'water_tes',
+              'bat',
+              'solar_coll_flat_plate',
               'solar_coll_tube',
-              # 'air_water_heat_pump',
+              'air_water_heat_pump',
               'brine_water_heat_pump',
               'boi',
-              'e_boi'
+              'e_boi',
+              # 'chp'
               ]
 
 for component in components:
@@ -179,7 +188,7 @@ for comp in test_bld_4.components.values():
     comp.show_cost_model()
 
 project_4.build_model()
-project_4.run_optimization('gurobi', save_lp=True, save_result=True, save_folder='project_stuttgart')
+project_4.run_optimization('gurobi', save_lp=True, save_result=True, save_folder=f'Project_{city_name}')
 
 for comp_name, comp in test_bld_4.components.items():
     size = project_4.model.find_component('size_' + comp_name).value

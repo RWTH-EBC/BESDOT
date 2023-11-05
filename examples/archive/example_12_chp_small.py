@@ -24,7 +24,7 @@ test_bld_12 = Building(name='bld_12', area=200)
 test_bld_12.add_thermal_profile('heat', test_env_12)
 test_bld_12.add_elec_profile(test_env_12.year, test_env_12)
 
-topo_file = os.path.join(base_path, '..', 'data', 'topology', 'chp_fluid_small.csv')
+topo_file = os.path.join(base_path, '..', 'data', 'topology', 'basic_chp.csv')
 test_bld_12.add_topology(topo_file)
 test_bld_12.add_components(test_env_12)
 

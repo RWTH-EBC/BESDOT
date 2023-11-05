@@ -257,11 +257,6 @@ Niedersachsen,Braunschweig,PV,None,Allgemein,0.4,0.6,0,400,,,,,,,,
 Niedersachsen,Braunschweig,PV,None,Allgemein,0.6,3,0,0,,,,,,,,
 Niedersachsen,Braunschweig,PV,None,Allgemein,3,20,200,0,,,,,,,,
 Niedersachsen,Braunschweig,PV,None,Allgemein,20,inf,0,4000,,,,,,,,
-Niedersachsen,Braunschweig,SolarThermalCollector,None,Allgemein,,,,,,,,,0,inf,0,1000
-Niedersachsen,Braunschweig,SolarThermalCollectorFlatPlate,None,Allgemein,,,,,,,,,0,inf,0,1000
-Niedersachsen,Braunschweig,SolarThermalCollectorTube,None,Allgemein,,,,,,,,,0,inf,0,1000
-Niedersachsen,Braunschweig,HeatPumpAirWater,None,Allgemein,,,,,,,,,0,inf,0,1000
-Niedersachsen,Braunschweig,HeatPumpBrineWater,None,Allgemein,,,,,,,,,0,inf,0,4000
 Niedersachsen,Wolfsburg,PV,None,Allgemein,0,0.25,0,0,,,,,,,,
 Niedersachsen,Wolfsburg,PV,None,Allgemein,0.25,0.4,0,150,,,,,,,,
 Niedersachsen,Wolfsburg,PV,None,Allgemein,0.4,0.6,0,200,,,,,,,,
@@ -411,8 +406,8 @@ Nordrhein-Westfalen,Bochum,PV,None,Allgemein,0,0.4,0,0,,,,,,,,
 Nordrhein-Westfalen,Bochum,PV,None,Allgemein,0.4,0.6,0,400,,,,,,,,
 Nordrhein-Westfalen,Bochum,PV,None,Allgemein,0.6,1,0,0,,,,,,,,
 Nordrhein-Westfalen,Bochum,PV,None,Allgemein,1,2,0,500,,,,,,,,
-Nordrhein-Westfalen,Bochum,PV,None,Allgemein,2,8,250,500,,,,,,,,
-Nordrhein-Westfalen,Bochum,PV,None,Allgemein,8,inf,0,2250,,,,,,,,
+Nordrhein-Westfalen,Bochum,PV,None,Allgemein,2,7,250,500,,,,,,,,
+Nordrhein-Westfalen,Bochum,PV,None,Allgemein,7,inf,0,2250,,,,,,,,
 Nordrhein-Westfalen,Wuppertal,PV,None,Allgemein,0,10,100,0,,,,,,,,
 Nordrhein-Westfalen,Wuppertal,PV,None,Allgemein,10,inf,0,1000,,,,,,,,
 Nordrhein-Westfalen,Krefeld,PV,None,Allgemein,0,0.6,0,400,,,,,,,,

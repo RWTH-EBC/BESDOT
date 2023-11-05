@@ -54,7 +54,7 @@ class CHP(Component):
                 self.unit_cost = 1568  # €/el kW
             elif self.sub_model == "condensing":
                 self.unit_cost = 1568 + 76  # €/el kW
-            model.cons.add(size * self.unit_cost == invest)
+            model.cons.add(size * self.unit_cost - city_subsidy - state_subsidy - country_subsidy == invest)
         elif self.cost_model == 1:
             if self.sub_model == "small":
                 self.unit_cost = 1131.2  # €/el kW
@@ -78,7 +78,7 @@ class CHP(Component):
                 select_size = pyo.Constraint(expr=size >= min_size)
                 select_inv = pyo.Constraint(expr=invest == size *
                                                  self.unit_cost +
-                                                 self.fixed_cost)
+                                                 self.fixed_cost - city_subsidy - state_subsidy - country_subsidy)
                 model.add_component('dis_select_' + self.name, dis_select)
                 dis_not_select.add_component('select_size_' + self.name,
                                              select_size)
@@ -92,7 +92,7 @@ class CHP(Component):
                 select_small_size_lower = pyo.Constraint(expr=size >= min_size)
                 select_small_size_upper = pyo.Constraint(expr=size <= 50)
                 select_small_inv = pyo.Constraint(expr=invest == size *
-                                                       1131.2 + 14490)
+                                                       1131.2 + 14490 - city_subsidy - state_subsidy - country_subsidy)
                 model.add_component('dis_select_small_' + self.name,
                                     dis_select_small)
                 dis_select_small.add_component(
@@ -111,8 +111,7 @@ class CHP(Component):
                                       "price, the cost model 2 is not allowed.")
 
         # model.cons.add(size * 458 + 57433 == invest)
-        annuity = calc_annuity(self.life, invest - city_subsidy - state_subsidy - country_subsidy,
-                               self.f_inst, self.f_w, self.f_op)
+        annuity = calc_annuity(self.life, invest - city_subsidy, self.f_inst, self.f_w, self.f_op)
         model.cons.add(annuity == annual_cost)
 
     def _constraint_power(self, model):

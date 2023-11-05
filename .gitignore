@@ -18,3 +18,9 @@ gurobi.log
 ../venv
 ../../docs_test
 /postprocessing_gitignore/
+/preprocessing
+/postprocessing/analysis_data.py
+/postprocessing/subsidy_data.csv
+/postprocessing/trend_line_plot.png
+/postprocessing/trend_line_plot_gdp.png
+/postprocessing/trend_line_plot_re.png

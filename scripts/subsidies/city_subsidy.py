@@ -5,7 +5,7 @@ from pyomo.gdp import Disjunct, Disjunction
 from scripts.Subsidy import Subsidy
 import warnings
 
-small_nr = 0.00001
+small_nr = 0.000001
 large_nr = 10000000
 
 script_folder = os.path.dirname(os.path.abspath(__file__))
@@ -185,7 +185,7 @@ class CitySubsidyComponent(CitySubsidy):
 
                 if self.component_name == 'PV' and self.component_name == 'Battery':
                     dis_not_select = Disjunct()
-                    not_select_size_pv = pyo.Constraint(expr=size_pv == 0)
+                    not_select_size_pv = pyo.Constraint(expr=size_pv == 0 if size_pv is None or size_pv == 0 else True)
                     not_select_size_bat = pyo.Constraint(expr=size_bat == 0)
                     model.add_component('dis_not_select_' + self.component_name, dis_not_select)
                     dis_not_select.add_component('not_select_size_pv_' + self.component_name, not_select_size_pv)
@@ -193,7 +193,7 @@ class CitySubsidyComponent(CitySubsidy):
 
                     dis_select = Disjunct()
                     select_size_pv = pyo.Constraint(expr=size_pv >= small_nr)
-                    select_size_bat = pyo.Constraint(expr=size_bat >= 0)
+                    select_size_bat = pyo.Constraint(expr=size_bat >= small_nr)
                     model.add_component('dis_select_' + self.component_name, dis_select)
                     dis_select.add_component('select_size_pv_' + self.component_name, select_size_pv)
                     dis_select.add_component('select_size_bat_' + self.component_name, select_size_bat)
