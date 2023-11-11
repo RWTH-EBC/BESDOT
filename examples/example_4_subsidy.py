@@ -24,12 +24,12 @@ user = 'None'
 # Baden-Baden: SWBAD; Mannheim: basic, premium; Tuebingen: Stadtwerke Tuebingen;
 # Jena: basic, premium
 conditions = 'Normal'  # Normal, Exchange premium for oil
-city_name = 'Ulm'
-
+city_name = 'Kiel'
+area_nr = 400
 ####################################################################################
 
 # Generate project and environment object.
-project_4 = Project(name=f'Subsidy_{city_name}_KM2_200_NWG', typ='building')
+project_4 = Project(name=f'Subsidy_{city_name}_KM2_{area_nr}_NWG_no_subsidy', typ='building')
 test_env = Environment(time_step=8760, city=city_name, user=user, conditions=conditions)
 
 city_bld_type_options = find_city_bld_typ(test_env.city)
@@ -102,7 +102,7 @@ topo_file = os.path.join(base_path, 'data', 'topology', 'basic_new.csv')
 
 # Generate building object and connect to project.
 project_4.add_environment(test_env)
-test_bld_4 = Building(name='bld_4', area=200, bld_typ='Verwaltungsgebäude')  # Wohngebäude , Verwaltungsgebäude
+test_bld_4 = Building(name='bld_4', area=area_nr, bld_typ='Verwaltungsgebäude')  # Wohngebäude , Verwaltungsgebäude
 test_bld_4.add_thermal_profile('heat', test_env)
 test_bld_4.add_elec_profile(test_env.year, test_env)
 test_bld_4.add_topology(topo_file)

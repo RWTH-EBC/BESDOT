@@ -101,11 +101,10 @@ Bayern,Augsburg,SolarThermalCollectorTube,None,Allgemein,,,,,,,,,3,inf,0,500
 Bayern,Regensburg,PV,None,Allgemein,0,0.6,0,150,,,,,,,,
 Bayern,Regensburg,PV,None,Allgemein,0.6,15,100,0,,,,,,,,
 Bayern,Regensburg,PV,None,Allgemein,15,inf,0,1500,,,,,,,,
-Bayern,Erlangen,PV,None,Allgemein,0,0.6,500,0,,,,,,,,
-Bayern,Erlangen,PV,None,Allgemein,0.6,1,0,0,,,,,,,,
+Bayern,Erlangen,PV,None,Allgemein,0,1,0,0,,,,,,,,
 Bayern,Erlangen,PV,None,Allgemein,1,30,150,0,,,,,,,,
 Bayern,Erlangen,PV,None,Allgemein,30,100,75,4500,,,,,,,,
-Bayern,Erlangen,PV,None,Allgemein,100,inf,0,9750,,,,,,,,
+Bayern,Erlangen,PV,None,Allgemein,100,inf,0,12000,,,,,,,,
 Bayern,Erlangen,Battery,None,Allgemein,0,7,150,0,,,,,,,,
 Bayern,Erlangen,Battery,None,Allgemein,7,inf,0,1050,,,,,,,,
 Bayern,Erlangen,SolarThermalCollector,None,Allgemein,,,,,,,,,0,14,70,0
@@ -125,7 +124,7 @@ Bayern,Schweinfurt,PV,None,Allgemein,0,10,100,0,,,,,,,,
 Bayern,Schweinfurt,PV,None,Allgemein,10,inf,0,1000,,,,,,,,
 Bayern,Schweinfurt,Battery,None,Allgemein,0,3,0,0,,,,,,,,
 Bayern,Schweinfurt,Battery,None,Allgemein,3,7,100,0,,,,,,,,
-Bayern,Schweinfurt,Battery,None,Allgemein,7,inf,0,1000,,,,,,,,
+Bayern,Schweinfurt,Battery,None,Allgemein,7,inf,0,700,,,,,,,,
 Bayern,Fuerth,CHP,None,Allgemein,0,inf,0,1000,,,,,,,,
 Bayern,Fuerth,SolarThermalCollector,None,Allgemein,,,,,,,,,0,inf,50,0
 Bayern,Fuerth,SolarThermalCollectorFlatPlate,None,Allgemein,,,,,,,,,0,inf,50,0

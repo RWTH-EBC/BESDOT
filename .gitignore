@@ -20,7 +20,14 @@ gurobi.log
 /postprocessing_gitignore/
 /preprocessing
 /postprocessing/analysis_data.py
+/postprocessing/analysis_data_2.py
+/postprocessing/analysis_data_gdp.py
+/postprocessing/gdp_subsidy.csv
 /postprocessing/subsidy_data.csv
+/postprocessing/subsidy_data_2.csv
+/postprocessing/subsidy_discrepancies_by_gdp_ranking.png
+/postprocessing/subsidy_discrepancies_heatmap.png
+/postprocessing/subsidy_discrepancies_heatmap_1.png
 /postprocessing/trend_line_plot.png
 /postprocessing/trend_line_plot_gdp.png
-/postprocessing/trend_line_plot_re.png
+/postprocessing/trend_line_plot_re_seaborn.png
