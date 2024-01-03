@@ -24,8 +24,8 @@ user = 'None'
 # Baden-Baden: SWBAD; Mannheim: basic, premium; Tuebingen: Stadtwerke Tuebingen;
 # Jena: basic, premium
 conditions = 'Normal'  # Normal, Exchange premium for oil
-city_name = 'Koeln'
-area_nr = 800
+city_name = 'Erlangen'
+area_nr = 400
 ####################################################################################
 
 # Generate project and environment object.
