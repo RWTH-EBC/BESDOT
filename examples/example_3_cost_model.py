@@ -23,7 +23,7 @@ from scripts.Building import Building
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-test_env = Environment(time_step=8760, city='Langenau')
+test_env = Environment(time_step=8760, city='Stuttgart')
 print(max(test_env.temp_profile_whole))
 print(min(test_env.temp_profile_whole))
 mean_value = np.mean(test_env.temp_profile_whole)

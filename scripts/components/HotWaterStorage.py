@@ -22,7 +22,7 @@ class HotWaterStorage(Storage):
                          max_size=max_size,
                          current_size=current_size)
 
-        self.temp_diff = 60 # K
+        self.temp_diff = 60  # K
         self.set_init = True
 
     # Attention! The size for hot water storage should be cubic meter instead
@@ -46,6 +46,9 @@ class HotWaterStorage(Storage):
         volume = model.find_component('volume_' + self.name)
         annual_cost = model.find_component('annual_cost_' + self.name)
         invest = model.find_component('invest_' + self.name)
+        city_subsidy = model.find_component('city_subsidy_' + self.name)
+        state_subsidy = model.find_component('state_subsidy_' + self.name)
+        country_subsidy = model.find_component('country_subsidy_' + self.name)
 
         # Take the fixed cost for investment into account and use dgp model to
         # indicate that, if component size is equal to zero, the investment
@@ -62,7 +65,7 @@ class HotWaterStorage(Storage):
             min_size = self.min_size
 
         if self.cost_model == 0:
-            model.cons.add(volume * self.unit_cost == invest)
+            model.cons.add(volume * self.unit_cost == invest - city_subsidy - state_subsidy - country_subsidy)
         elif self.cost_model == 1:
             dis_not_select = Disjunct()
             not_select_size = pyo.Constraint(expr=volume == 0)
@@ -76,12 +79,13 @@ class HotWaterStorage(Storage):
             dis_select = Disjunct()
             select_size = pyo.Constraint(expr=volume >= min_size)
             select_inv = pyo.Constraint(expr=invest == volume *
-                                             self.unit_cost + self.fixed_cost)
+                                        self.unit_cost + self.fixed_cost
+                                        - city_subsidy - state_subsidy - country_subsidy)
             model.add_component('dis_select_' + self.name, dis_select)
             dis_select.add_component('select_size_' + self.name,
-                                         select_size)
+                                     select_size)
             dis_select.add_component('select_inv_' + self.name,
-                                         select_inv)
+                                     select_inv)
 
             dj_size = Disjunction(expr=[dis_not_select, dis_select])
             model.add_component('disjunction_size' + self.name, dj_size)
@@ -91,11 +95,11 @@ class HotWaterStorage(Storage):
             model.add_component(self.name + '_cost_pair', pair)
             pair_list = []
             for i in range(pair_nr):
-                size_data = float(self.cost_pair[i].split(';')[0])
+                volume_data = float(self.cost_pair[i].split(';')[0])
                 price_data = float(self.cost_pair[i].split(';')[1])
 
-                select_size = pyo.Constraint(expr=volume == size_data)
-                select_inv = pyo.Constraint(expr=invest == price_data)
+                select_size = pyo.Constraint(expr=volume == volume_data)
+                select_inv = pyo.Constraint(expr=invest == price_data - city_subsidy - state_subsidy - country_subsidy)
                 pair[i + 1].add_component(
                     self.name + 'select_size_' + str(i + 1),
                     select_size)
@@ -115,8 +119,7 @@ class HotWaterStorage(Storage):
             disj_size = Disjunction(expr=pair_list)
             model.add_component('disj_size_' + self.name, disj_size)
 
-        annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w,
-                               self.f_op)
+        annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w, self.f_op)
         model.cons.add(annuity == annual_cost)
 
     def add_cons(self, model):

@@ -23,5 +23,4 @@ class Subsidy(object):
         # is added to each time step.
         for component in self.components:
             subsides = pyo.Var(bounds=(0, 10 ** 10))
-            model.add_component('subsidy_' + self.name + '_' + component,
-                                subsides)
+            model.add_component('subsidy_' + self.name + '_' + component, subsides)

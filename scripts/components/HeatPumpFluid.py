@@ -14,7 +14,6 @@ class HeatPumpFluid(HeatPump, FluidComponent):
         # otherwise we can't read properties properly. By getting efficiency,
         # the energy typ is needed.
 
-
         super().__init__(comp_name=comp_name,
                          temp_profile=temp_profile,
                          comp_type=comp_type,

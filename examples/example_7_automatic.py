@@ -7,55 +7,55 @@ from scripts.Building import Building
 from scripts.Environment import Environment
 
 
-# 定义一个函数，用于为拓扑文件运行优化并获取结果
+# Define a function to run optimization and obtain results for the topology file.
 def run_optimization_for_topology_file(topo_file, env, project_name, cost_model):
-    # 创建项目对象
+    # Creating a project object.
     project = Project(name=project_name, typ='building')
     project.add_environment(env)
 
-    # 创建建筑对象
+    # Creating a building object.
     bld = Building(name='bld', area=200, bld_typ='Verwaltungsgebäude')
     bld.add_thermal_profile('heat', env)
     bld.add_elec_profile(env.year, env)
 
-    # 添加拓扑文件
+    # Adding a topology file
     bld.add_topology(topo_file)
     bld.add_components(env)
     project.add_building(bld)
 
-    # 如果成本模型大于0，则更新组件的成本模型
+    # If the cost model is greater than 0, update the component's cost model
     if cost_model > 0:
         components = ['heat_pump', 'water_tes', 'boi', 'e_boi', 'solar_coll', 'pv', 'bat']
         for component in components:
             if component in bld.components:
                 bld.components[component].change_cost_model(new_cost_model=cost_model)
 
-    # 构建模型
+    # build a model
     project.build_model()
 
-    # 记录开始时间
+    # Recording start time
     start_time = time.time()
 
-    # 运行优化
+    # run optimization
     project.run_optimization('gurobi', save_lp=True, save_result=True, save_folder='d_project')
 
-    # 记录结束时间
+    # Recording end time
     end_time = time.time()
     time_taken = end_time - start_time
 
-    # 输出运行时间和总成本
+    # Output Runtime and Total Cost
     print(f"Time taken for {project_name}: {time_taken:.2f} seconds")
     total_cost = project.model.obj()
     print(f"Total cost for {project_name}: {total_cost}")
 
-    # 构建结果数据字典
+    # Constructing the resultant data dictionary
     data = {
         'project_name': project_name,
         'total_cost': total_cost,
         'time_taken': time_taken,
     }
 
-    # 遍历建筑组件并记录其尺寸
+    # Iterate over building components and record their dimensions.
     for comp_name, comp in bld.components.items():
         size = project.model.find_component('size_' + comp_name).value
         print(f"{comp_name}: size = {size}")
@@ -67,10 +67,10 @@ def run_optimization_for_topology_file(topo_file, env, project_name, cost_model)
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# 创建环境对象
+# Creating an Environment Object
 env = Environment(time_step=8760, city='Lindenberg')
 
-# 定义组件模型字典
+# Defining the Component Model Dictionary
 component_models = {
     'boi': ['all_brands-Gas_heating-boiler', 'all_brands-Gas_heating-therme'],
     'water_tes': ['all_brands-Storage_technology-buffer_storage-0_Heat_exchanger',
@@ -80,56 +80,57 @@ component_models = {
                    'all_brands-Solar_technology-tube_collectors']
 }
 
-# 读取原始拓扑文件
+# Read the original topology file
 original_topo_file = os.path.join(base_path, 'data', 'topology', 'basic.csv')
 original_df = pd.read_csv(original_topo_file)
 
-# 获取组件模型列表
+# Get the list of component models
 boi_models = component_models['boi']
 water_tes_models = component_models['water_tes']
 solar_coll_models = component_models['solar_coll']
 
-# 初始化计数器
+# Initialize Counter
 counter = 1
 
-# 遍历所有组件模型的组合
+# Iterate over all combinations of component models.
 for boi_model, water_tes_model, solar_coll_model in itertools.product(boi_models,
                                                                       water_tes_models,
                                                                       solar_coll_models):
 
-    # 创建拓扑文件的副本，并根据组件模型更新拓扑文件中的模型名称
+    # Create a copy of the topology file and update the model
+    # names in the topology file based on the component models.
     df = original_df.copy()
     df.loc[df['comp_name'] == 'boi', 'model'] = boi_model
     df.loc[df['comp_name'] == 'water_tes', 'model'] = water_tes_model
     df.loc[df['comp_name'] == 'solar_coll', 'model'] = solar_coll_model
 
-    # 确保目标文件夹存在
+    # Make sure the destination folder exists.
     result_output_folder = os.path.join(base_path, 'data', 'topology', 'basic_neu')
     if not os.path.exists(result_output_folder):
         os.makedirs(result_output_folder)
 
-    # 保存新的拓扑文件
+    # Save the new topology file.
     new_file = os.path.join(base_path, 'data', 'topology', 'basic_neu', f'basic_{counter}.csv')
     df.to_csv(new_file, index=False)
 
-    # 创建结果数据框
+    # Creating a results dataframe.
     results_df = pd.DataFrame()
 
-    # 对于每种成本模型，运行优化并获取结果
+    # For each cost model, run the optimization and obtain results.
     for cost_model in range(3):
         for i in ['d']:
             data = run_optimization_for_topology_file(new_file, env,
                                                       f'{i}_project_{counter}_{cost_model}', cost_model)
             results_df = results_df.append(data, ignore_index=True)
 
-        # 确保目标文件夹存在
+        # Make sure the target folder exists.
         result_output_folder = os.path.join(base_path, 'data', 'opt_output', 'results_dpm_2')
         if not os.path.exists(result_output_folder):
             os.makedirs(result_output_folder)
 
-        # 保存结果数据框为CSV文件
+        # Save the resultant data frame as a CSV file.
         results_df.to_csv(os.path.join(base_path, 'data', 'opt_output', 'results_dpm_2', f'{i}_results_{counter}.csv'),
                           index=False)
 
-    # 增加计数器的值
+    # Increase the counter value.
     counter += 1

@@ -54,14 +54,14 @@ class Component(object):
         self.max_size = max_size
         self.current_size = current_size
 
-        # Cost model can be choose from 0, 1, 2.
+        # Cost model can be chosen from 0, 1, 2.
         # The model 0 means no fixed cost is considered, the relationship
         # between total price and installed size is: y=m*x. y represents the
         # total price, x represents the installed size, and m represents the
         # unit cost from database.
         # The model 1 means fixed cost is considered, the relationship is
         # y=m*x+n. n represents the fixed cost. Model 1 usually has much better
-        # fitting result than model 0. But it cause the increase of number of
+        # fitting result than model 0. But it causes the increase of number of
         # binare variable.
         # The model 2 means the price pairs, each product is seen as an
         # individual point for optimization model, which would bring large
@@ -76,6 +76,7 @@ class Component(object):
         self.unit_cost = None
         self.fixed_cost = None
         self.cost_pair = None
+        self.components = {}
 
         self.energy_flows = {'input': {},
                              'output': {}}
@@ -204,7 +205,7 @@ class Component(object):
             "fixed_cost": self.fixed_cost,
             "cost_pair": self.cost_pair,
             "energy_flows": self.energy_flows,
-            "other_op_cost": self.other_op_cost
+            "other_op_cost": self.other_op_cost,
         }
 
     def add_energy_flows(self, io, energy_type, energy_flow):
@@ -244,7 +245,7 @@ class Component(object):
         """
         This constraint shows the energy conversion of the component.
         """
-        # todo: the component with more than 1 inputs is not developed,
+        # todo: the component with more than one input is not developed,
         #  because of the easily confused efficiency. If meet component in
         #  this type, develop the method further. (By mixing of natural gas
         #  and hydrogen, or special electrolyzer, which need heat and
@@ -302,8 +303,11 @@ class Component(object):
         n: number of replacements
         """
         size = model.find_component('size_' + self.name)
-        annual_cost = model.find_component('annual_cost_' + self.name)
         invest = model.find_component('invest_' + self.name)
+        annual_cost = model.find_component('annual_cost_' + self.name)
+        city_subsidy = model.find_component('city_subsidy_' + self.name)
+        state_subsidy = model.find_component('state_subsidy_' + self.name)
+        country_subsidy = model.find_component('country_subsidy_' + self.name)
 
         # Take the fixed cost for investment into account and use dgp model to
         # indicate that, if component size is equal to zero, the investment
@@ -320,7 +324,7 @@ class Component(object):
             min_size = self.min_size
 
         if self.cost_model == 0:
-            model.cons.add(size * self.unit_cost == invest)
+            model.cons.add(invest == size * self.unit_cost - city_subsidy - state_subsidy - country_subsidy)
         elif self.cost_model == 1:
             dis_not_select = Disjunct()
             not_select_size = pyo.Constraint(expr=size == 0)
@@ -334,7 +338,7 @@ class Component(object):
             dis_select = Disjunct()
             select_size = pyo.Constraint(expr=size >= min_size)
             select_inv = pyo.Constraint(expr=invest == size * self.unit_cost +
-                                             self.fixed_cost)
+                                        self.fixed_cost - city_subsidy - state_subsidy - country_subsidy)
             model.add_component('dis_select_' + self.name, dis_select)
             dis_select.add_component('select_size_' + self.name, select_size)
             dis_select.add_component('select_inv_' + self.name, select_inv)
@@ -351,7 +355,7 @@ class Component(object):
                 price_data = float(self.cost_pair[i].split(';')[1])
 
                 select_size = pyo.Constraint(expr=size == size_data)
-                select_inv = pyo.Constraint(expr=invest == price_data)
+                select_inv = pyo.Constraint(expr=invest == price_data - city_subsidy - state_subsidy - country_subsidy)
                 pair[i + 1].add_component(
                     self.name + 'select_size_' + str(i + 1),
                     select_size)
@@ -371,8 +375,7 @@ class Component(object):
             disj_size = Disjunction(expr=pair_list)
             model.add_component('disj_size_' + self.name, disj_size)
 
-        annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w,
-                               self.f_op)
+        annuity = calc_annuity(self.life, invest, self.f_inst, self.f_w, self.f_op)
         model.cons.add(annuity == annual_cost)
 
     def constraint_sum_inputs(self, model, energy_type):
@@ -453,6 +456,15 @@ class Component(object):
 
         invest = pyo.Var(bounds=(0, 10 ** 10))
         model.add_component('invest_' + self.name, invest)
+
+        city_subsidy = pyo.Var(bounds=(0, 10 ** 10))
+        model.add_component('city_subsidy_' + self.name, city_subsidy)
+
+        state_subsidy = pyo.Var(bounds=(0, 10 ** 10))
+        model.add_component('state_subsidy_' + self.name, state_subsidy)
+
+        country_subsidy = pyo.Var(bounds=(0, 10 ** 10))
+        model.add_component('country_subsidy_' + self.name, country_subsidy)
 
         if self.inputs is not None:
             for energy_type in self.inputs:

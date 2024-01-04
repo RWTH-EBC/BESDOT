@@ -1,11 +1,14 @@
-import warnings
-import pyomo.environ as pyo
+# import warnings
+# import pyomo.environ as pyo
+# from pyomo.gdp import Disjunct, Disjunction
+# from utils.calc_annuity_vdi2067 import calc_annuity
 from scripts.Component import Component
-import warnings
-from utils.calc_exhaust_gas_loss import calc_exhaust_gas_loss
+# from utils.calc_exhaust_gas_loss import calc_exhaust_gas_loss
 import os
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+small_num = 0.0001
 
 
 class GasBoiler(Component):
@@ -20,9 +23,3 @@ class GasBoiler(Component):
                          min_size=min_size,
                          max_size=max_size,
                          current_size=current_size)
-
-
-
-
-
-

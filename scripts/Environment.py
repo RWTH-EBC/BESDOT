@@ -8,6 +8,7 @@ import warnings
 import pandas as pd
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+city_info_file = os.path.join(base_path, "data", "subsidy", "city_state_country_info.csv")
 weather_data_path = os.path.join(base_path, "data", "weather_data")
 Soil_temperature_path = os.path.join(base_path, "data", "weather_data",
                                      "Dusseldorf", "soil_temp.csv")
@@ -29,6 +30,8 @@ def _read_weather_file(weather_file=None, city='Dusseldorf', year=2021):
         # higher priority than DWD file.
         pass
 
+    soil_data = None
+
     if year < 2025:
         weather_profile = pd.read_table(weather_file, skiprows=33, sep='\t')
         soil_data = pd.read_csv(Soil_temperature_path)
@@ -47,15 +50,25 @@ def _read_weather_file(weather_file=None, city='Dusseldorf', year=2021):
     soil_temperature_profile = soil_data.loc[:, 'temperature'].values.tolist()
 
     return temperature_profile, wind_profile, total_solar_profile, \
-           soil_temperature_profile
+        soil_temperature_profile
 
 
 class Environment(object):
 
-    def __init__(self, weather_file=None, city='Dusseldorf', year=2021,
-                 start_time=0, time_step=8760):
-        self.city = city
-        self.year = year
+    def __init__(self, weather_file=None, city='Lindenberg', year=2021,
+                 start_time=0, time_step=8760, user=None, conditions=None):
+
+        city_info = pd.read_csv(city_info_file)
+        city_row = city_info[city_info['City'] == city]
+        if not city_row.empty:
+            self.city = city_row.iloc[0]['City']
+            self.state = city_row.iloc[0]['State']
+            self.country = city_row.iloc[0]['Country']
+        else:
+            warnings.warn(f"City {city} not found in city_info.csv. Using default values.")
+            self.city = 'Lindenberg'
+            self.state = 'Bayern'
+            self.country = 'Germany'
         # start_time: Start time of the optimization process to be
         # considered, in hours.
         # time_step: The number of steps to be considered in the optimization
@@ -63,8 +76,11 @@ class Environment(object):
         # should be from 1 to 8759, start_time
         # should be from 0 to 8759, and the sum of both should be from 1 to
         # 8760.
+        self.year = year
         self.start_time = start_time
         self.time_step = time_step
+        self.user = user
+        self.conditions = conditions
         if start_time + time_step <= 0:
             warnings.warn('The selected interval is too small or the start '
                           'time is negative')
@@ -77,10 +93,11 @@ class Environment(object):
         # todo (yni): price could be set into series, array or list,
         #  for variable price
         # https://www.finanztip.de/stromvergleich/strompreis/
-        self.elec_price = 0.32  # €/kWh #0.3, 0.37
+        self.elec_price = 0.32  # €/kWh #0.3, 0.37, 0,32
         self.gas_price = 0.07  # €/kWh #0.1, 0.1377
         self.heat_price = 0.08  # €/kWh
         self.elec_feed_price = 0.08  # €/kWh #0.1, 0.05
+        self.elec_feed_price_chp = 0.09229  # €/kWh #0.1158, 0.09229
         self.elec_emission = 397  # g/kWh
         self.gas_emission = 202  # g/kWh
         self.co2_price = 35  # €/t

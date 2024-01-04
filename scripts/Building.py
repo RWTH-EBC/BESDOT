@@ -1,14 +1,13 @@
-"""
-Simplified Modell for internal use.
-"""
-
 import warnings
 import pyomo.environ as pyo
 import numpy as np
 import pandas as pd
 
 from scripts.components.Storage import Storage
-from scripts.subsidies.EEG import EEG
+from scripts.subsidies.country_subsidy_EEG import EEG
+from scripts.subsidies.country_subsidy_BAFA import CountrySubsidyComponent
+from scripts.subsidies.state_subsidy import StateSubsidyComponent
+from scripts.subsidies.city_subsidy import CitySubsidyComponent
 from utils.gen_heat_profile import *
 from utils.gen_elec_profile import gen_elec_profile
 from utils import get_all_class
@@ -29,9 +28,6 @@ class Building(object):
         self.name = name
         self.area = area
         if solar_area is None:
-            # if the information about the available area for solar of the 
-            # building is not given, here using a factor of 10% of the total 
-            # area to assume it.  
             self.solar_area = self.area * 0.1
         else:
             self.solar_area = solar_area
@@ -68,7 +64,7 @@ class Building(object):
 
         # The gas_demand is for natural gas, the demand of hydrogen is still not
         # considered in building. The profile of heat and cool demand depends
-        # on the air temperature, which is define in the Environment object.
+        # on the air temperature, which is defined in the Environment object.
         # So the method for generate profiles should be called in project
         # rather than in building object.
         self.demand_profile = {"elec_demand": [],
@@ -79,7 +75,7 @@ class Building(object):
 
         # The topology of the building energy system and all available
         # components in the system, which doesn't mean the components would
-        # have to be choose by optimizer.
+        # have to be chosen by optimizer.
         self.topology = None
         self.components = {}
         self.simp_matrix = None
@@ -89,7 +85,6 @@ class Building(object):
                              "gas": {}}
         self.heat_flows = {}
         self.subsidy_list = []
-
         self.bilevel = False
 
     def add_annual_demand(self, energy_sector):
@@ -108,7 +103,7 @@ class Building(object):
     def add_thermal_profile(self, energy_sector, env):
         """The heat and cool demand profile could be calculated with
         temperature profile according to degree day method.
-        Attention!!! The temperature profile could only provided in project
+        Attention!!! The temperature profile could only be provided in project
         object, so this method cannot be called in the initialization of
         building object."""
         # todo (yni): the current version is only for heat, the method could be
@@ -204,49 +199,44 @@ class Building(object):
                 min_size = self.topology['min_size'][item]
                 max_size = self.topology['max_size'][item]
                 current_size = self.topology['current_size'][item]
-                if comp_type in ['HeatPump', 'GasHeatPump', 'HeatPumpFluid',
+                if comp_type in ['HeatPump', 'HeatPumpAirWater', 'HeatPumpBrineWater',
+                                 'GasHeatPump', 'HeatPumpFluid',
                                  'HeatPumpQli', 'HeatPumpFluidQli',
                                  'AirHeatPumpFluid', 'UnderfloorHeat']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
-                                                      temp_profile=
-                                                      env.temp_profile,
+                                                      temp_profile=env.temp_profile,
                                                       comp_model=comp_model,
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
                 elif comp_type in ['GroundHeatPumpFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
-                                                      temp_profile=
-                                                      env.soil_temperature_profile,
+                                                      temp_profile=env.soil_temperature_profile,
                                                       comp_model=comp_model,
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
                 elif comp_type in ['PV', 'SolarThermalCollector',
+                                   'SolarThermalCollectorFlatPlate',
+                                   'SolarThermalCollectorTube',
                                    'SolarThermalCollectorFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
-                                                      temp_profile=
-                                                      env.temp_profile,
-                                                      irr_profile=
-                                                      env.irr_profile,
+                                                      temp_profile=env.temp_profile,
+                                                      irr_profile=env.irr_profile,
                                                       comp_model=comp_model,
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
                 elif comp_type in ['HeatConsumption', 'HeatConsumptionFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
-                                                      consum_profile=
-                                                      self.demand_profile[
-                                                          'heat_demand'],
+                                                      consum_profile=self.demand_profile['heat_demand'],
                                                       comp_model=comp_model,
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
                 elif comp_type == 'ElectricalConsumption':
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
-                                                      consum_profile=
-                                                      self.demand_profile[
-                                                          'elec_demand'],
+                                                      consum_profile=self.demand_profile['elec_demand'],
                                                       comp_model=comp_model,
                                                       min_size=min_size,
                                                       max_size=max_size,
@@ -254,9 +244,7 @@ class Building(object):
                 elif comp_type in ['HotWaterConsumption',
                                    'HotWaterConsumptionFluid']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
-                                                      consum_profile=
-                                                      self.demand_profile[
-                                                          'hot_water_demand'],
+                                                      consum_profile=self.demand_profile['hot_water_demand'],
                                                       comp_model=comp_model,
                                                       min_size=min_size,
                                                       max_size=max_size,
@@ -299,9 +287,11 @@ class Building(object):
                 cluster_profile = cluster['hot_water_demand'].tolist()
                 self.components[comp_name].update_profile(
                     consum_profile=cluster_profile)
-            if self.topology['comp_type'][item] in ['HeatPump',
+            if self.topology['comp_type'][item] in ['HeatPump', 'HeatPumpAirWater', 'HeatPumpBrineWater',
                                                     'GasHeatPump', 'PV',
                                                     'SolarThermalCollector',
+                                                    'SolarThermalCollectorFlatPlate',
+                                                    'SolarThermalCollectorTube',
                                                     'SolarThermalCollectorFluid',
                                                     'UnderfloorHeat',
                                                     ]:
@@ -310,8 +300,9 @@ class Building(object):
                 cluster_profile = cluster['temp'].tolist()
                 self.components[comp_name].update_profile(
                     temp_profile=cluster_profile)
-            if self.topology['comp_type'][item] in ['PV',
-                                                    'SolarThermalCollector',
+            if self.topology['comp_type'][item] in ['PV', 'SolarThermalCollector',
+                                                    'SolarThermalCollectorFlatPlate',
+                                                    'SolarThermalCollectorTube',
                                                     'SolarThermalCollectorFluid',
                                                     ]:
                 # cluster_profile = pd.Series(cluster.clusterPeriodDict[
@@ -347,6 +338,7 @@ class Building(object):
                    row[row.isnull()].index.tolist()) > 0:
                 for input_comp in row[row > 0].index.tolist() + \
                                   row[row.isnull()].index.tolist():
+                    print(f"Checking component: {input_comp} --> {index}")
                     if 'heat' in self.components[input_comp].outputs and \
                             'heat' in self.components[index].inputs or \
                             'heat' in self.components[input_comp].inputs and \
@@ -390,19 +382,19 @@ class Building(object):
             # generate the object at first.
             pass
             # self.subsidy_list.append()
-        elif isinstance(subsidy, EEG):
+        elif isinstance(subsidy, (CitySubsidyComponent, StateSubsidyComponent, CountrySubsidyComponent, EEG)):
             self.subsidy_list.append(subsidy)
             subsidy.analyze_topo(self)
         else:
             warn("The subsidy " + subsidy + "was not modeled, check again, "
-                                            "if something goes wrong.")
+                 "if something goes wrong.")
 
     def add_vars(self, model):
         """Add Pyomo variables into the ConcreteModel, which is defined in
         project object. So the model should be given in project object
         build_model.
         The following variable should be assigned:
-            Energy flow from a component to another [t]: this should be define
+            Energy flow from a component to another [t]: this should be defined
             according to the component inputs and outputs possibility and the
             building topology. For each time step.
             Total Energy input and output of each component [t]: this should be
@@ -519,17 +511,16 @@ class Building(object):
         total_operation_cost = pyo.Var(bounds=(0, None))
         total_annual_revenue = pyo.Var(bounds=(0, None))
         total_other_op_cost = pyo.Var(bounds=(0, None))
-        total_pur_subsidy = pyo.Var(bounds=(0, None))
+        # total_pur_subsidy = pyo.Var(bounds=(0, None))
         total_op_subsidy = pyo.Var(bounds=(0, None))
         total_elec_pur = pyo.Var(bounds=(0, None))
         # Attention. The building name should be unique, not same as the comp
         # or project or other buildings.
         model.add_component('annual_cost_' + self.name, total_annual_cost)
         model.add_component('operation_cost_' + self.name, total_operation_cost)
-        model.add_component('total_revenue_' + self.name,
-                            total_annual_revenue)
+        model.add_component('total_revenue_' + self.name, total_annual_revenue)
         model.add_component('other_op_cost_' + self.name, total_other_op_cost)
-        model.add_component('total_pur_subsidy_' + self.name, total_pur_subsidy)
+        # model.add_component('total_pur_subsidy_' + self.name, total_pur_subsidy)
         model.add_component('total_op_subsidy_' + self.name, total_op_subsidy)
         model.add_component('total_elec_pur_' + self.name, total_elec_pur)
 
@@ -546,12 +537,11 @@ class Building(object):
         # todo (yni): Attention in the optimization for operation cost should
         #  comment constrain for solar area. This should be done automated.
         # self._constraint_solar_area(model)
-
         self._constraint_total_cost(model)
         self._constraint_operation_cost(model, env, cluster)
         self._constraint_total_revenue(model, env)
         self._constraint_other_op_cost(model)
-        self._constraint_elec_pur(model)
+        self._constraint_elec_pur(model, env)
 
         if len(self.subsidy_list) >= 1:
             self._constraint_subsidies(model)
@@ -574,6 +564,8 @@ class Building(object):
         for item in self.topology.index:
             comp_type = self.topology['comp_type'][item]
             if comp_type in ['PV', 'SolarThermalCollector',
+                             'SolarThermalCollectorFlatPlate',
+                             'SolarThermalCollectorTube',
                              'SolarThermalCollectorFluid']:
                 self._constraint_solar_area(model)
 
@@ -628,7 +620,7 @@ class Building(object):
         """The total available solar area should be shared by PV and solar
         thermal collector."""
         # 'solar_area_PV' means the area for PV, 'size_PV' means the peak power.
-        #  'size_sollar_coll' means the area of solar collector.
+        #  'size_solar_coll' means the area of solar collector.
         solar_area_var_list = []
         for component in self.components:
             if isinstance(self.components[component], module_dict['PV']):
@@ -636,6 +628,14 @@ class Building(object):
                                                                 component))
             elif isinstance(self.components[component],
                             module_dict['SolarThermalCollector']):
+                solar_area_var_list.append(model.find_component('solar_area_' +
+                                                                component))
+            elif isinstance(self.components[component],
+                            module_dict['SolarThermalCollectorFlatPlate']):
+                solar_area_var_list.append(model.find_component('solar_area_' +
+                                                                component))
+            elif isinstance(self.components[component],
+                            module_dict['SolarThermalCollectorTube']):
                 solar_area_var_list.append(model.find_component('solar_area_' +
                                                                 component))
             elif isinstance(self.components[component],
@@ -674,15 +674,14 @@ class Building(object):
         """Calculate the total annual cost for the building energy system."""
         bld_annual_cost = model.find_component('annual_cost_' + self.name)
         bld_operation_cost = model.find_component('operation_cost_' + self.name)
-        bld_revenue = model.find_component('total_revenue_' + self.name)
         bld_other_op_cost = model.find_component('other_op_cost_' + self.name)
+        bld_revenue = model.find_component('total_revenue_' + self.name)
 
         comp_cost_list = []
         for comp in self.components:
             comp_cost_list.append(model.find_component('annual_cost_' + comp))
 
-        model.cons.add(bld_annual_cost == sum(item for item in
-                                              comp_cost_list) +
+        model.cons.add(bld_annual_cost == sum(item for item in comp_cost_list) +
                        bld_operation_cost + bld_other_op_cost - bld_revenue)
 
     def _constraint_operation_cost(self, model, env, cluster=None):
@@ -693,7 +692,7 @@ class Building(object):
         # sale volume in time series and used to avoid that the constraint
         # added is not executed properly if there is a None. The reason for
         # 8761 steps is the different index of python list and pyomo.
-        buy_elec = [0] * (env.time_step + 1)  # unmatched index for python and
+        buy_elec = [0] * (env.time_step + 1) # unmatched index for python and
         # pyomo
         sell_elec = [0] * (env.time_step + 1)
         buy_gas = [0] * (env.time_step + 1)
@@ -769,46 +768,91 @@ class Building(object):
         supplied electricity."""
         bld_revenue = model.find_component('total_revenue_' + self.name)
 
+        # Check if there are operate subsidies for this building
+        op_subsidy_exists = any(subsidy.type == 'operate' for subsidy in self.subsidy_list)
+
         # The following elements (buy_elec, ...) are the energy purchase and
         # sale volume in time series and used to avoid that the constraint
         # added is not executed properly if there is a None. The reason for
         # 8761 steps is the different index of python list and pyomo.
         sell_elec = [0] * (env.time_step + 1)
+        sell_elec_pv = [0] * (env.time_step + 1)
+        sell_elec_chp = [0] * (env.time_step + 1)
+
+        e_grid_name = None  # todo lji: Explain why this variable is needed.
 
         # comp_cost_list = []
         for comp in self.components:
             # comp_cost_list.append(model.find_component('annual_cost_' + comp))
             if isinstance(self.components[comp],
                           module_dict['ElectricityGrid']):
+                e_grid_name = comp
                 if 'elec' in self.components[comp].energy_flows['input'].keys():
-                    sell_elec = model.find_component('input_elec_' + comp)
+                    sell_elec = model.find_component('input_elec_' + e_grid_name)
 
-        if model.find_component('elec_feed_price'):
+        for comp in self.components:
+            if isinstance(self.components[comp], module_dict['PV']):
+                sell_elec_pv = model.find_component('elec_' + comp + '_' + e_grid_name)
+                # todo lji: Modify the name of the pv.
+
+        # comp_cost_list = []
+        for comp in self.components:
+            # comp_cost_list.append(model.find_component('annual_cost_' + comp))
+            if isinstance(self.components[comp], module_dict['CHP']):
+                sell_elec_chp = model.find_component('elec_' + comp + '_' + e_grid_name)
+
+        if 'CHP' in [comp for comp in self.components]:
+            elec_feed_price = env.elec_feed_price_chp
+        elif model.find_component('elec_feed_price'):
             elec_feed_price = model.elec_feed_price
         else:
             elec_feed_price = env.elec_feed_price
 
-        if cluster is None:
-            model.cons.add(bld_revenue == sum(sell_elec[t] * elec_feed_price
-                                              for t in model.time_step))
-        else:
-            # Attention! The period only for 24 hours is developed,
-            # other segments are not considered.
-            # period_length = 24
-            #
-            # nr_day_occur = pd.Series(cluster.clusterPeriodNoOccur).tolist()
-            # nr_hour_occur = []
-            # for nr_occur in nr_day_occur:
-            #     nr_hour_occur += [nr_occur] * 24
-            nr_hour_occur = cluster['Occur']
+        if not op_subsidy_exists:
+            if cluster is None:
+                if any(isinstance(self.components[comp], module_dict['CHP']) for comp in self.components):
+                    elec_feed_price_to_use = env.elec_feed_price_chp
+                else:
+                    elec_feed_price_to_use = elec_feed_price
 
-            model.cons.add(bld_revenue == sum(sell_elec[t] * elec_feed_price *
-                                              nr_hour_occur[t - 1] for t in
-                                              model.time_step))
+                model.cons.add(bld_revenue == sum(sell_elec[t] * elec_feed_price_to_use
+                                                  for t in model.time_step))
+            else:
+                nr_hour_occur = cluster['Occur']
+
+                if any(isinstance(self.components[comp], module_dict['CHP']) for comp in self.components):
+                    elec_feed_price_to_use = env.elec_feed_price_chp
+                else:
+                    elec_feed_price_to_use = elec_feed_price
+
+                model.cons.add(bld_revenue == sum(sell_elec[t] * elec_feed_price_to_use *
+                                                  nr_hour_occur[t - 1] for t in
+                                                  model.time_step))
+
+        else:
+            bld_op_subsidy = model.find_component('total_op_subsidy_' + self.name)
+
+            if cluster is None:
+                model.cons.add(bld_revenue == sum((sell_elec[t] - sell_elec_pv[t]) * elec_feed_price
+                                                  for t in model.time_step) + bld_op_subsidy)
+            else:
+                # Attention! The period only for 24 hours is developed,
+                # other segments are not considered.
+                # period_length = 24
+                #
+                # nr_day_occur = pd.Series(cluster.clusterPeriodNoOccur).tolist()
+                # nr_hour_occur = []
+                # for nr_occur in nr_day_occur:
+                #     nr_hour_occur += [nr_occur] * 24
+                nr_hour_occur = cluster['Occur']
+
+                model.cons.add(bld_revenue == sum((sell_elec[t] - sell_elec_pv[t]) * elec_feed_price *
+                                                  nr_hour_occur[t - 1] for t in
+                                                  model.time_step) + bld_op_subsidy)
 
     def _constraint_other_op_cost(self, model):
         """Other operation costs includes the costs except the fuel cost. One
-        of the most common form ist the start up cost for CHPs."""
+        of the most common form ist the start-up cost for CHPs."""
         # todo (qli&yni): the other operation cost should be tested with
         #  cluster methods
         bld_other_op_cost = model.find_component('other_op_cost_' + self.name)
@@ -863,10 +907,11 @@ class Building(object):
         else:
             model.cons.add(total_op_subsidy == 0)
 
-    def _constraint_elec_pur(self, model):
+    def _constraint_elec_pur(self, model, env):
         """The electricity purchase constraint is added to the model. The
         constraint is added to the model if the electricity is purchased
         from the grid."""
+        buy_elec = [0] * (env.time_step + 1)
         elec_pur = model.find_component('total_elec_pur_' + self.name)
         for comp in self.components:
             if isinstance(self.components[comp],

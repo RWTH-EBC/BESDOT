@@ -17,4 +17,12 @@ gurobi.log
 
 ../venv
 ../../docs_test
+/preprocessing
 /postprocessing_gitignore/
+/postprocessing/analysis_data.py
+/postprocessing/analysis_data_2.py
+/postprocessing/analysis_data_gdp.py
+/postprocessing/gdp_subsidy.csv
+/postprocessing/subsidy_data.csv
+/postprocessing/subsidy_data_2.csv
+/postprocessing/subsidy_data_complete.csv
