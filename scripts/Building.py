@@ -13,6 +13,7 @@ from utils.get_subsidy import check_subsidy
 
 module_dict = get_all_class.run()
 
+# todo(yni): delete after check, change them to docstring
 # building_typ_list = ["Verwaltungsgebäude",
 #                      "Büro und Dienstleistungsgebäude",
 #                      "Hochschule und Forschung",
@@ -27,6 +28,9 @@ module_dict = get_all_class.run()
 #                      "Einfamilienhaus",
 #                      "Zweifarilienhaus",
 #                      "Mehrfamilienhaus"]
+# todo(yni): test residential building with function calc_residential_demand,
+#  the building type could be 'SFH', 'MFH', 'TH', 'AB', which means 'single
+#  family house'?
 
 
 class Building(object):
@@ -50,8 +54,9 @@ class Building(object):
             self.solar_area = solar_area
         self.building_typ = bld_typ
         self.user = user
-        # fixme (yni): The building type is in German, which is connected with
-        #  the script "gen_heat_profil" and needs to be changed to English
+        # todo (yni): The building type is in German, which is connected with
+        #  the script "gen_heat_profil" and needs to be changed to English. Done
+        #  need to test later
         # todo (yni): TEK provided only the value for non-residential building.
         #  For residential building should get the data from the project TABULA.
 

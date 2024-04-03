@@ -25,6 +25,20 @@ building_typ_list = ["Verwaltungsgebäude",
                      "Gewerbliche und industrielle",
                      "Verkaufsstätten",
                      "Technikgebäude"]
+building_typ_dict_en = {"Administration building": "Verwaltungsgebäude",
+                        "Office and service buildings":
+                            "Büro und Dienstleistungsgebäude",
+                        "University and research": "Hochschule und Forschung",
+                        "Healthcare": "Gesundheitswesen",
+                        "Educational facilities": "Bildungseinrichtungen",
+                        "Cultural facilities": "Kultureinrichtungen",
+                        "Sports facilities": "Sporteinrichtungen",
+                        "Accommodation and catering":
+                            "Beherbergen und Verpflegen",
+                        "Commercial and industrial":
+                            "Gewerbliche und industrielle",
+                        "Retail premises": "Verkaufsstätten",
+                        "Technical buildings": "Technikgebäude"}
 energy_typ_list = ["sehr hoch", "hoch", "mittel", "gering", "sehr gering"]
 
 # ==============================================================================
@@ -40,11 +54,11 @@ input_energy_path = os.path.join(base_path, "data", "tek_data",
 input_zone_path = os.path.join(base_path, "data", "tek_data",
                                "GHD_Zonierung.xlsx")
 input_tabula_path = os.path.join(base_path, "data", "tek_data",
-                               "TABULA_data.xlsx")
+                                 "TABULA_data.xlsx")
 output_path = os.path.join(base_path, "data", "tek_data", "output_heat_profile")
 
 
-def gen_heat_profile(building_typ,
+def gen_heat_profile(building_typ_en,
                      area,
                      temperature_profile,
                      year=2021,
@@ -53,13 +67,15 @@ def gen_heat_profile(building_typ,
                      save_plot=False):
     """
     total_degree_day: K*h
-    annual_value: kW*h, jährlicher Gesamt Heizwärmebedarf
-    Using degree day method to calculate the heat profil, the set temperature depending
-    on room type and heating start at the temperature of 15 degree.
+    annual_value: kWh
+    Using degree day method to calculate the heat profile, the set
+    temperature depending on room type and heating start at the temperature
+    of 15 degree.
     :return:
     """
     # Analysis thermal zones in building
-    new_zone_df = analysis_bld_zone(building_typ, area)
+    building_typ_de = building_typ_dict_en[building_typ_en]
+    new_zone_df = analysis_bld_zone(building_typ_de, area)
 
     # Calculate demand in each zone and degree day method
     demand_df = pd.read_excel(input_energy_path, sheet_name=energy_typ)
@@ -190,7 +206,7 @@ def analysis_bld_zone(building_typ, area):
     return new_zone_df
 
 
-def calc_bld_demand(building_typ, area, energy_sector, energy_typ='mittel'):
+def calc_bld_demand(building_typ_en, area, energy_sector, energy_typ='mittel'):
     """Calculate the total demand of the building by adding up the demand of
     all thermal zones.
     energy_sector: the energy carrier, could be 'heat', 'cool', 'hot_water',
@@ -199,7 +215,8 @@ def calc_bld_demand(building_typ, area, energy_sector, energy_typ='mittel'):
     describe the building energy level. It could be the items in energy_typ_list
     """
     # Analysis thermal zones in building
-    new_zone_df = analysis_bld_zone(building_typ, area)
+    building_typ_de = building_typ_dict_en[building_typ_en]
+    new_zone_df = analysis_bld_zone(building_typ_de, area)
 
     bld_demand = 0
     demand_df = pd.read_excel(input_energy_path, sheet_name=energy_typ)
