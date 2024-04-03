@@ -1,0 +1,15 @@
+# admin file for git, pycharm and venv
+**/__pycache__
+/.idea/
+.idea/
+../venv
+
+# output results or intermediate results
+/data/opt_output/
+/data/opt_input/
+/data/cls_file/
+gurobi.log
+
+# files for Mac OS
+.DS_Store
+*/.DS_Store
