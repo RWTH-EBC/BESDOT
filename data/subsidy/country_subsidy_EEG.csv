@@ -1,0 +1,12 @@
+Feed Type,Size Lower,Size Upper,Direkte Vermarktung,Feste Verguetung
+Ueberschusseinspeisung,0,10,0.086,0.082
+Ueberschusseinspeisung,10,40,0.075,0.071
+Ueberschusseinspeisung,40,100,0.062,0.058
+Ueberschusseinspeisung,100,1000,0.062,0
+Ueberschusseinspeisung,1000,inf,0,0
+Volleinspeisung,0,10,0.134,0.13
+Volleinspeisung,10,40,0.113,0.109
+Volleinspeisung,40,100,0.113,0.109
+Volleinspeisung,100,400,0.094,0
+Volleinspeisung,400,1000,0.081,0
+Volleinspeisung,1000,inf,0,0

@@ -38,7 +38,9 @@ building_typ_dict_en = {"Administration building": "Verwaltungsgebäude",
                         "Commercial and industrial":
                             "Gewerbliche und industrielle",
                         "Retail premises": "Verkaufsstätten",
-                        "Technical buildings": "Technikgebäude"}
+                        "Technical buildings": "Technikgebäude",
+                        "Single-family house": "Wohngebäude",
+                        "Multi-family house": "Wohngebäude (MFH)"}
 energy_typ_list = ["sehr hoch", "hoch", "mittel", "gering", "sehr gering"]
 
 # ==============================================================================
@@ -262,41 +264,32 @@ def calc_zone_demand(demand_df, demand_typ, zone_typ, zone_area):
 
 
 def degree_day(zone_typ, annual_value, profile_df, temperature_profile,
-               status_list, night_lower=False):
+               status_list):
     heat_profile = []
     start_temp = 15  # The limit for heating on or off, could be the same as
     # set temperature? 15 comes from the german
     set_temp_heat = profile_df[profile_df['Raumtyp'] == zone_typ][
         'Raum-Solltemperatur_Heizung '].values[0]
 
-    if night_lower:
-        night_lower_temp(zone_typ, profile_df)
-    else:
-        total_degree_day = 0
-        for time_step in range(8760):
-            if temperature_profile[time_step] < start_temp and \
-                    status_list[time_step] == 1 and \
-                    temperature_profile[time_step] < set_temp_heat:
-                total_degree_day += (set_temp_heat - temperature_profile[
-                    time_step])
+    total_degree_day = 0
+    for time_step in range(8760):
+        if temperature_profile[time_step] < start_temp and \
+                status_list[time_step] == 1 and \
+                temperature_profile[time_step] < set_temp_heat:
+            total_degree_day += (set_temp_heat - temperature_profile[
+                time_step])
 
-        for time_step in range(8760):
-            if temperature_profile[time_step] < start_temp and \
-                    status_list[time_step] == 1 and \
-                    temperature_profile[time_step] < set_temp_heat:
-                heat_profile.append(
-                    (set_temp_heat - temperature_profile[time_step]) /
-                    total_degree_day * annual_value)
-            else:
-                heat_profile.append(0)
+    for time_step in range(8760):
+        if temperature_profile[time_step] < start_temp and \
+                status_list[time_step] == 1 and \
+                temperature_profile[time_step] < set_temp_heat:
+            heat_profile.append(
+                (set_temp_heat - temperature_profile[time_step]) /
+                total_degree_day * annual_value)
+        else:
+            heat_profile.append(0)
 
     return heat_profile
-
-
-def night_lower_temp(zone_typ, profile_df):
-    night = [22, 23, 24, 1, 2, 3, 4, 5, 6, 7]
-    low = profile_df['Temperaturabsenkung']
-    # todo: add this new function for night lower set temperature
 
 
 def plot_profile(heat_profile, save_plot=False):
@@ -340,14 +333,5 @@ if __name__ == "__main__":
     input_temp_path = os.path.join(base_path, 'data',
                                    'tek_data', 'temperature.csv')
     temperature = pd.read_csv(input_temp_path)['temperature'].values
-    # gen_heat_profile("Wohngebäude", 300, temperature, plot=True)
-    gen_heat_profile("Verwaltungsgebäude", 300, temperature, plot=True)
+    gen_heat_profile("Single-family house", 300, temperature, plot=True)
 
-    # print(calc_bld_demand("Wohngebäude (MFH)", 10000, 'heat',
-    #                       energy_typ='gering'))
-    # print(calc_bld_demand("Verwaltungsgebäude", 300, "elec"))
-
-    # calc_residential_demand('EFH', 1968, 200)
-
-    # weekday_lt = find_weekday(2022)
-    # print(op_time_status(2022, 'Bettenzimmer'))

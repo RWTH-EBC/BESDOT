@@ -52,8 +52,8 @@ def change_bld_typ(tek_bld_type):
     elif tek_bld_type in ["Verkaufsstätten"]:
         slp_bld_type = "G0"
     else:
-        warn('The tek building is not allowed, slp building type is set to '
-             'residential building')
+        # warn('The tek building is not allowed, slp building type is set to '
+        #      'residential building')
         slp_bld_type = "H0"
 
     return slp_bld_type

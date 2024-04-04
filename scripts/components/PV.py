@@ -19,26 +19,6 @@ class PV(Component):
 
         self.irr_profile = irr_profile
 
-    def _read_properties(self, properties):
-        """
-        The PV model utilizes additionally temperature coefficient and NOCT
-        (Nominal Operating Cell Temperature) to calculate the pv factor,
-        besides all universal properties
-        """
-        super()._read_properties(properties)
-        if 'temp coefficient' in properties.columns:
-            self.temp_coefficient = float(properties['temp coefficient'])
-        elif 'temp_coefficient' in properties.columns:
-            self.temp_coefficient = float(properties['temp_coefficient'])
-        else:
-            warnings.warn("In the model database for " + self.component_type +
-                          " lack of column for temp coefficient")
-        if 'NOCT' in properties.columns:
-            self.noct = float(properties['NOCT'])
-        else:
-            warnings.warn("In the model database for " + self.component_type +
-                          " lack of column for NOCT")
-
     def _constraint_area(self, model):
         """
         This constraint indicates the relationship between pv panel area in

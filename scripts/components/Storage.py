@@ -113,8 +113,10 @@ class Storage(Component):
             self.loss = float(properties['loss'])
         else:
             self.loss = 0.01
-            warnings.warn("In the model database for " + self.component_type +
-                          " lack of column for loss.")
+            # warnings.warn("In the model database for " + self.component_type +
+            #               " lack of column for loss.")
+            print("The default value for loss is set to be 0.01 because of "
+                  "lack of value in database.")
 
     def to_dict(self):
         return {

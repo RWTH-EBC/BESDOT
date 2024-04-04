@@ -107,7 +107,7 @@ def _find_state_country(city):
 
 class Environment(object):
 
-    def __init__(self, weather_file=None, city='Lindenberg', year=2021,
+    def __init__(self, weather_file=None, city='Dusseldorf', year=2021,
                  start_time=0, time_step=8760, user=None, conditions=None):
         # start_time: Start time of the optimization process to be
         # considered, in hours.
@@ -141,7 +141,6 @@ class Environment(object):
         self.heat_price = 0.08  # €/kWh
         self.biomass_price = 0.02  # €/kWh
         self.elec_feed_price = 0.08  # €/kWh #0.1, 0.05
-        # self.elec_feed_price_chp = 0.09229  # €/kWh #0.1158, 0.09229
         self.elec_emission = 397  # g/kWh
         self.gas_emission = 202  # g/kWh
         self.co2_price = 35  # €/t
@@ -151,8 +150,6 @@ class Environment(object):
         # year and without suffix '_whole' are slice for given time steps.
         temp_profile, wind_profile, irr_profile = \
             _read_weather_file(weather_file, city, year)
-        # fixme: the following line should be replaced with the calculated
-        #  soil profile with city.
         soil_temperature_profile = _read_soil_temperature_file()
         self.temp_profile_whole = temp_profile
         self.wind_profile_whole = wind_profile

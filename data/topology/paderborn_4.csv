@@ -1,0 +1,12 @@
+comp_name,comp_type,model,min_size,max_size,current_size,waste_heat,water_cns,water_tes,biomass,bio_boi,heat_pump,e_grid,gas_grid,hyb_boi,steam_cns,steam_tes
+waste_heat,HeatGrid,HG1,0,15000,0,0,1,1,0,0,0,0,0,0,1,1
+water_cns,HeatConsumption,HeatCNS1,1000000,1000000,0,0,0,0,0,0,0,0,0,0,0,0
+water_tes,HotWaterStorage,TES1,0,10000,0,0,1,0,0,0,0,0,0,0,0,0
+biomass,BiomassSource,BS1,0,20000,0,0,0,0,0,1,0,0,0,0,0,0
+bio_boi,BiomassBoiler,Biomass_district,0,20000,0,0,1,1,0,0,0,0,0,0,1,1
+heat_pump,HeatPump,EHP_district,0,20000,0,0,1,1,0,0,0,0,0,0,0,0
+e_grid,ElectricityGrid,GRD1,0,20000,0,0,0,0,0,0,1,0,0,0,0,0
+gas_grid,GasGrid,GAS1,0,20000,0,0,0,0,0,0,0,0,0,1,0,0
+hyb_boi,HybridBoiler,Hybrid_district,0,20000,0,0,1,1,0,0,0,0,0,0,1,1
+steam_tes,HotWaterStorage,TES1,0,10000,0,0,0,0,0,0,0,0,0,0,1,0
+steam_cns,HeatConsumption,HeatCNS1,1000000,1000000,0,0,0,0,0,0,0,0,0,0,0,0

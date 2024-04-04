@@ -13,35 +13,29 @@ from utils.get_subsidy import check_subsidy
 
 module_dict = get_all_class.run()
 
-# todo(yni): delete after check, change them to docstring
-# building_typ_list = ["Verwaltungsgebäude",
-#                      "Büro und Dienstleistungsgebäude",
-#                      "Hochschule und Forschung",
-#                      "Gesundheitswesen",
-#                      "Bildungseinrichtungen",
-#                      "Kultureinrichtungen",
-#                      "Sporteinrichtungen",
-#                      "Beherbergen und Verpflegen",
-#                      "Gewerbliche und industrielle",
-#                      "Verkaufsstätten",
-#                      "Technikgebäude",
-#                      "Einfamilienhaus",
-#                      "Zweifarilienhaus",
-#                      "Mehrfamilienhaus"]
-# todo(yni): test residential building with function calc_residential_demand,
-#  the building type could be 'SFH', 'MFH', 'TH', 'AB', which means 'single
-#  family house'?
-
 
 class Building(object):
     def __init__(self, name, area, solar_area=None,
-                 bld_typ='Verwaltungsgebäude',
+                 bld_typ='Single-family house',
                  user='basic',
                  annual_heat_demand=None,
                  annual_elec_demand=None):
         """
         Initialization for building.
         :param name: name of the building, should be unique
+        :param area: area of the building in m^2
+        :param solar_area: available area for solar panels in m^2
+        :param bld_typ: building type, which is defined in the TEK utils; the
+            Building typ could be "Administration building", "Office and service
+            buildings", "University and research", "Healthcare", "Educational
+            facilities", "Cultural facilities", "Sports facilities",
+            "Accommodation and catering", "Commercial and industrial",
+            "Retail premises", "Technical buildings", "Single-family house",
+            "Multi-family house". Other building types are not considered
+        :param user: the user of the building, could be 'basic', 'advanced'.
+            it might influence the subsidy of the building
+        :param annual_heat_demand: the annual heat demand of the building in kWh
+        :param annual_elec_demand: the annual electricity demand of the building
         """
         self.name = name
         self.area = area
@@ -54,11 +48,6 @@ class Building(object):
             self.solar_area = solar_area
         self.building_typ = bld_typ
         self.user = user
-        # todo (yni): The building type is in German, which is connected with
-        #  the script "gen_heat_profil" and needs to be changed to English. Done
-        #  need to test later
-        # todo (yni): TEK provided only the value for non-residential building.
-        #  For residential building should get the data from the project TABULA.
 
         # Calculate the annual energy demand for heating, hot water and
         # electricity. Using TEK utils from IWU.
@@ -131,8 +120,8 @@ class Building(object):
         Attention!!! The temperature profile could only be provided in project
         object, so this method cannot be called in the initialization of
         building object."""
-        # todo (yni): the current version is only for heat, the method could be
-        #  developed for cool demand later.
+        # the current version is only for heat, the method could be developed
+        # for cool demand.
         if energy_sector == 'heat':
             heat_demand_profile = gen_heat_profile(self.building_typ,
                                                    self.area,
@@ -149,14 +138,14 @@ class Building(object):
 
             warn(warn_msg)
 
-    def add_elec_profile(self, year, env):
+    def add_elec_profile(self, env):
         """Generate the electricity profile with the 'Standardlastprofil'
         method. This method could only be called in the Project object,
         because the year is stored in the Environment object"""
         elec_demand_profile = gen_elec_profile(self.annual_demand[
                                                    "elec_demand"],
                                                self.building_typ,
-                                               year)
+                                               env.year)
         self.demand_profile["elec_demand"] = elec_demand_profile[
                                              env.start_time:
                                              env.start_time + env.time_step]
@@ -225,9 +214,7 @@ class Building(object):
                 max_size = self.topology['max_size'][item]
                 current_size = self.topology['current_size'][item]
                 if comp_type in ['HeatPump', 'HeatPumpAirWater',
-                                 'HeatPumpBrineWater', 'GasHeatPump',
-                                 'HeatPumpFluid', 'AirHeatPumpFluid',
-                                 'UnderfloorHeat']:
+                                 'HeatPumpBrineWater', 'GasHeatPump']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       temp_profile=
                                                       env.temp_profile,
@@ -235,18 +222,9 @@ class Building(object):
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
-                elif comp_type in ['GroundHeatPumpFluid']:
-                    comp_obj = module_dict[comp_type](comp_name=comp_name,
-                                                      temp_profile=
-                                                      env.soil_temperature_profile,
-                                                      comp_model=comp_model,
-                                                      min_size=min_size,
-                                                      max_size=max_size,
-                                                      current_size=current_size)
                 elif comp_type in ['PV', 'SolarThermalCollector',
                                    'SolarThermalCollectorFlatPlate',
-                                   'SolarThermalCollectorTube',
-                                   'SolarThermalCollectorFluid']:
+                                   'SolarThermalCollectorTube']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       temp_profile=
                                                       env.temp_profile,
@@ -256,7 +234,7 @@ class Building(object):
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
-                elif comp_type in ['HeatConsumption', 'HeatConsumptionFluid']:
+                elif comp_type in ['HeatConsumption']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       consum_profile=
                                                       self.demand_profile[
@@ -274,8 +252,7 @@ class Building(object):
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
-                elif comp_type in ['HotWaterConsumption',
-                                   'HotWaterConsumptionFluid']:
+                elif comp_type in ['HotWaterConsumption']:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       consum_profile=
                                                       self.demand_profile[
@@ -303,8 +280,7 @@ class Building(object):
         storage should take additional assumption."""
         for item in self.topology.index:
             comp_name = self.topology['comp_name'][item]
-            if self.topology['comp_type'][item] in ['HeatConsumption',
-                                                    'HeatConsumptionFluid']:
+            if self.topology['comp_type'][item] in ['HeatConsumption']:
                 # cluster_profile = pd.Series(cluster.clusterPeriodDict[
                 #     'heat_demand']).tolist()
                 cluster_profile = cluster['heat_demand'].tolist()
@@ -314,8 +290,7 @@ class Building(object):
                 cluster_profile = cluster['elec_demand'].tolist()
                 self.components[comp_name].update_profile(
                     consum_profile=cluster_profile)
-            if self.topology['comp_type'][item] in ['HotWaterConsumption',
-                                                    'HotWaterConsumptionFluid'
+            if self.topology['comp_type'][item] in ['HotWaterConsumption'
                                                     ]:
                 # cluster_profile = pd.Series(cluster.clusterPeriodDict[
                 #                                 'hot_water_demand']).tolist()
@@ -328,9 +303,7 @@ class Building(object):
                                                     'GasHeatPump', 'PV',
                                                     'SolarThermalCollector',
                                                     'SolarThermalCollectorFlatPlate',
-                                                    'SolarThermalCollectorTube',
-                                                    'SolarThermalCollectorFluid',
-                                                    'UnderfloorHeat',
+                                                    'SolarThermalCollectorTube'
                                                     ]:
                 # cluster_profile = pd.Series(cluster.clusterPeriodDict[
                 #                                 'temp']).tolist()
@@ -340,19 +313,13 @@ class Building(object):
             if self.topology['comp_type'][item] in ['PV',
                                                     'SolarThermalCollector',
                                                     'SolarThermalCollectorFlatPlate',
-                                                    'SolarThermalCollectorTube',
-                                                    'SolarThermalCollectorFluid',
+                                                    'SolarThermalCollectorTube'
                                                     ]:
                 # cluster_profile = pd.Series(cluster.clusterPeriodDict[
                 #                                 'irr']).tolist()
                 cluster_profile = cluster['irr'].tolist()
                 self.components[comp_name].update_profile(
                     irr_profile=cluster_profile)
-            if self.topology['comp_type'][item] in ['GroundHeatPumpFluid']:
-                cluster_profile = pd.Series(cluster.clusterPeriodDict[
-                                                'soil_temp']).tolist()
-                self.components[comp_name].update_profile(
-                    temp_profile=cluster_profile)
             if isinstance(self.components[comp_name], Storage):
                 # The indicator cluster in storage could determine if the
                 # cluster function should be called.
@@ -396,8 +363,8 @@ class Building(object):
         # todo(yni): the current version doesn't consider the building type
         #  and user condition for the subsidy, which should be added later.
         #  It could be modified in the method check_subsidy in find_bld_typ.py
-        # find the name of electricity grid, which is
-        # strongly related to the operation subsidy.
+        # find the name of electricity grid, which is strongly related to the
+        # operation subsidy.
         elec_grid_name = None
         for elec_grid in self.components.values():
             if elec_grid.component_type == 'ElectricityGrid':
@@ -453,68 +420,6 @@ class Building(object):
             assigned in each component object. For each time step.
             Component size: should be assigned in component object, for once.
         """
-        # heat_flows = {}
-        # for index, row in simp_matrix.iteritems():
-        #     # search for Nan value and the mass flow in topology matrix, the
-        #     # unit is kg/h.
-        #     # print(row[row.isnull()].index.tolist())
-        #     if len(row[row > 0].index.tolist() +
-        #            row[row.isnull()].index.tolist()) > 0:
-        #         for input_comp in row[row > 0].index.tolist() + \
-        #                           row[row.isnull()].index.tolist():
-        #             energy_flow[(input_comp, index)] = pyo.Var(
-        #                 model.time_step, bounds=(0, None))
-        #             model.add_component(input_comp + '_' + index,
-        #                                 energy_flow[(input_comp, index)])
-        #
-        #             # Check, if heat is the output of the component,
-        #             # input should not be considered. The reason for it is
-        #             # avoiding duplicate definition, since in building
-        #             # level the input of one component is the output of
-        #             # another component.
-        #             if 'heat' in self.components[input_comp].outputs and \
-        #                     'heat' in self.components[index].inputs or \
-        #                     'heat' in self.components[input_comp].inputs and \
-        #                     'heat' in self.components[index].outputs:
-        #                 heat_flows[(input_comp, index)] = {}
-        #                 heat_flows[(index, input_comp)] = {}
-        #                 # mass flow from component 'input_comp' to
-        #                 # component 'index'.
-        #                 heat_flows[(input_comp, index)]['mass'] = \
-        #                     pyo.Var(model.time_step, bounds=(0, None))
-        #                 model.add_component(input_comp + '_' + index +
-        #                                     '_' + 'mass', heat_flows[(
-        #                     input_comp, index)]['mass'])
-        #                 # mass flow from component 'index' to
-        #                 # component 'index'.
-        #                 heat_flows[(index, input_comp)]['mass'] = \
-        #                     pyo.Var(model.time_step, bounds=(0, None))
-        #                 model.add_component(index + '_' + input_comp +
-        #                                     '_' + 'mass', heat_flows[(
-        #                     index, input_comp)]['mass'])
-        #                 # temperature of heat flow from component
-        #                 # 'input_comp' to component 'index'.
-        #                 heat_flows[(input_comp, index)]['temp'] = \
-        #                     pyo.Var(model.time_step, bounds=(0, None))
-        #                 model.add_component(input_comp + '_' + index +
-        #                                     '_' + 'temp', heat_flows[(
-        #                     input_comp, index)]['temp'])
-        #                 # temperature of heat flow from component
-        #                 # 'index' to component 'input_comp'.
-        #                 heat_flows[(index, input_comp)]['temp'] = \
-        #                     pyo.Var(model.time_step, bounds=(0, None))
-        #                 model.add_component(index + '_' + input_comp +
-        #                                     '_' + 'temp', heat_flows[(
-        #                     index, input_comp)]['temp'])
-        #             # elif 'elec' in self.components[input_comp].outputs and \
-        #             #         'elec' in self.components[index].inputs or \
-        #             #         'elec' in self.components[input_comp].inputs and \
-        #             #         'elec' in self.components[index].outputs:
-        #             #     elec_flows.append((index, input_comp))
-
-        # Save the simplified matrix and energy flow for energy balance
-        # self.heat_flows = heat_flows
-
         for energy in self.energy_flows.keys():
             for flow in self.energy_flows[energy]:
                 self.energy_flows[energy][flow] = pyo.Var(
@@ -522,50 +427,10 @@ class Building(object):
                 model.add_component(energy + '_' + flow[0] + '_' + flow[1],
                                     self.energy_flows[energy][flow])
 
-                if energy == 'heat':
-                    if hasattr(self.components[flow[0]], 'heat_flows_out') and \
-                            hasattr(self.components[flow[1]], 'heat_flows_in'):
-                        if self.components[flow[0]].heat_flows_out is not None \
-                                and self.components[flow[1]].heat_flows_in is \
-                                not None:
-                            self.heat_flows[flow] = {}
-                            self.heat_flows[(flow[1], flow[0])] = {}
-                            # mass flow from component 'input_comp' to
-                            # component 'index'.
-                            self.heat_flows[flow]['mass'] = \
-                                pyo.Var(model.time_step, bounds=(0, 10 ** 8))
-                            model.add_component(flow[0] + '_' + flow[1] + '_'
-                                                + 'mass', self.heat_flows[flow][
-                                                    'mass'])
-                            # mass flow from component 'index' to
-                            # component 'index'.
-                            self.heat_flows[(flow[1], flow[0])]['mass'] = \
-                                pyo.Var(model.time_step, bounds=(0, 10 ** 8))
-                            model.add_component(flow[1] + '_' + flow[0] +
-                                                '_' + 'mass', self.heat_flows[(
-                                flow[1], flow[0])]['mass'])
-                            # temperature of heat flow from component
-                            # 'input_comp' to component 'index'.
-                            self.heat_flows[flow]['temp'] = \
-                                pyo.Var(model.time_step, bounds=(0, 10 ** 8))
-                            model.add_component(flow[0] + '_' + flow[1] +
-                                                '_' + 'temp', self.heat_flows[
-                                                    flow]['temp'])
-                            # temperature of heat flow from component
-                            # 'index' to component 'input_comp'.
-                            self.heat_flows[(flow[1], flow[0])]['temp'] = \
-                                pyo.Var(model.time_step, bounds=(0, 10 ** 8))
-                            model.add_component(flow[1] + '_' + flow[0] +
-                                                '_' + 'temp', self.heat_flows[(
-                                flow[1], flow[0])]['temp'])
-
         total_annual_cost = pyo.Var(bounds=(0, None))
         total_operation_cost = pyo.Var(bounds=(0, None))
         total_annual_revenue = pyo.Var(bounds=(0, None))
         total_other_op_cost = pyo.Var(bounds=(0, None))
-        # total_pur_subsidy = pyo.Var(bounds=(0, None))
-        # total_op_subsidy = pyo.Var(bounds=(0, None))
-        # total_op_sub_quantity = pyo.Var(bounds=(0, None))
         total_elec_pur = pyo.Var(bounds=(0, None))
         # Attention. The building name should be unique, not same as the comp
         # or project or other buildings.
@@ -573,10 +438,6 @@ class Building(object):
         model.add_component('operation_cost_' + self.name, total_operation_cost)
         model.add_component('total_revenue_' + self.name, total_annual_revenue)
         model.add_component('other_op_cost_' + self.name, total_other_op_cost)
-        # model.add_component('total_pur_subsidy_' + self.name, total_pur_subsidy)
-        # model.add_component('total_op_subsidy_' + self.name, total_op_subsidy)
-        # model.add_component('total_op_sub_quantity_' + self.name,
-        #                     total_op_sub_quantity)
         model.add_component('total_elec_pur_' + self.name, total_elec_pur)
 
         for comp in self.components:
@@ -591,41 +452,28 @@ class Building(object):
 
     def add_cons(self, model, env, cluster=None):
         self._constraint_energy_balance(model)
-        self._constraint_mass_balance(model)
-        # todo (yni): Attention in the optimization for operation cost should
-        #  comment constrain for solar area. This should be done automated.
-        # self._constraint_solar_area(model)
         self._constraint_total_cost(model)
         self._constraint_operation_cost(model, env, cluster)
         self._constraint_total_revenue(model, env)
         self._constraint_other_op_cost(model)
-        self._constraint_elec_pur(model, env)
+        # self._constraint_elec_pur(model, env)
 
         if len(self.subsidy_list) >= 1:
-            # self._constraint_subsidies(model)
             for subsidy in self.subsidy_list:
                 subsidy.add_cons(model)
 
         for comp in self.components:
-            if hasattr(self.components[comp], 'heat_flows_in'):
-                if isinstance(self.components[comp].heat_flows_in, list):
-                    self.components[comp].add_heat_flows_in(
-                        self.heat_flows.keys())
-            if hasattr(self.components[comp], 'heat_flows_out'):
-                if isinstance(self.components[comp].heat_flows_out, list):
-                    self.components[comp].add_heat_flows_out(
-                        self.heat_flows.keys())
             self.components[comp].add_cons(model)
 
-        # todo (yni): Attention in the optimization for operation cost should
-        #  comment constrain for solar area. This should be done automated.
+        constraint_solar_area = False
         for item in self.topology.index:
             comp_type = self.topology['comp_type'][item]
             if comp_type in ['PV', 'SolarThermalCollector',
                              'SolarThermalCollectorFlatPlate',
-                             'SolarThermalCollectorTube',
-                             'SolarThermalCollectorFluid']:
-                self._constraint_solar_area(model)
+                             'SolarThermalCollectorTube']:
+                constraint_solar_area = True
+        if constraint_solar_area:
+            self._constraint_solar_area(model)
 
     def _constraint_energy_balance(self, model):
         """According to the energy system topology, the sum of energy flow
@@ -635,7 +483,7 @@ class Building(object):
         Attention! If a component has more than 1 inputs or outputs, should
         distinguish between different energy carriers"""
         # todo (yni): the method for more than 1 inputs or outputs should be
-        #  validiert.
+        #  tested.
 
         # Constraints for the inputs
         for index, row in self.simp_matrix.iteritems():
@@ -645,15 +493,6 @@ class Building(object):
                            row[row.isnull()].index.tolist()) > 0:
                         self.components[index].constraint_sum_inputs(
                             model=model, energy_type=energy_type)
-                        # input_components = row[row > 0].index.tolist() + \
-                        #                    row[row.isnull()].index.tolist()
-                        # input_energy = model.find_component('input_' +
-                        #                                     energy_type + '_' +
-                        #                                     index)
-                        # for t in model.time_step:
-                        #     model.cons.add(input_energy[t] == sum(
-                        #         self.energy_flow[(input_comp, index)][t] for
-                        #         input_comp in input_components))
 
         # Constraints for the outputs
         for index, row in self.simp_matrix.iterrows():
@@ -664,15 +503,6 @@ class Building(object):
                         self.components[index].constraint_sum_outputs(
                             model=model,
                             energy_type=energy_type)
-                        # output_components = row[row > 0].index.tolist() + \
-                        #                     row[row.isnull()].index.tolist()
-                        # output_energy = model.find_component('output_' +
-                        #                                      energy_type + '_' +
-                        #                                      index)
-                        # for t in model.time_step:
-                        #     model.cons.add(output_energy[t] == sum(
-                        #         self.energy_flow[(index, output_comp)][t] for
-                        #         output_comp in output_components))
 
     def _constraint_solar_area(self, model):
         """The total available solar area should be shared by PV and solar
@@ -696,37 +526,8 @@ class Building(object):
                             module_dict['SolarThermalCollectorTube']):
                 solar_area_var_list.append(model.find_component('solar_area_' +
                                                                 component))
-            elif isinstance(self.components[component],
-                            module_dict['SolarThermalCollectorFluid']):
-                solar_area_var_list.append(model.find_component('solar_area_' +
-                                                                component))
         model.cons.add(sum(item for item in solar_area_var_list) <=
                        self.solar_area)
-
-    def _constraint_mass_balance(self, model):
-        # Constraint for the mass flow, based on the assumption, that the
-        # mass flow in each circulation should be same.
-        # todo (yni): seems not necessary, because the mass flow balance are
-        #  defined in each component? Decide it later.
-        # It seems that, adding constraint in building could reduce the total
-        # constraints number.
-        if self.heat_flows is not None:
-            for heat_flow in self.heat_flows:
-                flow_1 = model.find_component(heat_flow[0] + '_' + heat_flow[1]
-                                              + '_' + 'mass')
-                flow_2 = model.find_component(heat_flow[1] + '_' + heat_flow[0]
-                                              + '_' + 'mass')
-                for t in model.time_step:
-                    if self.simp_matrix[heat_flow[0]][heat_flow[1]] > 0:
-                        # todo (yni): take care of the situation for variable
-                        #  mass flow.
-                        model.cons.add(flow_1[t] == flow_2[t])
-                        model.cons.add(flow_1[t] == self.simp_matrix[
-                            heat_flow[0]][heat_flow[1]])
-                    elif np.isnan(self.simp_matrix[heat_flow[0]][heat_flow[1]]):
-                        model.cons.add(flow_1[t] == flow_2[t])
-                        # print(flow_1[t])
-                        # print(flow_2[t])
 
     def _constraint_total_cost(self, model):
         """Calculate the total annual cost for the building energy system."""
@@ -918,46 +719,6 @@ class Building(object):
         model.cons.add(bld_other_op_cost == sum(comp_op for comp_op
                                                 in other_op_comp_list))
 
-    # def _constraint_subsidies(self, model):
-    #     """The subsidies in one building are added up to the total subsidy
-    #     and could be used in the objective of the optimization for minimal
-    #     cost for building holder."""
-    #     # In this model no building subsidies are considered for the building
-    #     # elements like wall or windows. The subsidies for each energy device
-    #     # in building are considered.
-    #     total_pur_subsidy = model.find_component('total_pur_subsidy_' +
-    #                                              self.name)
-    #     total_op_subsidy = model.find_component('total_op_subsidy_' + self.name)
-    #
-    #     pur_subsidy_list = []
-    #     op_subsidy_list = []
-    #     for subsidy in self.subsidy_list:
-    #         subsidy_var = None
-    #         if len(subsidy.components) == 1:
-    #             subsidy_var = model.find_component('subsidy_' + subsidy.name +
-    #                                                '_' + subsidy.components[0])
-    #         else:
-    #             warn(subsidy.name + " has multiple subsidies for components")
-    #
-    #         if subsidy.type == 'purchase':
-    #             pur_subsidy_list.append(subsidy_var)
-    #         elif subsidy.type == 'operate':
-    #             op_subsidy_list.append(subsidy_var)
-    #
-    #     if len(pur_subsidy_list) > 0:
-    #         model.cons.add(total_pur_subsidy ==
-    #                        sum(pur_subsidy_list[i] for i in range(len(
-    #                            pur_subsidy_list))))
-    #     else:
-    #         model.cons.add(total_pur_subsidy == 0)
-    #
-    #     if len(pur_subsidy_list) > 0:
-    #         model.cons.add(total_op_subsidy ==
-    #                        sum(op_subsidy_list[i] for i in range(len(
-    #                            op_subsidy_list))))
-    #     else:
-    #         model.cons.add(total_op_subsidy == 0)
-    #
     def _constraint_elec_pur(self, model, env):
         """The electricity purchase constraint is added to the model. The
         constraint is added to the model if the electricity is purchased

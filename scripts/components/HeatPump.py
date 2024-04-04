@@ -32,8 +32,10 @@ class HeatPump(Component):
         if 'outlet temperature' in properties.columns:
             self.outlet_temp = float(properties['outlet temperature'])
         else:
-            warnings.warn("In the model database for " + self.component_type +
-                          " lack of column for outlet temperature.")
+            # warnings.warn("In the model database for " + self.component_type +
+            #               " lack of column for outlet temperature.")
+            print("In the model database for " + self.component_type +
+                  " lack of column for outlet temperature. Default value is 50.")
             self.outlet_temp = 50
 
         # self.set_temp = 55
