@@ -1,4 +1,7 @@
-# The combination of cluster and subsidy is not tested yet.
+"""
+This example shows how to find the subsidies for a building in a specific
+city and the subsidies could be used for the optimization process.
+"""
 import os
 from scripts.Project import Project
 from scripts.Building import Building
@@ -13,36 +16,36 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ################################################################################
 
 # Generate a project object at first.
-test_project = Project(name='project_9', typ='building')
+prj = Project(name='project_4', typ='building')
 
 # Generate the environment object, which contains the weather data and price
 # data. If no weather file and city is given, the default weather file of
 # Dusseldorf is used.
-test_env_1 = Environment(time_step=8760, city='Dusseldorf')
-test_project.add_environment(test_env_1)
+env_4 = Environment(time_step=8760, city='Dusseldorf')
+prj.add_environment(env_4)
 
 # If the objective of the project is the optimization for building, a building
 # should be added to the project.
-test_bld_1 = Building(name='bld_1', area=200)
+bld_4 = Building(name='bld_4', area=1000, bld_typ='Multi-family house')
 
 # Add the energy demand profiles to the building object
-test_bld_1.add_thermal_profile('heat', test_env_1)
-test_bld_1.add_elec_profile(test_env_1.year, test_env_1)
+bld_4.add_thermal_profile('heat', env_4)
+bld_4.add_elec_profile(env_4)
 
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
 topo_file = os.path.join(base_path, 'data', 'topology', 'basic.csv')
-test_bld_1.add_topology(topo_file)
-test_bld_1.add_components(test_project.environment)
+bld_4.add_topology(topo_file)
+bld_4.add_components(prj.environment)
 
 # Find out all the subsidy options for the building
-subsidy_df = find_subsidies(test_env_1.city, test_env_1.state,
-                            building='Neubau')
-test_bld_1.add_subsidy(subsidy_df, building='Neubau')
-test_project.add_building(test_bld_1)
+# The building could be chosen from 'all', 'ExistingBuilding', 'NewBuilding'
+subsidy_df = find_subsidies(env_4.city, env_4.state, building='NewBuilding')
+bld_4.add_subsidy(subsidy_df, building='NewBuilding')
+prj.add_building(bld_4)
 
-# ################################################################################
-# #                        Build pyomo model and run optimization
-# ################################################################################
-test_project.build_model()
-test_project.run_optimization('gurobi', save_lp=True, save_result=True)
+################################################################################
+#                Build optimization model and run optimization
+################################################################################
+prj.build_model()
+prj.run_optimization('gurobi', save_lp=True, save_result=True)

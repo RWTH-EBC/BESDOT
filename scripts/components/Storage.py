@@ -115,8 +115,8 @@ class Storage(Component):
             self.loss = 0.01
             # warnings.warn("In the model database for " + self.component_type +
             #               " lack of column for loss.")
-            print("The default value for loss is set to be 0.01 because of "
-                  "lack of value in database.")
+            print("The default value for energy loss " + self.component_type +
+                  " is set to be 0.01 because of lack of value in database.")
 
     def to_dict(self):
         return {
@@ -151,11 +151,11 @@ class Storage(Component):
                                              '_' + self.name)
         stored_energy = model.find_component('energy_' + self.name)
 
-        for t in range(len(model.time_step)-1):
-            model.cons.add(stored_energy[t+1] * (1 - self.loss) +
-                           input_energy[t+1] * self.input_efficiency -
-                           output_energy[t+1] / self.output_efficiency ==
-                           stored_energy[t+2])
+        for t in range(len(model.time_step) - 1):
+            model.cons.add(stored_energy[t + 1] * (1 - self.loss) +
+                           input_energy[t + 1] * self.input_efficiency -
+                           output_energy[t + 1] / self.output_efficiency ==
+                           stored_energy[t + 2])
 
     def _constraint_init_energy(self, model):
         """

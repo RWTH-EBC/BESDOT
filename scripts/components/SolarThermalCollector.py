@@ -52,14 +52,9 @@ class SolarThermalCollector(Component):
         Compared to Component, the annual cost of solar thermal colleactor
         should be calculated with its area instead of the energy size in kWh.
         """
-        # todo: change it into cost model 0,1,2
         area = model.find_component('solar_area_' + self.name)
         annual_cost = model.find_component('annual_cost_' + self.name)
         invest = model.find_component('invest_' + self.name)
-        size = model.find_component('size_' + self.name)
-        city_subsidy = model.find_component('city_subsidy_' + self.name)
-        state_subsidy = model.find_component('state_subsidy_' + self.name)
-        country_subsidy = model.find_component('country_subsidy_' + self.name)
 
         if self.min_size == 0:
             min_size = small_num
@@ -86,7 +81,7 @@ class SolarThermalCollector(Component):
             # select_size_2 = pyo.Constraint(expr=area <= self.max_size /
             #                                   self.efficiency['heat'])
             select_inv = pyo.Constraint(expr=invest == area * self.unit_cost +
-                                        self.fixed_cost)
+                                        self.fixed_cost + self.install_cost)
             model.add_component('dis_select_' + self.name, dis_select)
             dis_select.add_component('select_size_' + self.name, select_size)
             # dis_select.add_component('select_size_2_' + self.name,
@@ -105,7 +100,8 @@ class SolarThermalCollector(Component):
                 price_data = float(self.cost_pair[i].split(';')[1])
 
                 select_area = pyo.Constraint(expr=area == area_data)
-                select_inv = pyo.Constraint(expr=invest == price_data)
+                select_inv = pyo.Constraint(expr=invest == price_data +
+                                                 self.install_cost)
                 pair[i + 1].add_component(
                     self.name + 'select_area_' + str(i + 1),
                     select_area)

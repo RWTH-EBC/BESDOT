@@ -1,11 +1,11 @@
 """
-This script is used to validate standardboiler class.
+This example shows the temporal clustering method for optimization process,
+which could reduce the calculation time and still keep the accuracy.
 """
 import os
 from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
-import utils.post_processing as post_pro
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -14,20 +14,20 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ################################################################################
 
 # Generate a project object at first.
-project = Project(name='project_5_cls', typ='building')
+project = Project(name='project_5', typ='building')
 
 # Generate the environment object
-env_5 = Environment(time_step=8760)
-project.add_environment(env_5)
+env = Environment(time_step=8760)
+project.add_environment(env)
 
 # If the objective of the project is the optimization for building, a building
 # should be added to the project.
-bld_5 = Building(name='bld_5', area=200)
+bld_5 = Building(name='bld_5', area=1000, bld_typ='Multi-family house')
 
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
-bld_5.add_thermal_profile('heat', env_5)
-bld_5.add_elec_profile(env_5.year, env_5)
+bld_5.add_thermal_profile('heat', env)
+bld_5.add_elec_profile(env)
 
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
@@ -54,17 +54,9 @@ for bld in project.building_list:
 #                        Build pyomo model and run optimization
 ################################################################################
 project.build_model(obj_typ='annual_cost')
-project.run_optimization('gurobi', save_lp=False, save_result=False)
+project.run_optimization('gurobi', save_lp=True, save_result=True)
 
 # save model
 # lp_model_path = os.path.join(base_path, 'data', 'opt_output',
 #                              project.name + '_model.lp')
 # project.model.write(lp_model_path, io_options={'symbolic_solver_labels': True})
-
-################################################################################
-#                                  Post-processing
-################################################################################
-
-# result_output_path = os.path.join(base_path, 'data', 'opt_output',
-#                                   project.name + '_result.csv')
-# # post_pro.plot_all(result_output_path, time_interval=[0, env_10.time_step])

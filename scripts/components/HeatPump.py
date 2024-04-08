@@ -77,19 +77,4 @@ class HeatPump(Component):
 
     def add_cons(self, model):
         self._constraint_cop(model)
-        self._constraint_conver(model)
-        self._constraint_vdi2067(model)
-        self._constraint_maxpower(model)
-
-        for subsidy in self.subsidy_list:
-            subsidy.add_cons(model, self.name)
-            self._constraint_sub_annuity(model, subsidy.name)
-
-    # def add_vars(self, model):
-    #     """
-    #     This method adds the pyomo variables and parameters
-    #     """
-    #     super().add_vars(model)
-    #
-    #     cop = pyo.Param(model.time_step, initialize=0)
-    #     model.add_component('cop_' + self.name, cop)
+        super().add_cons(model)

@@ -82,6 +82,11 @@ class Component(object):
         self.unit_cost = None
         self.fixed_cost = None
         self.cost_pair = None
+        # The value for install cost is not given in the database, a dummy value
+        # is given here.
+        # todo (yni): the value should be search from the database
+        self.install_cost = 150
+
         self.components = {}
 
         self.energy_flows = {'input': {},
@@ -101,6 +106,8 @@ class Component(object):
         # development.
         self.other_op_cost = False
         self.subsidy_list = []
+
+        self.min_part_load = None
 
     def get_properties(self, model):
         model_property_file = os.path.join(base_path, 'data',
@@ -187,6 +194,16 @@ class Component(object):
                               "Its cost model was changed to 0")
                 self.change_cost_model(0)
             # print(self.cost_pair)
+
+    def set_min_part_load(self, new_min_part_load):
+        """
+        Set a new minimum part load for the component. The part load feature
+        is not the default feature for all components, so that the function is
+        defined in the parent class. If any component has the part load feature,
+        should reset the minimum part load value.
+        :param new_min_part_load: The new minimum part load value to be set.
+        """
+        self.min_part_load = new_min_part_load
 
     def update_profile(self, **kwargs):
         for arg in kwargs:
@@ -348,7 +365,6 @@ class Component(object):
         # optimization language, so use "larger equal to" replace "larger"
         # with a small number. If min size is given from the model database,
         # the small number is no more necessary.
-
         if self.min_size == 0:
             min_size = small_num
         else:
@@ -370,7 +386,7 @@ class Component(object):
             dis_select = Disjunct()
             select_size = pyo.Constraint(expr=size >= min_size)
             select_inv = pyo.Constraint(expr=invest == size * self.unit_cost +
-                                             self.fixed_cost)
+                                             self.fixed_cost + self.install_cost)
             model.add_component('dis_select_' + self.name, dis_select)
             dis_select.add_component('select_size_' + self.name, select_size)
             dis_select.add_component('select_inv_' + self.name, select_inv)
@@ -388,7 +404,7 @@ class Component(object):
 
                 select_size = pyo.Constraint(expr=size == size_data)
                 select_inv = pyo.Constraint(
-                    expr=invest == price_data)
+                    expr=invest == price_data + self.install_cost)
                 pair[i + 1].add_component(
                     self.name + 'select_size_' + str(i + 1),
                     select_size)
@@ -477,10 +493,37 @@ class Component(object):
             model.cons.add(output_energy[t] == sum(output_flow[t] for
                                                    output_flow in output_flows))
 
+    def _constraint_part_load(self, model):
+        """The part-load constraint of the boiler."""
+        # model.not_work_state = Disjunct(model.time_step)
+        # model.work_state = Disjunct(model.time_step)
+        # model.work_or_not = Disjunction(model.time_step)
+        not_work_state = model.find_component('not_work_state_' + self.name)
+        work_state = model.find_component('work_state_' + self.name)
+        work_or_not = model.find_component('work_or_not_' + self.name)
+
+        output_heat = model.find_component('output_'+self.outputs[0] + '_' +
+                                           self.name)
+        size = model.find_component('size_' + self.name)
+
+        for t in model.time_step:
+            @not_work_state[t].Constraint()
+            def not_working(m):
+                return output_heat[t] == 0
+
+            @work_state[t].Constraint()
+            def working(m):
+                return output_heat[t] >= size * self.min_part_load
+
+            work_or_not[t] = [not_work_state[t], work_state[t]]
+
     def add_cons(self, model):
         self._constraint_conver(model)
         self._constraint_maxpower(model)
         self._constraint_vdi2067(model)
+
+        if self.min_part_load is not None:
+            self._constraint_part_load(model)
 
         for subsidy in self.subsidy_list:
             subsidy.add_cons(model)
@@ -506,14 +549,15 @@ class Component(object):
         invest = pyo.Var(bounds=(0, 10 ** 10))
         model.add_component('invest_' + self.name, invest)
 
-        # city_subsidy = pyo.Var(bounds=(0, 10 ** 10))
-        # model.add_component('city_subsidy_' + self.name, city_subsidy)
-        #
-        # state_subsidy = pyo.Var(bounds=(0, 10 ** 10))
-        # model.add_component('state_subsidy_' + self.name, state_subsidy)
-        #
-        # country_subsidy = pyo.Var(bounds=(0, 10 ** 10))
-        # model.add_component('country_subsidy_' + self.name, country_subsidy)
+        if self.min_part_load is not None:
+            # The part-load variables in GDP model.
+            not_work_state = Disjunct(model.time_step)
+            work_state = Disjunct(model.time_step)
+            work_or_not = Disjunction(model.time_step)
+
+            model.add_component('not_work_state_' + self.name, not_work_state)
+            model.add_component('work_state_' + self.name, work_state)
+            model.add_component('work_or_not_' + self.name, work_or_not)
 
         if self.inputs is not None:
             for energy_type in self.inputs:

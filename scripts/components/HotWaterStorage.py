@@ -46,9 +46,6 @@ class HotWaterStorage(Storage):
         volume = model.find_component('volume_' + self.name)
         annual_cost = model.find_component('annual_cost_' + self.name)
         invest = model.find_component('invest_' + self.name)
-        city_subsidy = model.find_component('city_subsidy_' + self.name)
-        state_subsidy = model.find_component('state_subsidy_' + self.name)
-        country_subsidy = model.find_component('country_subsidy_' + self.name)
 
         # Take the fixed cost for investment into account and use dgp model to
         # indicate that, if component size is equal to zero, the investment
@@ -79,7 +76,8 @@ class HotWaterStorage(Storage):
             dis_select = Disjunct()
             select_size = pyo.Constraint(expr=volume >= min_size)
             select_inv = pyo.Constraint(expr=invest == volume *
-                                        self.unit_cost + self.fixed_cost)
+                                        self.unit_cost + self.fixed_cost +
+                                             self.install_cost)
             model.add_component('dis_select_' + self.name, dis_select)
             dis_select.add_component('select_size_' + self.name,
                                      select_size)
@@ -98,7 +96,8 @@ class HotWaterStorage(Storage):
                 price_data = float(self.cost_pair[i].split(';')[1])
 
                 select_size = pyo.Constraint(expr=volume == volume_data)
-                select_inv = pyo.Constraint(expr=invest == price_data)
+                select_inv = pyo.Constraint(expr=invest == price_data +
+                                                 self.install_cost)
                 pair[i + 1].add_component(
                     self.name + 'select_size_' + str(i + 1),
                     select_size)

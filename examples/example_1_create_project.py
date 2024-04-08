@@ -27,7 +27,7 @@ prj.add_environment(env)
 
 # If the objective of the project is the optimization for building, a building
 # should be added to the project.
-bld_1 = Building(name='bld_1', area=200)
+bld_1 = Building(name='bld_1', area=1000, bld_typ='Multi-family house')
 
 # Add the energy demand profiles to the building object
 bld_1.add_thermal_profile('heat', env)
@@ -44,7 +44,7 @@ prj.add_building(bld_1)
 #                  Build optimization model and run optimization
 ################################################################################
 prj.build_model()
-prj.run_optimization('gurobi', save_lp=False, save_result=False)
+prj.run_optimization('gurobi', save_lp=True, save_result=True)
 
 # save model. If only the optimization model is wanted, could use the
 # following codes to save the model file. Other model formate like gms,

@@ -63,6 +63,9 @@ def find_dependent_vars(sub_name, sub_type, apply_for):
     if sub_detail['Area Coefficient'].notnull().any():
         # print('The subsidy {} is for area'.format(sub_name))
         return 'area'
+    if sub_detail['Demand Coefficient'].notnull().any():
+        # print('The subsidy {} is for demand'.format(sub_name))
+        return 'demand'
 
 
 def find_sub_rules(sub_name, sub_type, apply_for, user='basic',
@@ -125,4 +128,10 @@ def find_rules_from_df(sub_df, dependent_vars):
                          'upper': row['Area Upper'],
                          'coefficient': row['Area Coefficient'],
                          'constant': row['Area Constant']})
+    elif dependent_vars == 'demand':
+        for index, row in sub_df.iterrows():
+            rule.append({'lower': row['Size Lower'],
+                         'upper': row['Size Upper'],
+                         'coefficient': row['Demand Coefficient'],
+                         'constant': row['Demand Constant']})
     return rule

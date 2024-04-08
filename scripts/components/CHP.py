@@ -31,88 +31,88 @@ class CHP(Component):
         if 'th_efficiency' in properties.columns:
             self.efficiency['heat'] = float(properties['th_efficiency'])
 
-    def _constraint_vdi2067(self, model):
-        """The price information does not come from the crawler, but the
-        report of ASUE, which provides the curve from regression. The exact
-        price of each device was not given. So the data could not be updated
-        and using linearization to get the cost model 0 and 1. The cost model 2
-        could not be generated from the curve."""
-        size = model.find_component('size_' + self.name)
-        annual_cost = model.find_component('annual_cost_' + self.name)
-        invest = model.find_component('invest_' + self.name)
-        city_subsidy = model.find_component('city_subsidy_' + self.name)
-        state_subsidy = model.find_component('state_subsidy_' + self.name)
-        country_subsidy = model.find_component('country_subsidy_' + self.name)
-
-        if self.min_size == 0:
-            min_size = small_num
-        else:
-            min_size = self.min_size
-
-        if self.cost_model == 0:
-            if self.sub_model == "small":
-                self.unit_cost = 1568  # €/el kW
-            elif self.sub_model == "condensing":
-                self.unit_cost = 1568 + 76  # €/el kW
-            model.cons.add(size * self.unit_cost)
-        elif self.cost_model == 1:
-            if self.sub_model == "small":
-                self.unit_cost = 1131.2  # €/el kW
-                self.fixed_cost = 14490  # €
-            elif self.sub_model == "condensing":
-                self.unit_cost = 1568 + 76  # €/el kW
-                self.fixed_cost = 14490  # €
-
-            if self.sub_model == "small" or self.sub_model == "condensing":
-                dis_not_select = Disjunct()
-                not_select_size = pyo.Constraint(expr=size == 0)
-                not_select_inv = pyo.Constraint(expr=invest == 0)
-                model.add_component('dis_not_select_' + self.name,
-                                    dis_not_select)
-                dis_not_select.add_component('not_select_size_' + self.name,
-                                             not_select_size)
-                dis_not_select.add_component('not_select_inv_' + self.name,
-                                             not_select_inv)
-
-                dis_select = Disjunct()
-                select_size = pyo.Constraint(expr=size >= min_size)
-                select_inv = pyo.Constraint(expr=invest == size *
-                                                 self.unit_cost +
-                                                 self.fixed_cost)
-                model.add_component('dis_select_' + self.name, dis_select)
-                dis_not_select.add_component('select_size_' + self.name,
-                                             select_size)
-                dis_not_select.add_component('select_inv_' + self.name,
-                                             select_inv)
-
-                dj_size = Disjunction(expr=[dis_not_select, dis_select])
-                model.add_component('disjunction_vdi_' + self.name, dj_size)
-
-                dis_select_small = Disjunct()
-                select_small_size_lower = pyo.Constraint(expr=size >= min_size)
-                select_small_size_upper = pyo.Constraint(expr=size <= 50)
-                select_small_inv = pyo.Constraint(expr=invest == size *
-                                                       1131.2 + 14490)
-                model.add_component('dis_select_small_' + self.name,
-                                    dis_select_small)
-                dis_select_small.add_component(
-                    'select_small_size_lower_' + self.name,
-                    select_small_size_lower)
-                dis_select_small.add_component(
-                    'select_small_size_upper_' + self.name,
-                    select_small_size_upper)
-                dis_select_small.add_component('select_small_inv_' +
-                                               self.name, select_small_inv)
-
-                dj_size = Disjunction(expr=[dis_not_select, dis_select_small])
-                model.add_component('disjunction_vdi_' + self.name, dj_size)
-        elif self.cost_model == 2:
-            warnings.warn(self.name + " is CHP, which has no data pair for "
-                                      "price, the cost model 2 is not allowed.")
-
-        # model.cons.add(size * 458 + 57433 == invest)
-        annuity = calc_annuity(self.life, invest - city_subsidy, self.f_inst, self.f_w, self.f_op)
-        model.cons.add(annuity == annual_cost)
+    # def _constraint_vdi2067(self, model):
+    #     """The price information does not come from the crawler, but the
+    #     report of ASUE, which provides the curve from regression. The exact
+    #     price of each device was not given. So the data could not be updated
+    #     and using linearization to get the cost model 0 and 1. The cost model 2
+    #     could not be generated from the curve."""
+    #     size = model.find_component('size_' + self.name)
+    #     annual_cost = model.find_component('annual_cost_' + self.name)
+    #     invest = model.find_component('invest_' + self.name)
+    #     city_subsidy = model.find_component('city_subsidy_' + self.name)
+    #     state_subsidy = model.find_component('state_subsidy_' + self.name)
+    #     country_subsidy = model.find_component('country_subsidy_' + self.name)
+    #
+    #     if self.min_size == 0:
+    #         min_size = small_num
+    #     else:
+    #         min_size = self.min_size
+    #
+    #     if self.cost_model == 0:
+    #         if self.sub_model == "small":
+    #             self.unit_cost = 1568  # €/el kW
+    #         elif self.sub_model == "condensing":
+    #             self.unit_cost = 1568 + 76  # €/el kW
+    #         model.cons.add(size * self.unit_cost)
+    #     elif self.cost_model == 1:
+    #         if self.sub_model == "small":
+    #             self.unit_cost = 1131.2  # €/el kW
+    #             self.fixed_cost = 14490  # €
+    #         elif self.sub_model == "condensing":
+    #             self.unit_cost = 1568 + 76  # €/el kW
+    #             self.fixed_cost = 14490  # €
+    #
+    #         if self.sub_model == "small" or self.sub_model == "condensing":
+    #             dis_not_select = Disjunct()
+    #             not_select_size = pyo.Constraint(expr=size == 0)
+    #             not_select_inv = pyo.Constraint(expr=invest == 0)
+    #             model.add_component('dis_not_select_' + self.name,
+    #                                 dis_not_select)
+    #             dis_not_select.add_component('not_select_size_' + self.name,
+    #                                          not_select_size)
+    #             dis_not_select.add_component('not_select_inv_' + self.name,
+    #                                          not_select_inv)
+    #
+    #             dis_select = Disjunct()
+    #             select_size = pyo.Constraint(expr=size >= min_size)
+    #             select_inv = pyo.Constraint(expr=invest == size *
+    #                                              self.unit_cost +
+    #                                              self.fixed_cost)
+    #             model.add_component('dis_select_' + self.name, dis_select)
+    #             dis_not_select.add_component('select_size_' + self.name,
+    #                                          select_size)
+    #             dis_not_select.add_component('select_inv_' + self.name,
+    #                                          select_inv)
+    #
+    #             dj_size = Disjunction(expr=[dis_not_select, dis_select])
+    #             model.add_component('disjunction_vdi_' + self.name, dj_size)
+    #
+    #             dis_select_small = Disjunct()
+    #             select_small_size_lower = pyo.Constraint(expr=size >= min_size)
+    #             select_small_size_upper = pyo.Constraint(expr=size <= 50)
+    #             select_small_inv = pyo.Constraint(expr=invest == size *
+    #                                                    1131.2 + 14490)
+    #             model.add_component('dis_select_small_' + self.name,
+    #                                 dis_select_small)
+    #             dis_select_small.add_component(
+    #                 'select_small_size_lower_' + self.name,
+    #                 select_small_size_lower)
+    #             dis_select_small.add_component(
+    #                 'select_small_size_upper_' + self.name,
+    #                 select_small_size_upper)
+    #             dis_select_small.add_component('select_small_inv_' +
+    #                                            self.name, select_small_inv)
+    #
+    #             dj_size = Disjunction(expr=[dis_not_select, dis_select_small])
+    #             model.add_component('disjunction_vdi_' + self.name, dj_size)
+    #     elif self.cost_model == 2:
+    #         warnings.warn(self.name + " is CHP, which has no data pair for "
+    #                                   "price, the cost model 2 is not allowed.")
+    #
+    #     # model.cons.add(size * 458 + 57433 == invest)
+    #     annuity = calc_annuity(self.life, invest - city_subsidy, self.f_inst, self.f_w, self.f_op)
+    #     model.cons.add(annuity == annual_cost)
 
     def _constraint_power(self, model):
         """This method shows the relationship of electricity power and thermal
