@@ -6,6 +6,7 @@ relationship, which is provided by most other optimization utils.
 """
 
 import os
+import numpy as np
 from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
@@ -31,6 +32,9 @@ bld_1 = Building(name='bld_1', area=1000, bld_typ='Multi-family house')
 
 # Add the energy demand profiles to the building object
 bld_1.add_thermal_profile('heat', env)
+bld_1.add_hot_water_profile(env)
+bld_1.demand_profile['heat_demand'] = np.array(bld_1.demand_profile[
+    'heat_demand']) + np.array(bld_1.demand_profile['hot_water_demand'])
 bld_1.add_elec_profile(env)
 
 # Pre define the building energy system with the topology for different

@@ -28,13 +28,13 @@ def _read_weather_file(weather_file=None, city='Dusseldorf', year=2021):
         weather_profile = pd.read_table(weather_file, skiprows=33, sep='\t')
     else:
         weather_profile = pd.read_table(weather_file, skiprows=35, sep='\t')
-    temperature_profile = weather_profile.iloc[:, 0].str.split('\s+', 17).str[
+    temperature_profile = weather_profile.iloc[:, 0].str.split('\s+').str[
         5].astype('float64').values
-    wind_profile = weather_profile.iloc[:, 0].str.split('\s+', 17).str[
+    wind_profile = weather_profile.iloc[:, 0].str.split('\s+').str[
         8].astype('float64').values
-    direct_solar_profile = weather_profile.iloc[:, 0].str.split('\s+', 17).str[
+    direct_solar_profile = weather_profile.iloc[:, 0].str.split('\s+').str[
         12].astype('float64').values
-    diffuse_solar_profile = weather_profile.iloc[:, 0].str.split('\s+', 17).str[
+    diffuse_solar_profile = weather_profile.iloc[:, 0].str.split('\s+').str[
         13].astype('float64').values
     total_solar_profile = diffuse_solar_profile + direct_solar_profile
 

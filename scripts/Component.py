@@ -122,7 +122,7 @@ class Component(object):
         if self.outputs is not None:
             if 'efficiency' in properties.columns:
                 self.efficiency[self.outputs[0]] = float(
-                    properties['efficiency'])
+                    properties['efficiency'].iloc[0])
             else:
                 if self.component_type not in ['Storage', 'Inverter',
                                                'Battery', 'HotWaterStorage',
@@ -130,37 +130,37 @@ class Component(object):
                     warnings.warn("In the model database for " + self.name +
                                   " lack of column for efficiency.")
         if 'service life' in properties.columns:
-            self.life = int(properties['service life'])
+            self.life = int(properties['service life'].iloc[0])
         elif 'service_life' in properties.columns:
-            self.life = int(properties['service_life'])
+            self.life = int(properties['service_life'].iloc[0])
         else:
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for service life.")
         if 'factor repair effort' in properties.columns:
-            self.f_inst = float(properties['factor repair effort'])
+            self.f_inst = float(properties['factor repair effort'].iloc[0])
         elif 'factor_repair_effort' in properties.columns:
-            self.f_inst = float(properties['factor_repair_effort'])
+            self.f_inst = float(properties['factor_repair_effort'].iloc[0])
         else:
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for factor repair effort.")
         if 'factor servicing effort' in properties.columns:
-            self.f_w = float(properties['factor servicing effort'])
+            self.f_w = float(properties['factor servicing effort'].iloc[0])
         elif 'factor_servicing_effort' in properties.columns:
-            self.f_w = float(properties['factor_servicing_effort'])
+            self.f_w = float(properties['factor_servicing_effort'].iloc[0])
         else:
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for factor servicing effort.")
         if 'servicing effort hours' in properties.columns:
-            self.f_op = float(properties['servicing effort hours'])
+            self.f_op = float(properties['servicing effort hours'].iloc[0])
         elif 'servicing_effort_hours' in properties.columns:
-            self.f_op = float(properties['servicing_effort_hours'])
+            self.f_op = float(properties['servicing_effort_hours'].iloc[0])
         else:
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for servicing effort hours.")
 
         if self.cost_model == 0:
             if 'only-unit-price' in properties.columns:
-                self.unit_cost = float(properties['only-unit-price'])
+                self.unit_cost = float(properties['only-unit-price'].iloc[0])
             else:
                 warnings.warn("In the model database for " + self.name +
                               "lack of column for unit cost. Its cost model "
@@ -168,8 +168,8 @@ class Component(object):
         elif self.cost_model == 1:
             if 'fixed-unit-price' in properties.columns and \
                     'fixed-price' in properties.columns:
-                self.unit_cost = float(properties['fixed-unit-price'])
-                self.fixed_cost = float(properties['fixed-price'])
+                self.unit_cost = float(properties['fixed-unit-price'].iloc[0])
+                self.fixed_cost = float(properties['fixed-price'].iloc[0])
             elif 'fixed-unit-price' not in properties.columns:
                 warnings.warn("In the model database for " + self.name +
                               " lack of column for unit cost. Its cost model "

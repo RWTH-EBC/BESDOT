@@ -3,6 +3,7 @@ This example shows the temporal clustering method for optimization process,
 which could reduce the calculation time and still keep the accuracy.
 """
 import os
+import numpy as np
 from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
@@ -27,6 +28,9 @@ bld_5 = Building(name='bld_5', area=1000, bld_typ='Multi-family house')
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
 bld_5.add_thermal_profile('heat', env)
+bld_5.add_hot_water_profile(env)
+bld_5.demand_profile['heat_demand'] = np.array(bld_5.demand_profile[
+    'heat_demand']) + np.array(bld_5.demand_profile['hot_water_demand'])
 bld_5.add_elec_profile(env)
 
 # Pre define the building energy system with the topology for different

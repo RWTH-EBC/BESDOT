@@ -4,11 +4,10 @@ space heating and the other part is hot water demand.
 """
 
 import os
-import pandas as pd
 from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
-from scripts.components.HeatGrid import HeatGrid
+
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

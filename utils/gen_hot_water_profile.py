@@ -51,7 +51,11 @@ def gen_hot_water_profile(building_typ_en, area, year=2021, energy_typ="mittel")
     for row in range(len(new_zone_df)):
         zone = new_zone_df.loc[row, 'DIN_Zone']
 
-    bld_hot_water_demand = calc_bld_demand(building_typ_en, area, 'hot_water', energy_typ)
+    if building_typ_en in ['Multi-family house', 'Single-family house']:
+        bld_hot_water_demand = area / 100 * 12 / 3.6 * 365  # kWh,
+        # dummy value from a UK study
+    else:
+        bld_hot_water_demand = calc_bld_demand(building_typ_en, area, 'hot_water', energy_typ)
     hot_water_heating_demand_df = pd.read_excel(input_profile_path, sheet_name='DHW', header=None, usecols=[1],
                                                 skiprows=1)
     hot_water_heating_demand_df.columns = ['Wärmebedarf für Trinkwassererwärmung (kWh)']

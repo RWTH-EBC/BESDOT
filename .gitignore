@@ -8,8 +8,10 @@
 /data/opt_output/
 /data/opt_input/
 /data/cls_file/
+/examples/plot_example/
 gurobi.log
 
 # files for Mac OS
 .DS_Store
 */.DS_Store
+

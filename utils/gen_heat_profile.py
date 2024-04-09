@@ -82,7 +82,7 @@ def gen_heat_profile(building_typ_en,
     # Calculate demand in each zone and degree day method
     demand_df = pd.read_excel(input_energy_path, sheet_name=energy_typ)
     profile_df = pd.read_excel(input_profile_path, sheet_name='DIN V 18599')
-    total_heat_profile = []
+    total_heat_profile = [0] * 8760
     total_heat_demand = 0
     for row in range(len(new_zone_df)):
         zone = new_zone_df.loc[row, 'DIN_Zone']  # Zone name in DIN

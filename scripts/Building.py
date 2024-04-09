@@ -338,7 +338,7 @@ class Building(object):
         simp_matrix.set_index(['comp_name'], inplace=True)
         self.simp_matrix = simp_matrix
 
-        for index, row in simp_matrix.iteritems():
+        for index, row in simp_matrix.items():
             if len(row[row > 0].index.tolist() +
                    row[row.isnull()].index.tolist()) > 0:
                 for input_comp in row[row > 0].index.tolist() + \
@@ -486,7 +486,7 @@ class Building(object):
         #  tested.
 
         # Constraints for the inputs
-        for index, row in self.simp_matrix.iteritems():
+        for index, row in self.simp_matrix.items():
             if self.components[index].inputs is not None:
                 for energy_type in self.components[index].inputs:
                     if len(row[row > 0].index.tolist() +

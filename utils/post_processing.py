@@ -144,6 +144,62 @@ def csv_to_excel(project_path):
         save_non_time_series(bld_path, 'bld')
 
 
+def split_excel(excel_file):
+    # 读取Excel文件
+    xls = pd.ExcelFile(excel_file)
+    sheet_to_df_map = pd.read_excel(xls, sheet_name=None)
+
+    # 创建新的sheets
+    input_df = pd.DataFrame()
+    output_df = pd.DataFrame()
+
+    # 遍历每一个sheet
+    for sheet_name, df in sheet_to_df_map.items():
+        # 创建一个新的DataFrame来保存每一列的和和最大值
+        summary_df = pd.DataFrame(index=['Sum', 'Max'])
+
+        # 遍历每一列
+        for column in df.columns:
+            # 求和和求最大值
+            sum_val = df[column].sum()
+            max_val = df[column].max()
+
+            # 将求和和最大值结果保存到summary_df中
+            summary_df[column] = pd.Series({'Sum': sum_val, 'Max': max_val})
+
+        # 将summary_df追加到原始的df中
+        df = pd.concat([df, summary_df])
+
+        # 遍历每一列
+        for column in df.columns:
+            # 求和和求最大值
+            sum_val = df[column].sum()
+            max_val = df[column].max()
+
+            # 如果最大值和求和结果都为0，删除该列
+            if sum_val == 0 and max_val == 0:
+                df = df.drop(columns=[column])
+            # 如果列名以“input”开头，将该列移动到名为“input”的新sheet中
+            elif column.startswith('input'):
+                input_df[column] = df[column]
+                df = df.drop(columns=[column])
+            # 如果列名以“output”开头，将该列移动到名为“output”的新sheet中
+            elif column.startswith('output'):
+                output_df[column] = df[column]
+                df = df.drop(columns=[column])
+
+        # 保存处理后的sheet
+        with pd.ExcelWriter(excel_file, engine='openpyxl', mode='a',
+                            if_sheet_exists='replace') as writer:
+            df.to_excel(writer, sheet_name=sheet_name)
+
+    # 保存新的sheets
+    with pd.ExcelWriter(excel_file, engine='openpyxl', mode='a',
+                        if_sheet_exists='replace') as writer:
+        input_df.to_excel(writer, sheet_name='input')
+        output_df.to_excel(writer, sheet_name='output')
+
+
 if __name__ == '__main__':
     # Provide the name of the project
     project_name = 'project_6'
@@ -153,4 +209,5 @@ if __name__ == '__main__':
     prj_result = os.path.join(base_path, 'data', 'opt_output', project_name)
 
     csv_to_excel(prj_result)
+    split_excel(os.path.join(prj_result, 'bld_timeseries.xlsx'))
 

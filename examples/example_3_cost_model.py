@@ -34,6 +34,9 @@ project_1.add_environment(env)
 
 bld_1 = Building(name='bld_1', area=1000, bld_typ='Multi-family house')
 bld_1.add_thermal_profile('heat', env)
+bld_1.add_hot_water_profile(env)
+bld_1.demand_profile['heat_demand'] = np.array(bld_1.demand_profile[
+    'heat_demand']) + np.array(bld_1.demand_profile['hot_water_demand'])
 bld_1.add_elec_profile(env)
 
 topo_file = os.path.join(base_path, 'data', 'topology', 'basic.csv')
@@ -57,6 +60,9 @@ project_2.add_environment(env)
 
 bld_2 = Building(name='bld_2', area=1000, bld_typ='Multi-family house')
 bld_2.add_thermal_profile('heat', env)
+bld_2.add_hot_water_profile(env)
+bld_2.demand_profile['heat_demand'] = np.array(bld_2.demand_profile[
+    'heat_demand']) + np.array(bld_2.demand_profile['hot_water_demand'])
 bld_2.add_elec_profile(env)
 
 topo_file = os.path.join(base_path, 'data', 'topology', 'basic.csv')
@@ -91,6 +97,9 @@ project_3.add_environment(env)
 
 bld_3 = Building(name='bld_3', area=1000, bld_typ='Multi-family house')
 bld_3.add_thermal_profile('heat', env)
+bld_3.add_hot_water_profile(env)
+bld_3.demand_profile['heat_demand'] = np.array(bld_3.demand_profile[
+    'heat_demand']) + np.array(bld_3.demand_profile['hot_water_demand'])
 bld_3.add_elec_profile(env)
 
 topo_file = os.path.join(base_path, 'data', 'topology', 'basic.csv')

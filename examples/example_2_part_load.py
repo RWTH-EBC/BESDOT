@@ -4,6 +4,7 @@ part load operation constraints of the building components (gas boiler, etc.).
 """
 
 import os
+import numpy as np
 from scripts.Project import Project
 from scripts.Environment import Environment
 from scripts.Building import Building
@@ -31,6 +32,9 @@ bld_2 = Building(name='bld_2', area=1000, bld_typ='Multi-family house')
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile
 bld_2.add_thermal_profile('heat', env)
+bld_2.add_hot_water_profile(env)
+bld_2.demand_profile['heat_demand'] = np.array(bld_2.demand_profile[
+    'heat_demand']) + np.array(bld_2.demand_profile['hot_water_demand'])
 bld_2.add_elec_profile(env)
 
 # Pre define the building energy system with the topology for different

@@ -30,9 +30,9 @@ class Storage(Component):
         # input_efficiency shows the performance in the process of storing
         # energy, default set to be 1.
         if 'input efficiency' in properties.columns:
-            self.input_efficiency = float(properties['input efficiency'])
+            self.input_efficiency = float(properties['input efficiency'].iloc[0])
         elif 'input_efficiency' in properties.columns:
-            self.input_efficiency = float(properties['input_efficiency'])
+            self.input_efficiency = float(properties['input_efficiency'].iloc[0])
         else:
             self.input_efficiency = 1
             warnings.warn("In the model database for " + self.component_type +
@@ -41,9 +41,9 @@ class Storage(Component):
         # output_efficiency shows the performance in the process of releasing
         # energy, default set to be 1.
         if 'output efficiency' in properties.columns:
-            self.output_efficiency = float(properties['output efficiency'])
+            self.output_efficiency = float(properties['output efficiency'].iloc[0])
         elif 'output_efficiency' in properties.columns:
-            self.output_efficiency = float(properties['output_efficiency'])
+            self.output_efficiency = float(properties['output_efficiency'].iloc[0])
         else:
             self.output_efficiency = 1
             warnings.warn("In the model database for " + self.component_type +
@@ -52,9 +52,9 @@ class Storage(Component):
         # max_soc indicates the proportion of the storage capacity occupied by
         # the maximum allowed storage volume.
         if 'max soc' in properties.columns:
-            self.max_soc = float(properties['max soc'])
+            self.max_soc = float(properties['max soc'].iloc[0])
         elif 'max_soc' in properties.columns:
-            self.max_soc = float(properties['max_soc'])
+            self.max_soc = float(properties['max_soc'].iloc[0])
         else:
             self.max_soc = 1
             warnings.warn("In the model database for " + self.component_type +
@@ -63,9 +63,9 @@ class Storage(Component):
         # min_soc indicates the proportion of the storage capacity occupied by
         # the minimum allowed storage volume.
         if 'min soc' in properties.columns:
-            self.min_soc = float(properties['min soc'])
+            self.min_soc = float(properties['min soc'].iloc[0])
         elif 'min_soc' in properties.columns:
-            self.min_soc = float(properties['min_soc'])
+            self.min_soc = float(properties['min_soc'].iloc[0])
         else:
             self.min_soc = 0
             warnings.warn("In the model database for " + self.component_type +
@@ -74,9 +74,9 @@ class Storage(Component):
         # init_soc indicates the proportion of the storage capacity occupied
         # in the initial state.
         if 'init soc' in properties.columns:
-            self.init_soc = float(properties['init soc'])
+            self.init_soc = float(properties['init soc'].iloc[0])
         elif 'init_soc' in properties.columns:
-            self.init_soc = float(properties['init_soc'])
+            self.init_soc = float(properties['init_soc'].iloc[0])
         else:
             self.init_soc = 0.5
             warnings.warn("In the model database for " + self.component_type +
@@ -90,9 +90,9 @@ class Storage(Component):
         # and release energy at the same time for some kind of storage,
         # such as hot water tank.
         if 'e2p in' in properties.columns:
-            self.e2p_in = float(properties['e2p in'])
+            self.e2p_in = float(properties['e2p in'].iloc[0])
         elif 'e2p_in' in properties.columns:
-            self.e2p_in = float(properties['e2p_in'])
+            self.e2p_in = float(properties['e2p_in'].iloc[0])
         else:
             self.e2p_in = 0.5
             warnings.warn("In the model database for " + self.component_type +
@@ -101,16 +101,16 @@ class Storage(Component):
         # e2p_out indicates the maximum continuous discharging rate, e is the
         # abbreviation for energy, p is the abbreviation for power.
         if 'e2p out' in properties.columns:
-            self.e2p_out = float(properties['e2p out'])
+            self.e2p_out = float(properties['e2p out'].iloc[0])
         elif 'e2p_out' in properties.columns:
-            self.e2p_out = float(properties['e2p_out'])
+            self.e2p_out = float(properties['e2p_out'].iloc[0])
         else:
             self.e2p_out = 0.5
             warnings.warn("In the model database for " + self.component_type +
                           " lack of column for e2p out.")
 
         if 'loss' in properties.columns:
-            self.loss = float(properties['loss'])
+            self.loss = float(properties['loss'].iloc[0])
         else:
             self.loss = 0.01
             # warnings.warn("In the model database for " + self.component_type +

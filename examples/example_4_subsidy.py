@@ -3,6 +3,7 @@ This example shows how to find the subsidies for a building in a specific
 city and the subsidies could be used for the optimization process.
 """
 import os
+import numpy as np
 from scripts.Project import Project
 from scripts.Building import Building
 from scripts.Environment import Environment
@@ -30,6 +31,9 @@ bld_4 = Building(name='bld_4', area=1000, bld_typ='Multi-family house')
 
 # Add the energy demand profiles to the building object
 bld_4.add_thermal_profile('heat', env_4)
+bld_4.add_hot_water_profile(env_4)
+bld_4.demand_profile['heat_demand'] = np.array(bld_4.demand_profile[
+    'heat_demand']) + np.array(bld_4.demand_profile['hot_water_demand'])
 bld_4.add_elec_profile(env_4)
 
 # Pre define the building energy system with the topology for different
