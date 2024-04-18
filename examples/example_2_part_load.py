@@ -27,7 +27,7 @@ prj.add_environment(env)
 
 # If the objective of the project is the optimization for building, a building
 # should be added to the project.
-bld_2 = Building(name='bld_2', area=1000, bld_typ='Multi-family house')
+bld_2 = Building(name='bld_2', area=500, bld_typ='Multi-family house')
 
 # Add the energy demand profiles to the building object
 # Attention! generate thermal with profile whole year temperature profile

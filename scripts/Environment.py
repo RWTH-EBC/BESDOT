@@ -136,8 +136,8 @@ class Environment(object):
         # todo (yni): price could be set into series, array or list,
         #  for variable price
         # https://www.finanztip.de/stromvergleich/strompreis/
-        self.elec_price = 0.32  # €/kWh #0.3, 0.37, 0,32
-        self.gas_price = 0.07  # €/kWh #0.1, 0.1377
+        self.elec_price = 0.27  # €/kWh #0.3, 0.37, 0,32
+        self.gas_price = 0.09  # €/kWh #0.1, 0.1377
         self.heat_price = 0.08  # €/kWh
         self.biomass_price = 0.02  # €/kWh
         self.elec_feed_price = 0.08  # €/kWh #0.1, 0.05

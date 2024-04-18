@@ -28,7 +28,7 @@ project.add_environment(env)
 # building in the paderborn project. The area of the building makes no
 # difference for the optimization. Because the optimization is based on the
 # energy demand, which is given from input data.
-bld = Building(name='bld', area=1000, bld_typ='Multi-family house')
+bld = Building(name='bld', area=500, bld_typ='Multi-family house')
 
 # Add the energy demand profiles to the building object
 bld.add_thermal_profile('heat', env)

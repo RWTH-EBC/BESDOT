@@ -32,7 +32,7 @@ env = Environment(time_step=8760, city='Dusseldorf')
 project_1 = Project(name='project_3_0', typ='building')
 project_1.add_environment(env)
 
-bld_1 = Building(name='bld_1', area=1000, bld_typ='Multi-family house')
+bld_1 = Building(name='bld_1', area=500, bld_typ='Multi-family house')
 bld_1.add_thermal_profile('heat', env)
 bld_1.add_hot_water_profile(env)
 bld_1.demand_profile['heat_demand'] = np.array(bld_1.demand_profile[
@@ -58,7 +58,7 @@ print("===========================================")
 project_2 = Project(name='project_3_1', typ='building')
 project_2.add_environment(env)
 
-bld_2 = Building(name='bld_2', area=1000, bld_typ='Multi-family house')
+bld_2 = Building(name='bld_2', area=500, bld_typ='Multi-family house')
 bld_2.add_thermal_profile('heat', env)
 bld_2.add_hot_water_profile(env)
 bld_2.demand_profile['heat_demand'] = np.array(bld_2.demand_profile[
@@ -95,7 +95,7 @@ print("===========================================")
 project_3 = Project(name='project_3_2', typ='building')
 project_3.add_environment(env)
 
-bld_3 = Building(name='bld_3', area=1000, bld_typ='Multi-family house')
+bld_3 = Building(name='bld_3', area=500, bld_typ='Multi-family house')
 bld_3.add_thermal_profile('heat', env)
 bld_3.add_hot_water_profile(env)
 bld_3.demand_profile['heat_demand'] = np.array(bld_3.demand_profile[

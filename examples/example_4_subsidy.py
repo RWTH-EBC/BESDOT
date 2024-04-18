@@ -27,7 +27,7 @@ prj.add_environment(env_4)
 
 # If the objective of the project is the optimization for building, a building
 # should be added to the project.
-bld_4 = Building(name='bld_4', area=1000, bld_typ='Multi-family house')
+bld_4 = Building(name='bld_4', area=500, bld_typ='Multi-family house')
 
 # Add the energy demand profiles to the building object
 bld_4.add_thermal_profile('heat', env_4)
@@ -41,6 +41,12 @@ bld_4.add_elec_profile(env_4)
 topo_file = os.path.join(base_path, 'data', 'topology', 'basic.csv')
 bld_4.add_topology(topo_file)
 bld_4.add_components(prj.environment)
+
+# Change the cost model for some components to simulate the subsidy effect.
+bld_4.components['heat_pump'].change_cost_model(new_cost_model=1)
+bld_4.components['water_tes'].change_cost_model(new_cost_model=1)
+bld_4.components['boi'].change_cost_model(new_cost_model=1)
+bld_4.components['e_boi'].change_cost_model(new_cost_model=1)
 
 # Find out all the subsidy options for the building
 # The building could be chosen from 'all', 'ExistingBuilding', 'NewBuilding'
