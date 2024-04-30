@@ -522,6 +522,8 @@ class Building(object):
         total_pur_subsidy = pyo.Var(bounds=(0, None))
         total_op_subsidy = pyo.Var(bounds=(0, None))
         total_elec_pur = pyo.Var(bounds=(0, None))
+        # yso: the connection status of the building to the heating network
+        building_connection = pyo.Var(within=pyo.Binary)
         # Attention. The building name should be unique, not same as the comp
         # or project or other buildings.
         model.add_component('annual_cost_' + self.name, total_annual_cost)
@@ -532,6 +534,7 @@ class Building(object):
         model.add_component('total_pur_subsidy_' + self.name, total_pur_subsidy)
         model.add_component('total_op_subsidy_' + self.name, total_op_subsidy)
         model.add_component('total_elec_pur_' + self.name, total_elec_pur)
+        model.add_component('building_connection', building_connection)
 
         for comp in self.components:
             self.components[comp].add_vars(model)
@@ -552,6 +555,8 @@ class Building(object):
         self._constraint_total_revenue(model, env)
         self._constraint_other_op_cost(model)
         self._constraint_elec_pur(model)
+        # yso: Consider the building’s connection status to the heating network
+        self._constraint_building_connection(model, env)
 
         if len(self.subsidy_list) >= 1:
             self._constraint_subsidies(model)
@@ -875,3 +880,19 @@ class Building(object):
                     buy_elec = model.find_component('output_elec_' + comp)
 
         model.cons.add(elec_pur == sum(buy_elec[t] for t in model.time_step))
+
+    def _constraint_building_connection(self, model, env):
+        building_connection = model.find_component('building_connection')
+
+        M = 1e9
+
+        buy_heat = [0] * (env.time_step + 1)
+        for comp in self.components:
+            if isinstance(self.components[comp], module_dict['HeatGrid']):
+                buy_heat = model.find_component('output_heat_' + comp)
+
+        def _building_connection_rule(model,t):
+            return buy_heat[t] <= M * building_connection
+
+        model.building_connection_constraint = pyo.Constraint(
+            model.time_step, rule=_building_connection_rule)
