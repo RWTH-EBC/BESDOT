@@ -80,6 +80,7 @@ class Environment(object):
         self.elec_price = 0.32  # €/kWh #0.3, 0.37
         self.gas_price = 0.07  # €/kWh #0.1, 0.1377
         self.heat_price = 0.08  # €/kWh
+        self.heat_price_hub = 0.03  # €/kWh, production cost for energy hub
         self.elec_feed_price = 0.08  # €/kWh #0.1, 0.05
         self.elec_emission = 397  # g/kWh
         self.gas_emission = 202  # g/kWh

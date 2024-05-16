@@ -50,7 +50,7 @@ class Building(object):
                               "gas_demand": 0}
         if annual_heat_demand is None:
             self.add_annual_demand('heat')
-        elif not isinstance(annual_heat_demand, float):
+        elif not isinstance(annual_heat_demand, (float, int)):
             warn_msg = 'The annual_heat_demand of ' + self.name + \
                        ' is not float, need to check.'
             warnings.warn(warn_msg)
@@ -59,7 +59,7 @@ class Building(object):
 
         if annual_elec_demand is None:
             self.add_annual_demand('elec')
-        elif not isinstance(annual_elec_demand, float):
+        elif not isinstance(annual_elec_demand, (float, int)):
             warn_msg = 'The annual_elec_demand of ' + self.name + \
                        ' is not float, need to check.'
             warnings.warn(warn_msg)
@@ -106,6 +106,31 @@ class Building(object):
                  "the problem with changing this method add_annual_demand")
 
     def add_thermal_profile(self, energy_sector, env):
+        """The heat and cool demand profile could be calculated with
+        temperature profile according to degree day method.
+        Attention!!! The temperature profile could only provided in project
+        object, so this method cannot be called in the initialization of
+        building object."""
+        # todo (yni): the current version is only for heat, the method could be
+        #  developed for cool demand later.
+        if energy_sector == 'heat':
+            heat_demand_profile = gen_heat_profile(self.annual_demand["heat_demand"],
+                                                   self.building_typ,
+                                                   self.area,
+                                                   env.temp_profile_whole,
+                                                   env.year)
+            self.demand_profile["heat_demand"] = heat_demand_profile[
+                                                 env.start_time:
+                                                 env.start_time + env.time_step]
+        elif energy_sector == 'cool':
+            warn('Profile for cool is still not developed')
+        else:
+            warn_msg = 'The ' + energy_sector + ' is not allowed, check the ' \
+                                                'method add_thermal_profile '
+
+            warn(warn_msg)
+
+    def add_thermal_profile_save(self, energy_sector, env):
         """The heat and cool demand profile could be calculated with
         temperature profile according to degree day method.
         Attention!!! The temperature profile could only provided in project
@@ -524,6 +549,8 @@ class Building(object):
         total_elec_pur = pyo.Var(bounds=(0, None))
         # yso: the connection status of the building to the heating network
         building_connection = pyo.Var(within=pyo.Binary)
+        # yso: the maximum power of the building from the heating network
+        max_heat_power = pyo.Var(bounds=(0, None))
         # Attention. The building name should be unique, not same as the comp
         # or project or other buildings.
         model.add_component('annual_cost_' + self.name, total_annual_cost)
@@ -535,6 +562,7 @@ class Building(object):
         model.add_component('total_op_subsidy_' + self.name, total_op_subsidy)
         model.add_component('total_elec_pur_' + self.name, total_elec_pur)
         model.add_component('building_connection', building_connection)
+        model.add_component('max_heat_power', max_heat_power)
 
         for comp in self.components:
             self.components[comp].add_vars(model)
@@ -552,11 +580,15 @@ class Building(object):
 
         self._constraint_total_cost(model)
         self._constraint_operation_cost(model, env, cluster)
+        # yso: For buildings connected to the heating network, consider the fixed price
+        self._constraint_operation_cost_fixed(model, env, cluster)
         self._constraint_total_revenue(model, env)
         self._constraint_other_op_cost(model)
         self._constraint_elec_pur(model)
         # yso: Consider the building’s connection status to the heating network
         self._constraint_building_connection(model, env)
+        # yso: to calculate the power price, consider the maximum power from the heating network
+        self._constraint_max_heat_power(model, env)
 
         if len(self.subsidy_list) >= 1:
             self._constraint_subsidies(model)
@@ -691,9 +723,74 @@ class Building(object):
                        bld_operation_cost + bld_other_op_cost - bld_revenue)
 
     def _constraint_operation_cost(self, model, env, cluster=None):
-        """Calculate the total operation cost for the building energy system."""
+        """Calculate the total operation cost for the building energy system.
+        yso：The fixed price of the heating network is not considered in this constraint.
+        Suitable for hubs and buildings that do not consider fixed prices."""
         bld_operation_cost = model.find_component('operation_cost_' + self.name)
         bld_other_op_cost = model.find_component('other_op_cost_' + self.name)
+        # The following elements (buy_elec, ...) are the energy purchase and
+        # sale volume in time series and used to avoid that the constraint
+        # added is not executed properly if there is a None. The reason for
+        # 8761 steps is the different index of python list and pyomo.
+        buy_elec = [0] * (env.time_step + 1)  # unmatched index for python and
+        # pyomo
+        sell_elec = [0] * (env.time_step + 1)
+        buy_gas = [0] * (env.time_step + 1)
+        buy_heat = [0] * (env.time_step + 1)
+
+        # comp_cost_list = []
+        for comp in self.components:
+            # comp_cost_list.append(model.find_component('annual_cost_' + comp))
+            if isinstance(self.components[comp],
+                          module_dict['ElectricityGrid']):
+                if 'elec' in self.components[comp].energy_flows['input'].keys():
+                    sell_elec = model.find_component('input_elec_' + comp)
+                if 'elec' in self.components[comp].energy_flows[
+                    'output'].keys():
+                    buy_elec = model.find_component('output_elec_' + comp)
+            elif isinstance(self.components[comp], module_dict['GasGrid']):
+                buy_gas = model.find_component('output_gas_' + comp)
+            elif isinstance(self.components[comp], module_dict['HeatGrid']):
+                # todo (yni): take care of the situation for variable mass
+                #  flow. the calculation of heat price take the amount of
+                #  input energy of heat grid as the denominator. This should
+                #  be discussed later. It depends on the business model of
+                #  district heating supplier. The reason for taking the output
+                #  energy of energy, is that the energy loss of heat grid could
+                #  be seen as part of the heat exchanger, so it could reduce the
+                #  model complexity.
+                buy_heat = model.find_component('output_heat_' + comp)
+
+        if self.bilevel:
+            elec_price = model.elec_price
+        else:
+            elec_price = env.elec_price
+
+        # yso: For the hub, the heat price is the heat production cost.
+        # This is different from the price at which a building purchases
+        # heat from the heating network.
+        # For simplicity, a value in class environment is used here.
+        if 'hub' in self.name.lower():
+            heat_price = env.heat_price_hub
+        else:
+            if model.find_component('heat_price'):
+                if len(model.heat_price.index_set()) == 1:
+                    heat_price = model.heat_price[0]
+                else:
+                    heat_price = None
+                    warn('The dynamic heat price is not developed, please check')
+            else:
+                heat_price = env.heat_price
+
+    def _constraint_operation_cost_fixed(self, model, env, cluster=None):
+        """yso: Calculate the total operation cost for the building energy system.
+        Includes fixed costs of buying heat from heat grid and
+        is suitable for buildings connected to the heating network."""
+
+        bld_operation_cost = model.find_component('operation_cost_' + self.name)
+        bld_other_op_cost = model.find_component('other_op_cost_' + self.name)
+        max_heat_power = model.find_component('max_heat_power')
+        building_connection = model.find_component('building_connection')
         # The following elements (buy_elec, ...) are the energy purchase and
         # sale volume in time series and used to avoid that the constraint
         # added is not executed properly if there is a None. The reason for
@@ -741,6 +838,24 @@ class Building(object):
         else:
             heat_price = env.heat_price
 
+        if model.find_component('heat_basic_price'):
+            if len(model.heat_basic_price.index_set()) == 1:
+                heat_basic_price = model.heat_basic_price[0]
+            else:
+                heat_basic_price = None
+                warn('The dynamic heat basic price is not developed, please check')
+        else:
+            heat_basic_price = 0
+
+        if model.find_component('heat_power_price'):
+            if len(model.heat_power_price.index_set()) == 1:
+                heat_power_price = model.heat_power_price[0]
+            else:
+                heat_power_price = None
+                warn('The dynamic heat power price is not developed, please check')
+        else:
+            heat_power_price = 0
+
         if cluster is None:
             model.cons.add(
                 bld_operation_cost == sum(buy_elec[t] * elec_price +
@@ -748,7 +863,8 @@ class Building(object):
                                           buy_heat[t] *
                                           heat_price
                                           for t in model.time_step) +
-                bld_other_op_cost)
+                bld_other_op_cost + heat_basic_price * building_connection +
+                max_heat_power * heat_power_price * building_connection)
         else:
             # Attention! The period only for 24 hours is developed,
             # other segments are not considered.
@@ -767,7 +883,8 @@ class Building(object):
                                           buy_heat[t] * heat_price *
                                           nr_hour_occur[t - 1]
                                           for t in model.time_step) +
-                bld_other_op_cost)
+                bld_other_op_cost + heat_basic_price * building_connection +
+                max_heat_power * heat_power_price * building_connection )
 
     def _constraint_total_revenue(self, model, env, cluster=None):
         """The total revenue of the building is the sum of the revenue of
@@ -882,6 +999,8 @@ class Building(object):
         model.cons.add(elec_pur == sum(buy_elec[t] for t in model.time_step))
 
     def _constraint_building_connection(self, model, env):
+        """This constraint is used to determine the connection status of
+        the building and the heating pipe network."""
         building_connection = model.find_component('building_connection')
 
         M = 1e9
@@ -896,3 +1015,20 @@ class Building(object):
 
         model.building_connection_constraint = pyo.Constraint(
             model.time_step, rule=_building_connection_rule)
+
+    def _constraint_max_heat_power(self, model, env):
+        """This constraint is used to determine the maximum heat output from heating
+        network to building.This value represents the building's peak power, which is
+        employed in calculating the heat power price."""
+        max_heat_power = model.find_component('max_heat_power')
+
+        buy_heat = [0] * (env.time_step + 1)
+        for comp in self.components:
+            if isinstance(self.components[comp], module_dict['HeatGrid']):
+                buy_heat = model.find_component('output_heat_' + comp)
+
+        def _max_heat_power_rule(model, t):
+            return max_heat_power >= buy_heat[t]
+
+        model.max_heat_power_constraint = pyo.Constraint(model.time_step,
+            rule=_max_heat_power_rule)
