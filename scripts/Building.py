@@ -325,7 +325,8 @@ class Building(object):
                 self.components[comp_name].update_profile(
                     consum_profile=cluster_profile)
             if self.topology['comp_type'][item] in ['HeatPump',
-                                                    'GasHeatPump', 'PV',
+                                                    'GasHeatPump',
+                                                    # 'PV',
                                                     'SolarThermalCollector',
                                                     'SolarThermalCollectorFluid',
                                                     'UnderfloorHeat',
@@ -579,16 +580,16 @@ class Building(object):
         # self._constraint_solar_area(model)
 
         self._constraint_total_cost(model)
-        self._constraint_operation_cost(model, env, cluster)
+        # self._constraint_operation_cost(model, env, cluster)
         # yso: For buildings connected to the heating network, consider the fixed price
         self._constraint_operation_cost_fixed(model, env, cluster)
-        self._constraint_total_revenue(model, env)
+        self._constraint_total_revenue(model, env, cluster)
         self._constraint_other_op_cost(model)
-        self._constraint_elec_pur(model)
+        self._constraint_elec_pur(model, cluster)
         # yso: Consider the building’s connection status to the heating network
         self._constraint_building_connection(model, env)
         # yso: to calculate the power price, consider the maximum power from the heating network
-        self._constraint_max_heat_power(model, env)
+        self._constraint_max_heat_power(model, env,)
 
         if len(self.subsidy_list) >= 1:
             self._constraint_subsidies(model)
@@ -782,6 +783,34 @@ class Building(object):
             else:
                 heat_price = env.heat_price
 
+        if cluster is None:
+            model.cons.add(
+                bld_operation_cost == sum(buy_elec[t] * elec_price +
+                                          buy_gas[t] * env.gas_price +
+                                          buy_heat[t] *
+                                          heat_price
+                                          for t in model.time_step) +
+                bld_other_op_cost)
+        else:
+            # Attention! The period only for 24 hours is developed,
+            # other segments are not considered.
+            # period_length = 24
+            #
+            # nr_day_occur = pd.Series(cluster.clusterPeriodNoOccur).tolist()
+            # nr_hour_occur = []
+            # for nr_occur in nr_day_occur:
+            #     nr_hour_occur += [nr_occur] * 24
+            nr_hour_occur = cluster['Occur']
+
+            model.cons.add(
+                bld_operation_cost == sum(buy_elec[t] * elec_price *
+                                          nr_hour_occur[t - 1] + buy_gas[t] *
+                                          env.gas_price * nr_hour_occur[t - 1] +
+                                          buy_heat[t] * heat_price *
+                                          nr_hour_occur[t - 1]
+                                          for t in model.time_step) +
+                bld_other_op_cost)
+
     def _constraint_operation_cost_fixed(self, model, env, cluster=None):
         """yso: Calculate the total operation cost for the building energy system.
         Includes fixed costs of buying heat from heat grid and
@@ -895,7 +924,9 @@ class Building(object):
         # sale volume in time series and used to avoid that the constraint
         # added is not executed properly if there is a None. The reason for
         # 8761 steps is the different index of python list and pyomo.
-        sell_elec = [0] * (env.time_step + 1)
+
+        # sell_elec = [0] * (env.time_step + 1)
+        sell_elec = [0] * len(model.time_step)
 
         # comp_cost_list = []
         for comp in self.components:
@@ -985,7 +1016,7 @@ class Building(object):
         else:
             model.cons.add(total_op_subsidy == 0)
 
-    def _constraint_elec_pur(self, model):
+    def _constraint_elec_pur(self, model, cluster):
         """The electricity purchase constraint is added to the model. The
         constraint is added to the model if the electricity is purchased
         from the grid."""
@@ -996,7 +1027,12 @@ class Building(object):
                 if 'elec' in self.components[comp].energy_flows['output'].keys():
                     buy_elec = model.find_component('output_elec_' + comp)
 
-        model.cons.add(elec_pur == sum(buy_elec[t] for t in model.time_step))
+        if cluster is None:
+            model.cons.add(elec_pur == sum(buy_elec[t] for t in model.time_step))
+        else:
+            nr_hour_occur = cluster['Occur']
+            model.cons.add(elec_pur == sum(buy_elec[t] *  nr_hour_occur[t - 1]
+                                            for t in model.time_step))
 
     def _constraint_building_connection(self, model, env):
         """This constraint is used to determine the connection status of
@@ -1005,7 +1041,7 @@ class Building(object):
 
         M = 1e9
 
-        buy_heat = [0] * (env.time_step + 1)
+        buy_heat = [0] * (len(model.time_step))
         for comp in self.components:
             if isinstance(self.components[comp], module_dict['HeatGrid']):
                 buy_heat = model.find_component('output_heat_' + comp)
@@ -1014,7 +1050,7 @@ class Building(object):
             return buy_heat[t] <= M * building_connection
 
         model.building_connection_constraint = pyo.Constraint(
-            model.time_step, rule=_building_connection_rule)
+                model.time_step, rule=_building_connection_rule)
 
     def _constraint_max_heat_power(self, model, env):
         """This constraint is used to determine the maximum heat output from heating
@@ -1022,7 +1058,7 @@ class Building(object):
         employed in calculating the heat power price."""
         max_heat_power = model.find_component('max_heat_power')
 
-        buy_heat = [0] * (env.time_step + 1)
+        buy_heat = [0] * (len(model.time_step))
         for comp in self.components:
             if isinstance(self.components[comp], module_dict['HeatGrid']):
                 buy_heat = model.find_component('output_heat_' + comp)
@@ -1031,4 +1067,4 @@ class Building(object):
             return max_heat_power >= buy_heat[t]
 
         model.max_heat_power_constraint = pyo.Constraint(model.time_step,
-            rule=_max_heat_power_rule)
+                                                        rule=_max_heat_power_rule)

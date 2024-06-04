@@ -68,6 +68,8 @@ def gen_heat_profile(heat_demand,
     total_heat_demand = 0
     for row in range(len(new_zone_df)):
         zone = new_zone_df.loc[row, 'DIN_Zone']  # Zone name in DIN
+        if zone == 'Wohnen Mehrfamilienhaus':
+            zone = 'Bettenzimmer'
         hour_status = op_time_status(year, zone)
         # # yso: this calculation process is repeated when initializing Class Building.
         # zone_area = new_zone_df.loc[row, 'new_area']
@@ -99,6 +101,8 @@ def op_time_status(year, zone):
     """
     weekday_list = find_weekday(year)
     profile_df = pd.read_excel(input_profile_path, sheet_name='DIN V 18599')
+    if zone == "Wohnen":
+        zone = "Bettenzimmer"
     start_time = profile_df.loc[profile_df['Raumtyp'] == zone][
         'Nutzungszeit_von'].values[0]
     end_time = profile_df.loc[profile_df['Raumtyp'] == zone][
@@ -252,6 +256,8 @@ def degree_day(zone_typ, annual_value, profile_df, temperature_profile,
     heat_profile = []
     start_temp = 15  # The limit for heating on or off, could be the same as
     # set temperature? 15 comes from the german
+    if zone_typ == "Wohnen":
+        zone_typ = "Bettenzimmer"
     set_temp_heat = profile_df[profile_df['Raumtyp'] == zone_typ][
         'Raum-Solltemperatur_Heizung '].values[0]
 
