@@ -72,6 +72,11 @@ def save_timeseries(csv_file, name=''):
     output_df = pd.read_csv(csv_file)
     elements_dict = find_element(output_df)
 
+    # 剔除字典key中带有“Disjunct”和“rule”的元素
+    for key in list(elements_dict.keys()):
+        if 'Disjunct' in key or 'rule' in key:
+            elements_dict.pop(key)
+
     element_len_set = set()
     for item in elements_dict.keys():
         if len(elements_dict[item]) > 1:
@@ -202,7 +207,7 @@ def split_excel(excel_file):
 
 if __name__ == '__main__':
     # Provide the name of the project
-    project_name = 'project_6'
+    project_name = 'project_4_2_cls'
 
     # The path of the project
     base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

@@ -58,16 +58,27 @@ class EEG(OperateSubsidy):
             mode_rules = model.find_component('rule_' + self.name + '_' +
                                               sbj_name + '_' + mode)
             for index in range(len(self.rules[mode])):
-                sub_rule = pyo.Constraint(expr=sub_annuity == sum(
-                    sub_price * pv_to_e_grid[t] for t in model.time_step))
+                # sub_rule = pyo.Constraint(expr=sub_annuity == sum(
+                #     sub_price * pv_to_e_grid[t] for t in model.time_step))
+                sub_rule = pyo.Constraint(expr=sub_annuity == sub_price *
+                                               sub_quantity)
                 mode_rules[index + 1].add_component('sub_rule_' + str(index),
                                                     sub_rule)
 
-                sub_quantity_rule = pyo.Constraint(expr=sub_quantity == sum(
-                    pv_to_e_grid[t] for t in model.time_step))
-                mode_rules[index + 1].add_component('sub_quantity_rule_' +
-                                                    str(index),
-                                                    sub_quantity_rule)
+                if self.cluster is None:
+                    sub_quantity_rule = pyo.Constraint(expr=sub_quantity == sum(
+                        pv_to_e_grid[t] for t in model.time_step))
+                    mode_rules[index + 1].add_component('sub_quantity_rule_' +
+                                                        str(index),
+                                                        sub_quantity_rule)
+                else:
+                    nr_hour_occur = self.cluster['Occur']
+                    sub_quantity_rule = pyo.Constraint(expr=sub_quantity == sum(
+                        pv_to_e_grid[t] * nr_hour_occur[t - 1] for t in
+                        model.time_step))
+                    mode_rules[index + 1].add_component('sub_quantity_rule_' +
+                                                        str(index),
+                                                        sub_quantity_rule)
 
                 if mode in {'full feed-in + fixed compensation',
                             'full feed-in + direct marketing'}:
@@ -75,3 +86,24 @@ class EEG(OperateSubsidy):
                                           rule=pv_to_grid_rule)
                     mode_rules[index + 1].add_component('feed_in_' + str(index),
                                                         rule)
+        # sub_rule = pyo.Constraint(expr=sub_annuity == sub_price *
+        #                                sub_quantity)
+        # model.add_component('sub_rule_' + self.name + '_' + sbj_name, sub_rule)
+        #
+        # if self.cluster is None:
+        #     sub_quantity_rule = pyo.Constraint(expr=sub_quantity == sum(
+        #         pv_to_e_grid[t] for t in model.time_step))
+        #     model.add_component('sub_quantity_rule_' + self.name + '_' +
+        #                         sbj_name, sub_quantity_rule)
+        # else:
+        #     nr_hour_occur = self.cluster['Occur']
+        #     sub_quantity_rule = pyo.Constraint(expr=sub_quantity == sum(
+        #         pv_to_e_grid[t] * nr_hour_occur[t - 1] for t in
+        #         model.time_step))
+        #     model.add_component('sub_quantity_rule_' + self.name + '_' +
+        #                         sbj_name, sub_quantity_rule)
+        #
+        # # if mode in {'full feed-in + fixed compensation',
+        # #             'full feed-in + direct marketing'}:
+        # rule = pyo.Constraint(model.time_step, rule=pv_to_grid_rule)
+        # model.add_component('feed_in_' + self.name + '_' + sbj_name, rule)

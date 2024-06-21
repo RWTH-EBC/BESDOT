@@ -256,25 +256,6 @@ class Project(object):
         solvers:
         glpk(bad for milp), cbc(good for milp), gurobi: linear, ipopt: nonlinear
         """
-        if not instance:
-            model = self.model
-        else:
-            model = instance
-        # The following transformation could be used for pyomo gdp model.
-        # This makes no influence for existing MILP model.
-        pyo.TransformationFactory('gdp.bigm').apply_to(model)
-        # pyo.TransformationFactory('gdp.hull').apply_to(model)
-        solver = pyo.SolverFactory(solver_name)
-        # Attention! The option for solver could be set before solving the
-        # model. The following options are for gurobi solver and could be
-        # used for most scenarios.
-        solver.options['NonConvex'] = 2
-        solver.options['MIPGap'] = 0.01
-        solver.options['TimeLimit'] = 30000
-        solver.options['Heuristics'] = 0.001
-
-        solver.solve(model, tee=True)
-
         if save_lp or save_result:
             if not os.path.exists(os.path.join(base_path, 'data',
                                                'opt_output')):
@@ -289,27 +270,70 @@ class Project(object):
             else:
                 pass
 
-            # Save model in lp file, this only works with linear model. That is
-            # not necessary.
-            if save_lp:
-                model_output_path = os.path.join(base_path, 'data',
-                                                 'opt_output', self.name,
-                                                 'model.lp')
-                model.write(model_output_path,
-                            io_options={'symbolic_solver_labels': True})
+        if not instance:
+            model = self.model
+        else:
+            model = instance
+        # The following transformation could be used for pyomo gdp model.
+        # This makes no influence for existing MILP model.
+        pyo.TransformationFactory('gdp.bigm').apply_to(model)
+        # pyo.TransformationFactory('gdp.hull').apply_to(model)
+        solver = pyo.SolverFactory(solver_name)
+        # Attention! The option for solver could be set before solving the
+        # model. The following options are for gurobi solver and could be
+        # used for most scenarios.
+        solver.options['NonConvex'] = 2
+        solver.options['MIPGap'] = 0.01
+        solver.options['TimeLimit'] = 90000
 
-            # Save results in csv file.
-            if save_result:
-                result_output_path = os.path.join(base_path, 'data',
-                                                  'opt_output', self.name,
-                                                  'result.csv')
+        # solver.options['Heuristics'] = 0.001
 
-                # Get results for all variable.
-                var_list = []
-                value_list = []
-                for v in model.component_objects(pyo.Var, active=True):
-                    var_list += [v.name + '[' + str(nr) + ']' for nr in list(v)]
-                    value_list += list(v[:].value)
-                result_df = pd.DataFrame(list(zip(var_list, value_list)),
-                                         columns=['var', 'value'])
-                result_df.to_csv(result_output_path)
+        # solver.options['NodefileStart'] = 10
+
+        # export the iis model to ilp file, to find the source of infeasibility.
+        # could be used for gurobi solver.
+        # iis_model_output_path = os.path.join(base_path, 'data',
+        #                                      'opt_output', self.name,
+        #                                      'iis.ilp')
+        # solver.options['ResultFile'] = iis_model_output_path
+
+        results = solver.solve(model, tee=True)
+
+        if (results.solver.termination_condition ==
+                pyo.TerminationCondition.infeasible):
+            model_infeas = True
+        else:
+            model_infeas = False
+
+        # Save model in lp file, this only works with linear model. That is
+        # not necessary.
+        if save_lp:
+            model_output_path = os.path.join(base_path, 'data',
+                                             'opt_output', self.name,
+                                             'model.lp')
+            model.write(model_output_path,
+                        io_options={'symbolic_solver_labels': True})
+            if model_infeas:
+                # save raw model to turn ilp file to a readable file with label.
+                raw_model_output_path = os.path.join(base_path, 'data',
+                                                     'opt_output',
+                                                     self.name,
+                                                     'raw_model.lp')
+                model.write(raw_model_output_path,
+                            io_options={'symbolic_solver_labels': False})
+
+        # Save results in csv file.
+        if save_result and not model_infeas:
+            result_output_path = os.path.join(base_path, 'data',
+                                              'opt_output', self.name,
+                                              'result.csv')
+
+            # Get results for all variable.
+            var_list = []
+            value_list = []
+            for v in model.component_objects(pyo.Var, active=True):
+                var_list += [v.name + '[' + str(nr) + ']' for nr in list(v)]
+                value_list += list(v[:].value)
+            result_df = pd.DataFrame(list(zip(var_list, value_list)),
+                                     columns=['var', 'value'])
+            result_df.to_csv(result_output_path)

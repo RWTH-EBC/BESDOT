@@ -213,6 +213,11 @@ class Component(object):
                 warnings.warn("Can't update the profile for component" +
                               self.name)
 
+    def update_subsidy(self, cluster):
+        for sub in self.subsidy_list:
+            if isinstance(sub, OperateSubsidy):
+                sub.add_cluster(cluster)
+
     def to_dict(self):
         return {
             "name": self.name,
@@ -527,7 +532,8 @@ class Component(object):
 
         for subsidy in self.subsidy_list:
             subsidy.add_cons(model)
-            self._constraint_sub_annuity(model, subsidy.name)
+            if isinstance(subsidy, PurchaseSubsidy):
+                self._constraint_sub_annuity(model, subsidy.name)
 
     def add_vars(self, model):
         """

@@ -277,7 +277,10 @@ class Building(object):
         """Update the components, which could be influenced by clustering
         methods. The most important items are consumption items and storages:
         consumptions should be replaced by the new clustered profiles and
-        storage should take additional assumption."""
+        storage should take additional assumption.
+        The operation subsidy are also updated, since the operation subsidy is
+        related to the energy demand for each time step.
+        """
         for item in self.topology.index:
             comp_name = self.topology['comp_name'][item]
             if self.topology['comp_type'][item] in ['HeatConsumption']:
@@ -324,6 +327,20 @@ class Building(object):
                 # The indicator cluster in storage could determine if the
                 # cluster function should be called.
                 self.components[comp_name].cluster = True
+
+    def update_subsidy(self, cluster):
+        """Update the operation subsidy, which is related to the energy demand
+        for each time step. The operation subsidy should be updated according
+        to the new clustered profiles."""
+        for sub in self.subsidy_list:
+            if isinstance(sub, OperateSubsidy):
+                sub.add_cluster(cluster)
+
+        # Most operation subsidies are related to the device. Like EEG are
+        # related to the photovoltaic system and KWKG are related to the CHP.
+        for item in self.topology.index:
+            comp_name = self.topology['comp_name'][item]
+            self.components[comp_name].update_subsidy(cluster)
 
     def add_energy_flows(self):
         # Assign the variables for the energy flows according to system
@@ -427,7 +444,10 @@ class Building(object):
                 model.add_component(energy + '_' + flow[0] + '_' + flow[1],
                                     self.energy_flows[energy][flow])
 
-        total_annual_cost = pyo.Var(bounds=(0, None))
+        # total_annual_cost = pyo.Var(bounds=(0, None)) # this definition
+        # might cause infeasible solution, since the following definition
+        # would avoid the infeasibility with a positive solution.
+        total_annual_cost = pyo.Var()
         total_operation_cost = pyo.Var(bounds=(0, None))
         total_annual_revenue = pyo.Var(bounds=(0, None))
         total_other_op_cost = pyo.Var(bounds=(0, None))
@@ -454,7 +474,7 @@ class Building(object):
         self._constraint_energy_balance(model)
         self._constraint_total_cost(model)
         self._constraint_operation_cost(model, env, cluster)
-        self._constraint_total_revenue(model, env)
+        self._constraint_total_revenue(model, env, cluster)
         self._constraint_other_op_cost(model)
         # self._constraint_elec_pur(model, env)
 
@@ -541,11 +561,12 @@ class Building(object):
         for comp in self.components:
             comp_cost_list.append(model.find_component('annual_cost_' + comp))
             for sub in self.components[comp].subsidy_list:
-                comp_subsidy_list.append(model.find_component(
-                    'sub_annuity_' + sub.name + '_' + comp))
+                if sub.sub_type == 'purchase':
+                    comp_subsidy_list.append(model.find_component(
+                        'sub_annuity_' + sub.name + '_' + comp))
 
         model.cons.add(bld_annual_cost == sum(item for item in comp_cost_list) +
-                       bld_operation_cost + bld_other_op_cost - bld_revenue -
+                       bld_operation_cost - bld_revenue -
                        sum(item for item in comp_subsidy_list))
 
     def _constraint_operation_cost(self, model, env, cluster=None):

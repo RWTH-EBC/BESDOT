@@ -33,13 +33,11 @@ bld_2 = Building(name='bld_2', area=500, bld_typ='Multi-family house')
 # Attention! generate thermal with profile whole year temperature profile
 bld_2.add_thermal_profile('heat', env)
 bld_2.add_hot_water_profile(env)
-bld_2.demand_profile['heat_demand'] = np.array(bld_2.demand_profile[
-    'heat_demand']) + np.array(bld_2.demand_profile['hot_water_demand'])
 bld_2.add_elec_profile(env)
 
 # Pre define the building energy system with the topology for different
 # components and add components to the building.
-topo_file = os.path.join(base_path, 'data', 'topology', 'basic.csv')
+topo_file = os.path.join(base_path, 'data', 'topology', 'basic_with_dhw.csv')
 bld_2.add_topology(topo_file)
 bld_2.add_components(prj.environment)
 prj.add_building(bld_2)

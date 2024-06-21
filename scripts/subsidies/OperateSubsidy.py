@@ -19,6 +19,7 @@ class OperateSubsidy(Subsidy):
                          dependent_vars=dependent_vars)
         self.modes = None
         self.require_name = None
+        self.cluster = None
 
     def add_rules(self, user='basic', building='all'):
         self.modes = find_sub_modes(self.name, 'operate',
@@ -32,6 +33,9 @@ class OperateSubsidy(Subsidy):
         """add the component name, which should get the produced energy.
         in most situation the required component is the electricity grid."""
         self.require_name = require_name
+
+    def add_cluster(self, cluster):
+        self.cluster = cluster
 
     def add_vars(self, model):
         super().add_vars(model)
@@ -50,6 +54,8 @@ class OperateSubsidy(Subsidy):
         sub_quantity = pyo.Var(bounds=(0, 10e8))
         model.add_component('sub_quantity_' + self.name + '_' + self.sbj_name,
                             sub_quantity)
+
+        model.del_component('subsidy_' + self.name + '_' + self.sbj_name)
 
     def add_cons(self, model):
         """add the constraints of the subsidy. sub_name is the name of the
@@ -82,13 +88,13 @@ class OperateSubsidy(Subsidy):
             weighted_price_expr = 0
             for index in range(len(rules)):
                 bound_low = pyo.Constraint(expr=depend_var >= rules[index][
-                    'lower'])
+                    'lower'] + small_num)
 
                 if rules[index]['upper'] == 'inf':
                     bound_up = pyo.Constraint(expr=depend_var <= np.inf)
                 else:
                     bound_up = pyo.Constraint(expr=depend_var <= rules[index][
-                        'upper'] - small_num)
+                        'upper'])
 
                 # The calculated subsidy price is the weighted average of
                 # relevant tariffs.

@@ -1,7 +1,7 @@
 comp_name,comp_type,model,min_size,max_size,current_size,heat_pump,heat_cns,heat_tes,pv,solar_coll,bat,e_grid,gas_grid,boi,e_boi,e_cns,water_cns,water_tes
 heat_pump,HeatPumpAirWater,all_brands-Heat_pumps-air-water,0,2000,0,0,1,1,0,0,0,0,0,0,0,0,0,0
 heat_cns,HeatConsumption,HeatCNS1,1000,2000,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-heat_tes,HotWaterStorage,all_brands-Storage_technology-buffer_storage-0_Heat_exchanger,0,2000,0,0,1,0,0,0,0,0,0,0,0,0,0,0
+heat_tes,HotWaterStorage,all_brands-Storage_technology-buffer_storage-0_Heat_exchanger,0,20000,0,0,1,0,0,0,0,0,0,0,0,0,0,0
 pv,PV,PV1,0,2000,0,1,0,0,0,0,1,1,0,0,1,1,0,0
 solar_coll,SolarThermalCollector,all_brands-Solar_technology-flat-plate_collectors,0,2000,0,0,1,1,0,0,0,0,0,0,0,0,0,0
 bat,Battery,BAT1,0,2000,0,1,0,0,0,0,0,1,0,0,1,1,0,0
@@ -11,4 +11,4 @@ boi,GasBoiler,all_brands-Gas_heating-boiler,0,2000,0,0,1,1,0,0,0,0,0,0,0,0,1,1
 e_boi,ElectricBoiler,all_brands-Flow_heater-electricity,0,2000,0,0,1,1,0,0,0,0,0,0,0,0,1,1
 e_cns,ElectricalConsumption,CNS1,0,2000,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 water_cns,HotWaterConsumption,HWCNS1,1000,2000,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-water_tes,HotWaterStorage,all_brands-Storage_technology-buffer_storage-0_Heat_exchanger,0,2000,0,0,1,0,0,0,0,0,0,0,0,0,1,0
+water_tes,HotWaterStorage,all_brands-Storage_technology-buffer_storage-0_Heat_exchanger,0,20000,0,0,1,0,0,0,0,0,0,0,0,0,1,0

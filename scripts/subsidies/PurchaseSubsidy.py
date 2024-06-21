@@ -50,6 +50,7 @@ class PurchaseSubsidy(Subsidy):
         rule = Disjunct(pyo.RangeSet(rule_nr + 1))
         model.add_component('rule_' + self.name + '_' + self.sbj_name, rule)
         rule_list = []
+        last_bound_up = 0
         for index in range(len(rules)):
             if rules[index]['lower'] == 0:
                 bound_low = pyo.Constraint(expr=depend_var >= rules[index][
@@ -65,8 +66,9 @@ class PurchaseSubsidy(Subsidy):
                     'upper'] - small_num)
 
             sub_rule = pyo.Constraint(expr=rules[index]['coefficient'] *
-                                       depend_var + rules[index][
-                                       'constant'] == subsidy)
+                                           (depend_var - last_bound_up) +
+                                           rules[index]['constant'] == subsidy)
+            last_bound_up = rules[index]['upper']
 
             # the name for constraints in disjunct should be different? need
             # to be checked later
