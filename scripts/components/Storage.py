@@ -199,12 +199,20 @@ class Storage(Component):
         # Attention! The period only for 24 hours is developed,
         # other segments are not considered.
         period_length = 24
+        period_num = len(model.time_step) // period_length
+        # period_end_list = [period_length * i for i in range(1, period_num + 1)]
 
         stored_energy = model.find_component('energy_' + self.name)
+        model.cons.add(sum(stored_energy[i * period_length] *
+                           self.cluster[i * period_length - 1] for i in
+                           range(1, period_num + 1)) -
+                       sum(stored_energy[i * period_length + 1] *
+                           self.cluster[i * period_length] for i in
+                           range(period_num)) == 0)
 
-        for t in model.time_step:
-            if t % period_length == 0:
-                model.cons.add(stored_energy[t] == stored_energy[1])
+        # for t in model.time_step:
+        #     if t % period_length == 0:
+        #         model.cons.add(stored_energy[t] == stored_energy[1])
 
     def _constriant_unchange(self, model):
         """This is an additional constraint, which makes the final state of
@@ -229,18 +237,12 @@ class Storage(Component):
         if self.set_init:
             self._constraint_init_energy(model)
         self._constriant_unchange(model)
-        '''
-        if self.cluster is not None:
-            self._constraint_conserve_temp(model)
-        else:
-            self._constriant_unchange(model)
-        
         
         if self.cluster is not None:
             self._constraint_conserve(model)
-        else:
-            self._constriant_unchange(model)
-        '''
+        # else:
+        #     self._constriant_unchange(model)
+
         for subsidy in self.subsidy_list:
             subsidy.add_cons(model)
             self._constraint_sub_annuity(model, subsidy.name)

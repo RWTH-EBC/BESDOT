@@ -8,6 +8,8 @@ from scripts.Project import Project
 from scripts.Building import Building
 from scripts.Environment import Environment
 from utils.get_subsidy import find_subsidies
+from scripts.components.GasBoiler import GasBoiler
+from scripts.components.HeatPump import HeatPump
 
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -17,7 +19,7 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ################################################################################
 
 # Generate a project object at first.
-prj = Project(name='project_4_1', typ='building')
+prj = Project(name='project_7_1', typ='building')
 
 # Generate the environment object, which contains the weather data and price
 # data. If no weather file and city is given, the default weather file of
@@ -27,7 +29,7 @@ prj.add_environment(env_4)
 
 # If the objective of the project is the optimization for building, a building
 # should be added to the project.
-bld_4 = Building(name='bld_4_1', area=500, bld_typ='Multi-family house')
+bld_4 = Building(name='bld_7_1', area=500, bld_typ='Multi-family house')
 
 # Add the energy demand profiles to the building object
 bld_4.add_thermal_profile('heat', env_4)
@@ -55,6 +57,18 @@ subsidy_df = find_subsidies(env_4.city, env_4.state, building='NewBuilding')
 bld_4.add_subsidy(subsidy_df, building='NewBuilding')
 
 prj.add_building(bld_4)
+
+################################################################################
+#       Set the part load constraints for the gas boiler and heat pump
+################################################################################
+# Search for the gas boiler and heat pump components in the building
+# components, and set the minimal part load coefficient to 0.3. The
+# constraint would be added to the optimization model automatically. The
+# component could also be found with the component name.
+for item in bld_4.components:
+    if isinstance(bld_4.components[item], GasBoiler) or \
+            isinstance(bld_4.components[item], HeatPump):
+        bld_4.components[item].min_part_load = 0.3
 
 ################################################################################
 #                        Pre-Processing for time clustering
@@ -85,7 +99,7 @@ prj.run_optimization('gurobi', save_lp=False, save_result=True)
 ################################################################################
 
 # Generate a project object at first.
-prj_2 = Project(name='project_4_2', typ='building')
+prj_2 = Project(name='project_7_2', typ='building')
 
 env_5 = Environment(time_step=8760, city='Dusseldorf')
 prj_2.add_environment(env_5)
@@ -117,6 +131,18 @@ bld_5.components['e_boi'].change_cost_model(new_cost_model=2)
 subsidy_df = find_subsidies(env_5.city, env_5.state, building='NewBuilding')
 bld_5.add_subsidy(subsidy_df, building='NewBuilding')
 prj_2.add_building(bld_5)
+
+################################################################################
+#       Set the part load constraints for the gas boiler and heat pump
+################################################################################
+# Search for the gas boiler and heat pump components in the building
+# components, and set the minimal part load coefficient to 0.3. The
+# constraint would be added to the optimization model automatically. The
+# component could also be found with the component name.
+for item in bld_5.components:
+    if isinstance(bld_5.components[item], GasBoiler) or \
+            isinstance(bld_5.components[item], HeatPump):
+        bld_5.components[item].min_part_load = 0.3
 
 ################################################################################
 #                  Select the subsidies for testing
@@ -166,7 +192,7 @@ prj_2.run_optimization('gurobi', save_lp=False, save_result=True)
 #                   Project with cost model 3: Generate python objects
 ################################################################################
 # Generate a project object at first.
-prj_3 = Project(name='project_4_0', typ='building')
+prj_3 = Project(name='project_7_0', typ='building')
 
 env_6 = Environment(time_step=8760, city='Dusseldorf')
 prj_3.add_environment(env_6)
@@ -191,6 +217,19 @@ bld_6.add_components(prj_3.environment)
 subsidy_df = find_subsidies(env_6.city, env_6.state, building='NewBuilding')
 bld_6.add_subsidy(subsidy_df, building='NewBuilding')
 prj_3.add_building(bld_6)
+
+################################################################################
+#       Set the part load constraints for the gas boiler and heat pump
+################################################################################
+# Search for the gas boiler and heat pump components in the building
+# components, and set the minimal part load coefficient to 0.3. The
+# constraint would be added to the optimization model automatically. The
+# component could also be found with the component name.
+for item in bld_6.components:
+    if isinstance(bld_6.components[item], GasBoiler) or \
+            isinstance(bld_6.components[item], HeatPump):
+        bld_6.components[item].min_part_load = 0.3
+
 
 ################################################################################
 #                        Pre-Processing for time clustering

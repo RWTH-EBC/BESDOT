@@ -207,7 +207,7 @@ def split_excel(excel_file):
 
 if __name__ == '__main__':
     # Provide the name of the project
-    project_name = 'project_4_2_cls'
+    project_name = 'project_6'
 
     # The path of the project
     base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

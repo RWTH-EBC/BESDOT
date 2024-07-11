@@ -326,7 +326,7 @@ class Building(object):
             if isinstance(self.components[comp_name], Storage):
                 # The indicator cluster in storage could determine if the
                 # cluster function should be called.
-                self.components[comp_name].cluster = True
+                self.components[comp_name].cluster = cluster['Occur'].tolist()
 
     def update_subsidy(self, cluster):
         """Update the operation subsidy, which is related to the energy demand

@@ -55,6 +55,19 @@ for item in bld_2.components:
         bld_2.components[item].min_part_load = 0.3
 
 ################################################################################
+#                        Pre-Processing for time clustering
+################################################################################
+# The profiles could be clustered are: demand profiles, weather profiles and
+# prices profiles (if necessary). demand profiles are stored in buildings
+# and other information are stored in Environment objects.
+# prj.time_cluster(nr_periods=15, save_cls='15day_24hour.csv')
+prj.time_cluster(read_cls='15day_24hour.csv')
+
+# After clustering need to update the demand profiles and storage assumptions.
+for bld in prj.building_list:
+    bld.update_components(prj.cluster)
+
+################################################################################
 #                  Build optimization model and run optimization
 ################################################################################
 prj.build_model()
