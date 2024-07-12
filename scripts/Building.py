@@ -4,6 +4,7 @@ Simplified Modell for internal use.
 
 import warnings
 import pyomo.environ as pyo
+from pyomo.gdp import Disjunct, Disjunction
 import numpy as np
 import pandas as pd
 
@@ -91,6 +92,8 @@ class Building(object):
         self.subsidy_list = []
 
         self.bilevel = False
+        self.fixed_price_different_by_demand = False
+        self.fixed_price_different_by_power = False
 
     def add_annual_demand(self, energy_sector):
         """Calculate the annual heat demand according to the TEK provided
@@ -552,6 +555,20 @@ class Building(object):
         building_connection = pyo.Var(within=pyo.Binary)
         # yso: the maximum power of the building from the heating network
         max_heat_power = pyo.Var(bounds=(0, None))
+        # yso: the fixed price categories will be differentiated based
+        # on the use of heat from the heat grid
+        if (hasattr(self, 'fixed_price_different_by_demand')
+            and self.fixed_price_different_by_demand) \
+                or (hasattr(self, 'fixed_price_different_by_power')
+                    and self.fixed_price_different_by_power):
+            consider_basic_price = pyo.Var(within=pyo.Binary)
+            consider_power_price = pyo.Var(within=pyo.Binary)
+            bc_cbp_product = pyo.Var(within=pyo.Binary)  # consider_basic_price和building_connection的乘积
+            bc_cpp_product = pyo.Var(within=pyo.Binary) # consider_power_price和building_connection的乘积
+            model.add_component('consider_basic_price', consider_basic_price)
+            model.add_component('consider_power_price', consider_power_price)
+            model.add_component('bc_cbp_product', bc_cbp_product)
+            model.add_component('bc_cpp_product', bc_cpp_product)
         # Attention. The building name should be unique, not same as the comp
         # or project or other buildings.
         model.add_component('annual_cost_' + self.name, total_annual_cost)
@@ -588,8 +605,18 @@ class Building(object):
         self._constraint_elec_pur(model, cluster)
         # yso: Consider the building’s connection status to the heating network
         self._constraint_building_connection(model, env)
-        # yso: to calculate the power price, consider the maximum power from the heating network
-        self._constraint_max_heat_power(model, env,)
+        # yso: to calculate the power price, consider the maximum power from
+        # the heating network
+        self._constraint_max_heat_power(model, env)
+        # yso: the fixed price categories will be differentiated based on the
+        # use of heat from the heat grid
+        if (hasattr(self, 'fixed_price_different_by_demand')
+            and self.fixed_price_different_by_demand) \
+                or (hasattr(self, 'fixed_price_different_by_power')
+                    and self.fixed_price_different_by_power):
+            self._constraint_fixed_price_different(model, env, cluster)
+            self._constraint_bc_cbp_cpp_product(model)
+
 
         if len(self.subsidy_list) >= 1:
             self._constraint_subsidies(model)
@@ -732,7 +759,12 @@ class Building(object):
         bld_operation_cost = model.find_component('operation_cost_' + self.name)
         bld_other_op_cost = model.find_component('other_op_cost_' + self.name)
         max_heat_power = model.find_component('max_heat_power')
-        building_connection = model.find_component('building_connection')
+        if hasattr(self, 'fixed_price_different_by_demand') \
+                and self.fixed_price_different_by_demand == True:
+            bc_cbp_product = model.find_component('bc_cbp_product')
+            bc_cpp_product = model.find_component('bc_cpp_product')
+        else:
+            building_connection = model.find_component('building_connection')
         # The following elements (buy_elec, ...) are the energy purchase and
         # sale volume in time series and used to avoid that the constraint
         # added is not executed properly if there is a None. The reason for
@@ -828,36 +860,68 @@ class Building(object):
 
             gas_price = env.gas_price
 
+            if hasattr(self, 'fixed_price_different_by_demand') \
+                    and self.fixed_price_different_by_demand == True:
+                if cluster is None:
+                    model.cons.add(
+                        bld_operation_cost == sum(buy_elec[t] * elec_price +
+                                                  buy_gas[t] * gas_price +
+                                                  buy_heat[t] *
+                                                  heat_price
+                                                  for t in model.time_step) +
+                        bld_other_op_cost + heat_basic_price * bc_cbp_product +
+                        max_heat_power * heat_power_price * bc_cpp_product)
+                else:
+                    # Attention! The period only for 24 hours is developed,
+                    # other segments are not considered.
+                    # period_length = 24
+                    #
+                    # nr_day_occur = pd.Series(cluster.clusterPeriodNoOccur).tolist()
+                    # nr_hour_occur = []
+                    # for nr_occur in nr_day_occur:
+                    #     nr_hour_occur += [nr_occur] * 24
+                    nr_hour_occur = cluster['Occur']
 
-            if cluster is None:
-                model.cons.add(
-                    bld_operation_cost == sum(buy_elec[t] * elec_price +
-                                            buy_gas[t] * gas_price +
-                                            buy_heat[t] *
-                                            heat_price
-                                            for t in model.time_step) +
-                    bld_other_op_cost + heat_basic_price * building_connection +
-                    max_heat_power * heat_power_price * building_connection)
+                    model.cons.add(
+                        bld_operation_cost == sum(buy_elec[t] * elec_price *
+                                                  nr_hour_occur[t - 1] + buy_gas[t] *
+                                                  gas_price * nr_hour_occur[t - 1] +
+                                                  buy_heat[t] * heat_price *
+                                                  nr_hour_occur[t - 1]
+                                                  for t in model.time_step) +
+                        bld_other_op_cost + heat_basic_price * bc_cbp_product +
+                        max_heat_power * heat_power_price * bc_cpp_product)
+
             else:
-                # Attention! The period only for 24 hours is developed,
-                # other segments are not considered.
-                # period_length = 24
-                #
-                # nr_day_occur = pd.Series(cluster.clusterPeriodNoOccur).tolist()
-                # nr_hour_occur = []
-                # for nr_occur in nr_day_occur:
-                #     nr_hour_occur += [nr_occur] * 24
-                nr_hour_occur = cluster['Occur']
+                if cluster is None:
+                    model.cons.add(
+                        bld_operation_cost == sum(buy_elec[t] * elec_price +
+                                                buy_gas[t] * gas_price +
+                                                buy_heat[t] *
+                                                heat_price
+                                                for t in model.time_step) +
+                        bld_other_op_cost + heat_basic_price * building_connection +
+                        max_heat_power * heat_power_price * building_connection)
+                else:
+                    # Attention! The period only for 24 hours is developed,
+                    # other segments are not considered.
+                    # period_length = 24
+                    #
+                    # nr_day_occur = pd.Series(cluster.clusterPeriodNoOccur).tolist()
+                    # nr_hour_occur = []
+                    # for nr_occur in nr_day_occur:
+                    #     nr_hour_occur += [nr_occur] * 24
+                    nr_hour_occur = cluster['Occur']
 
-                model.cons.add(
-                    bld_operation_cost == sum(buy_elec[t] * elec_price *
-                                            nr_hour_occur[t - 1] + buy_gas[t] *
-                                            gas_price * nr_hour_occur[t - 1] +
-                                            buy_heat[t] * heat_price *
-                                            nr_hour_occur[t - 1]
-                                            for t in model.time_step) +
-                    bld_other_op_cost + heat_basic_price * building_connection +
-                    max_heat_power * heat_power_price * building_connection )
+                    model.cons.add(
+                        bld_operation_cost == sum(buy_elec[t] * elec_price *
+                                                nr_hour_occur[t - 1] + buy_gas[t] *
+                                                gas_price * nr_hour_occur[t - 1] +
+                                                buy_heat[t] * heat_price *
+                                                nr_hour_occur[t - 1]
+                                                for t in model.time_step) +
+                        bld_other_op_cost + heat_basic_price * building_connection +
+                        max_heat_power * heat_power_price * building_connection)
 
     def _constraint_total_revenue(self, model, env, cluster=None):
         """The total revenue of the building is the sum of the revenue of
@@ -1012,3 +1076,97 @@ class Building(object):
 
         model.max_heat_power_constraint = pyo.Constraint(model.time_step,
                                                         rule=_max_heat_power_rule)
+
+    def _constraint_fixed_price_different(self, model, env, cluster):
+        consider_basic_price = model.find_component('consider_basic_price')
+        consider_power_price = model.find_component('consider_power_price')
+
+        if (hasattr(self, 'fixed_price_different_by_demand')
+            and self.fixed_price_different_by_demand):
+            buy_heat = [0] * len(model.time_step)
+            for comp in self.components:
+                if isinstance(self.components[comp], module_dict['HeatGrid']):
+                    buy_heat = model.find_component('output_heat_' + comp)
+
+            if model.find_component('price_demand_threshold'):
+                if len(model.price_demand_threshold.index_set()) == 1:
+                    price_demand_threshold = model.price_demand_threshold[0]
+                else:
+                    price_demand_threshold = None
+                    warn('The dynamic price_demand_threshold is not developed, please check')
+            else:
+                price_demand_threshold = 0
+
+            if cluster is None:
+                sum_buy_heat = sum(buy_heat[t] for t in model.time_step)
+            else:
+                nr_hour_occur = cluster['Occur']
+                sum_buy_heat = sum(buy_heat[t] * nr_hour_occur[t - 1] for t in model.time_step)
+
+            epsilon = 1e-12  # 一个非常小的数值，用于近似严格的不等式
+
+            model.PriceDemandDisjunct1 = Disjunct()
+            model.PriceDemandDisjunct1.cons = pyo.Constraint(expr=(
+                    sum_buy_heat <= price_demand_threshold))
+            model.PriceDemandDisjunct1.cons2 = pyo.Constraint(expr=(consider_basic_price == 1))
+            model.PriceDemandDisjunct1.cons3 = pyo.Constraint(expr=(consider_power_price == 0))
+
+            model.PriceDemandDisjunct2 = Disjunct()
+            model.PriceDemandDisjunct2.cons = pyo.Constraint(expr=(
+                    sum_buy_heat >= price_demand_threshold + epsilon))
+            model.PriceDemandDisjunct2.cons2 = pyo.Constraint(expr=(consider_basic_price == 0))
+            model.PriceDemandDisjunct2.cons3 = pyo.Constraint(expr=(consider_power_price == 1))
+
+            model.price_demand_disjunction = Disjunction(
+                expr=[model.PriceDemandDisjunct1, model.PriceDemandDisjunct2])
+
+        elif (hasattr(self, 'fixed_price_different_by_power')
+            and self.fixed_price_different_by_power):
+            max_heat_power = model.find_component('max_heat_power')
+
+            if model.find_component('price_power_threshold'):
+                if len(model.price_power_threshold.index_set()) == 1:
+                    price_power_threshold = model.price_power_threshold[0]
+                else:
+                    price_power_threshold = None
+                    warn('The dynamic price_power_threshold is not developed, please check')
+            else:
+                price_power_threshold = 0
+
+            epsilon = 1e-12  # 一个非常小的数值，用于近似严格的不等式
+
+            model.PricePowerDisjunct1 = Disjunct()
+            model.PricePowerDisjunct1.cons = pyo.Constraint(expr=(
+                    max_heat_power <= price_power_threshold))
+            model.PricePowerDisjunct1.cons2 = pyo.Constraint(expr=(consider_basic_price == 1))
+            model.PricePowerDisjunct1.cons3 = pyo.Constraint(expr=(consider_power_price == 0))
+
+            model.PricePowerDisjunct2 = Disjunct()
+            model.PricePowerDisjunct2.cons = pyo.Constraint(expr=(
+                    max_heat_power >= price_power_threshold + epsilon))
+            model.PricePowerDisjunct2.cons2 = pyo.Constraint(expr=(consider_basic_price == 0))
+            model.PricePowerDisjunct2.cons3 = pyo.Constraint(expr=(consider_power_price == 1))
+
+            model.price_demand_disjunction = Disjunction(
+                expr=[model.PricePowerDisjunct1, model.PricePowerDisjunct2])
+
+        pyo.TransformationFactory('gdp.bigm').apply_to(model, bigM={None: 1e12})
+
+    def _constraint_bc_cbp_cpp_product(self, model):
+        consider_basic_price = model.find_component('consider_basic_price')
+        consider_power_price = model.find_component('consider_power_price')
+        building_connection = model.find_component('building_connection')
+        bc_cbp_product = model.find_component('bc_cbp_product')
+        bc_cpp_product = model.find_component('bc_cpp_product')
+
+        model.cons.add(bc_cpp_product <= building_connection)
+        model.cons.add(bc_cpp_product <= consider_power_price)
+        model.cons.add(bc_cpp_product >= building_connection + consider_power_price - 1)
+        model.cons.add(bc_cbp_product <= building_connection)
+        model.cons.add(bc_cbp_product <= consider_basic_price)
+        model.cons.add(bc_cbp_product >= building_connection + consider_basic_price - 1)
+
+
+
+
+

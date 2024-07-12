@@ -130,10 +130,10 @@ def save_non_time_series(csv_file, name=''):
     new_df.to_excel(non_timeseries_path)
 
 
-def csv_to_excel(project_path):
+def csv_to_excel(project_path, result_name):
     """Convert result csv file in the folder to excel file for better
     understanding."""
-    bld_path = os.path.join(project_path, 'result.csv')
+    bld_path = os.path.join(project_path, result_name)
     bld_timeseries_path = os.path.join(project_path, 'bld_timeseries.xlsx')
     bld_non_timeseries_path = os.path.join(project_path,
                                            'bld_non_timeseries.xlsx')
@@ -206,8 +206,9 @@ if __name__ == '__main__':
 
     # The path of the project
     base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    prj_result = os.path.join(base_path, 'data', 'opt_output', project_name)
+    project_path = 'D:\Git\cangku\desdot\examples\outputs\\75不接入'
 
-    csv_to_excel(prj_result)
-    split_excel(os.path.join(prj_result, 'bld_timeseries.xlsx'))
+    result_name = 'building_172.csv'
+    csv_to_excel(project_path,result_name)
+    split_excel(os.path.join(project_path, 'bld_timeseries.xlsx'))
 
