@@ -1,0 +1,7 @@
+comp_name,comp_type,model,min_size,max_size,current_size,heat_pump,heat_outlet,water_tes,pv,bat,e_grid
+heat_pump,HeatPump,EHP_district,0,1500,0,0,1,1,0,0,0
+heat_outlet,HeatOutlet,HeatOutlet1,0,10000,0,0,0,0,0,0,0
+water_tes,HotWaterStorage,all_brands-Storage_technology-buffer_storage-0_Heat_exchanger,0,100000,0,0,1,0,0,0,0
+pv,PV,PV1,0,10000,0,1,0,0,0,1,1
+bat,Battery,BAT1,0,10000,0,1,0,0,0,0,1
+e_grid,ElectricityGrid,GRD1,0,10000,0,1,0,0,0,1,0
