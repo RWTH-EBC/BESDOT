@@ -89,14 +89,14 @@ class Project(object):
             price_profiles = {}
             if isinstance(self.environment.elec_price, list):
                 price_profiles["elec_price"] = self.environment.elec_price
-            if isinstance(self.environment.elec_price, list):
-                price_profiles["gas_price"] = self.environment.elec_price
-            if isinstance(self.environment.elec_price, list):
-                price_profiles["heat_price"] = self.environment.elec_price
-            if isinstance(self.environment.elec_price, list):
-                price_profiles["elec_feed_price"] = self.environment.elec_price
-            if isinstance(self.environment.elec_price, list):
-                price_profiles["co2_price"] = self.environment.elec_price
+            if isinstance(self.environment.gas_price, list):
+                price_profiles["gas_price"] = self.environment.gas_price
+            if isinstance(self.environment.heat_price, list):
+                price_profiles["heat_price"] = self.environment.heat_price
+            if isinstance(self.environment.elec_feed_price, list):
+                price_profiles["elec_feed_price"] = self.environment.elec_feed_price
+            if isinstance(self.environment.co2_price, list):
+                price_profiles["co2_price"] = self.environment.co2_price
 
             # Original profiles for mentioned series
             orig_profiles = {**demand_profiles, **weather_profiles,

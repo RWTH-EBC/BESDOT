@@ -44,7 +44,8 @@ input_tabula_path = os.path.join(base_path, "data", "tek_data",
 output_path = os.path.join(base_path, "data", "tek_data", "output_heat_profile")
 
 
-def gen_heat_profile(building_typ,
+def gen_heat_profile(heat_demand,
+                     building_typ,
                      area,
                      temperature_profile,
                      year=2021,
@@ -62,15 +63,19 @@ def gen_heat_profile(building_typ,
     new_zone_df = analysis_bld_zone(building_typ, area)
 
     # Calculate demand in each zone and degree day method
-    demand_df = pd.read_excel(input_energy_path, sheet_name=energy_typ)
     profile_df = pd.read_excel(input_profile_path, sheet_name='DIN V 18599')
     total_heat_profile = []
     total_heat_demand = 0
     for row in range(len(new_zone_df)):
         zone = new_zone_df.loc[row, 'DIN_Zone']  # Zone name in DIN
+        if zone == 'Wohnen Mehrfamilienhaus':
+            zone = 'Bettenzimmer'
         hour_status = op_time_status(year, zone)
-        zone_area = new_zone_df.loc[row, 'new_area']
-        zone_heat_demand = calc_zone_demand(demand_df, 'heat', zone, zone_area)
+        # # yso: this calculation process is repeated when initializing Class Building.
+        # zone_area = new_zone_df.loc[row, 'new_area']
+        # zone_heat_demand = calc_zone_demand(demand_df, 'heat', zone, zone_area)
+        zone_per = new_zone_df.loc[row, 'new_per']
+        zone_heat_demand = heat_demand * zone_per
         zone_heat_profile = degree_day(zone, zone_heat_demand, profile_df,
                                        temperature_profile, hour_status)
         total_heat_profile = np.sum([total_heat_profile, zone_heat_profile],
@@ -96,6 +101,8 @@ def op_time_status(year, zone):
     """
     weekday_list = find_weekday(year)
     profile_df = pd.read_excel(input_profile_path, sheet_name='DIN V 18599')
+    if zone == "Wohnen":
+        zone = "Bettenzimmer"
     start_time = profile_df.loc[profile_df['Raumtyp'] == zone][
         'Nutzungszeit_von'].values[0]
     end_time = profile_df.loc[profile_df['Raumtyp'] == zone][
@@ -249,6 +256,8 @@ def degree_day(zone_typ, annual_value, profile_df, temperature_profile,
     heat_profile = []
     start_temp = 15  # The limit for heating on or off, could be the same as
     # set temperature? 15 comes from the german
+    if zone_typ == "Wohnen":
+        zone_typ = "Bettenzimmer"
     set_temp_heat = profile_df[profile_df['Raumtyp'] == zone_typ][
         'Raum-Solltemperatur_Heizung '].values[0]
 
