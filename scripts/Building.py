@@ -452,26 +452,27 @@ class Building(object):
                 model.add_component(energy + '_' + flow[0] + '_' + flow[1],
                                     self.energy_flows[energy][flow])
 
-        building_connection = pyo.Var(within=pyo.Binary) # yso: the
-        # connection status of the building to the heating network
-        model.add_component('building_connection', building_connection)
-        max_heat_power = pyo.Var(bounds=(0, None)) # the maximum power of the
-        # building from the heating network
-        model.add_component('max_heat_power', max_heat_power)
-        # yso: the fixed price categories will be differentiated based
-        # on the use of heat from the heat grid
-        if (hasattr(self, 'fixed_price_different_by_demand')
-            and self.fixed_price_different_by_demand) \
-                or (hasattr(self, 'fixed_price_different_by_power')
-                    and self.fixed_price_different_by_power):
-            consider_basic_price = pyo.Var(within=pyo.Binary)
-            consider_power_price = pyo.Var(within=pyo.Binary)
-            bc_cbp_product = pyo.Var(within=pyo.Binary)  # consider_basic_price和building_connection的乘积
-            bc_cpp_product = pyo.Var(within=pyo.Binary) # consider_power_price和building_connection的乘积
-            model.add_component('consider_basic_price', consider_basic_price)
-            model.add_component('consider_power_price', consider_power_price)
-            model.add_component('bc_cbp_product', bc_cbp_product)
-            model.add_component('bc_cpp_product', bc_cpp_product)
+        if self.bilevel:
+            building_connection = pyo.Var(within=pyo.Binary) # yso: the
+            # connection status of the building to the heating network
+            model.add_component('building_connection', building_connection)
+            max_heat_power = pyo.Var(bounds=(0, None)) # the maximum power of the
+            # building from the heating network
+            model.add_component('max_heat_power', max_heat_power)
+            # yso: the fixed price categories will be differentiated based
+            # on the use of heat from the heat grid
+            if (hasattr(self, 'fixed_price_different_by_demand')
+                and self.fixed_price_different_by_demand) \
+                    or (hasattr(self, 'fixed_price_different_by_power')
+                        and self.fixed_price_different_by_power):
+                consider_basic_price = pyo.Var(within=pyo.Binary)
+                consider_power_price = pyo.Var(within=pyo.Binary)
+                bc_cbp_product = pyo.Var(within=pyo.Binary)  # consider_basic_price和building_connection的乘积
+                bc_cpp_product = pyo.Var(within=pyo.Binary) # consider_power_price和building_connection的乘积
+                model.add_component('consider_basic_price', consider_basic_price)
+                model.add_component('consider_power_price', consider_power_price)
+                model.add_component('bc_cbp_product', bc_cbp_product)
+                model.add_component('bc_cpp_product', bc_cpp_product)
 
         # total_annual_cost = pyo.Var(bounds=(0, None)) # this definition
         # might cause infeasible solution, since the following definition
@@ -507,19 +508,20 @@ class Building(object):
         self._constraint_other_op_cost(model)
         # self._constraint_elec_pur(model, env)
 
-        # yso: Consider the building’s connection status to the heating network
-        self._constraint_building_connection(model, env)
-        # yso: to calculate the power price, consider the maximum power from
-        # the heating network
-        self._constraint_max_heat_power(model, env)
-        # yso: the fixed price categories will be differentiated based on the
-        # use of heat from the heat grid
-        if (hasattr(self, 'fixed_price_different_by_demand')
-            and self.fixed_price_different_by_demand) \
-                or (hasattr(self, 'fixed_price_different_by_power')
-                    and self.fixed_price_different_by_power):
-            self._constraint_fixed_price_different(model, env, cluster)
-            self._constraint_bc_cbp_cpp_product(model)
+        if self.bilevel:
+            # yso: Consider the building’s connection status to the heating network
+            self._constraint_building_connection(model, env)
+            # yso: to calculate the power price, consider the maximum power from
+            # the heating network
+            self._constraint_max_heat_power(model, env)
+            # yso: the fixed price categories will be differentiated based on the
+            # use of heat from the heat grid
+            if (hasattr(self, 'fixed_price_different_by_demand')
+                and self.fixed_price_different_by_demand) \
+                    or (hasattr(self, 'fixed_price_different_by_power')
+                        and self.fixed_price_different_by_power):
+                self._constraint_fixed_price_different(model, env, cluster)
+                self._constraint_bc_cbp_cpp_product(model)
 
         if len(self.subsidy_list) >= 1:
             for subsidy in self.subsidy_list:
@@ -619,13 +621,14 @@ class Building(object):
         bld_operation_cost = model.find_component('operation_cost_' + self.name)
         bld_other_op_cost = model.find_component('other_op_cost_' + self.name)
 
-        max_heat_power = model.find_component('max_heat_power')
-        if hasattr(self, 'fixed_price_different_by_demand') \
-                and self.fixed_price_different_by_demand == True:
-            bc_cbp_product = model.find_component('bc_cbp_product')
-            bc_cpp_product = model.find_component('bc_cpp_product')
-        else:
-            building_connection = model.find_component('building_connection')
+        if self.bilevel:
+            max_heat_power = model.find_component('max_heat_power')
+            if hasattr(self, 'fixed_price_different_by_demand') \
+                    and self.fixed_price_different_by_demand == True:
+                bc_cbp_product = model.find_component('bc_cbp_product')
+                bc_cpp_product = model.find_component('bc_cpp_product')
+            else:
+                building_connection = model.find_component('building_connection')
 
         # The following elements (buy_elec, ...) are the energy purchase and
         # sale volume in time series and used to avoid that the constraint
@@ -753,8 +756,7 @@ class Building(object):
                                                 buy_heat[t] *
                                                 heat_price
                                                 for t in model.time_step) +
-                        bld_other_op_cost + heat_basic_price * building_connection +
-                        max_heat_power * heat_power_price * building_connection)
+                        bld_other_op_cost )
                 else:
                     nr_hour_occur = cluster['Occur']
 
@@ -765,8 +767,7 @@ class Building(object):
                                                 buy_heat[t] * heat_price *
                                                 nr_hour_occur[t - 1]
                                                 for t in model.time_step) +
-                        bld_other_op_cost + heat_basic_price * building_connection +
-                        max_heat_power * heat_power_price * building_connection)
+                        bld_other_op_cost)
 
         # if cluster is None:
         #     model.cons.add(
@@ -892,7 +893,8 @@ class Building(object):
         for comp in self.components:
             if isinstance(self.components[comp],
                           module_dict['ElectricityGrid']):
-                if 'elec' in self.components[comp].energy_flows['output'].keys():
+                if 'elec' in self.components[comp].energy_flows[
+                    'output'].keys():
                     buy_elec = model.find_component('output_elec_' + comp)
 
         if cluster is None:
