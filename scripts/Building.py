@@ -3,9 +3,10 @@ Simplified Modell for internal use.
 """
 
 import warnings
-import pyomo.environ as pyo
 import numpy as np
 import pandas as pd
+import pyomo.environ as pyo
+from pyomo.gdp import Disjunct, Disjunction
 
 from scripts.components.Storage import Storage
 from scripts.subsidies.country_subsidy_EEG import EEG
