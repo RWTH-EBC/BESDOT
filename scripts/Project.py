@@ -82,14 +82,14 @@ class Project(object):
             price_profiles = {}
             if isinstance(self.environment.elec_price, list):
                 price_profiles["elec_price"] = self.environment.elec_price
-            if isinstance(self.environment.elec_price, list):
-                price_profiles["gas_price"] = self.environment.elec_price
-            if isinstance(self.environment.elec_price, list):
-                price_profiles["heat_price"] = self.environment.elec_price
-            if isinstance(self.environment.elec_price, list):
-                price_profiles["elec_feed_price"] = self.environment.elec_price
-            if isinstance(self.environment.elec_price, list):
-                price_profiles["co2_price"] = self.environment.elec_price
+            if isinstance(self.environment.gas_price, list):
+                price_profiles["gas_price"] = self.environment.gas_price
+            if isinstance(self.environment.heat_price, list):
+                price_profiles["heat_price"] = self.environment.heat_price
+            if isinstance(self.environment.elec_feed_price, list):
+                price_profiles["elec_feed_price"] = self.environment.elec_feed_price
+            if isinstance(self.environment.co2_price, list):
+                price_profiles["co2_price"] = self.environment.co2_price
 
             # Original profiles for mentioned series
             orig_profiles = {**demand_profiles, **weather_profiles,
@@ -106,8 +106,7 @@ class Project(object):
 
             # Turn profiles from dict into pandas Dataframe and use package tsam
             raw = pd.DataFrame(orig_profiles)
-            raw.index = pd.to_datetime(arg=raw.index,
-                                       unit='h',
+            raw.index = pd.to_datetime(arg=raw.index, unit='h',
                                        origin=pd.Timestamp('2021-01-01'))
 
             aggregation = \

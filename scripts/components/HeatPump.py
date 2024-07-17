@@ -56,9 +56,6 @@ class HeatPump(Component):
                 self.outputs[0]] / (self.outlet_temp - self.temp_profile[t - 1])
 
         cop = pyo.Param(model.time_step, initialize=cop_list)
-        # import numpy as np
-        # print("COP value is: ")
-        # print(np.mean(list(cop_list.values())))
         model.add_component('cop_' + self.name, cop)
 
     def _constraint_conver(self, model):

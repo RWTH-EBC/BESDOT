@@ -56,11 +56,12 @@ input_energy_path = os.path.join(base_path, "data", "tek_data",
 input_zone_path = os.path.join(base_path, "data", "tek_data",
                                "GHD_Zonierung.xlsx")
 input_tabula_path = os.path.join(base_path, "data", "tek_data",
-                                 "TABULA_data.xlsx")
+                               "TABULA_data.xlsx")
 output_path = os.path.join(base_path, "data", "tek_data", "output_heat_profile")
 
 
-def gen_heat_profile(building_typ_en,
+def gen_heat_profile(heat_demand,
+                     building_typ_en,
                      area,
                      temperature_profile,
                      year=2021,
@@ -80,15 +81,21 @@ def gen_heat_profile(building_typ_en,
     new_zone_df = analysis_bld_zone(building_typ_de, area)
 
     # Calculate demand in each zone and degree day method
-    demand_df = pd.read_excel(input_energy_path, sheet_name=energy_typ)
+    # demand_df = pd.read_excel(input_energy_path, sheet_name=energy_typ)
     profile_df = pd.read_excel(input_profile_path, sheet_name='DIN V 18599')
     total_heat_profile = [0] * 8760
     total_heat_demand = 0
     for row in range(len(new_zone_df)):
         zone = new_zone_df.loc[row, 'DIN_Zone']  # Zone name in DIN
+        if zone == 'Wohnen Mehrfamilienhaus':
+            zone = 'Bettenzimmer'
         hour_status = op_time_status(year, zone)
-        zone_area = new_zone_df.loc[row, 'new_area']
-        zone_heat_demand = calc_zone_demand(demand_df, 'heat', zone, zone_area)
+        # # yso: this calculation process is repeated when initializing Class Building.
+        # zone_area = new_zone_df.loc[row, 'new_area']
+        # zone_heat_demand = calc_zone_demand(demand_df, 'heat', zone, zone_area)
+        zone_per = new_zone_df.loc[row, 'new_per']
+        zone_heat_demand = heat_demand * zone_per
+
         zone_heat_profile = degree_day(zone, zone_heat_demand, profile_df,
                                        temperature_profile, hour_status)
         total_heat_profile = np.sum([total_heat_profile, zone_heat_profile],
@@ -114,6 +121,10 @@ def op_time_status(year, zone):
     """
     weekday_list = find_weekday(year)
     profile_df = pd.read_excel(input_profile_path, sheet_name='DIN V 18599')
+
+    if zone == "Wohnen":
+        zone = "Bettenzimmer"
+
     start_time = profile_df.loc[profile_df['Raumtyp'] == zone][
         'Nutzungszeit_von'].values[0]
     end_time = profile_df.loc[profile_df['Raumtyp'] == zone][
@@ -266,6 +277,8 @@ def calc_zone_demand(demand_df, demand_typ, zone_typ, zone_area):
 def degree_day(zone_typ, annual_value, profile_df, temperature_profile,
                status_list):
     heat_profile = []
+    if zone_typ == "Wohnen":
+        zone_typ = "Bettenzimmer"
     start_temp = 15  # The limit for heating on or off, could be the same as
     # set temperature? 15 comes from the german
     set_temp_heat = profile_df[profile_df['Raumtyp'] == zone_typ][
@@ -335,3 +348,15 @@ if __name__ == "__main__":
     temperature = pd.read_csv(input_temp_path)['temperature'].values
     gen_heat_profile("Single-family house", 300, temperature, plot=True)
 
+
+    # gen_heat_profile("Wohngebäude", 300, temperature, plot=True)
+    # gen_heat_profile("Verwaltungsgebäude", 300, temperature, plot=True)
+
+    # print(calc_bld_demand("Wohngebäude (MFH)", 10000, 'heat',
+    #                       energy_typ='gering'))
+    # print(calc_bld_demand("Verwaltungsgebäude", 300, "elec"))
+
+    # calc_residential_demand('EFH', 1968, 200)
+
+    # weekday_lt = find_weekday(2022)
+    # print(op_time_status(2022, 'Bettenzimmer'))

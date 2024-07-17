@@ -9,9 +9,22 @@
 /data/opt_input/
 /data/cls_file/
 /examples/plot_example/
+/data/denmark_energy_hub/
+/utils/analysis_lp_new.txt
+/utils/analysis_lp_temp.txt
 gurobi.log
 
 # files for Mac OS
 .DS_Store
 */.DS_Store
 
+../../docs_test
+/preprocessing
+/postprocessing_gitignore/
+/postprocessing/analysis_data.py
+/postprocessing/analysis_data_2.py
+/postprocessing/analysis_data_gdp.py
+/postprocessing/gdp_subsidy.csv
+/postprocessing/subsidy_data.csv
+/postprocessing/subsidy_data_2.csv
+/postprocessing/subsidy_data_complete.csv
