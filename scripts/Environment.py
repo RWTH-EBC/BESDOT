@@ -136,11 +136,25 @@ class Environment(object):
         # todo (yni): price could be set into series, array or list,
         #  for variable price
         # https://www.finanztip.de/stromvergleich/strompreis/
-        self.elec_price = 0.27  # €/kWh #0.3, 0.37, 0,32
-        self.gas_price = 0.09  # €/kWh #0.1, 0.1377
-        self.heat_price = 0.08  # €/kWh
-        self.biomass_price = 0.02  # €/kWh
-        self.elec_feed_price = 0.08  # €/kWh #0.1, 0.05
+        self.elec_price = 0.38  # €/kWh #0.3, 0.37, the price of buying electricity,
+        # average in 2024
+        # https://www.verivox.de/strom/strompreise/
+        self.elec_price_pump = 0.30  # yso: 20 percent cheaper than normal household electricity
+        # https://www.verivox.de/heizstrom/waermepumpe/
+        self.elec_price_hub = 0.17  # €/kWh, Average industrial electricity prices in 01/2024
+        # https://www.eon.de/de/gk/strom/industriestrom.html
+        self.elec_feed_price = 0.08  # €/kWh #0.1, 0.05, Feed-in tariff 2024
+        # https://senec.com/de/magazin/einspeiseverguetung
+        self.gas_price = 0.11  # €/kWh #0.1, 0.1377, Average in 2024
+        # https://www.verivox.de/gas/gaspreisentwicklung/
+        self.gas_price_hub = 0.08  # €/kWh, production cost for energy hub, Q1 2024
+        # https://de.statista.com/statistik/daten/studie/
+        # 168528/umfrage/gaspreise-fuer-gewerbe-und-industriekunden
+        # -seit-2006/
+        self.heat_price = 0.14  # €/kWh, the price for buying heat from the heat network
+        # https://www.stadtwerke-fellbach.de/de/Waerme/Waermepreise/
+        # Waermepreise/Waermepreise-2024-ab-01.04.-19-.pdf
+        self.heat_price_hub = 0.03  # hub暂时不需要买热
         self.elec_emission = 397  # g/kWh
         self.gas_emission = 202  # g/kWh
         self.co2_price = 35  # €/t
