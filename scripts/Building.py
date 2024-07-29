@@ -691,7 +691,7 @@ class Building(object):
                                               for t in model.time_step) +
                     bld_other_op_cost)
         else:
-            if self.bilevel:
+            if model.find_component('elec_price'):
                 elec_price = model.elec_price
             else:
                 elec_price = env.elec_price
@@ -883,26 +883,6 @@ class Building(object):
 
         model.cons.add(bld_other_op_cost == sum(comp_op for comp_op
                                                 in other_op_comp_list))
-
-    def _constraint_elec_pur(self, model, cluster):
-        """The electricity purchase constraint is added to the model. The
-        constraint is added to the model if the electricity is purchased
-        from the grid."""
-        buy_elec = [0] * len(model.time_step)
-        elec_pur = model.find_component('total_elec_pur_' + self.name)
-        for comp in self.components:
-            if isinstance(self.components[comp],
-                          module_dict['ElectricityGrid']):
-                if 'elec' in self.components[comp].energy_flows[
-                    'output'].keys():
-                    buy_elec = model.find_component('output_elec_' + comp)
-
-        if cluster is None:
-            model.cons.add(elec_pur == sum(buy_elec[t] for t in model.time_step))
-        else:
-            nr_hour_occur = cluster['Occur']
-            model.cons.add(elec_pur == sum(buy_elec[t] *  nr_hour_occur[t - 1]
-                                            for t in model.time_step))
 
     def _constraint_building_connection(self, model, env):
         """This constraint is used to determine the connection status of
