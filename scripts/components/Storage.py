@@ -208,7 +208,8 @@ class Storage(Component):
                            range(1, period_num + 1)) -
                        sum(stored_energy[i * period_length + 1] *
                            self.cluster[i * period_length] for i in
-                           range(period_num)) == 0)
+                           range(period_num)) - stored_energy[1] *
+                       self.cluster[period_num * period_length - 1] == 0)
 
         # for t in model.time_step:
         #     if t % period_length == 0:
