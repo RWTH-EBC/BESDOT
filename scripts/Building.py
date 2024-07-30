@@ -20,7 +20,8 @@ class Building(object):
                  bld_typ='Single-family house',
                  user='basic',
                  annual_heat_demand=None,
-                 annual_elec_demand=None):
+                 annual_elec_demand=None,
+                 bilevel=False):
         """
         Initialization for building.
         :param name: name of the building, should be unique
@@ -101,7 +102,7 @@ class Building(object):
                              "hydrogen": {}}
         self.heat_flows = {}
         self.subsidy_list = []
-        self.bilevel = False
+        self.bilevel = bilevel
         self.fixed_price_different_by_demand = False
         self.fixed_price_different_by_power = False
 

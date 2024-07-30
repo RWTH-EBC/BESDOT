@@ -77,38 +77,52 @@ def save_timeseries(csv_file, name=''):
         if 'Disjunct' in key or 'rule' in key:
             elements_dict.pop(key)
 
-    element_len_set = set()
+    # element_len_set = set()
+    element_len_dict = {}
     for item in elements_dict.keys():
         if len(elements_dict[item]) > 1:
             # new_df = pd.DataFrame(index=range(len(elements_dict[item])))
-            element_len_set.add(len(elements_dict[item]))
+            # element_len_set.add(len(elements_dict[item]))
+            # 记录每个元素长度出现的次数，长度作为key，次数作为value
+            element_len_dict[len(elements_dict[item])] = element_len_dict.get(
+                len(elements_dict[item]), 0) + 1
 
-    # find the minimal length (greatest common divisor) of the time series
-    gcd_result = element_len_set.pop()
-    while element_len_set:
-        num = element_len_set.pop()
-        gcd_result = math.gcd(gcd_result, num)
-    new_df = pd.DataFrame(index=range(gcd_result))
+    #返回element_len_dict中value最大的key
+    max_len = max(element_len_dict, key=element_len_dict.get)
+    # print('The maximal length of the time series is:', max_len)
 
+    # 将所有elements_dict[item]长度等于max_len的元素保存到new_df中
+    new_df = pd.DataFrame(index=range(max_len))
     for item in elements_dict.keys():
-        if len(elements_dict[item]) > 1:
-            if 'status' in item:  # quick fix for status in chp, need to
-                # be fixed in the future
-                pass
-            elif 'building_connect' in item:
-                pass
-            elif 'energy_edge' in item:
-                pass
-            elif 'energy_on_edges' in item:
-                pass
-            elif len(elements_dict[item]) != gcd_result and len(elements_dict[
-                item]) % gcd_result == 0:
-                # nr = int(len(elements_dict[item]) / gcd_result)
-                # for i in range(nr):
-                #     new_df[item + '_' + str(i)] = elements_dict[item][i::nr]
-                pass
-            else:
-                new_df[item] = elements_dict[item]
+        if len(elements_dict[item]) == max_len:
+            new_df[item] = elements_dict[item]
+
+    # # find the minimal length (greatest common divisor) of the time series
+    # gcd_result = element_len_set.pop()
+    # while element_len_set:
+    #     num = element_len_set.pop()
+    #     gcd_result = math.gcd(gcd_result, num)
+    # new_df = pd.DataFrame(index=range(gcd_result))
+    #
+    # for item in elements_dict.keys():
+    #     if len(elements_dict[item]) > 1:
+    #         if 'status' in item:  # quick fix for status in chp, need to
+    #             # be fixed in the future
+    #             pass
+    #         elif 'building_connect' in item:
+    #             pass
+    #         elif 'energy_edge' in item:
+    #             pass
+    #         elif 'energy_on_edges' in item:
+    #             pass
+    #         elif len(elements_dict[item]) != gcd_result and len(elements_dict[
+    #             item]) % gcd_result == 0:
+    #             # nr = int(len(elements_dict[item]) / gcd_result)
+    #             # for i in range(nr):
+    #             #     new_df[item + '_' + str(i)] = elements_dict[item][i::nr]
+    #             pass
+    #         else:
+    #             new_df[item] = elements_dict[item]
 
     output_path = os.path.split(csv_file)
     timeseries_path = os.path.join(output_path[0], name + '_timeseries.xlsx')
