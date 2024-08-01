@@ -482,14 +482,14 @@ class Building(object):
         total_operation_cost = pyo.Var(bounds=(0, None))
         total_annual_revenue = pyo.Var(bounds=(0, None))
         total_other_op_cost = pyo.Var(bounds=(0, None))
-        total_elec_pur = pyo.Var(bounds=(0, None))
+        # total_elec_pur = pyo.Var(bounds=(0, None))
         # Attention. The building name should be unique, not same as the comp
         # or project or other buildings.
         model.add_component('annual_cost_' + self.name, total_annual_cost)
         model.add_component('operation_cost_' + self.name, total_operation_cost)
         model.add_component('total_revenue_' + self.name, total_annual_revenue)
         model.add_component('other_op_cost_' + self.name, total_other_op_cost)
-        model.add_component('total_elec_pur_' + self.name, total_elec_pur)
+        # model.add_component('total_elec_pur_' + self.name, total_elec_pur)
 
         for comp in self.components:
             self.components[comp].add_vars(model)
