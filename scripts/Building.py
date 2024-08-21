@@ -103,6 +103,8 @@ class Building(object):
         self.heat_flows = {}
         self.subsidy_list = []
 
+        self.cluster = None
+
         self.bilevel_bld = bilevel
         # the heat_supply_business is used to determine the building, if it
         # should be pay the basic price or the power price. The default value is
