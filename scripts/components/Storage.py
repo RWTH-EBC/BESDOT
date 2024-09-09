@@ -203,7 +203,15 @@ class Storage(Component):
         # period_end_list = [period_length * i for i in range(1, period_num + 1)]
 
         stored_energy = model.find_component('energy_' + self.name)
-        model.cons.add(sum(stored_energy[i * period_length] *
+        input_energy = model.find_component('input_' + self.inputs[0] +
+                                            '_' + self.name)
+        output_energy = model.find_component('output_' + self.outputs[0] +
+                                             '_' + self.name)
+        model.cons.add(sum((stored_energy[i * period_length] * (1 - self.loss)
+                            + input_energy[i * period_length] *
+                            self.input_efficiency -
+                            output_energy[i * period_length] /
+                            self.output_efficiency) *
                            self.cluster[i * period_length - 1] for i in
                            range(1, period_num + 1)) -
                        sum(stored_energy[i * period_length + 1] *
