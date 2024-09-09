@@ -20,7 +20,8 @@ class Building(object):
                  bld_typ='Single-family house',
                  user='basic',
                  annual_heat_demand=None,
-                 annual_elec_demand=None):
+                 annual_elec_demand=None,
+                 bilevel=False):
         """
         Initialization for building.
         :param name: name of the building, should be unique
@@ -101,7 +102,21 @@ class Building(object):
                              "hydrogen": {}}
         self.heat_flows = {}
         self.subsidy_list = []
-        self.bilevel = False
+
+        self.cluster = None
+
+        self.bilevel_bld = bilevel
+        # the heat_supply_business is used to determine the building, if it
+        # should be pay the basic price or the power price. The default value is
+        # 'demand', which means the building only pay the price for the heat
+        # amount it used. If the heat_gird_model is 'power', the building will
+        # pay the price for the power it used, which is the maximum power of
+        # the building it takes from the heat grid. If the heat_gird_model is
+        # 'basic', the building will pay an annual basic price, which is not
+        # related to the heat demand.
+        self.heat_supply_business = ['demand']
+        # self.heat_supply_business = ['demand', 'power', 'basic']
+
         self.fixed_price_different_by_demand = False
         self.fixed_price_different_by_power = False
 
@@ -197,7 +212,7 @@ class Building(object):
             # "demand_profile": self.demand_profile,
             "components": [],
             "subsidy_list": self.subsidy_list,
-            "bilevel": self.bilevel
+            "bilevel": self.bilevel_bld
         }
 
         for component in self.components.values():
@@ -452,13 +467,40 @@ class Building(object):
                 model.add_component(energy + '_' + flow[0] + '_' + flow[1],
                                     self.energy_flows[energy][flow])
 
-        if self.bilevel:
-            building_connection = pyo.Var(within=pyo.Binary) # yso: the
-            # connection status of the building to the heating network
+        # total_annual_cost = pyo.Var(bounds=(0, None)) # this definition
+        # might cause infeasible solution, since the following definition
+        # would avoid the infeasibility with a positive solution.
+        total_annual_cost = pyo.Var()
+        total_operation_cost = pyo.Var(bounds=(0, None))
+        total_annual_revenue = pyo.Var(bounds=(0, None))
+        total_other_op_cost = pyo.Var(bounds=(0, None))
+        # total_elec_pur = pyo.Var(bounds=(0, None))
+        # Attention. The building name should be unique, not same as the comp
+        # or project or other buildings.
+        model.add_component('annual_cost_' + self.name, total_annual_cost)
+        model.add_component('operation_cost_' + self.name, total_operation_cost)
+        model.add_component('total_revenue_' + self.name, total_annual_revenue)
+        model.add_component('other_op_cost_' + self.name, total_other_op_cost)
+        # model.add_component('total_elec_pur_' + self.name, total_elec_pur)
+
+        for comp in self.components:
+            self.components[comp].add_vars(model)
+
+        for sub in self.subsidy_list:
+            sub.add_vars(model, self.name)
+
+        if len(self.subsidy_list) >= 1:
+            for subsidy in self.subsidy_list:
+                subsidy.add_vars(model)
+
+        if self.bilevel_bld:
+            building_connection = pyo.Var(within=pyo.Binary, initialize=1) #
             model.add_component('building_connection', building_connection)
-            max_heat_power = pyo.Var(bounds=(0, None)) # the maximum power of the
-            # building from the heating network
-            model.add_component('max_heat_power', max_heat_power)
+            if 'power' in self.heat_supply_business:
+                # the maximum power of the building from the heating network
+                max_heat_power = pyo.Var(bounds=(0, None))
+                model.add_component('max_heat_power', max_heat_power)
+
             # yso: the fixed price categories will be differentiated based
             # on the use of heat from the heat grid
             if (hasattr(self, 'fixed_price_different_by_demand')
@@ -474,32 +516,6 @@ class Building(object):
                 model.add_component('bc_cbp_product', bc_cbp_product)
                 model.add_component('bc_cpp_product', bc_cpp_product)
 
-        # total_annual_cost = pyo.Var(bounds=(0, None)) # this definition
-        # might cause infeasible solution, since the following definition
-        # would avoid the infeasibility with a positive solution.
-        total_annual_cost = pyo.Var()
-        total_operation_cost = pyo.Var(bounds=(0, None))
-        total_annual_revenue = pyo.Var(bounds=(0, None))
-        total_other_op_cost = pyo.Var(bounds=(0, None))
-        total_elec_pur = pyo.Var(bounds=(0, None))
-        # Attention. The building name should be unique, not same as the comp
-        # or project or other buildings.
-        model.add_component('annual_cost_' + self.name, total_annual_cost)
-        model.add_component('operation_cost_' + self.name, total_operation_cost)
-        model.add_component('total_revenue_' + self.name, total_annual_revenue)
-        model.add_component('other_op_cost_' + self.name, total_other_op_cost)
-        model.add_component('total_elec_pur_' + self.name, total_elec_pur)
-
-        for comp in self.components:
-            self.components[comp].add_vars(model)
-
-        for sub in self.subsidy_list:
-            sub.add_vars(model, self.name)
-
-        if len(self.subsidy_list) >= 1:
-            for subsidy in self.subsidy_list:
-                subsidy.add_vars(model)
-
     def add_cons(self, model, env, cluster=None):
         self._constraint_energy_balance(model)
         self._constraint_total_cost(model)
@@ -508,12 +524,13 @@ class Building(object):
         self._constraint_other_op_cost(model)
         # self._constraint_elec_pur(model, env)
 
-        if self.bilevel:
+        if self.bilevel_bld:
             # yso: Consider the building’s connection status to the heating network
             self._constraint_building_connection(model, env)
             # yso: to calculate the power price, consider the maximum power from
             # the heating network
-            self._constraint_max_heat_power(model, env)
+            if 'power' in self.heat_supply_business:
+                self._constraint_max_heat_power(model, env)
             # yso: the fixed price categories will be differentiated based on the
             # use of heat from the heat grid
             if (hasattr(self, 'fixed_price_different_by_demand')
@@ -621,14 +638,23 @@ class Building(object):
         bld_operation_cost = model.find_component('operation_cost_' + self.name)
         bld_other_op_cost = model.find_component('other_op_cost_' + self.name)
 
-        if self.bilevel:
-            max_heat_power = model.find_component('max_heat_power')
+        if self.bilevel_bld:
+            if 'power' in self.heat_supply_business:
+                max_heat_power = model.find_component('max_heat_power')
+            else:
+                max_heat_power = 0
+
             if hasattr(self, 'fixed_price_different_by_demand') \
                     and self.fixed_price_different_by_demand == True:
                 bc_cbp_product = model.find_component('bc_cbp_product')
                 bc_cpp_product = model.find_component('bc_cpp_product')
             else:
                 building_connection = model.find_component('building_connection')
+                # building_connection = 0
+                # pass
+        else:
+            building_connection = 0
+            max_heat_power = 0
 
         # The following elements (buy_elec, ...) are the energy purchase and
         # sale volume in time series and used to avoid that the constraint
@@ -666,19 +692,54 @@ class Building(object):
             elif isinstance(self.components[comp], module_dict['BiomassSource']):
                 buy_biomass = model.find_component('output_biomass_' + comp)
 
-        if self.type == 'EnergyHub':
-            # yso: Here are the industrial energy prices
-            elec_price = env.elec_price_hub
-            heat_price = env.heat_price_hub
-            gas_price = env.gas_price_hub
+        if model.find_component('elec_price'):
+            elec_price = model.elec_price
+        else:
+            elec_price = env.elec_price
 
+        if (model.find_component('heat_price') and
+                'demand' in self.heat_supply_business):
+            if len(model.heat_price.index_set()) == 1:
+                heat_price = model.heat_price[0]
+            else:
+                heat_price = None
+                warn('The dynamic heat price is not developed, please check')
+        else:
+            heat_price = env.heat_price
+
+        if (model.find_component('heat_basic_price') and
+                'basic' in self.heat_supply_business):
+            if len(model.heat_basic_price.index_set()) == 1:
+                heat_basic_price = model.heat_basic_price[0]
+            else:
+                heat_basic_price = None
+                warn('The dynamic heat basic price is not developed, please check')
+        else:
+            heat_basic_price = 0
+
+        if (model.find_component('heat_power_price') and
+                'power' in self.heat_supply_business):
+            if len(model.heat_power_price.index_set()) == 1:
+                heat_power_price = model.heat_power_price[0]
+            else:
+                heat_power_price = None
+                warn('The dynamic heat power price is not developed, please check')
+        else:
+            heat_power_price = 0
+
+        gas_price = env.gas_price
+
+        if hasattr(self, 'fixed_price_different_by_demand') \
+                and self.fixed_price_different_by_demand == True:
             if cluster is None:
                 model.cons.add(
                     bld_operation_cost == sum(buy_elec[t] * elec_price +
                                               buy_gas[t] * gas_price +
-                                              buy_heat[t] * heat_price
+                                              buy_heat[t] *
+                                              heat_price
                                               for t in model.time_step) +
-                    bld_other_op_cost)
+                    bld_other_op_cost + heat_basic_price * bc_cbp_product +
+                    max_heat_power * heat_power_price * bc_cpp_product)
             else:
                 nr_hour_occur = cluster['Occur']
 
@@ -689,115 +750,31 @@ class Building(object):
                                               buy_heat[t] * heat_price *
                                               nr_hour_occur[t - 1]
                                               for t in model.time_step) +
-                    bld_other_op_cost)
+                    bld_other_op_cost + heat_basic_price * bc_cbp_product +
+                    max_heat_power * heat_power_price * bc_cpp_product)
         else:
-            if self.bilevel:
-                elec_price = model.elec_price
+            if cluster is None:
+                model.cons.add(
+                    bld_operation_cost == sum(buy_elec[t] * elec_price +
+                                            buy_gas[t] * gas_price +
+                                            buy_heat[t] * heat_price
+                                            for t in model.time_step) +
+                    heat_basic_price * building_connection +
+                    heat_power_price * max_heat_power +
+                    bld_other_op_cost)
             else:
-                elec_price = env.elec_price
+                nr_hour_occur = cluster['Occur']
 
-            if model.find_component('heat_price'):
-                if len(model.heat_price.index_set()) == 1:
-                    heat_price = model.heat_price[0]
-                else:
-                    heat_price = None
-                    warn('The dynamic heat price is not developed, please check')
-            else:
-                heat_price = env.heat_price
-
-            if model.find_component('heat_basic_price'):
-                if len(model.heat_basic_price.index_set()) == 1:
-                    heat_basic_price = model.heat_basic_price[0]
-                else:
-                    heat_basic_price = None
-                    warn('The dynamic heat basic price is not developed, please check')
-            else:
-                heat_basic_price = 0
-
-            if model.find_component('heat_power_price'):
-                if len(model.heat_power_price.index_set()) == 1:
-                    heat_power_price = model.heat_power_price[0]
-                else:
-                    heat_power_price = None
-                    warn('The dynamic heat power price is not developed, please check')
-            else:
-                heat_power_price = 0
-
-            gas_price = env.gas_price
-
-            if hasattr(self, 'fixed_price_different_by_demand') \
-                    and self.fixed_price_different_by_demand == True:
-                if cluster is None:
-                    model.cons.add(
-                        bld_operation_cost == sum(buy_elec[t] * elec_price +
-                                                  buy_gas[t] * gas_price +
-                                                  buy_heat[t] *
-                                                  heat_price
-                                                  for t in model.time_step) +
-                        bld_other_op_cost + heat_basic_price * bc_cbp_product +
-                        max_heat_power * heat_power_price * bc_cpp_product)
-                else:
-                    nr_hour_occur = cluster['Occur']
-
-                    model.cons.add(
-                        bld_operation_cost == sum(buy_elec[t] * elec_price *
-                                                  nr_hour_occur[t - 1] + buy_gas[t] *
-                                                  gas_price * nr_hour_occur[t - 1] +
-                                                  buy_heat[t] * heat_price *
-                                                  nr_hour_occur[t - 1]
-                                                  for t in model.time_step) +
-                        bld_other_op_cost + heat_basic_price * bc_cbp_product +
-                        max_heat_power * heat_power_price * bc_cpp_product)
-            else:
-                if cluster is None:
-                    model.cons.add(
-                        bld_operation_cost == sum(buy_elec[t] * elec_price +
-                                                buy_gas[t] * gas_price +
-                                                buy_heat[t] *
-                                                heat_price
-                                                for t in model.time_step) +
-                        bld_other_op_cost )
-                else:
-                    nr_hour_occur = cluster['Occur']
-
-                    model.cons.add(
-                        bld_operation_cost == sum(buy_elec[t] * elec_price *
-                                                nr_hour_occur[t - 1] + buy_gas[t] *
-                                                gas_price * nr_hour_occur[t - 1] +
-                                                buy_heat[t] * heat_price *
-                                                nr_hour_occur[t - 1]
-                                                for t in model.time_step) +
-                        bld_other_op_cost)
-
-        # if cluster is None:
-        #     model.cons.add(
-        #         bld_operation_cost == sum(buy_elec[t] * elec_price +
-        #                                   buy_gas[t] * env.gas_price +
-        #                                   buy_heat[t] * heat_price +
-        #                                   buy_biomass[t] * env.biomass_price
-        #                                   for t in model.time_step) +
-        #         bld_other_op_cost)
-        # else:
-        #     # Attention! The period only for 24 hours is developed,
-        #     # other segments are not considered.
-        #     # period_length = 24
-        #     #
-        #     # nr_day_occur = pd.Series(cluster.clusterPeriodNoOccur).tolist()
-        #     # nr_hour_occur = []
-        #     # for nr_occur in nr_day_occur:
-        #     #     nr_hour_occur += [nr_occur] * 24
-        #     nr_hour_occur = cluster['Occur']
-        #
-        #     model.cons.add(
-        #         bld_operation_cost == sum(buy_elec[t] * elec_price *
-        #                                   nr_hour_occur[t - 1] + buy_gas[t] *
-        #                                   env.gas_price * nr_hour_occur[t - 1] +
-        #                                   buy_heat[t] * heat_price *
-        #                                   nr_hour_occur[t - 1] + buy_biomass[
-        #                                       t] * env.biomass_price *
-        #                                   nr_hour_occur[t - 1]
-        #                                   for t in model.time_step) +
-        #         bld_other_op_cost)
+                model.cons.add(
+                    bld_operation_cost == sum(buy_elec[t] * elec_price *
+                                            nr_hour_occur[t - 1] + buy_gas[t] *
+                                            gas_price * nr_hour_occur[t - 1] +
+                                            buy_heat[t] * heat_price *
+                                            nr_hour_occur[t - 1]
+                                            for t in model.time_step) +
+                    heat_basic_price * building_connection +
+                    heat_power_price * max_heat_power +
+                    bld_other_op_cost)
 
     def _constraint_total_revenue(self, model, env, cluster=None):
         """The total revenue of the building is the sum of the revenue of
@@ -884,26 +861,6 @@ class Building(object):
         model.cons.add(bld_other_op_cost == sum(comp_op for comp_op
                                                 in other_op_comp_list))
 
-    def _constraint_elec_pur(self, model, cluster):
-        """The electricity purchase constraint is added to the model. The
-        constraint is added to the model if the electricity is purchased
-        from the grid."""
-        buy_elec = [0] * len(model.time_step)
-        elec_pur = model.find_component('total_elec_pur_' + self.name)
-        for comp in self.components:
-            if isinstance(self.components[comp],
-                          module_dict['ElectricityGrid']):
-                if 'elec' in self.components[comp].energy_flows[
-                    'output'].keys():
-                    buy_elec = model.find_component('output_elec_' + comp)
-
-        if cluster is None:
-            model.cons.add(elec_pur == sum(buy_elec[t] for t in model.time_step))
-        else:
-            nr_hour_occur = cluster['Occur']
-            model.cons.add(elec_pur == sum(buy_elec[t] *  nr_hour_occur[t - 1]
-                                            for t in model.time_step))
-
     def _constraint_building_connection(self, model, env):
         """This constraint is used to determine the connection status of
         the building and the heating pipe network."""
@@ -939,6 +896,7 @@ class Building(object):
         model.max_heat_power_constraint = pyo.Constraint(model.time_step,
                                                         rule=_max_heat_power_rule)
 
+    # todo (yni): check it
     def _constraint_fixed_price_different(self, model, env, cluster):
         consider_basic_price = model.find_component('consider_basic_price')
         consider_power_price = model.find_component('consider_power_price')
@@ -1014,6 +972,7 @@ class Building(object):
 
         pyo.TransformationFactory('gdp.bigm').apply_to(model, bigM={None: 1e12})
 
+    # todo (yni): check it
     def _constraint_bc_cbp_cpp_product(self, model):
         consider_basic_price = model.find_component('consider_basic_price')
         consider_power_price = model.find_component('consider_power_price')

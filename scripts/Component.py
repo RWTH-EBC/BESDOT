@@ -210,7 +210,7 @@ class Component(object):
             if hasattr(self, arg):
                 setattr(self, arg, kwargs[arg])
             else:
-                warnings.warn("Can't update the profile for component" +
+                warnings.warn("Can't update the profile for component " +
                               self.name)
 
     def update_subsidy(self, cluster):
