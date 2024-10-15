@@ -1,5 +1,6 @@
 import warnings
 import pyomo.environ as pyo
+import numpy as np
 from pyomo.gdp import Disjunct, Disjunction
 
 from scripts.components.Storage import Storage
@@ -61,7 +62,10 @@ class Building(object):
                               "gas_demand": 0}
         if annual_heat_demand is None:
             self.add_annual_demand('heat')
-        elif not isinstance(annual_heat_demand, float):
+        elif (not isinstance(annual_heat_demand, float) and
+              not isinstance(annual_heat_demand, int) and
+              not isinstance(annual_heat_demand, np.int64) and
+              not isinstance(annual_heat_demand, np.float64)):
             warn_msg = 'The annual_heat_demand of ' + self.name + \
                        ' is not float, need to check.'
             warnings.warn(warn_msg)
@@ -323,13 +327,16 @@ class Building(object):
                 cluster_profile = cluster['hot_water_demand'].tolist()
                 self.components[comp_name].update_profile(
                     consum_profile=cluster_profile)
+            if self.topology['comp_type'][item] in ['HeatSource']:
+                # cluster_profile = pd.Series(cluster.clusterPeriodDict[
+                #                                 'heat_source']).tolist()
+                cluster_profile = cluster['heat_source'].tolist()
+                self.components[comp_name].update_profile(
+                    source_profile=cluster_profile)
             if self.topology['comp_type'][item] in ['HeatPump',
                                                     'HeatPumpAirWater',
                                                     'HeatPumpBrineWater',
-                                                    'GasHeatPump', 'PV',
-                                                    'SolarThermalCollector',
-                                                    'SolarThermalCollectorFlatPlate',
-                                                    'SolarThermalCollectorTube'
+                                                    'GasHeatPump'
                                                     ]:
                 # cluster_profile = pd.Series(cluster.clusterPeriodDict[
                 #                                 'temp']).tolist()
