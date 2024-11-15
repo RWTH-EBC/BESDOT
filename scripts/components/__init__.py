@@ -12,6 +12,7 @@ from .HeatGrid import HeatGrid
 from .HeatPump import HeatPump
 from .HeatPumpAirWater import HeatPumpAirWater
 from .HeatPumpBrineWater import HeatPumpBrineWater
+from .HeatPumpWasteHeat import HeatPumpWasteHeat
 from .HotWaterConsumption import HotWaterConsumption
 from .HotWaterStorage import HotWaterStorage
 from .PV import PV
