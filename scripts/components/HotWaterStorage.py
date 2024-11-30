@@ -31,7 +31,7 @@ class HotWaterStorage(Storage):
     def _constraint_volume(self, model):
         """
         This constraint indicates the relationship between storage volume in
-        cubic meter and energy size in kWh
+        liter and energy size in kWh
         """
         size = model.find_component('size_' + self.name)
         volume = model.find_component('volume_' + self.name)

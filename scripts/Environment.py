@@ -141,13 +141,15 @@ class Environment(object):
         # https://www.verivox.de/strom/strompreise/
         self.elec_price_pump = 0.30  # yso: 20 percent cheaper than normal household electricity
         # https://www.verivox.de/heizstrom/waermepumpe/
-        self.elec_price_hub = 0.17  # €/kWh, Average industrial electricity prices in 01/2024
+        self.elec_price_hub = 0.38
+        # self.elec_price_hub = 0.17  # €/kWh, Average industrial electricity prices in 01/2024
         # https://www.eon.de/de/gk/strom/industriestrom.html
         self.elec_feed_price = 0.08  # €/kWh #0.1, 0.05, Feed-in tariff 2024
         # https://senec.com/de/magazin/einspeiseverguetung
         self.gas_price = 0.11  # €/kWh #0.1, 0.1377, Average in 2024
         # https://www.verivox.de/gas/gaspreisentwicklung/
-        self.gas_price_hub = 0.08  # €/kWh, production cost for energy hub, Q1 2024
+        self.gas_price_hub = 0.11
+        # self.gas_price_hub = 0.08  # €/kWh, production cost for energy hub, Q1 2024
         # https://de.statista.com/statistik/daten/studie/
         # 168528/umfrage/gaspreise-fuer-gewerbe-und-industriekunden
         # -seit-2006/
