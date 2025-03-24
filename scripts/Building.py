@@ -59,7 +59,8 @@ class Building(object):
                               "heat_demand": 0,
                               "cool_demand": 0,
                               "hot_water_demand": 0,
-                              "gas_demand": 0}
+                              "gas_demand": 0,
+                              "hydrogen_demand": 0,}
         if annual_heat_demand is None:
             self.add_annual_demand('heat')
         elif (not isinstance(annual_heat_demand, float) and
@@ -90,7 +91,8 @@ class Building(object):
                                "heat_demand": [],
                                "cool_demand": [],
                                "hot_water_demand": [],
-                               "gas_demand": []}
+                               "gas_demand": [],
+                               "hydrogen_demand": []}
 
         # The topology of the building energy system and all available
         # components in the system, which doesn't mean the components would
@@ -195,7 +197,8 @@ class Building(object):
                     len(self.demand_profile['heat_demand']),
                     len(self.demand_profile['cool_demand']),
                     len(self.demand_profile['hot_water_demand']),
-                    len(self.demand_profile['gas_demand']))
+                    len(self.demand_profile['gas_demand']),
+                    len(self.demand_profile['hydrogen_demand']))
         for k, v in self.demand_profile.items():
             if len(v) != steps and len(v) != 0:
                 warn('The ' + k + 'has different time steps')
@@ -290,6 +293,15 @@ class Building(object):
                                                       min_size=min_size,
                                                       max_size=max_size,
                                                       current_size=current_size)
+                elif comp_type in ['H2Consumption']:
+                    comp_obj = module_dict[comp_type](comp_name=comp_name,
+                                                      consum_profile=
+                                                      self.demand_profile[
+                                                          'hydrogen_demand'],
+                                                      comp_model=comp_model,
+                                                      min_size=min_size,
+                                                      max_size=max_size,
+                                                      current_size=current_size)
                 else:
                     comp_obj = module_dict[comp_type](comp_name=comp_name,
                                                       comp_model=comp_model,
@@ -325,6 +337,10 @@ class Building(object):
                 # cluster_profile = pd.Series(cluster.clusterPeriodDict[
                 #                                 'hot_water_demand']).tolist()
                 cluster_profile = cluster['hot_water_demand'].tolist()
+                self.components[comp_name].update_profile(
+                    consum_profile=cluster_profile)
+            if self.topology['comp_type'][item] in ['H2Consumption']:
+                cluster_profile = cluster['hydrogen_demand'].tolist()
                 self.components[comp_name].update_profile(
                     consum_profile=cluster_profile)
             if self.topology['comp_type'][item] in ['HeatSource']:
